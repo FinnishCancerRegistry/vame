@@ -30,6 +30,7 @@ NULL
 
 #' @describeIn VariableMetadata Use this function to create a new
 #' VariableMetadata object.
+#' @importFrom data.table := .SD
 VariableMetadata <- function(var_nm_dt, var_nm_set_dt) {
   data <- new.env(parent = emptyenv())
   data$var_nm_dt <- var_nm_dt

@@ -7,10 +7,12 @@ Authors@R:
 Description: Define value spaces and other metadata for variables.
 License: MIT + file LICENSE
 Imports:
-    dbc
+    data.table (>= 1.14.8),
+    dbc (>= 0.4.11),
+    methods (>= 4.2.3)
 Suggests: 
-    codedoc,
-    devtools,
+    codedoc (>= 0.3.8),
+    devtools (>= 2.4.5),
     testthat (>= 3.0.0)
 Remotes:
     github::FinnishCancerRegistry/codedoc,
