@@ -9,12 +9,12 @@ License: MIT + file LICENSE
 Imports:
     dbc
 Suggests: 
-    testthat (>= 3.0.0),
+    codedoc,
     devtools,
-    codedoc
+    testthat (>= 3.0.0)
 Remotes:
-    github::FinnishCancerRegistry/dbc,
-    github::FinnishCancerRegistry/codedoc
+    github::FinnishCancerRegistry/codedoc,
+    github::FinnishCancerRegistry/dbc
 Config/testthat/edition: 3
 Encoding: UTF-8
 Roxygen: list(markdown = TRUE)
