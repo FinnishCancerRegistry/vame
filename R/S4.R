@@ -39,7 +39,11 @@ VariableMetadata <- function(var_nm_dt, var_nm_set_dt) {
   local(
     expr = {
       vnd_get <- function() {
-        data[["var_nm_dt"]]
+        out <- data[["var_nm_dt"]]
+        if (nrow(out) == 0) {
+          stop("vnd has no rows")
+        }
+        return(out[])
       }
       vnd_implied_get <- function() {
         vnsd <- vnsd_get()
@@ -59,8 +63,14 @@ VariableMetadata <- function(var_nm_dt, var_nm_set_dt) {
       vnd_vnsd_linkage_refresh <- function() {
         vnd <- vnd_get()
         vndi <- vnd_implied_get()
+        data.table::setkeyv(vnd, intersect(names(vndi), names(vnd)))
         i.var_nm_set_dt_pos <- NULL # appease R CMD CHECK
-        data.table::setkeyv(vnd, c("var_nm", "var_nm_set_dt_pos"))
+        vnd[
+          i = vndi,
+          on = "var_nm",
+          j = "var_nm_set_dt_pos" := i.var_nm_set_dt_pos
+        ]
+        data.table::setkeyv(vnd, intersect(names(vndi), names(vnd)))
         vnd_set(vnd)
         return(invisible(NULL))
       }
@@ -90,7 +100,11 @@ VariableMetadata <- function(var_nm_dt, var_nm_set_dt) {
         data[["var_nm_dt"]] <- dt
       }
       vnsd_get <- function() {
-        data[["var_nm_set_dt"]]
+        out <- data[["var_nm_set_dt"]]
+        if (nrow(out) == 0) {
+          stop("vnsd has no rows")
+        }
+        return(out[])
       }
       vnsd_set <- function(dt) {
         data[["var_nm_set_dt"]] <- dt
@@ -163,7 +177,6 @@ VariableMetadata <- function(var_nm_dt, var_nm_set_dt) {
         vnd_set(vnd)
 
         vnd_vnsd_intersect()
-        vnsd_set(vnd)
       }
       subset <- function(expr) {
         expr <- substitute(expr)
