@@ -114,14 +114,15 @@ VariableMetadata <- function(var_nm_dt, var_nm_set_dt) {
         data.table::chmatch(var_nm, vnd_get()[["var_nm"]])
       }
       value_space_get <- function(pos) {
-        return(vnsd_get()[["value_space"]][[pos]])
+        vnsd <- vnsd_get()
+        return(vnsd[["value_space"]][[pos]])
       }
       value_space_set <- function(pos, value_space) {
-        vnsd_get()[["value_space"]][[pos]] <- value_space
+        vnsd <- value_space_get()
+        vnsd[["value_space"]][[pos]] <- value_space
       }
       value_space_dt_subset_expr <- function(var_nm, expr) {
         dbc::assert_is_language_object(expr, assertion_type = "prod_input")
-        vnd <- vnd_get()
         pos <- value_space_pos_get(var_nm)
         vs <- value_space_get(pos)
         dt <- vs[["dt"]]
