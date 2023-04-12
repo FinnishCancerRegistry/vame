@@ -48,10 +48,12 @@ NULL
 #' @export
 #' @importFrom data.table := .SD
 VariableMetadata <- function(var_nm_dt, var_nm_set_dt) {
-  funs <- new.env(parent = asNamespace("data.table"))
+  pkg_env <- environment(VariableMetadata)
+  funs <- new.env(parent = pkg_env)
   funs$data <- new.env(parent = emptyenv())
   funs$data$var_nm_dt <- var_nm_dt
   funs$data$var_nm_set_dt <- var_nm_set_dt
+  data <- NULL # appease R CMD CHECK
   local(
     expr = {
       assert_var_nm <- function(
@@ -323,7 +325,6 @@ VariableMetadata <- function(var_nm_dt, var_nm_set_dt) {
     },
     envir = funs
   )
-  stopifnot(vame_slot_nms_get() %in% ls(funs))
   funs[["vnd_vnsd_intersect"]]()
   arg_list <- list(
     Class = "VariableMetadata"

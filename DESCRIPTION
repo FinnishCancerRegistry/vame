@@ -14,8 +14,7 @@ Imports:
     methods (>= 4.2.3)
 Suggests: 
     codedoc (>= 0.3.8),
-    devtools (>= 2.4.5),
-    testthat (>= 3.0.0)
+    devtools (>= 2.4.5)
 Remotes:
     github::FinnishCancerRegistry/codedoc,
     github::FinnishCancerRegistry/dbc
