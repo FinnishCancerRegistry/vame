@@ -38,6 +38,6 @@ vd <- vame::VariableMetadata(
     var_nm_set = list(c("a", "b"))
   )
 )
-vd@rename("a", "A")
-stopifnot(identical(vd@meta_get("A", "flavour"), "tasty"))
+vd@var_rename("a", "A")
+stopifnot(identical(vd@var_meta_get("A", "flavour"), "tasty"))
 }

@@ -1,19 +1,14 @@
 
-vd_fun_nms <- function() {
-  c(
-    "rename",
-    "subset",
-    "remove",
-    "union_append",
-    "value_space_dt_subset",
-    "value_space_set",
-    "meta_get"
-  )
+vd_slot_nms_get <- function() {
+  vd_slot_nms[]
 }
 
 methods::setClass(
   Class = "VariableMetadata",
-  slots = structure(rep("function", length(vd_fun_nms())), names = vd_fun_nms())
+  slots = structure(
+    rep("function", length(vd_slot_nms_get())),
+    names = vd_slot_nms_get()
+  )
 )
 
 #' @title Variable Metadata
@@ -26,7 +21,6 @@ NULL
 #' @section Functions:
 #' - `vame::VariableMetadata`: Use this function to create a new
 #'   VariableMetadata object.
-#' @importFrom data.table := .SD
 #' @param var_nm_dt `[data.table]`
 #' 
 #' Contains information for individual variables. Must contain at a minimum
@@ -35,7 +29,6 @@ NULL
 #' 
 #' Contains information for sets of variables --- e.g. a common value space.
 #' Must contain at a minimum column `var_nm_set`.
-#' @export
 #' @examples
 #' vd <- vame::VariableMetadata(
 #'   var_nm_dt = data.table::data.table(
@@ -46,16 +39,59 @@ NULL
 #'     var_nm_set = list(c("a", "b"))
 #'   )
 #' )
-#' vd@rename("a", "A")
-#' stopifnot(identical(vd@meta_get("A", "flavour"), "tasty"))
+#' vd@var_rename("a", "A")
+#' stopifnot(identical(vd@var_meta_get("A", "flavour"), "tasty"))
+#' @export
+#' @importFrom data.table := .SD
 VariableMetadata <- function(var_nm_dt, var_nm_set_dt) {
-  data <- new.env(parent = emptyenv())
-  data$var_nm_dt <- var_nm_dt
-  data$var_nm_set_dt <- var_nm_set_dt
   funs <- new.env(parent = asNamespace("data.table"))
-  funs$data <- data
+  funs$data <- new.env(parent = emptyenv())
+  funs$data$var_nm_dt <- var_nm_dt
+  funs$data$var_nm_set_dt <- var_nm_set_dt
   local(
     expr = {
+      assert_var_nm <- function(
+        var_nm,
+        assertion_type = dbc::assertion_type_default()
+      ) {
+        dbc::assert_is_character_nonNA_atom(
+          var_nm,
+          assertion_type = assertion_type
+        )
+        dbc::assert_atom_is_in_set(
+          var_nm,
+          set = vnd_get()[["var_nm"]],
+          assertion_type = assertion_type
+        )
+      }
+      assert_var_meta_nm <- function(
+        meta_nm,
+        assertion_type = dbc::assertion_type_default()
+      ) {
+        dbc::assert_is_character_nonNA_atom(
+          meta_nm,
+          assertion_type = dbc::assertion_type_default()
+        )
+        dbc::assert_atom_is_in_set(
+          meta_nm,
+          set = names(vnd_get()),
+          assertion_type = dbc::assertion_type_default()
+        )
+      }
+      assert_var_set_meta_nm <- function(
+        meta_nm,
+        assertion_type = dbc::assertion_type_default()
+      ) {
+        dbc::assert_is_character_nonNA_atom(
+          meta_nm,
+          assertion_type = dbc::assertion_type_default()
+        )
+        dbc::assert_atom_is_in_set(
+          meta_nm,
+          set = names(vnsd_get()),
+          assertion_type = dbc::assertion_type_default()
+        )
+      }
       vnd_get <- function() {
         out <- data[["var_nm_dt"]]
         if (nrow(out) == 0) {
@@ -127,8 +163,9 @@ VariableMetadata <- function(var_nm_dt, var_nm_set_dt) {
       vnsd_set <- function(dt) {
         data[["var_nm_set_dt"]] <- dt
       }
-      value_space_pos_get <- function(var_nm) {
-        data.table::chmatch(var_nm, vnd_get()[["var_nm"]])
+      var_set_pos_get <- function(var_nm) {
+        vnd <- vnd_get()
+        vnd[["var_nm_set_dt_pos"]][data.table::chmatch(var_nm, vnd[["var_nm"]])]
       }
       value_space_get <- function(pos) {
         vnsd <- vnsd_get()
@@ -140,7 +177,7 @@ VariableMetadata <- function(var_nm_dt, var_nm_set_dt) {
       }
       value_space_dt_subset_expr <- function(var_nm, expr) {
         dbc::assert_is_language_object(expr, assertion_type = "prod_input")
-        pos <- value_space_pos_get(var_nm)
+        pos <- var_set_pos_get(var_nm)
         vs <- value_space_get(pos)
         dt <- vs[["dt"]]
         if (!data.table::is.data.table(dt)) {
@@ -151,27 +188,51 @@ VariableMetadata <- function(var_nm_dt, var_nm_set_dt) {
         value_space_set(pos, dt)
         return(invisible(NULL))
       }
-      value_space_dt_subset <- function(var_nm, expr) {
+      # slot:value_space_dt_subset
+      value_space_dt_subset <- function(
+        var_nm,
+        expr
+      ) {
+        assert_var_nm(var_nm)
         expr <- substitute(expr)
         value_space_dt_subset_expr(var_nm, expr)
       }
-      meta_get <- function(var_nm, meta_nm) {
+      # slot:var_meta_get
+      var_meta_get <- function(var_nm, meta_nm) {
+        assert_var_nm(var_nm)
+        assert_var_meta_nm(meta_nm)
         vnd <- vnd_get()
-        dbc::assert_is_character_nonNA_atom(var_nm)
-        dbc::assert_is_character_nonNA_atom(meta_nm)
-        dbc::assert_atom_is_in_set(var_nm, set = vnd[["var_nm"]])
-        dbc::assert_atom_is_in_set(
-          meta_nm, set = setdiff(names(vnd), "var_nm_set_dt_pos")
-        )
         jdt <- data.table::setDT(list(var_nm = var_nm))
-        vnd[
+        out <- vnd[
           i = jdt,
           on = "var_nm",
           j = .SD[[1]],
           .SDcols = meta_nm
         ]
+        return(out)
       }
-      rename <- function(old, new) {
+      # slot:var_meta_set
+      var_meta_set <- function(
+        var_nm,
+        meta_nm,
+        value
+      ) {
+        assert_var_nm(var_nm)
+        assert_var_meta_nm(meta_nm)
+        vnd <- vnd_get()
+        jdt <- data.table::setDT(list(var_nm = var_nm, meta = value))
+        i.meta <- NULL # appease R CMD CHECK
+        vnd[
+          i = jdt,
+          on = "var_nm",
+          j = (meta_nm) := i.meta
+        ]
+        return(invisible(NULL))
+      }
+      # slot:var_rename
+      var_rename <- function(old, new) {
+        assert_var_nm(old)
+        dbc::assert_is_character_nonNA_atom(new)
         vnd <- vnd_get()
         vnsd <- vnsd_get()
         jdt <- data.table::data.table(var_nm = old, new = new)
@@ -188,7 +249,7 @@ VariableMetadata <- function(var_nm_dt, var_nm_set_dt) {
         data.table::set(vnsd, j = "var_nm_set", value = tmp[["var_nm_set"]])
         invisible(NULL)
       }
-      subset_expr <- function(expr) {
+      vame_subset_expr <- function(expr) {
         dbc::assert_is_language_object(expr, assertion_type = "prod_input")
         vnd <- vnd_get()
         dt_expr <- substitute(vnd[i = expr], list(expr = expr))
@@ -197,16 +258,22 @@ VariableMetadata <- function(var_nm_dt, var_nm_set_dt) {
 
         vnd_vnsd_intersect()
       }
-      subset <- function(expr) {
+      # slot:vame_subset
+      vame_subset <- function(expr) {
         expr <- substitute(expr)
-        subset_expr(expr)
+        vame_subset_expr(expr)
         invisible(NULL)
       }
-      remove <- function(var_nms) {
+      # slot:var_remove
+      var_remove <- function(var_nms) {
+        lapply(seq_along(var_nms), function(i) {
+          assert_var_nm(var_nms[i])
+        })        
         expr <- substitute(!var_nm %in% var_nms, list(var_nms = var_nms))
-        subset_expr(expr)
+        vame_subset_expr(expr)
       }
-      union_append <- function(x) {
+      # slot:vame_union_append
+      vame_union_append <- function(x) {
         e <- environment(x@remove)
         vnd_1 <- vnd_get()
         vnsd_1 <- vnsd_get()
@@ -220,18 +287,47 @@ VariableMetadata <- function(var_nm_dt, var_nm_set_dt) {
         vnsd_set(vnsd)
         return(invisible(NULL))
       }
+      # slot:var_set_meta_get
+      var_set_meta_get <- function(
+        var_nm,
+        meta_nm
+      ) {
+        assert_var_nm(var_nm)
+        assert_var_set_meta_nm(meta_nm)
+        pos <- var_set_pos_get(var_nm = var_nm)
+        vnsd <- vnsd_get()
+        vnsd[[meta_nm]][[pos]]
+      }
+      # slot:var_set_meta_set
+      var_set_meta_set <- function(
+        var_nm,
+        meta_nm,
+        value
+      ) {
+        assert_var_nm(var_nm)
+        assert_var_set_meta_nm(meta_nm)
+        pos <- var_set_pos_get(var_nm = var_nm)
+        vnsd <- vnsd_get()
+        data.table::set(
+          vnsd,
+          i = pos,
+          j = meta_nm,
+          value = value
+        )
+        vnsd_set(vnsd)
+      }
     },
     envir = funs
   )
-  stopifnot(vd_fun_nms() %in% ls(funs))
+  stopifnot(vd_slot_nms() %in% ls(funs))
   funs[["vnd_vnsd_intersect"]]()
   arg_list <- list(
     Class = "VariableMetadata"
   )
-  fun_list <- lapply(vd_fun_nms(), function(fun_nm) {
+  fun_list <- lapply(vd_slot_nms(), function(fun_nm) {
     funs[[fun_nm]]
   })
-  names(fun_list) <- vd_fun_nms()
+  names(fun_list) <- vd_slot_nms()
   arg_list <- c(arg_list, fun_list)
   do.call(methods::new, arg_list, quote = TRUE)
 }
@@ -243,7 +339,7 @@ methods::setMethod(
     cat(
       "VariableMetadata object ----\n",
       "Functions:\n",
-      vapply(vd_fun_nms(), function(obj_nm) {
+      vapply(vd_slot_nms(), function(obj_nm) {
         paste0("  @", obj_nm, "()\n")
       }, character(1L))
     )
