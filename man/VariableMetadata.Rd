@@ -3,15 +3,41 @@
 \name{VariableMetadata}
 \alias{VariableMetadata}
 \title{Variable Metadata}
+\usage{
+VariableMetadata(var_nm_dt, var_nm_set_dt)
+}
 \arguments{
 \item{var_nm_dt}{\verb{[data.table]}
 
-Contains information for individual variables.}
+Contains information for individual variables. Must contain at a minimum
+column \code{var_nm}.}
 
 \item{var_nm_set_dt}{\verb{[data.table]}
 
-Contains information for sets of variables --- e.g. a common value space.}
+Contains information for sets of variables --- e.g. a common value space.
+Must contain at a minimum column \code{var_nm_set}.}
 }
 \description{
 Create a VariableMetadata object.
+}
+\section{Functions}{
+
+\itemize{
+\item \code{vame::VariableMetadata}: Use this function to create a new
+VariableMetadata object.
+}
+}
+
+\examples{
+vd <- vame::VariableMetadata(
+  var_nm_dt = data.table::data.table(
+    var_nm = c("a", "b", "c"),
+    flavour = c("tasty", "rancid", "bitter")
+  ),
+  var_nm_set_dt = data.table::data.table(
+    var_nm_set = list(c("a", "b"))
+  )
+)
+vd@rename("a", "A")
+stopifnot(identical(vd@meta_get("A", "flavour"), "tasty"))
 }

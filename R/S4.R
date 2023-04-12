@@ -19,18 +19,35 @@ methods::setClass(
 #' @title Variable Metadata
 #' @description
 #' Create a VariableMetadata object.
-#' @param var_nm_dt `[data.table]`
-#' 
-#' Contains information for individual variables.
-#' @param var_nm_set_dt `[data.table]`
-#' 
-#' Contains information for sets of variables --- e.g. a common value space.
 #' @name VariableMetadata
 NULL
 
-#' @describeIn VariableMetadata Use this function to create a new
-#' VariableMetadata object.
+#' @rdname VariableMetadata
+#' @section Functions:
+#' - `vame::VariableMetadata`: Use this function to create a new
+#'   VariableMetadata object.
 #' @importFrom data.table := .SD
+#' @param var_nm_dt `[data.table]`
+#' 
+#' Contains information for individual variables. Must contain at a minimum
+#' column `var_nm`.
+#' @param var_nm_set_dt `[data.table]`
+#' 
+#' Contains information for sets of variables --- e.g. a common value space.
+#' Must contain at a minimum column `var_nm_set`.
+#' @export
+#' @examples
+#' vd <- vame::VariableMetadata(
+#'   var_nm_dt = data.table::data.table(
+#'     var_nm = c("a", "b", "c"),
+#'     flavour = c("tasty", "rancid", "bitter")
+#'   ),
+#'   var_nm_set_dt = data.table::data.table(
+#'     var_nm_set = list(c("a", "b"))
+#'   )
+#' )
+#' vd@rename("a", "A")
+#' stopifnot(identical(vd@meta_get("A", "flavour"), "tasty"))
 VariableMetadata <- function(var_nm_dt, var_nm_set_dt) {
   data <- new.env(parent = emptyenv())
   data$var_nm_dt <- var_nm_dt
