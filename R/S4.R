@@ -253,7 +253,7 @@ VariableMetadata <- function(var_nm_dt, var_nm_set_dt) {
         pos <- var_set_pos_get(id)
         return(vnsd[["value_space"]][[pos]])
       }
-      # slot:var_set_value_space_get
+      # slot:var_set_value_space_set
       var_set_value_space_set <- function(id, value_space) {
         assert_var_set_value_space_defined()
         vnsd <- vnsd_get()
