@@ -11,7 +11,7 @@ vame_slot_nms_read <- function() {
 }
 vame_slot_nms <- vame_slot_nms_read()
 
-s1 <- git2r::status()
+s1 <- system2("git", c("--no-pager", "diff", "R/S4.R"), stdout = TRUE)
 local({
   lines <- readLines("R/S4.R")
   wh_start <- which(grepl("# start:vame_slot_nms", lines))
@@ -24,8 +24,12 @@ local({
   )
   writeLines(lines, "R/S4.R")
 })
-s2 <- git2r::status()
+Sys.sleep(1.0)
+s2 <- system2("git", c("--no-pager", "diff", "R/S4.R"), stdout = TRUE)
 if (!identical(s1, s2)) {
-  git2r::add(path = "R/S4.R")
-  git2r::commit(message = "build: run dev/01_data.R")
+  message("Create git commit on R/S4.R changes? [y/n]")
+  if (readline(": ") == "y") {
+    git2r::add(path = "R/S4.R")
+    git2r::commit(message = "build: run dev/01_data.R")
+  }
 }
