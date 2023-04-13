@@ -26,6 +26,6 @@ local({
 })
 s2 <- git2r::status()
 if (!identical(s1, s2)) {
-  git2r::add(path = "R/sysdata.rda")
+  git2r::add(path = "R/S4.R")
   git2r::commit(message = "build: run dev/01_data.R")
 }
