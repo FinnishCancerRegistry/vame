@@ -224,15 +224,13 @@ VariableMetadata <- function(var_nm_dt, var_nm_set_dt) {
         value
       ) {
         assert_var_nm(var_nm)
-        assert_var_meta_nm(meta_nm)
         vnd <- vnd_get()
-        jdt <- data.table::setDT(list(var_nm = var_nm, meta = value))
-        i.meta <- NULL # appease R CMD CHECK
-        vnd[
-          i = jdt,
-          on = "var_nm",
-          j = (meta_nm) := i.meta
-        ]
+        data.table::set(
+          vnd,
+          i = data.table::chmatch(var_nm, vnd[["var_nm"]]),
+          j = meta_nm,
+          value = value
+        )
         return(invisible(NULL))
       }
       # slot:var_rename
@@ -311,7 +309,6 @@ VariableMetadata <- function(var_nm_dt, var_nm_set_dt) {
         value
       ) {
         assert_var_nm(var_nm)
-        assert_var_set_meta_nm(meta_nm)
         pos <- var_set_pos_get(var_nm = var_nm)
         vnsd <- vnsd_get()
         data.table::set(
