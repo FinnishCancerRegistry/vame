@@ -11,7 +11,7 @@ Depends:
 Imports:
     data.table (>= 1.14.8),
     dbc (>= 0.4.11),
-    methods (>= 4.2.3)
+    methods (>= 4.2.2)
 Suggests: 
     codedoc (>= 0.3.8),
     devtools (>= 2.4.5)
