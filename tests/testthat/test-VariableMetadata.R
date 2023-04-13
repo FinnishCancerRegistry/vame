@@ -42,4 +42,17 @@ testthat::test_that("VariableMetadata funs work", {
   testthat::expect_identical(
     length(vd@var_set_meta_get_all("var_nm_set")), 0L
   )
+
+  vd <- vame::VariableMetadata(
+    var_dt = data.table::data.table(
+      var_nm = c("a", "b", "c"),
+      flavour = c("tasty", "rancid", "bitter")
+    ),
+    var_set_dt = data.table::data.table(
+      id = "set_01",
+      var_nm_set = list(c("a", "b"))
+    )
+  )
+  vd@var_rename("a", "A")
+  testthat::expect_identical(vd@var_meta_get("A", "flavour"), "tasty")
 })

@@ -122,9 +122,8 @@ VariableMetadata <- function(var_dt, var_set_dt) {
         )
       }
       assert_var_set_value_space_is_defined <- function() {
-        vsd <- vsd_get()
-        if (!"value_space" %in% names(vsd)) {
-          stop("var_set_dt does not have column 'value_space'")
+        if (!var_set_value_space_is_defined()) {
+          stop("No value spaces have been defined")
         }
       }
 
@@ -307,6 +306,10 @@ VariableMetadata <- function(var_dt, var_set_dt) {
       }
 
       # var_set_value_space funs -----------------------------------------------
+      var_set_value_space_is_defined <- function() {
+        vsd <- vsd_get()
+        return("value_space" %in% names(vsd))
+      }
       # slot:var_set_value_space_get
       var_set_value_space_get <- function(id) {
         assert_is_var_set_id(id)
@@ -396,11 +399,13 @@ VariableMetadata <- function(var_dt, var_set_dt) {
         dbc::assert_is_character_nonNA_atom(new)
         var_meta_set(var_nm = old, meta_nm = "var_nm", value = new)
         id <- var_to_var_set_id(new)
-        vs <- var_set_value_space_get(id = id)
-        if ("dt" %in% names(vs)) {
-          data.table::setnames(vs[["dt"]], old, new)
+        if (var_set_value_space_is_defined()) {
+          vs <- var_set_value_space_get(id = id)
+          if ("dt" %in% names(vs)) {
+            data.table::setnames(vs[["dt"]], old, new)
+          }
+          var_set_value_space_set(id = id, value_space = vs)
         }
-        var_set_value_space_set(id = id, value_space = vs)
         var_set <- var_set_meta_get(id = id, meta_nm = "var_nm_set")
         var_set[var_set == old] <- new
         var_set_meta_set(id = id, meta_nm = "var_nm_set", value = var_set)
