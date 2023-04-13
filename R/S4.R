@@ -54,7 +54,7 @@ NULL
 #' vd@var_rename("a", "A")
 #' stopifnot(identical(vd@var_meta_get("A", "flavour"), "tasty"))
 #' @export
-#' @importFrom data.table := .SD
+#' @importFrom data.table := .SD .N
 VariableMetadata <- function(var_dt, var_set_dt) {
   pkg_env <- environment(VariableMetadata)
   funs <- new.env(parent = pkg_env)
@@ -203,8 +203,9 @@ VariableMetadata <- function(var_dt, var_set_dt) {
               var_nm_set = lapply(.SD[["var_nm_set"]], setdiff, y = rm_var_nms)
             )
           ]
+          vsd_subset <- vapply(vsd[["var_nm_set"]], length, integer(1L)) > 0L
+          vsd <- vsd[vsd_subset, ]
           if ("value_space" %in% names(vsd)) {
-            vsd_subset <- vapply(vsd[["var_nm_set"]], length, integer(1L)) > 0L
             vsd[
               j = "value_space" := list(
                 value_space = lapply(seq_len(.N), function(i) {
@@ -224,7 +225,6 @@ VariableMetadata <- function(var_dt, var_set_dt) {
               )
             ]
           }
-          vsd <- vsd[vsd_subset, ]
           vsd_set(vsd)
         }
         vd_vsd_linkage_refresh()
@@ -463,12 +463,32 @@ methods::setMethod(
   f = "print",
   signature = "VariableMetadata",
   definition = function(x) {
+    ids <- x@var_set_meta_get_all("id")
+    sets <- x@var_set_meta_get_all("var_nm_set")
     cat(
       "VariableMetadata object ----\n",
+      
       "Functions:\n",
       vapply(vame_slot_nms_get(), function(obj_nm) {
         paste0("  @", obj_nm, "()\n")
-      }, character(1L))
+      }, character(1L)),
+      
+      "Variable sets:\n",
+      vapply(
+        seq_along(ids),
+        function(i) {
+          set_string <- paste0(
+            "\"", utils::head(sets[[i]], 5), "\"",
+            collapse = ", "
+          )
+          if (length(sets[[i]]) > 5) {
+            set_string <- paste0(set_string, ", ...")
+          }
+          set_string <- paste0("c(", set_string, ")")
+          paste0("  \"", ids[i], "\": ", set_string, "\n")
+        },
+        character(1L)
+      )
     )
   }
 )

@@ -4,18 +4,24 @@
 \alias{VariableMetadata}
 \title{Variable Metadata}
 \usage{
-VariableMetadata(var_nm_dt, var_nm_set_dt)
+VariableMetadata(var_dt, var_set_dt)
 }
 \arguments{
-\item{var_nm_dt}{\verb{[data.table]}
+\item{var_dt}{\verb{[data.table]}
 
 Contains information for individual variables. Must contain at a minimum
 column \code{var_nm}.}
 
-\item{var_nm_set_dt}{\verb{[data.table]}
+\item{var_set_dt}{\verb{[data.table]}
 
 Contains information for sets of variables --- e.g. a common value space.
-Must contain at a minimum column \code{var_nm_set}.}
+Must contain at a minimum columns
+\itemize{
+\item \code{id} \code{\link{character}}: Identifies each set of variable names. E.g.
+\code{"my_set"}.
+\item \code{var_nm_set} \verb{[list]}: Each list element contains a character string
+vector of variable names. e.g. \code{list(c("a", "b"))}.
+}}
 }
 \description{
 Create a VariableMetadata object.
@@ -30,11 +36,12 @@ VariableMetadata object.
 
 \examples{
 vd <- vame::VariableMetadata(
-  var_nm_dt = data.table::data.table(
+  var_dt = data.table::data.table(
     var_nm = c("a", "b", "c"),
     flavour = c("tasty", "rancid", "bitter")
   ),
-  var_nm_set_dt = data.table::data.table(
+  var_set_dt = data.table::data.table(
+    id = "set_01",
     var_nm_set = list(c("a", "b"))
   )
 )
