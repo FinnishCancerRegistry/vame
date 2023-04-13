@@ -148,7 +148,7 @@ VariableMetadata <- function(var_nm_dt, var_nm_set_dt) {
           )
         )
         if (length(rm_var_nms) > 0) {
-          remove(rm_var_nms)
+          var_remove(rm_var_nms)
           vnsd <- vnsd_get()
           vnsd_subset <- vapply(vnsd[["var_nm_set"]], length, integer(1L)) > 0L
           vnsd <- vnsd[vnsd_subset, ]
