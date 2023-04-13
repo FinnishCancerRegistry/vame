@@ -2,3 +2,4 @@
 ^.+[.]code-workspace$
 ^\.github$
 ^dev$
+^sandbox[.]R$
