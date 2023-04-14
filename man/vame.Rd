@@ -12,8 +12,8 @@ to one more variables (e.g. a tabular dataset).
 }
 \section{Recommended installation}{
 \if{html}{\out{<div class="sourceCode r">}}\preformatted{devtools::install_github(
-  "FinnishCancerRegistry/vame",
-  ref = readline("enter latest tag on github: ")
+"FinnishCancerRegistry/vame",
+ref = readline("enter latest tag on github: ")
 )
 }\if{html}{\out{</div>}}
 }
