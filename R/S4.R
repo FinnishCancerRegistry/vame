@@ -454,7 +454,15 @@ VariableMetadata <- function(var_dt, var_set_dt) {
 
       # vame_category_space funs -----------------------------------------------
       # slot:vame_category_space_dt_list
-      vame_category_space_dt_list <- function(var_nms) {
+      vame_category_space_dt_list <- function(var_nms, env = NULL) {
+        dbc::assert_is_one_of(
+          env,
+          funs = list(dbc::report_is_NULL,
+                      dbc::report_is_environment)
+        )
+        if (is.null(env)) {
+          env <- parent.frame(1L)
+        }
         vd <- data.table::setDT(list(
           var_nm = var_meta_get_all("var_nm"),
           type = var_meta_get_all("type")
@@ -474,7 +482,9 @@ VariableMetadata <- function(var_dt, var_set_dt) {
             return(NULL)
           }
           value_space_to_subset_dt(
-            value_space = vsd[["value_space"]][[i]], var_nms = var_nms
+            value_space = vsd[["value_space"]][[i]],
+            var_nms = var_nms,
+            env = env
           )
         })
         names(dtl) <- vsd[["id"]]
@@ -483,8 +493,16 @@ VariableMetadata <- function(var_dt, var_set_dt) {
         return(dtl)
       }
       # slot:vame_category_space_dt
-      vame_category_space_dt <- function(var_nms) {
-        dtl <- vame_category_space_dt_list(var_nms)
+      vame_category_space_dt <- function(var_nms, env = NULL) {
+        dbc::assert_is_one_of(
+          env,
+          funs = list(dbc::report_is_NULL,
+                      dbc::report_is_environment)
+        )
+        if (is.null(env)) {
+          env <- parent.frame(1L)
+        }
+        dtl <- vame_category_space_dt_list(var_nms = var_nms, env = env)
         category_space_dt_list_to_category_space_dt(dtl)
       }
     },

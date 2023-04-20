@@ -15,8 +15,8 @@ to one more variables (e.g. a tabular dataset).
 
 ```r
 devtools::install_github(
-"FinnishCancerRegistry/vame",
-ref = readline("enter latest tag on github: ")
+  "FinnishCancerRegistry/vame",
+  ref = readline("enter latest tag on github: ")
 )
 ```
 

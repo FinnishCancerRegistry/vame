@@ -1,4 +1,4 @@
-value_space_to_subset_dt <- function(value_space, var_nms) {
+value_space_to_subset_dt <- function(value_space, var_nms, env) {
   if (length(var_nms) == 0L) {
     return(data.table::data.table(NULL)[])
   } else if ("dt" %in% names(value_space)) {
@@ -9,15 +9,13 @@ value_space_to_subset_dt <- function(value_space, var_nms) {
       .SDcols = var_nms
     ]
   } else if ("expr" %in% names(value_space)) {
-    expr_eval_env <- new.env(parent = parent.frame(1L))
+    expr_eval_env <- new.env(parent = env)
     expr_eval_env[["var_nms"]] <- var_nms
-    dt <- eval(value_space[["expr"]], envir = eval_env)
-  } else if ("fun" %in% names(value_space)) {
-    dt <- fun(var_nms)
+    dt <- eval(value_space[["expr"]], envir = expr_eval_env)
   } else {
-    stop("value_space did not have any of the following elements: ",
-         "dt, expr, fun. could not evaluate category space for ",
-         "variable names ", deparse1(var_nms))
+    stop("A value_space did not have either \"dt\" or \"expr\" element. ",
+         "Could not evaluate category space for ",
+         "variable names ", deparse1(var_nms), ".")
   }
   data.table::setcolorder(dt, var_nms)
   dbc::assert_prod_output_is_data_table_with_required_names(
