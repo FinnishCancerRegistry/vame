@@ -5,7 +5,8 @@ vame_slot_nms_get <- function() {
   "var_set_meta_get_all", "var_set_rename", "var_set_remove", "var_set_value_space_get",
   "var_set_value_space_set", "var_set_value_space_dt_subset", "var_meta_get",
   "var_meta_set", "var_meta_get_all", "var_rename", "var_remove",
-  "vame_subset", "vame_union_append")
+  "vame_subset", "vame_union_append", "vame_category_space_dt_list",
+  "vame_category_space_dt")
   # stop:vame_slot_nms
 }
 
@@ -28,14 +29,14 @@ NULL
 #' - `vame::VariableMetadata`: Use this function to create a new
 #'   VariableMetadata object.
 #' @param var_dt `[data.table]`
-#' 
+#'
 #' Contains information for individual variables. Must contain at a minimum
 #' column `var_nm`.
 #' @param var_set_dt `[data.table]`
-#' 
+#'
 #' Contains information for sets of variables --- e.g. a common value space.
 #' Must contain at a minimum columns
-#' 
+#'
 #' - `id` [`character`]: Identifies each set of variable names. E.g.
 #'   `"my_set"`.
 #' - `var_nm_set` `[list]`: Each list element contains a character string
@@ -136,17 +137,18 @@ VariableMetadata <- function(var_dt, var_set_dt) {
         vsd <- vsd_get()
         dt <- data.table::data.table(
           var_nm = unlist(vsd[["var_nm_set"]]),
-          var_set_dt_pos = vapply(
+          var_set_dt_pos = unlist(lapply(
             seq_along(vsd[["var_nm_set"]]),
             function(i) {
-              rep(i, length(vsd[["var_nm_set"]]))
-            },
-            integer(1L)
-          )
+              rep(i, length(vsd[["var_nm_set"]][[i]]))
+            }
+          ))
         )
-        data.table::setkeyv(dt, names(dt))
+        if (ncol(dt) > 0) {
+          data.table::setkeyv(dt, names(dt))
+        }
         return(dt[])
-      }     
+      }
       vd_set <- function(dt) {
         data[["var_dt"]] <- dt
       }
@@ -449,6 +451,42 @@ VariableMetadata <- function(var_dt, var_set_dt) {
         vsd_set(vsd)
         return(invisible(NULL))
       }
+
+      # vame_category_space funs -----------------------------------------------
+      # slot:vame_category_space_dt_list
+      vame_category_space_dt_list <- function(var_nms) {
+        vd <- data.table::setDT(list(
+          var_nm = var_meta_get_all("var_nm"),
+          type = var_meta_get_all("type")
+        ))
+        vd <- vd[vd[["type"]] == "categorical", ]
+        dbc::assert_vector_elems_are_in_set(var_nms, set = vd[["var_nm"]])
+        vd <- vd[vd[["var_nm"]] %in% var_nms, ]
+        vsd <- data.table::setDT(list(
+          id = var_set_meta_get_all("id"),
+          var_nm_set = var_set_meta_get_all("var_nm_set"),
+          value_space = var_set_meta_get_all("value_space")
+        ))
+
+        dtl <- lapply(seq_along(vsd[["value_space"]]), function(i) {
+          var_nm_set <- intersect(var_nms, vsd[["var_nm_set"]][[i]])
+          if (length(var_nm_set) == 0) {
+            return(NULL)
+          }
+          value_space_to_subset_dt(
+            value_space = vsd[["value_space"]][[i]], var_nms = var_nms
+          )
+        })
+        names(dtl) <- vsd[["id"]]
+        dtl[vapply(dtl, is.null, logical(1L))] <- NULL
+
+        return(dtl)
+      }
+      # slot:vame_category_space_dt
+      vame_category_space_dt <- function(var_nms) {
+        dtl <- vame_category_space_dt_list(var_nms)
+        category_space_dt_list_to_category_space_dt(dtl)
+      }
     },
     envir = funs
   )
@@ -472,12 +510,12 @@ methods::setMethod(
     sets <- x@var_set_meta_get_all("var_nm_set")
     cat(
       "VariableMetadata object ----\n",
-      
+
       "Functions:\n",
       vapply(vame_slot_nms_get(), function(obj_nm) {
         paste0("  @", obj_nm, "()\n")
       }, character(1L)),
-      
+
       "Variable sets:\n",
       vapply(
         seq_along(ids),
