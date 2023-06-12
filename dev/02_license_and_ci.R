@@ -4,7 +4,7 @@ stopifnot(
 )
 usethis::use_mit_license()
 unlink(".github", recursive = TRUE, force = TRUE)
-usethis::use_github_action_check_release()
+usethis::use_github_action(name = "check-release")
 desc::desc_normalize()
 Sys.sleep(1)
 s2 <- git2r::status()
