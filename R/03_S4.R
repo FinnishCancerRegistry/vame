@@ -1,8 +1,8 @@
 methods::setClass(
   Class = "VariableMetadata",
   slots = structure(
-    rep("function", length(vame_slot_nms_get())),
-    names = vame_slot_nms_get()
+    rep("function", length(vame_slot_nms_get__())),
+    names = vame_slot_nms_get__()
   )
 )
 
@@ -463,35 +463,21 @@ VariableMetadata <- function(var_dt, var_set_dt) {
           var_nm_set = var_set_meta_get_all("var_nm_set"),
           value_space = var_set_meta_get_all("value_space")
         ))
-
-        dtl <- lapply(seq_along(vsd[["value_space"]]), function(i) {
-          var_nm_set <- intersect(var_nms, vsd[["var_nm_set"]][[i]])
-          if (length(var_nm_set) == 0) {
-            return(NULL)
-          }
-          value_space_to_subset_dt(
-            value_space = vsd[["value_space"]][[i]],
-            var_nms = var_nms,
-            env = env
-          )
-        })
-        names(dtl) <- vsd[["id"]]
-        dtl[vapply(dtl, is.null, logical(1L))] <- NULL
-
+        dtl <- category_space_dt_list__(
+          var_nms = var_nms,
+          vsd = vsd,
+          env = env
+        )
         return(dtl)
       }
       # slot:vame_category_space_dt
       vame_category_space_dt <- function(var_nms, env = NULL) {
-        dbc::assert_is_one_of(
-          env,
-          funs = list(dbc::report_is_NULL,
-                      dbc::report_is_environment)
-        )
         if (is.null(env)) {
           env <- parent.frame(1L)
         }
         dtl <- vame_category_space_dt_list(var_nms = var_nms, env = env)
-        category_space_dt_list_to_category_space_dt(dtl)
+        dt <- category_space_dt_list_to_category_space_dt__(dtl)
+        return(dt[])
       }
     },
     envir = funs
@@ -500,10 +486,10 @@ VariableMetadata <- function(var_dt, var_set_dt) {
   arg_list <- list(
     Class = "VariableMetadata"
   )
-  fun_list <- lapply(vame_slot_nms_get(), function(fun_nm) {
+  fun_list <- lapply(vame_slot_nms_get__(), function(fun_nm) {
     funs[[fun_nm]]
   })
-  names(fun_list) <- vame_slot_nms_get()
+  names(fun_list) <- vame_slot_nms_get__()
   arg_list <- c(arg_list, fun_list)
   do.call(methods::new, arg_list, quote = TRUE)
 }
@@ -518,7 +504,7 @@ methods::setMethod(
       "VariableMetadata object ----\n",
 
       "Functions:\n",
-      vapply(vame_slot_nms_get(), function(obj_nm) {
+      vapply(vame_slot_nms_get__(), function(obj_nm) {
         paste0("  @", obj_nm, "()\n")
       }, character(1L)),
 

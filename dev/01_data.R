@@ -1,5 +1,5 @@
 vame_slot_nms_read <- function() {
-  lines <- readLines("./R/02_S4.R")
+  lines <- readLines("./R/03_S4.R")
   lhs_re <- "^[ ]*#+[ ]*slot:"
   value_re <- "[a-z_]+"
   rhs_re <- "[ ]*$"
