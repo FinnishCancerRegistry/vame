@@ -9,7 +9,7 @@ testthat::test_that("category_space_dt_list_to_category_space_dt__ works", {
   )
 
   dtl <- list(
-    data.table::data.table(a = 1:5, b = 5:1),
+    data.table::data.table(a = 1:3, b = 3:1),
     data.table::CJ(a = 1:5, c = 2:6),
     data.table::data.table(d = 5:6)
   )

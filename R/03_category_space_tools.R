@@ -98,46 +98,6 @@ assert_is_category_space_dt_list__ <- function(
       assertion_type = assertion_type
     )
   })
-  col_nm_dt <- data.table::rbindlist(lapply(x, function(dt) {
-    dt <- data.table::data.table(
-      col_nm = names(dt),
-      category_space = lapply(dt, function(col) sort(unique(col)))
-    )
-    dt[
-      j = "category_space_string" := vapply(
-        dt[["category_space"]],
-        deparse1,
-        character(1L)
-      )
-    ]
-    dt[]
-  }))
-  col_nm_dt[
-    j = "is_dup_1" := duplicated(
-      col_nm_dt,
-      by = "col_nm"
-    )
-  ]
-  col_nm_dt[
-    j = "is_dup_2" := duplicated(
-      col_nm_dt,
-      by = c("col_nm", "category_space_string")
-    )
-  ]
-  col_nm_dt[
-    j = "fail" := col_nm_dt[["is_dup_1"]] != col_nm_dt[["is_dup_2"]]
-  ]
-  if (any(col_nm_dt[["fail"]])) {
-    fail_col_nms <- unique(col_nm_dt[["col_nm"]][col_nm_dt[["fail"]]])
-    stop(paste0(
-      x_nm, " contains columns(s) ", deparse1(fail_col_nms), " more than once ",
-      "but those columns have different category spaces in different tables. ",
-      "If a column appears in multiple tables, it must have the exact same ",
-      "category space in each. E.g. if column 'a' has category space 1:3 in ",
-      "one table and 1:2 in another, this should be corrected so that both ",
-      "have for instance 1:3."
-    ))
-  }
   return(invisible(NULL))
 }
 
