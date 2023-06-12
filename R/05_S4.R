@@ -117,8 +117,12 @@ VariableMetadata <- function(var_dt, var_set_dt) {
       }
 
       # vd funs ----------------------------------------------------------------
-      vd_get <- function() {
+      vd_get <- function(col_nms = NULL) {
         out <- data[["var_dt"]]
+        if (is.null(col_nms)) {
+          col_nms <- names(out)
+        }
+        out <- dt_independent_frame_dependent_contents__(out, col_nms)
         return(out[])
       }
       vd_implied_get <- function() {
@@ -142,8 +146,12 @@ VariableMetadata <- function(var_dt, var_set_dt) {
       }
 
       # vsd funs ---------------------------------------------------------------
-      vsd_get <- function() {
+      vsd_get <- function(col_nms = NULL) {
         out <- data[["var_set_dt"]]
+        if (!is.null(col_nms)) {
+          dbc::assert_vector_elems_are_in_set(col_nms, set = names(out))
+          out <- dt_independent_frame_dependent_contents__(out, col_nms)
+        }
         return(out[])
       }
       vsd_set <- function(dt) {
@@ -451,18 +459,13 @@ VariableMetadata <- function(var_dt, var_set_dt) {
         if (is.null(env)) {
           env <- parent.frame(1L)
         }
-        vd <- data.table::setDT(list(
-          var_nm = var_meta_get_all("var_nm"),
-          type = var_meta_get_all("type")
-        ))
-        vd <- vd[vd[["type"]] == "categorical", ]
-        dbc::assert_vector_elems_are_in_set(var_nms, set = vd[["var_nm"]])
-        vd <- vd[vd[["var_nm"]] %in% var_nms, ]
-        vsd <- data.table::setDT(list(
-          id = var_set_meta_get_all("id"),
-          var_nm_set = var_set_meta_get_all("var_nm_set"),
-          value_space = var_set_meta_get_all("value_space")
-        ))
+        vd <- vd_get(c("var_nm", "type"))
+        is_categorical <- vd[["type"]] == "categorical"
+        dbc::assert_vector_elems_are_in_set(
+          var_nms,
+          set = vd[["var_nm"]][is_categorical]
+        )
+        vsd <- vsd_get(c("id", "var_nm_set", "value_space"))
         dtl <- category_space_dt_list__(
           var_nms = var_nms,
           vsd = vsd,
