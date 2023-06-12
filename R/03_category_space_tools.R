@@ -145,40 +145,31 @@ category_space_dt_list_to_category_space_dt__ <- function(
   dtl,
   assertion_type = "prod_input"
 ) {
+  # this could do with some optimisation. the loop takes many copies of the
+  # data.
   assert_is_category_space_dt_list__(dtl, assertion_type = assertion_type)
   if (length(dtl) == 0L) {
     return(data.table::data.table(NULL))
+  } else if (length(dtl) == 1L) {
+    return(dtl[[1L]])
   }
-  # "worst-case": each dt in dtl is combined as a "cartesian product".
-  # other cases: some dt's in dtl have common column names. those can
-  # be combined as merges.
-  n_dt_rows <- prod(vapply(dtl, nrow, integer(1L)))
-  dt <- data.table::data.table(
-    "____tmp____" = rep(TRUE, n_dt_rows)
-  )
-  for (i in seq_along(dtl)) {
+  dt <- dtl[[1L]]
+  for (i in 2:length(dtl)) {
     join_col_nms <- intersect(names(dt), names(dtl[[i]]))
     if (length(join_col_nms) > 0) {
-      add_col_nms <- setdiff(names(dtl[[i]]), join_col_nms)
-      dt_join_assign__(
-        dt = dt,
-        i = dtl[[i]],
-        on = join_col_nms,
-        dt_col_nms = add_col_nms,
-        i_col_nms = add_col_nms
+      dt <- merge(
+        x = dt,
+        y = dtl[[i]],
+        by = join_col_nms,
+        all.x = TRUE,
+        all.y = TRUE,
+        allow.cartesian = TRUE
       )
     } else {
-      n_i <- nrow(dtl[[i]])
-      indices <- rep(seq_len(n_i), n_dt_rows / n_i)
-      add_col_nms <- names(dtl[[i]])
-      data.table::set(
-        dt,
-        j = add_col_nms,
-        value = dtl[[i]][i = indices, j = .SD, .SDcols = add_col_nms]
-      )
-    }
-    if (i == 1) {
-      data.table::set(dt, j = "____tmp____", value = NULL)
+      dt_indices <- rep(seq_len(nrow(dt)), each = nrow(dtl[[i]]))
+      dtli_indices <- rep(seq_len(nrow(dtl[[i]])), nrow(dt))
+      dt <- dt[dt_indices, ]
+      data.table::set(dt, j = names(dtl[[i]]), value = dtl[[i]][dtli_indices, ])
     }
   }
   is_duplicated <- duplicated(dt, by = names(dt))
