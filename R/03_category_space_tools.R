@@ -61,13 +61,13 @@ category_space_dt_list__ <- function(
     env,
     assertion_type = assertion_type
   )
-  dtl <- lapply(seq_along(vsd[["value_spaces"]]), function(i) {
-    var_nm_set <- intersect(var_nms, vsd[["var_nm_sets"]][[i]])
+  dtl <- lapply(seq_along(vsd[["value_space"]]), function(i) {
+    var_nm_set <- intersect(var_nms, vsd[["var_nm_set"]][[i]])
     if (length(var_nm_set) == 0) {
       return(NULL)
     }
     value_space_to_subset_dt__(
-      value_space = vsd[["value_spaces"]][[i]],
+      value_space = vsd[["value_space"]][[i]],
       var_nms = var_nms,
       env = env
     )
@@ -76,52 +76,107 @@ category_space_dt_list__ <- function(
   return(dtl)
 }
 
+assert_is_category_space_dt_list__ <- function(
+  x,
+  x_nm = NULL,
+  call = NULL,
+  assertion_type = dbc::assertion_type_default()
+) {
+  x_nm <- dbc::handle_arg_x_nm(x_nm = x_nm)
+  call <- dbc::handle_arg_call(call = call)
+  dbc::assert_is_list(
+    x,
+    x_nm = x_nm,
+    call = call,
+    assertion_type = assertion_type
+  )
+  lapply(seq_along(x), function(i) {
+    dbc::assert_is_data_table(
+      x[[i]],
+      x_nm = paste0(x_nm, "[[", i, "]]"),
+      call = call,
+      assertion_type = assertion_type
+    )
+  })
+  col_nm_dt <- data.table::rbindlist(lapply(x, function(dt) {
+    dt <- data.table::data.table(
+      col_nm = names(dt),
+      category_space = lapply(dt, function(col) sort(unique(col)))
+    )
+    dt[
+      j = "category_space_string" := vapply(
+        dt[["category_space"]],
+        deparse1,
+        character(1L)
+      )
+    ]
+    dt[]
+  }))
+  col_nm_dt[
+    j = "is_dup_1" := duplicated(
+      col_nm_dt,
+      by = "col_nm"
+    )
+  ]
+  col_nm_dt[
+    j = "is_dup_2" := duplicated(
+      col_nm_dt,
+      by = c("col_nm", "category_space_string")
+    )
+  ]
+  col_nm_dt[
+    j = "fail" := col_nm_dt[["is_dup_1"]] != col_nm_dt[["is_dup_2"]]
+  ]
+  if (any(col_nm_dt[["fail"]])) {
+    fail_col_nms <- unique(col_nm_dt[["col_nm"]][col_nm_dt[["fail"]]])
+    stop(paste0(
+      x_nm, " contains columns(s) ", deparse1(fail_col_nms), " more than once ",
+      "but those columns have different category spaces in different tables. ",
+      "If a column appears in multiple tables, it must have the exact same ",
+      "category space in each. E.g. if column 'a' has category space 1:3 in ",
+      "one table and 1:2 in another, this should be corrected so that both ",
+      "have for instance 1:3."
+    ))
+  }
+  return(invisible(NULL))
+}
+
 category_space_dt_list_to_category_space_dt__ <- function(
   dtl,
   assertion_type = "prod_input"
-  ) {
-  dbc::assert_is_list(
-    dtl,
-    assertion_type = assertion_type
-  )
+) {
+  assert_is_category_space_dt_list__(dtl, assertion_type = assertion_type)
   if (length(dtl) == 0L) {
     return(data.table::data.table(NULL))
   }
-  index_dt <- do.call(
-    what = data.table::CJ,
-    args = lapply(dtl, function(dt) seq_len(nrow(dt))),
-    quote = TRUE
-  )
-  index_col_nms <- paste0("index_", seq_len(ncol(index_dt)))
-  data.table::setnames(dt, index_col_nms)
+  # "worst-case": each dt in dtl is combined as a "cartesian product".
+  # other cases: some dt's in dtl have common column names. those can
+  # be combined as merges.
+  n_dt_rows <- prod(vapply(dtl, nrow, integer(1L)))
   dt <- data.table::data.table(
-    "____tmp____" = rep(TRUE, nrow(index_dt))
+    "____tmp____" = rep(TRUE, n_dt_rows)
   )
   for (i in seq_along(dtl)) {
     join_col_nms <- intersect(names(dt), names(dtl[[i]]))
     if (length(join_col_nms) > 0) {
-      dt <- merge(
-        dt,
-        dtl[[i]],
+      add_col_nms <- setdiff(names(dtl[[i]]), join_col_nms)
+      dt_join_assign__(
+        dt = dt,
+        i = dtl[[i]],
         on = join_col_nms,
-        all.x = TRUE,
-        all.y = TRUE,
-        allow.cartesian = TRUE
+        dt_col_nms = add_col_nms,
+        i_col_nms = add_col_nms
       )
     } else {
-      indices <- dt[[index_col_nms[i]]]
-      new_col_nms <- names(dtl[[i]])
+      n_i <- nrow(dtl[[i]])
+      indices <- rep(seq_len(n_i), n_dt_rows / n_i)
+      add_col_nms <- names(dtl[[i]])
       data.table::set(
         dt,
-        j = new_col_nms,
-        value = dtl[[i]][i = indices, j = .SD, .SDcols = new_col_nms]
+        j = add_col_nms,
+        value = dtl[[i]][i = indices, j = .SD, .SDcols = add_col_nms]
       )
     }
-    data.table::set(
-      dt,
-      j = index_col_nms[i],
-      value = NULL
-    )
     if (i == 1) {
       data.table::set(dt, j = "____tmp____", value = NULL)
     }
