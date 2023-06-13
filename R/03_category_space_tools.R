@@ -68,7 +68,7 @@ category_space_dt_list__ <- function(
     }
     value_space_to_subset_dt__(
       value_space = vsd[["value_space"]][[i]],
-      var_nms = var_nms,
+      var_nms = var_nm_set,
       env = env
     )
   })

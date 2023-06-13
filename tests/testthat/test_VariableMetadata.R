@@ -82,4 +82,22 @@ testthat::test_that("category_space funs work", {
     dt_02,
     ignore_attr = TRUE
   )
+
+  dt_01 <- data.table::CJ(a = 1:3, b = 3:1, c = 1:3)
+  dt_02 <- data.table::CJ(a = 0:1, e = 2:1)
+  vd <- vame::VariableMetadata(
+    var_dt = data.table::data.table(
+      var_nm = c("a", "b", "c", "e"),
+      type = "categorical"
+    ),
+    var_set_dt = data.table::data.table(
+      id = c("set_01", "set_02"),
+      var_nm_set = list(c("a", "b", "c"), c("a", "e")),
+      value_space = list(
+        list(dt = dt_01),
+        list(dt = dt_02)
+      )
+    )
+  )
+  vd@vame_category_space_dt(c("a", "b", "e"))
 })
