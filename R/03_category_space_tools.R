@@ -29,8 +29,12 @@ value_space_to_subset_dt__ <- function(
     expr_eval_env <- new.env(parent = env)
     expr_eval_env[["var_nms"]] <- var_nms
     dt <- eval(value_space[["expr"]], envir = expr_eval_env)
+  } else if ("set" %in% names(value_space)) {
+    dbc::assert_prod_interim_has_length(var_nms, expected_length = 1L)
+    dt <- data.table::data.table(x = value_space[["set"]])
+    data.table::setnames(dt, "x", var_nms)
   } else {
-    stop("A value_space did not have either \"dt\" or \"expr\" element. ",
+    stop("A value_space did not have a \"dt\", \"expr\", or \"set\" element. ",
          "Could not evaluate category space for ",
          "variable names ", deparse1(var_nms), ".")
   }
