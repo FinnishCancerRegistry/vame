@@ -122,3 +122,53 @@ testthat::test_that("category_space funs work", {
   data.table::setkeyv(exp, names(exp))
   testthat::expect_equal(object = obs, expected = exp, ignore_attr = TRUE)
 })
+
+testthat::test_that("VariableMetadata labels work", {
+  dt_01 <- data.table::CJ(a = 1:3, b = 3:1, c = 4:5)
+  vd <- vame::VariableMetadata(
+    var_dt = data.table::data.table(
+      var_nm = c("a", "b", "c"),
+      type = "categorical",
+      label_dt = list(
+        a = data.table::data.table(
+          level = 1:3,
+          en = paste0("a_level_", 1:3)
+        ),
+        b = data.table::data.table(
+          level = 1:3,
+          en = paste0("b_level_", 1:3)
+        ),
+        c = NULL
+      )
+    ),
+    var_set_dt = data.table::data.table(
+      id = c("set_01"),
+      var_nm_set = list(c("a", "b", "c")),
+      value_space = list(
+        list(dt = dt_01)
+      )
+    )
+  )
+
+  obs <- vd@var_labels_get(x = 1:4, var_nm = "a", label_col_nm = "en")
+  exp <- c(paste0("a_level_", 1:3), NA)
+  testthat::expect_identical(object = obs, expected = exp)
+
+  testthat::expect_error(
+    vd@var_labels_get(
+      x = 1:4,
+      var_nm = "a",
+      label_col_nm = "this does not exist"
+    ),
+    regexp = "Label column does not exist: "
+  )
+
+  testthat::expect_error(
+    vd@var_labels_get(
+      x = 1:4,
+      var_nm = "c",
+      label_col_nm = "en"
+    ),
+    regexp = "Variable \"c\" has no label_dt defined"
+  )
+})
