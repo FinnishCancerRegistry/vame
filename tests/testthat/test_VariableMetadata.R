@@ -88,7 +88,19 @@ testthat::test_that("category_space funs work", {
   vd <- vame::VariableMetadata(
     var_dt = data.table::data.table(
       var_nm = c("a", "b", "c", "e"),
-      type = "categorical"
+      type = "categorical",
+      label_dt = list(
+        a = data.table::data.table(
+          level = 0:3,
+          en = paste0("a_level_", 0:3)
+        ),
+        b = NULL,
+        c = NULL,
+        e = data.table::data.table(
+          level = 1:2,
+          en = paste0("e_level_", 1:2)
+        )
+      )
     ),
     var_set_dt = data.table::data.table(
       id = c("set_01", "set_02"),
@@ -99,5 +111,14 @@ testthat::test_that("category_space funs work", {
       )
     )
   )
-  vd@vame_category_space_dt(c("a", "b", "e"))
+
+  obs <- vd@vame_category_space_dt(c("a", "b", "e"))
+  exp <- data.table::data.table(
+    a = c(0L, 0L, 1L, 1L, 1L, 1L, 1L, 1L, 2L, 2L, 2L, 3L, 3L, 3L),
+    b = c(NA, NA, 1L, 1L, 2L, 2L, 3L, 3L, 1L, 2L, 3L, 1L, 2L, 3L),
+    e = c(1L, 2L, 1L, 2L, 1L, 2L, 1L, 2L, NA, NA, NA, NA, NA, NA)
+  )
+  data.table::setkeyv(obs, names(obs))
+  data.table::setkeyv(exp, names(exp))
+  testthat::expect_equal(object = obs, expected = exp, ignore_attr = TRUE)
 })
