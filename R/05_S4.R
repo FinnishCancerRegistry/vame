@@ -33,6 +33,38 @@ NULL
 #'
 #' # vame::VariableMetadata ----------------------------------------------------
 #'
+#' # basic example of different kinds of variables
+#' value_space_d <- function() 1:3 * 100L
+#' vd <- vame::VariableMetadata(
+#'   var_dt = data.table::data.table(
+#'     var_nm = c("a", "b", "c", "d", "e"),
+#'     type = c("categorical", "categorical",
+#'              "my_type_1",
+#'              "my_type_2", "my_type_2")
+#'   ),
+#'   var_set_dt = data.table::data.table(
+#'     id = c("ab", "c", "de"),
+#'     var_set = list(ab = c("a", "b"), c = "c", d = "d", e = "e"),
+#'     value_space = list(
+#'       ab = list(dt = data.table::data.table(
+#'         a = c(1L, 2L, 2L),
+#'         b = c(11L, 21L, 22L)
+#'       )),
+#'       c = list(set = c("a", "b")),
+#'       d = list(expr = quote(value_space_d())),
+#'       e = list(bounds = list(
+#'         lo = 0.0, hi = 10.0,
+#'         lo_inclusive = TRUE, hi_inclusive = TRUE
+#'       ))
+#'     )
+#'   )
+#' )
+#' vd@var_assert(1L, var_nm = "a")
+#' vd@var_assert(21L, var_nm = "b")
+#' vd@var_assert("a", var_nm = "c")
+#' vd@var_assert(100L, var_nm = "d")
+#' vd@var_assert(c(0.0, 10.0), var_nm = "e")
+#'
 #' # renaming, removing variables
 #' vd <- vame::VariableMetadata(
 #'   var_dt = data.table::data.table(
@@ -547,6 +579,83 @@ VariableMetadata <- function(var_dt, var_set_dt) {
       }
 
       # var funs ---------------------------------------------------------------
+      # slot:var_value_space_get
+      var_value_space_get <- function(var_nm) {
+        if (var_meta_get(var_nm = var_nm, meta_nm = "type") == "categorical") {
+          value_space <- list(dt = vame_category_space_dt(var_nms = var_nm))
+        } else {
+          pos <- var_meta_get(var_nm = var_nm, meta_nm = "var_set_dt_pos")
+          vsd <- vsd_get("value_space")
+          value_space <- vsd[["value_space"]][[pos]]
+        }
+        return(value_space)
+      }
+
+      # slot:var_assert
+      var_assert <- function(x, var_nm, assertion_type = NULL) {
+        vs <- var_value_space_get(var_nm)
+        if ("dt" %in% names(vs)) {
+          vs <- list(set = vs[["set"]])
+        }
+        dbc::assert_prod_interim_is_list(
+          vs
+        )
+        dbc::assert_prod_interim_has_length(
+          vs,
+          expected_length = 1L
+        )
+        dbc::assert_prod_interim_atom_is_in_set(
+          names(vs),
+          set = c("set", "bounds")
+        )
+        if (names(vs) == "set") {
+          dbc::assert_vector_elems_are_in_set(
+            x = x,
+            set = vs[["set"]],
+            assertion_type = assertion_type
+          )
+        } else {
+          vs <- vs[["bounds"]]
+          dbc::assert_prod_interim_is_list(
+            vs
+          )
+          dbc::assert_prod_interim_has_length(
+            vs,
+            expected_length = 1L
+          )
+          dbc::assert_prod_interim_has_names(
+            vs,
+            required_names = c("lo", "hi", "lo_inlusive", "hi_inclusive")
+          )
+          if (vs[["lo_inlusive"]]) {
+            dbc::assert_is_gte(
+              x = x,
+              lo = vs[["lo"]],
+              assertion_type = assertion_type
+            )
+          } else {
+            dbc::assert_is_gt(
+              x = x,
+              lo = vs[["lo"]],
+              assertion_type = assertion_type
+            )
+          }
+          if (vs[["hi_inlusive"]]) {
+            dbc::assert_is_lte(
+              x = x,
+              hi = vs[["hi"]],
+              assertion_type = assertion_type
+            )
+          } else {
+            dbc::assert_is_lt(
+              x = x,
+              hi = vs[["hi"]],
+              assertion_type = assertion_type
+            )
+          }
+        }
+      }
+
       # slot:var_meta_get
       var_meta_get <- function(var_nm, meta_nm) {
         assert_is_var_nm(var_nm)
