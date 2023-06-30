@@ -38,6 +38,38 @@ VariableMetadata object.
 
 # vame::VariableMetadata ----------------------------------------------------
 
+# basic example of different kinds of variables
+value_space_d <- function() 1:3 * 100L
+vd <- vame::VariableMetadata(
+  var_dt = data.table::data.table(
+    var_nm = c("a", "b", "c", "d", "e"),
+    type = c("categorical", "categorical",
+             "my_type_1",
+             "my_type_2", "my_type_2")
+  ),
+  var_set_dt = data.table::data.table(
+    id = c("ab", "c", "de"),
+    var_set = list(ab = c("a", "b"), c = "c", d = "d", e = "e"),
+    value_space = list(
+      ab = list(dt = data.table::data.table(
+        a = c(1L, 2L, 2L),
+        b = c(11L, 21L, 22L)
+      )),
+      c = list(set = c("a", "b")),
+      d = list(expr = quote(value_space_d())),
+      e = list(bounds = list(
+        lo = 0.0, hi = 10.0,
+        lo_inclusive = TRUE, hi_inclusive = TRUE
+      ))
+    )
+  )
+)
+vd@var_assert(1L, var_nm = "a")
+vd@var_assert(21L, var_nm = "b")
+vd@var_assert("a", var_nm = "c")
+vd@var_assert(100L, var_nm = "d")
+vd@var_assert(c(0.0, 10.0), var_nm = "e")
+
 # renaming, removing variables
 vd <- vame::VariableMetadata(
   var_dt = data.table::data.table(
