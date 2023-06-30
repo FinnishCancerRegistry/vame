@@ -114,6 +114,18 @@ VariableMetadata <- function(var_dt, var_set_dt) {
           stop("No value spaces have been defined")
         }
       }
+      assert_is_var_label_dt <- function(value) {
+        dbc::assert_is_one_of(
+          value,
+          funs = list(
+            dbc::report_is_data_table,
+            dbc::report_is_NULL
+          )
+        )
+        if (data.table::is.data.table(value)) {
+          dbc::assert_has_names(value, required_names = "level")
+        }
+      }
 
       # vd funs ----------------------------------------------------------------
       vd_get <- function(col_nms = NULL) {
@@ -430,18 +442,23 @@ VariableMetadata <- function(var_dt, var_set_dt) {
       # slot:var_label_dt_set
       var_label_dt_set <- function(var_nm, value) {
         assert_is_var_nm(var_nm)
+        assert_is_var_label_dt(value)
         var_meta_set(var_nm, "label_dt", value)
       }
       # slot:var_labels_get
       var_labels_get <- function(x, var_nm, label_col_nm) {
         assert_is_var_nm(var_nm)
         ldt <- var_label_dt_get(var_nm = var_nm)
+        if (is.null(ldt)) {
+          stop("Variable \"", var_nm, "\" has no label_dt defined.")
+        }
         dbc::assert_is_character_nonNA_atom(label_col_nm)
-        dbc::assert_atom_is_in_set(
-          label_col_nm,
-          set = setdiff(names(ldt), "level")
-        )
-        dbc::assert_has_class(x = x, required_class = ldt[["level"]])
+        label_col_nm_set <- setdiff(names(ldt), "level")
+        if (!label_col_nm %in% label_col_nm_set) {
+          stop("label_col_nm = \"", label_col_nm, "\" not one of the defined ",
+               "label columns: ", deparse1(label_col_nm_set))
+        }
+        dbc::assert_has_class(x = x, required_class = class(ldt[["level"]]))
         jdt <- data.table::setDT(list(level = x))
         #' @importFrom data.table .SD
         ldt[
