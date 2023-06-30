@@ -6,7 +6,7 @@ usethis::use_mit_license()
 unlink(".github", recursive = TRUE, force = TRUE)
 usethis::use_github_action(name = "check-release")
 desc::desc_normalize()
-Sys.sleep(1)
+Sys.sleep(5)
 s2 <- git2r::status()
 
 if (!identical(s1, s2)) {
