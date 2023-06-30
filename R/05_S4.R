@@ -306,12 +306,12 @@ VariableMetadata <- function(var_dt, var_set_dt) {
       }
 
       # vd funs ----------------------------------------------------------------
-      vd_get <- function(col_nms = NULL) {
+      vd_get <- function(var_nms = NULL) {
         out <- data[["var_dt"]]
-        if (is.null(col_nms)) {
-          col_nms <- names(out)
+        if (is.null(var_nms)) {
+          var_nms <- names(out)
         }
-        out <- dt_independent_frame_dependent_contents__(out, col_nms)
+        out <- dt_independent_frame_dependent_contents__(out, var_nms)
         return(out[])
       }
       vd_implied_get <- function() {
@@ -335,11 +335,11 @@ VariableMetadata <- function(var_dt, var_set_dt) {
       }
 
       # vsd funs ---------------------------------------------------------------
-      vsd_get <- function(col_nms = NULL) {
+      vsd_get <- function(var_nms = NULL) {
         out <- data[["var_set_dt"]]
-        if (!is.null(col_nms)) {
-          dbc::assert_vector_elems_are_in_set(col_nms, set = names(out))
-          out <- dt_independent_frame_dependent_contents__(out, col_nms)
+        if (!is.null(var_nms)) {
+          dbc::assert_vector_elems_are_in_set(var_nms, set = names(out))
+          out <- dt_independent_frame_dependent_contents__(out, var_nms)
         }
         return(out[])
       }
