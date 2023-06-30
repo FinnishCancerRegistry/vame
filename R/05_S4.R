@@ -43,7 +43,6 @@ NULL
 #' vd@var_rename("a", "A")
 #' stopifnot(identical(vd@var_meta_get("A", "flavour"), "tasty"))
 #' @export
-#' @importFrom data.table := .SD .N
 VariableMetadata <- function(var_dt, var_set_dt) {
   pkg_env <- environment(VariableMetadata)
   funs <- new.env(parent = pkg_env)
@@ -167,6 +166,7 @@ VariableMetadata <- function(var_dt, var_set_dt) {
         vdi <- vd_implied_get()
         data.table::setkeyv(vd, intersect(names(vdi), names(vd)))
         i.var_set_dt_pos <- NULL # appease R CMD CHECK
+        #' @importFrom data.table :=
         vd[
           i = vdi,
           on = "var_nm",
@@ -195,6 +195,7 @@ VariableMetadata <- function(var_dt, var_set_dt) {
           vd_set(vd)
 
           vsd <- vsd_get()
+          #' @importFrom data.table :=
           vsd[
             j = "var_nm_set" := list(
               var_nm_set = lapply(.SD[["var_nm_set"]], setdiff, y = rm_var_nms)
@@ -205,6 +206,7 @@ VariableMetadata <- function(var_dt, var_set_dt) {
           if ("value_space" %in% names(vsd)) {
             vsd[
               j = "value_space" := list(
+                #' @importFrom data.table .N
                 value_space = lapply(seq_len(.N), function(i) {
                   vs_i <- .SD[["value_space"]][[i]]
                   if ("dt" %in% names(vs_i)) {
@@ -414,6 +416,35 @@ VariableMetadata <- function(var_dt, var_set_dt) {
         assert_is_var_nm(var_nm)
         expr <- substitute(var_nm != VN, list(VN = var_nm))
         vame_subset_expr(expr)
+      }
+      # slot:var_label_dt_get
+      var_label_dt_get <- function(var_nm) {
+        assert_is_var_nm(var_nm)
+        var_meta_get(var_nm, "label_dt")
+      }
+      # slot:var_label_dt_set
+      var_label_dt_set <- function(var_nm, value) {
+        assert_is_var_nm(var_nm)
+        var_meta_set(var_nm, "label_dt", value)
+      }
+      # slot:var_labels_get
+      var_labels_get <- function(x, var_nm, label_col_nm) {
+        assert_is_var_nm(var_nm)
+        ldt <- var_label_dt_get(var_nm = var_nm)
+        dbc::assert_is_character_nonNA_atom(label_col_nm)
+        dbc::assert_atom_is_in_set(
+          label_col_nm,
+          set = setdiff(names(ldt), "level")
+        )
+        dbc::assert_has_class(x = x, required_class = ldt[["level"]])
+        jdt <- data.table::setDT(list(level = x))
+        #' @importFrom data.table .SD
+        ldt[
+          i = jdt,
+          on = "level",
+          j = .SD[[1]],
+          .SDcols = label_col_nm
+        ]
       }
 
       # vame funs --------------------------------------------------------------
