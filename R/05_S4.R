@@ -363,12 +363,17 @@ VariableMetadata <- function(var_dt, var_set_dt) {
         assert_is_var_meta_nm(meta_nm)
         vd <- vd_get()
         jdt <- data.table::setDT(list(var_nm = var_nm))
-        out <- vd[
+        # retrieve "pos" instead of joining directly to ensure that list-type
+        # columns are handled correctly.
+        pos <- vd[
           i = jdt,
           on = "var_nm",
-          j = .SD[[1]],
-          .SDcols = meta_nm
+          which = TRUE
         ]
+        out <- vd[[meta_nm]][pos]
+        if (inherits(out, "list") && length(out) == 1L) {
+          out <- out[[1]]
+        }
         return(out)
       }
       # slot:var_meta_set
