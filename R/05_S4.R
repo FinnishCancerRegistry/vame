@@ -219,6 +219,9 @@ NULL
 #' )
 #' @export
 VariableMetadata <- function(var_dt, var_set_dt) {
+  # @codedoc_comment_block news("vame::VariableMetadata", "2023-06-30", "0.1.0")
+  # First release.
+  # @codedoc_comment_block news("vame::VariableMetadata", "2023-06-30", "0.1.0")
   pkg_env <- environment(VariableMetadata)
   funs <- new.env(parent = pkg_env)
   funs$data <- new.env(parent = emptyenv())

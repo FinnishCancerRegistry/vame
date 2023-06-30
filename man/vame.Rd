@@ -153,5 +153,12 @@ my_fun_2 <- function(dg_age) \{
 
 \section{News}{
 
+\subsection{News for version 0.1.0}{
+\subsection{Object vame::VariableMetadata news:}{
+
+First release.
+}
+
+}
 }
 
