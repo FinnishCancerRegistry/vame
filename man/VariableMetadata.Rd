@@ -35,6 +35,10 @@ VariableMetadata object.
 }
 
 \examples{
+
+# vame::VariableMetadata ----------------------------------------------------
+
+# renaming, removing variables
 vd <- vame::VariableMetadata(
   var_dt = data.table::data.table(
     var_nm = c("a", "b", "c"),
@@ -42,9 +46,180 @@ vd <- vame::VariableMetadata(
   ),
   var_set_dt = data.table::data.table(
     id = "set_01",
-    var_nm_set = list(c("a", "b"))
+    var_nm_set = list(c("a", "b")),
+    value_space = list(list(dt = data.table::data.table(
+      a = 1:2,
+      b = 3:4
+    )))
   )
 )
+
 vd@var_rename("a", "A")
-stopifnot(identical(vd@var_meta_get("A", "flavour"), "tasty"))
+stopifnot(
+  identical(vd@var_meta_get("A", "flavour"), "tasty"),
+  identical(names(vd@var_set_value_space_get("set_01")[["dt"]]), c("A", "b")),
+  identical(vd@var_set_meta_get("set_01", "var_nm_set"), c("A", "b"))
+)
+
+vd@var_set_rename("set_01", "Ab")
+stopifnot(
+  identical(vd@var_set_meta_get_all("id"), "Ab")
+)
+
+vd@var_remove("b")
+stopifnot(
+  identical(names(vd@var_set_value_space_get("Ab")[["dt"]]), "A"),
+  identical(vd@var_set_meta_get("Ab", "var_nm_set"), "A")
+)
+
+vd@var_set_remove("Ab")
+stopifnot(
+  identical(length(vd@var_set_meta_get_all("var_nm_set")), 0L)
+)
+
+# retrieving category space data.tables
+dt_01 <- data.table::CJ(a = 1:3, b = 3:1, c = 1:3)
+dt_02 <- data.table::CJ(d = 1:2, e = 2:1)
+vd <- vame::VariableMetadata(
+  var_dt = data.table::data.table(
+    var_nm = c("a", "b", "c", "d", "e"),
+    type = "categorical"
+  ),
+  var_set_dt = data.table::data.table(
+    id = c("set_01", "set_02"),
+    var_nm_set = list(c("a", "b", "c"), c("d", "e")),
+    value_space = list(
+      list(dt = dt_01),
+      list(expr = quote({
+        dt_02[
+          i = !duplicated(dt_02, by = var_nms),
+          j = .SD,
+          .SDcols = var_nms
+        ]
+      }))
+    )
+  )
+)
+
+stopifnot(
+  all.equal(
+    vd@vame_category_space_dt(c("a", "b")),
+    dt_01[
+      i = !duplicated(dt_01, by = c("a", "b")),
+      j = .SD,
+      .SDcols = c("a", "b")
+    ],
+    check.attributes = FALSE
+  ),
+  all.equal(
+    vd@vame_category_space_dt(c("d", "e")),
+    dt_02,
+    check.attributes = FALSE
+  )
+)
+
+# getting category space data.tables --- here a variable appears in
+# two different value spaces
+dt_01 <- data.table::CJ(a = 1:3, b = 3:1, c = 1:3)
+dt_02 <- data.table::CJ(a = 0:1, e = 2:1)
+vd <- vame::VariableMetadata(
+  var_dt = data.table::data.table(
+    var_nm = c("a", "b", "c", "e"),
+    type = "categorical",
+    label_dt = list(
+      a = data.table::data.table(
+        level = 0:3,
+        en = paste0("a_level_", 0:3)
+      ),
+      b = NULL,
+      c = NULL,
+      e = data.table::data.table(
+        level = 1:2,
+        en = paste0("e_level_", 1:2)
+      )
+    )
+  ),
+  var_set_dt = data.table::data.table(
+    id = c("set_01", "set_02"),
+    var_nm_set = list(c("a", "b", "c"), c("a", "e")),
+    value_space = list(
+      list(dt = dt_01),
+      list(dt = dt_02)
+    )
+  )
+)
+
+obs <- vd@vame_category_space_dt(c("a", "b", "e"))
+exp <- data.table::data.table(
+  a = c(0L, 0L, 1L, 1L, 1L, 1L, 1L, 1L, 2L, 2L, 2L, 3L, 3L, 3L),
+  b = c(NA, NA, 1L, 1L, 2L, 2L, 3L, 3L, 1L, 2L, 3L, 1L, 2L, 3L),
+  e = c(1L, 2L, 1L, 2L, 1L, 2L, 1L, 2L, NA, NA, NA, NA, NA, NA)
+)
+data.table::setkeyv(obs, names(obs))
+data.table::setkeyv(exp, names(exp))
+stopifnot(
+  all.equal(obs, exp, check.attributes = FALSE)
+)
+
+# getting labels for variable levels
+dt_01 <- data.table::CJ(a = 1:3, b = 3:1, c = 4:5)
+vd <- vame::VariableMetadata(
+  var_dt = data.table::data.table(
+    var_nm = c("a", "b", "c"),
+    type = "categorical",
+    label_dt = list(
+      a = data.table::data.table(
+        level = 1:3,
+        en = paste0("a_level_", 1:3)
+      ),
+      b = data.table::data.table(
+        level = 1:3,
+        en = paste0("b_level_", 1:3)
+      ),
+      c = NULL
+    )
+  ),
+  var_set_dt = data.table::data.table(
+    id = c("set_01"),
+    var_nm_set = list(c("a", "b", "c")),
+    value_space = list(
+      list(dt = dt_01)
+    )
+  )
+)
+
+obs <- vd@var_labels_get(x = 1:4, var_nm = "a", label_col_nm = "en")
+exp <- c(paste0("a_level_", 1:3), NA)
+stopifnot(
+  identical(obs, exp)
+)
+
+obs <- tryCatch(
+  vd@var_labels_get(
+    x = 1:4,
+    var_nm = "a",
+    label_col_nm = "this does not exist"
+  ),
+  error = function(e) e[["message"]]
+)
+exp <- paste0(
+  "label_col_nm = \"this does not exist\"",
+  " not one of the defined label columns: \"en\""
+)
+stopifnot(
+  grepl(exp, obs)
+)
+
+obs <- tryCatch(
+  vd@var_labels_get(
+    x = 1:4,
+    var_nm = "c",
+    label_col_nm = "en"
+  ),
+  error = function(e) e[["message"]]
+)
+exp <- "Variable \"c\" has no label_dt defined"
+stopifnot(
+  grepl(exp, obs)
+)
 }
