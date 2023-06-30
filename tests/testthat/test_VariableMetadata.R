@@ -160,7 +160,10 @@ testthat::test_that("VariableMetadata labels work", {
       var_nm = "a",
       label_col_nm = "this does not exist"
     ),
-    regexp = "Label column does not exist: "
+    regexp = paste0(
+      "label_col_nm = \"this does not exist\"",
+      " not one of the defined label columns: \"en\""
+    )
   )
 
   testthat::expect_error(
