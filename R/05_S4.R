@@ -885,11 +885,11 @@ VariableMetadata <- function(var_dt, var_set_dt) {
   arg_list <- list(
     Class = "VariableMetadata"
   )
-  fun_list <- lapply(vame_slot_nms_get__(), function(fun_nm) {
+  slots <- lapply(vame_slot_nms_get__(), function(fun_nm) {
     funs[[fun_nm]]
   })
-  names(fun_list) <- vame_slot_nms_get__()
-  arg_list <- c(arg_list, fun_list)
+  names(slots) <- vame_slot_nms_get__()
+  arg_list <- c(arg_list, slots)
   do.call(methods::new, arg_list, quote = TRUE)
 }
 
