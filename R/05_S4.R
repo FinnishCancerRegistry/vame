@@ -451,7 +451,7 @@ VariableMetadata <- function(var_dt, var_set_dt) {
         vd_vsd_linkage_refresh()
       }
 
-      # var_set funs -----------------------------------------------------------
+      # var_nm_set funs -----------------------------------------------------------
       var_set_id_to_pos <- function(id) {
         vsd <- vsd_get()
         data.table::chmatch(id, vsd[["id"]])
@@ -645,9 +645,9 @@ VariableMetadata <- function(var_dt, var_set_dt) {
 
       # slot:var_assert
       var_assert <- function(x, var_nm, assertion_type = NULL) {
-        vs <- var_value_space_get(var_nm)
+        vs <- var_value_space_eval(var_nm)
         if ("dt" %in% names(vs)) {
-          vs <- list(set = vs[["set"]])
+          vs <- list(set = vs[["dt"]][[1L]])
         }
         dbc::assert_prod_interim_is_list(
           vs
@@ -673,13 +673,13 @@ VariableMetadata <- function(var_dt, var_set_dt) {
           )
           dbc::assert_prod_interim_has_length(
             vs,
-            expected_length = 1L
+            expected_length = 4L
           )
           dbc::assert_prod_interim_has_names(
             vs,
-            required_names = c("lo", "hi", "lo_inlusive", "hi_inclusive")
+            required_names = c("lo", "hi", "lo_inclusive", "hi_inclusive")
           )
-          if (vs[["lo_inlusive"]]) {
+          if (vs[["lo_inclusive"]]) {
             dbc::assert_is_gte(
               x = x,
               lo = vs[["lo"]],
@@ -692,7 +692,7 @@ VariableMetadata <- function(var_dt, var_set_dt) {
               assertion_type = assertion_type
             )
           }
-          if (vs[["hi_inlusive"]]) {
+          if (vs[["hi_inclusive"]]) {
             dbc::assert_is_lte(
               x = x,
               hi = vs[["hi"]],
@@ -762,9 +762,9 @@ VariableMetadata <- function(var_dt, var_set_dt) {
           }
           var_set_value_space_set(id = id, value_space = vs)
         }
-        var_set <- var_set_meta_get(id = id, meta_nm = "var_nm_set")
-        var_set[var_set == old] <- new
-        var_set_meta_set(id = id, meta_nm = "var_nm_set", value = var_set)
+        var_nm_set <- var_set_meta_get(id = id, meta_nm = "var_nm_set")
+        var_nm_set[var_nm_set == old] <- new
+        var_set_meta_set(id = id, meta_nm = "var_nm_set", value = var_nm_set)
         invisible(NULL)
       }
       # slot:var_remove
