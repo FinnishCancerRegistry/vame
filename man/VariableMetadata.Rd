@@ -42,14 +42,14 @@ VariableMetadata object.
 value_space_d <- function() 1:3 * 100L
 vd <- vame::VariableMetadata(
   var_dt = data.table::data.table(
-    var_nm = c("a", "b", "c", "d", "e"),
+    var_nm = c("a", "b", "c", "d", "e", "f"),
     type = c("categorical", "categorical",
-             "my_type_1",
-             "my_type_2", "my_type_2")
+             "categorical",
+             "my_type_1", "my_type_2", "my_type_3")
   ),
   var_set_dt = data.table::data.table(
-    id = c("ab", "c", "de"),
-    var_set = list(ab = c("a", "b"), c = "c", d = "d", e = "e"),
+    id = c("ab", "c", "d", "e", "f"),
+    var_nm_set = list(ab = c("a", "b"), c = "c", d = "d", e = "e" f = "f"),
     value_space = list(
       ab = list(dt = data.table::data.table(
         a = c(1L, 2L, 2L),
@@ -60,6 +60,10 @@ vd <- vame::VariableMetadata(
       e = list(bounds = list(
         lo = 0.0, hi = 10.0,
         lo_inclusive = TRUE, hi_inclusive = TRUE
+      )),
+      f = list(bounds = list(
+        lo = as.Date("1901-01-01"), hi = as.Date("2023-12-31"),
+        lo_inclusive = TRUE, hi_inclusive = TRUE
       ))
     )
   )
@@ -69,6 +73,7 @@ vd@var_assert(21L, var_nm = "b")
 vd@var_assert("a", var_nm = "c")
 vd@var_assert(100L, var_nm = "d")
 vd@var_assert(c(0.0, 10.0), var_nm = "e")
+vd@var_assert(as.Date("1901-01-01"), var_nm = "f")
 
 # renaming, removing variables
 vd <- vame::VariableMetadata(
