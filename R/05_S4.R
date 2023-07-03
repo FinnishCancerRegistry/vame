@@ -878,6 +878,10 @@ VariableMetadata <- function(var_dt, var_set_dt) {
     envir = funs
   )
   funs[["vd_vsd_intersect"]]()
+  if (nrow(funs[["vd_get"]]()) == 0) {
+    stop("vame::VariableMetadata call resulted in no variables being defined. ",
+         "do var_dt and var_set_dt use the same variable names?")
+  }
   arg_list <- list(
     Class = "VariableMetadata"
   )
