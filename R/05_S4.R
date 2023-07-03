@@ -44,7 +44,7 @@ NULL
 #'   ),
 #'   var_set_dt = data.table::data.table(
 #'     id = c("ab", "c", "d", "e", "f"),
-#'     var_nm_set = list(ab = c("a", "b"), c = "c", d = "d", e = "e" f = "f"),
+#'     var_nm_set = list(ab = c("a", "b"), c = "c", d = "d", e = "e", f = "f"),
 #'     value_space = list(
 #'       ab = list(dt = data.table::data.table(
 #'         a = c(1L, 2L, 2L),
