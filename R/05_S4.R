@@ -554,6 +554,43 @@ VariableMetadata <- function(var_dt, var_set_dt) {
         )
         vsd_set(vsd)
       }
+      # slot:var_set_value_space_eval
+      var_set_value_space_eval <- function(id, env = NULL) {
+        assert_is_var_set_id(id)
+        assert_var_set_value_space_is_defined()
+        dbc::assert_is_one_of(
+          env,
+          funs = list(dbc::report_is_NULL,
+                      dbc::report_is_environment)
+        )
+        if (is.null(env)) {
+          env <- parent.frame(1L)
+        }
+        vsd <- vsd_get()
+        pos <- var_set_id_to_pos(id)
+        value_space <- vsd[["value_space"]][[pos]]
+        var_nms <- vsd[["var_nm_set"]][[pos]]
+        if ("expr" %in% names(value_space)) {
+          eval_env <- new.env(parent = env)
+          eval_env[["var_nms"]] <- var_nms
+          value_space <- list(
+            tmp = eval(value_space[["expr"]], envir = eval_env)
+          )
+        } else if ("fun" %in% names(value_space)) {
+          value_space <- list(tmp = value_space[["fun"]](var_nms))
+        }
+        if ("tmp" %in% names(value_space)) {
+          tmp <- value_space[["tmp"]]
+          if (data.table::is.data.table(tmp)) {
+            names(value_space) <- "dt"
+          } else if (is.vector(tmp) && !is.list(tmp)) {
+            names(value_space) <- "set"
+          } else if (is.list(tmp) && "lo" %in% names(tmp)) {
+            names(value_space) <- "bounds"
+          }
+        }
+        return(value_space)
+      }
       var_set_value_set_dt_subset_expr <- function(id, expr) {
         assert_var_set_value_space_is_defined()
         dbc::assert_is_language_object(expr, assertion_type = "prod_input")
@@ -579,14 +616,29 @@ VariableMetadata <- function(var_dt, var_set_dt) {
       }
 
       # var funs ---------------------------------------------------------------
-      # slot:var_value_space_get
-      var_value_space_get <- function(var_nm) {
-        if (var_meta_get(var_nm = var_nm, meta_nm = "type") == "categorical") {
-          value_space <- list(dt = vame_category_space_dt(var_nms = var_nm))
-        } else {
-          pos <- var_meta_get(var_nm = var_nm, meta_nm = "var_set_dt_pos")
-          vsd <- vsd_get("value_space")
-          value_space <- vsd[["value_space"]][[pos]]
+      # slot:var_value_space_eval
+      var_value_space_eval <- function(var_nm, env = NULL) {
+        assert_is_var_nm(var_nm)
+        dbc::assert_is_one_of(
+          env,
+          funs = list(dbc::report_is_NULL,
+                      dbc::report_is_environment)
+        )
+        if (is.null(env)) {
+          env <- parent.frame(1L)
+        }
+        pos <- var_meta_get(var_nm = var_nm, meta_nm = "var_set_dt_pos")
+        vsd <- vsd_get(var_nms = "id")
+        value_space <- var_set_value_space_eval(
+          id = vsd[["id"]][pos], env = env
+        )
+        if ("dt" %in% names(value_space)) {
+          dt_subset <- !duplicated(value_space[["dt"]], by = var_nm)
+          value_space[["dt"]] <- value_space[["dt"]][
+            i = dt_subset,
+            j = .SD,
+            .SDcols = var_nm
+          ]
         }
         return(value_space)
       }
