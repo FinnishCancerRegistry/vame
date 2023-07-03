@@ -153,6 +153,24 @@ my_fun_2 <- function(dg_age) \{
 
 \section{News}{
 
+\subsection{News for version 0.1.1}{
+\subsection{Object vame::VariableMetadata@var_assert news:}{
+
+Fixed \code{var_assert} handling of a value space based on \code{bounds}.
+}
+
+\subsection{Object vame::VariableMetadata@var_set_value_space_eval news:}{
+
+New slot \code{vame::VariableMetadata@var_set_value_space_eval}.
+}
+
+\subsection{Object vame::VariableMetadata@var_value_space_eval news:}{
+
+New slot \code{vame::VariableMetadata@var_value_space_eval}.
+}
+
+}
+
 \subsection{News for version 0.1.0}{
 \subsection{Object vame::VariableMetadata news:}{
 

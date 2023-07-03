@@ -561,6 +561,10 @@ VariableMetadata <- function(var_dt, var_set_dt) {
       }
       # slot:var_set_value_space_eval
       var_set_value_space_eval <- function(id, env = NULL) {
+        # @codedoc_comment_block news("vame::VariableMetadata@var_set_value_space_eval", "2023-07-03", "0.1.1")
+        # New slot `vame::VariableMetadata@var_set_value_space_eval`.
+        # @codedoc_comment_block news("vame::VariableMetadata@var_set_value_space_eval", "2023-07-03", "0.1.1")
+
         assert_is_var_set_id(id)
         assert_var_set_value_space_is_defined()
         dbc::assert_is_one_of(
@@ -623,6 +627,10 @@ VariableMetadata <- function(var_dt, var_set_dt) {
       # var funs ---------------------------------------------------------------
       # slot:var_value_space_eval
       var_value_space_eval <- function(var_nm, env = NULL) {
+        # @codedoc_comment_block news("vame::VariableMetadata@var_value_space_eval", "2023-07-03", "0.1.1")
+        # New slot `vame::VariableMetadata@var_value_space_eval`.
+        # @codedoc_comment_block news("vame::VariableMetadata@var_value_space_eval", "2023-07-03", "0.1.1")
+
         assert_is_var_nm(var_nm)
         dbc::assert_is_one_of(
           env,
@@ -650,6 +658,9 @@ VariableMetadata <- function(var_dt, var_set_dt) {
 
       # slot:var_assert
       var_assert <- function(x, var_nm, assertion_type = NULL) {
+        # @codedoc_comment_block news("vame::VariableMetadata@var_assert", "2023-07-03", "0.1.1")
+        # Fixed `var_assert` handling of a value space based on `bounds`.
+        # @codedoc_comment_block news("vame::VariableMetadata@var_assert", "2023-07-03", "0.1.1")
         vs <- var_value_space_eval(var_nm)
         if ("dt" %in% names(vs)) {
           vs <- list(set = vs[["dt"]][[1L]])
