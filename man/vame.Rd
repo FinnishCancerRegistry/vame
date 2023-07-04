@@ -153,6 +153,24 @@ my_fun_2 <- function(dg_age) \{
 
 \section{News}{
 
+\subsection{News for version 0.1.2}{
+\subsection{Object vame::VariableMetadata@vame_category_space_dt news:}{
+
+Also \code{bounds} value space can be used when creating category spaces.
+}
+
+\subsection{Object vame::VariableMetadata@vame_category_space_dt_list news:}{
+
+Also \code{bounds} value space can be used when creating category spaces.
+}
+
+\subsection{Object vame::VariableMetadata@var_assert news:}{
+
+Added arguments \code{x_nm}, \code{call}.
+}
+
+}
+
 \subsection{News for version 0.1.1}{
 \subsection{Object vame::VariableMetadata@var_assert news:}{
 

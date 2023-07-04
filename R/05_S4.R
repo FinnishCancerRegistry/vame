@@ -680,6 +680,9 @@ VariableMetadata <- function(var_dt, var_set_dt) {
         # @codedoc_comment_block news("vame::VariableMetadata@var_assert", "2023-07-03", "0.1.1")
         # Fixed `var_assert` handling of a value space based on `bounds`.
         # @codedoc_comment_block news("vame::VariableMetadata@var_assert", "2023-07-03", "0.1.1")
+        # @codedoc_comment_block news("vame::VariableMetadata@var_assert", "2023-07-04", "0.1.2")
+        # Added arguments `x_nm`, `call`.
+        # @codedoc_comment_block news("vame::VariableMetadata@var_assert", "2023-07-04", "0.1.2")
         x_nm <- dbc::handle_arg_x_nm(x_nm)
         call <- dbc::handle_arg_call(call)
         assertion_type <- dbc::handle_arg_assertion_type(assertion_type)
