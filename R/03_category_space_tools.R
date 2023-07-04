@@ -33,10 +33,24 @@ value_space_to_subset_dt__ <- function(
     dbc::assert_prod_interim_has_length(var_nms, expected_length = 1L)
     dt <- data.table::data.table(x = value_space[["set"]])
     data.table::setnames(dt, "x", var_nms)
+    data.table::setkeyv(dt, var_nms)
+  } else if ("bounds" %in% names(value_space)) {
+    dbc::assert_prod_interim_has_length(var_nms, expected_length = 1L)
+    lo <- value_space[["bounds"]][["lo"]]
+    hi <- value_space[["bounds"]][["hi"]]
+    if (!value_space[["bounds"]][["lo_inclusive"]]) {
+      lo <- lo + 1L
+    }
+    if (!value_space[["bounds"]][["hi_inclusive"]]) {
+      hi <- hi - 1L
+    }
+    dt <- data.table::data.table(x = lo:hi)
+    data.table::setnames(dt, "x", var_nms)
+    data.table::setkeyv(dt, var_nms)
   } else {
-    stop("A value_space did not have a \"dt\", \"expr\", or \"set\" element. ",
-         "Could not evaluate category space for ",
-         "variable names ", deparse1(var_nms), ".")
+    stop("A value_space did not have a \"dt\", \"expr\", \"set\", or ",
+         "\"bounds\" element. Could not evaluate category space for ",
+         "variable name(s) ", deparse1(var_nms), ".")
   }
   data.table::setcolorder(dt, var_nms)
   dbc::assert_prod_output_is_data_table_with_required_names(

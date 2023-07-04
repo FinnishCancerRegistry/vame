@@ -114,21 +114,29 @@ NULL
 #' dt_02 <- data.table::CJ(d = 1:2, e = 2:1)
 #' vd <- vame::VariableMetadata(
 #'   var_dt = data.table::data.table(
-#'     var_nm = c("a", "b", "c", "d", "e"),
+#'     var_nm = c("a", "b", "c", "d", "e", "f"),
 #'     type = "categorical"
 #'   ),
 #'   var_set_dt = data.table::data.table(
-#'     id = c("set_01", "set_02"),
-#'     var_nm_set = list(c("a", "b", "c"), c("d", "e")),
+#'     id = c("abc", "de", "f"),
+#'     var_nm_set = list(
+#'       abc = c("a", "b", "c"),
+#'       de = c("d", "e"),
+#'       f = "f"
+#'      ),
 #'     value_space = list(
-#'       list(dt = dt_01),
-#'       list(expr = quote({
+#'       abc = list(dt = dt_01),
+#'       de = list(expr = quote({
 #'         dt_02[
 #'           i = !duplicated(dt_02, by = var_nms),
 #'           j = .SD,
 #'           .SDcols = var_nms
 #'         ]
-#'       }))
+#'       })),
+#'       f = list(bounds = list(
+#'         lo = 0L, hi = 10L,
+#'         lo_inclusive = TRUE, hi_inclusive = TRUE
+#'       ))
 #'     )
 #'   )
 #' )
@@ -146,6 +154,11 @@ NULL
 #'   all.equal(
 #'     vd@vame_category_space_dt(c("d", "e")),
 #'     dt_02,
+#'     check.attributes = FALSE
+#'   ),
+#'   all.equal(
+#'     vd@vame_category_space_dt(c("a", "f")),
+#'     data.table::CJ(a = 1:3, f = 0:10),
 #'     check.attributes = FALSE
 #'   )
 #' )
