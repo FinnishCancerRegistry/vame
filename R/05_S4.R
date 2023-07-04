@@ -657,68 +657,101 @@ VariableMetadata <- function(var_dt, var_set_dt) {
       }
 
       # slot:var_assert
-      var_assert <- function(x, var_nm, assertion_type = NULL) {
+      var_assert <- function(
+        x,
+        var_nm,
+        x_nm = NULL,
+        call = NULL,
+        assertion_type = NULL
+      ) {
         # @codedoc_comment_block news("vame::VariableMetadata@var_assert", "2023-07-03", "0.1.1")
         # Fixed `var_assert` handling of a value space based on `bounds`.
         # @codedoc_comment_block news("vame::VariableMetadata@var_assert", "2023-07-03", "0.1.1")
+        x_nm <- dbc::handle_arg_x_nm(x_nm)
+        call <- dbc::handle_arg_call(call)
+        assertion_type <- dbc::handle_arg_assertion_type(assertion_type)
+
         vs <- var_value_space_eval(var_nm)
         if ("dt" %in% names(vs)) {
-          vs <- list(set = vs[["dt"]][[1L]])
+          vs <- list(set = vs[["dt"]][[var_nm]])
         }
         dbc::assert_prod_interim_is_list(
-          vs
+          vs,
+          call = call
         )
         dbc::assert_prod_interim_has_length(
           vs,
-          expected_length = 1L
+          expected_length = 1L,
+          call = call
         )
         dbc::assert_prod_interim_atom_is_in_set(
           names(vs),
-          set = c("set", "bounds")
+          set = c("set", "bounds"),
+          call = call
         )
         if (names(vs) == "set") {
           dbc::assert_vector_elems_are_in_set(
             x = x,
-            set = vs[["set"]],
-            assertion_type = assertion_type
+            x_nm = x_nm,
+            assertion_type = assertion_type,
+            call = call,
+            set = vs[["set"]]
+          )
+          dbc::assert_is_identical(
+            x = class(x),
+            x_nm = paste0("class(", x_nm, ")"),
+            y = class(vs[["set"]]),
+            y_nm = paste0("class(expected_set)"),
+            call = call
           )
         } else {
           vs <- vs[["bounds"]]
           dbc::assert_prod_interim_is_list(
-            vs
+            vs,
+            call = call
           )
           dbc::assert_prod_interim_has_length(
             vs,
-            expected_length = 4L
+            expected_length = 4L,
+            call = call
           )
           dbc::assert_prod_interim_has_names(
             vs,
-            required_names = c("lo", "hi", "lo_inclusive", "hi_inclusive")
+            required_names = c("lo", "hi", "lo_inclusive", "hi_inclusive"),
+            call = call
           )
           if (vs[["lo_inclusive"]]) {
             dbc::assert_is_gte(
               x = x,
               lo = vs[["lo"]],
-              assertion_type = assertion_type
+              x_nm = x_nm,
+              assertion_type = assertion_type,
+              call = call
             )
           } else {
             dbc::assert_is_gt(
               x = x,
               lo = vs[["lo"]],
-              assertion_type = assertion_type
+              x_nm = x_nm,
+              assertion_type = assertion_type,
+              call = call
             )
           }
           if (vs[["hi_inclusive"]]) {
             dbc::assert_is_lte(
               x = x,
               hi = vs[["hi"]],
-              assertion_type = assertion_type
+              x_nm = x_nm,
+              assertion_type = assertion_type,
+              call = call
             )
           } else {
             dbc::assert_is_lt(
               x = x,
               hi = vs[["hi"]],
-              assertion_type = assertion_type
+              x_nm = x_nm,
+              assertion_type = assertion_type,
+              call = call
             )
           }
         }
