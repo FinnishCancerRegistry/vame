@@ -2,6 +2,11 @@
 
 ## News for version 0.1.2
 
+### Object vame::VariableMetadata@assert_is_var_set_id news:
+
+`var_set_dt$id` no longer needs to be of class character. For clarity
+us character, for marginal speed improvement use integer.
+
 ### Object vame::VariableMetadata@vame_category_space_dt news:
 
 Also `bounds` value space can be used when creating category spaces.

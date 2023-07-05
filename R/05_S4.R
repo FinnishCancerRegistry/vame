@@ -325,6 +325,10 @@ VariableMetadata <- function(var_dt, var_set_dt) {
         id,
         assertion_type = NULL
       ) {
+        # @codedoc_comment_block news("vame::VariableMetadata@assert_is_var_set_id", "2023-07-05", "0.1.2")
+        # `var_set_dt$id` no longer needs to be of class character. For clarity
+        # us character, for marginal speed improvement use integer.
+        # @codedoc_comment_block news("vame::VariableMetadata@assert_is_var_set_id", "2023-07-05", "0.1.2")
         dbc::assert_is_atom(
           id,
           assertion_type = assertion_type
