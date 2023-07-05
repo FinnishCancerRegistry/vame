@@ -295,7 +295,7 @@ VariableMetadata <- function(var_dt, var_set_dt) {
       # assertions -------------------------------------------------------------
       assert_is_var_nm <- function(
         var_nm,
-        assertion_type = dbc::assertion_type_default()
+        assertion_type = NULL
       ) {
         dbc::assert_is_character_nonNA_atom(
           var_nm,
@@ -309,48 +309,48 @@ VariableMetadata <- function(var_dt, var_set_dt) {
       }
       assert_is_var_meta_nm <- function(
         meta_nm,
-        assertion_type = dbc::assertion_type_default()
+        assertion_type = NULL
       ) {
         dbc::assert_is_character_nonNA_atom(
           meta_nm,
-          assertion_type = dbc::assertion_type_default()
+          assertion_type = assertion_type
         )
         dbc::assert_atom_is_in_set(
           meta_nm,
           set = names(vd_get()),
-          assertion_type = dbc::assertion_type_default()
+          assertion_type = assertion_type
         )
       }
       assert_is_var_set_id <- function(
         id,
-        assertion_type = dbc::assertion_type_default()
+        assertion_type = NULL
       ) {
         dbc::assert_is_atom(
           id,
-          assertion_type = dbc::assertion_type_default()
+          assertion_type = assertion_type
         )
         dbc::assert_is_nonNA(
           id,
-          assertion_type = dbc::assertion_type_default()
+          assertion_type = assertion_type
         )
         dbc::assert_atom_is_in_set(
           id,
           set = vsd_get()[["id"]],
-          assertion_type = dbc::assertion_type_default()
+          assertion_type = assertion_type
         )
       }
       assert_is_var_set_meta_nm <- function(
         meta_nm,
-        assertion_type = dbc::assertion_type_default()
+        assertion_type = NULL
       ) {
         dbc::assert_is_character_nonNA_atom(
           meta_nm,
-          assertion_type = dbc::assertion_type_default()
+          assertion_type = assertion_type
         )
         dbc::assert_atom_is_in_set(
           meta_nm,
           set = names(vsd_get()),
-          assertion_type = dbc::assertion_type_default()
+          assertion_type = assertion_type
         )
       }
       assert_var_set_value_space_is_defined <- function() {
@@ -358,16 +358,24 @@ VariableMetadata <- function(var_dt, var_set_dt) {
           stop("No value spaces have been defined")
         }
       }
-      assert_is_var_label_dt <- function(value) {
+      assert_is_var_label_dt <- function(
+        value,
+        assertion_type = NULL
+      ) {
         dbc::assert_is_one_of(
           value,
           funs = list(
             dbc::report_is_data_table,
             dbc::report_is_NULL
-          )
+          ),
+          assertion_type = assertion_type
         )
         if (data.table::is.data.table(value)) {
-          dbc::assert_has_names(value, required_names = "level")
+          dbc::assert_has_names(
+            value,
+            required_names = "level",
+            assertion_type = assertion_type
+          )
         }
       }
 
