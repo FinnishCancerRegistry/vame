@@ -325,7 +325,11 @@ VariableMetadata <- function(var_dt, var_set_dt) {
         id,
         assertion_type = dbc::assertion_type_default()
       ) {
-        dbc::assert_is_character_nonNA_atom(
+        dbc::assert_is_atom(
+          id,
+          assertion_type = dbc::assertion_type_default()
+        )
+        dbc::assert_is_nonNA(
           id,
           assertion_type = dbc::assertion_type_default()
         )
