@@ -272,6 +272,18 @@ VariableMetadata <- function(var_dt, var_set_dt) {
   # @codedoc_comment_block news("vame::VariableMetadata", "2023-06-30", "0.1.0")
   # First release.
   # @codedoc_comment_block news("vame::VariableMetadata", "2023-06-30", "0.1.0")
+  dbc::assert_is_data_table_with_required_names(
+    var_dt,
+    required_names = c("var_nm")
+  )
+  dbc::assert_is_character_nonNA_vector(var_dt[["var_nm"]])
+  dbc::assert_is_data_table_with_required_names(
+    var_set_dt,
+    required_names = c("id", "value_space")
+  )
+  dbc::assert_is_vector(var_dt[["id"]])
+  dbc::assert_is_nonNA(var_dt[["id"]])
+  dbc::assert_is_list(var_dt[["value_space"]])
   pkg_env <- environment(VariableMetadata)
   funs <- new.env(parent = pkg_env)
   funs$data <- new.env(parent = emptyenv())
