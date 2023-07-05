@@ -493,10 +493,16 @@ VariableMetadata <- function(var_dt, var_set_dt) {
         vd_vsd_linkage_refresh()
       }
 
-      # var_nm_set funs -----------------------------------------------------------
+      # var_nm_set funs --------------------------------------------------------
       var_set_id_to_pos <- function(id) {
-        vsd <- vsd_get()
-        data.table::chmatch(id, vsd[["id"]])
+        dt <- data.table::setDT(list(id = var_set_meta_get_all("id")))
+        jdt <- data.table::setDT(list(id = id))
+        out <- dt[
+          i = jdt,
+          on = "id",
+          which = TRUE
+        ]
+        return(out)
       }
       var_set_pos_to_id <- function(pos) {
         vsd_get()[["id"]][pos]
