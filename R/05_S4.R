@@ -164,7 +164,8 @@ NULL
 #' )
 #'
 #' # getting category space data.tables --- here a variable appears in
-#' # two different value spaces
+#' # two different value spaces. this can be handy for defining joint value
+#' # spaces and also conversions.
 #' dt_01 <- data.table::CJ(a = 1:3, b = 3:1, c = 1:3)
 #' dt_02 <- data.table::CJ(a = 0:1, e = 2:1)
 #' vd <- vame::VariableMetadata(
@@ -204,6 +205,11 @@ NULL
 #' data.table::setkeyv(exp, names(exp))
 #' stopifnot(
 #'   all.equal(obs, exp, check.attributes = FALSE)
+#' )
+#'
+#' stopifnot(
+#'   vd@var_is_aggregateable_to("a", "e"),
+#'   identical(vd@var_aggregate(0:1, "a", "e"), 2:1)
 #' )
 #'
 #' # getting labels for variable levels
@@ -672,6 +678,40 @@ VariableMetadata <- function(var_dt, var_set_dt) {
       }
 
       # var funs ---------------------------------------------------------------
+      # slot:var_is_aggregateable_to
+      var_is_aggregateable_to <- function(from_var_nm, to_var_nm) {
+        assert_is_var_nm(from_var_nm)
+        assert_is_var_nm(to_var_nm)
+        if (from_var_nm == to_var_nm) {
+          return(TRUE)
+        }
+        dt <- vame_category_space_dt(c(from_var_nm, to_var_nm))
+        sum(duplicated(dt[[from_var_nm]])) == 0L
+      }
+      # slot:var_aggregate
+      var_aggregate <- function(x, from_var_nm, to_var_nm) {
+        assert_is_var_nm(from_var_nm)
+        assert_is_var_nm(to_var_nm)
+        dbc::assert_is_vector(x)
+        dt <- vame_category_space_dt(c(from_var_nm, to_var_nm))
+        is_aggregateable <- sum(duplicated(dt[[from_var_nm]])) == 0L
+        if (!is_aggregateable) {
+          stop("cannot aggregate ", from_var_nm, " to ", to_var_nm, "; ",
+               "aggregation only possible when there is exactly one ",
+               "level of the target variable for each level of the starting ",
+               "variable. if e.g. ", from_var_nm, " = 1 can be either ",
+               to_var_nm, " = 1 or 2, cannot aggregate.")
+        }
+        jdt <- data.table::setDT(list(x = x))
+        data.table::setnames(jdt, "x", from_var_nm)
+        dt[
+          i = jdt,
+          on = from_var_nm,
+          j = .SD[[1L]],
+          .SDcols = to_var_nm
+        ]
+      }
+
       # slot:var_value_space_eval
       var_value_space_eval <- function(var_nm, env = NULL) {
         # @codedoc_comment_block news("vame::VariableMetadata@var_value_space_eval", "2023-07-03", "0.1.1")

@@ -169,7 +169,8 @@ stopifnot(
 )
 
 # getting category space data.tables --- here a variable appears in
-# two different value spaces
+# two different value spaces. this can be handy for defining joint value
+# spaces and also conversions.
 dt_01 <- data.table::CJ(a = 1:3, b = 3:1, c = 1:3)
 dt_02 <- data.table::CJ(a = 0:1, e = 2:1)
 vd <- vame::VariableMetadata(
@@ -209,6 +210,11 @@ data.table::setkeyv(obs, names(obs))
 data.table::setkeyv(exp, names(exp))
 stopifnot(
   all.equal(obs, exp, check.attributes = FALSE)
+)
+
+stopifnot(
+  vd@var_is_aggregateable_to("a", "e"),
+  identical(vd@var_aggregate(0:1, "a", "e"), 2:1)
 )
 
 # getting labels for variable levels
