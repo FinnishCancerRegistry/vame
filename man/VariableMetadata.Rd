@@ -175,32 +175,22 @@ stopifnot(
 
 # getting category space data.tables --- here a variable appears in
 # two different value spaces. this can be handy for defining joint value
-# spaces and also conversions.
+# spaces and also conversions & aggregations.
 dt_01 <- data.table::CJ(a = 1:3, b = 3:1, c = 1:3)
 dt_02 <- data.table::CJ(a = 0:1, e = 2:1)
+dt_03 <- data.table::data.table(a = 0:3, a_2 = c(1L,1L, 2L,2L))
 vd <- vame::VariableMetadata(
   var_dt = data.table::data.table(
-    var_nm = c("a", "b", "c", "e"),
-    type = "categorical",
-    label_dt = list(
-      a = data.table::data.table(
-        level = 0:3,
-        en = paste0("a_level_", 0:3)
-      ),
-      b = NULL,
-      c = NULL,
-      e = data.table::data.table(
-        level = 1:2,
-        en = paste0("e_level_", 1:2)
-      )
-    )
+    var_nm = c("a", "b", "c", "e", "a_2"),
+    type = "categorical"
   ),
   var_set_dt = data.table::data.table(
-    id = c("set_01", "set_02"),
-    var_nm_set = list(c("a", "b", "c"), c("a", "e")),
+    id = c("set_01", "set_02", "set_03"),
+    var_nm_set = list(c("a", "b", "c"), c("a", "e"), c("a", "a_2")),
     value_space = list(
       list(dt = dt_01),
-      list(dt = dt_02)
+      list(dt = dt_02),
+      list(dt = dt_03)
     )
   )
 )
@@ -218,8 +208,8 @@ stopifnot(
 )
 
 stopifnot(
-  vd@var_is_aggregateable_to("a", "e"),
-  identical(vd@var_aggregate(0:1, "a", "e"), 2:1)
+  vd@var_is_aggregateable_to("a", "a_2"),
+  identical(vd@var_aggregate(0:1, "a", "a_2"), c(1L,1L))
 )
 
 # getting labels for variable levels
