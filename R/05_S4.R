@@ -69,6 +69,11 @@ NULL
 #' vd@var_assert(100L, var_nm = "d")
 #' vd@var_assert(c(0.0, 10.0), var_nm = "e")
 #' vd@var_assert(as.Date("1901-01-01"), var_nm = "f")
+#' my_fun <- function(e_values) {
+#'   vd@var_assert(e_values, var_nm = "e")
+#'   e_values + 1
+#' }
+#' my_fun(0.0)
 #'
 #' # renaming, removing variables
 #' vd <- vame::VariableMetadata(
@@ -680,6 +685,9 @@ VariableMetadata <- function(var_dt, var_set_dt) {
       # var funs ---------------------------------------------------------------
       # slot:var_is_aggregateable_to
       var_is_aggregateable_to <- function(from_var_nm, to_var_nm) {
+        # @codedoc_comment_block news("vame::VariableMetadata@var_is_aggregateable_to", "2023-07-10", "0.1.3")
+        # New slot `var_is_aggregateable_to`.
+        # @codedoc_comment_block news("vame::VariableMetadata@var_is_aggregateable_to", "2023-07-10", "0.1.3")
         assert_is_var_nm(from_var_nm)
         assert_is_var_nm(to_var_nm)
         if (from_var_nm == to_var_nm) {
@@ -690,6 +698,9 @@ VariableMetadata <- function(var_dt, var_set_dt) {
       }
       # slot:var_aggregate
       var_aggregate <- function(x, from_var_nm, to_var_nm) {
+        # @codedoc_comment_block news("vame::VariableMetadata@var_aggregate", "2023-07-10", "0.1.3")
+        # New slot `var_aggregate`.
+        # @codedoc_comment_block news("vame::VariableMetadata@var_aggregate", "2023-07-10", "0.1.3")
         assert_is_var_nm(from_var_nm)
         assert_is_var_nm(to_var_nm)
         dbc::assert_is_vector(x)
@@ -762,6 +773,10 @@ VariableMetadata <- function(var_dt, var_set_dt) {
         call <- dbc::handle_arg_call(call)
         assertion_type <- dbc::handle_arg_assertion_type(assertion_type)
 
+        # @codedoc_comment_block news("vame::VariableMetadata@var_assert", "2023-07-11", "0.1.3")
+        # `vame::VariableMetadata@var_assert` gains arg `env`. This is passed
+        # to `vame::VariableMetadata@var_value_space_eval`.
+        # @codedoc_comment_block news("vame::VariableMetadata@var_assert", "2023-07-11", "0.1.3")
         dbc::assert_is_one_of(
           env,
           funs = list(dbc::report_is_NULL,

@@ -153,6 +153,25 @@ my_fun_2 <- function(dg_age) \{
 
 \section{News}{
 
+\subsection{News for version 0.1.3}{
+\subsection{Object vame::VariableMetadata@var_aggregate news:}{
+
+New slot \code{var_aggregate}.
+}
+
+\subsection{Object vame::VariableMetadata@var_assert news:}{
+
+\code{vame::VariableMetadata@var_assert} gains arg \code{env}. This is passed
+to \code{vame::VariableMetadata@var_value_space_eval}.
+}
+
+\subsection{Object vame::VariableMetadata@var_is_aggregateable_to news:}{
+
+New slot \code{var_is_aggregateable_to}.
+}
+
+}
+
 \subsection{News for version 0.1.2}{
 \subsection{Object vame::VariableMetadata@assert_is_var_set_id news:}{
 

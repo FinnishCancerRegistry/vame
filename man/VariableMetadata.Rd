@@ -74,6 +74,11 @@ vd@var_assert("a", var_nm = "c")
 vd@var_assert(100L, var_nm = "d")
 vd@var_assert(c(0.0, 10.0), var_nm = "e")
 vd@var_assert(as.Date("1901-01-01"), var_nm = "f")
+my_fun <- function(e_values) {
+  vd@var_assert(e_values, var_nm = "e")
+  e_values + 1
+}
+my_fun(0.0)
 
 # renaming, removing variables
 vd <- vame::VariableMetadata(
