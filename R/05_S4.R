@@ -749,7 +749,8 @@ VariableMetadata <- function(var_dt, var_set_dt) {
         var_nm,
         x_nm = NULL,
         call = NULL,
-        assertion_type = NULL
+        assertion_type = NULL,
+        env = NULL
       ) {
         # @codedoc_comment_block news("vame::VariableMetadata@var_assert", "2023-07-03", "0.1.1")
         # Fixed `var_assert` handling of a value space based on `bounds`.
@@ -761,7 +762,16 @@ VariableMetadata <- function(var_dt, var_set_dt) {
         call <- dbc::handle_arg_call(call)
         assertion_type <- dbc::handle_arg_assertion_type(assertion_type)
 
-        vs <- var_value_space_eval(var_nm)
+        dbc::assert_is_one_of(
+          env,
+          funs = list(dbc::report_is_NULL,
+                      dbc::report_is_environment)
+        )
+        if (is.null(env)) {
+          env <- parent.frame(1L)
+        }
+
+        vs <- var_value_space_eval(var_nm, env = env)
         if ("dt" %in% names(vs)) {
           vs <- list(set = vs[["dt"]][[var_nm]])
         }
