@@ -68,14 +68,14 @@ vm <- vame::VariableMetadata(
     )
   )
 )
-vd@var_assert(1L, var_nm = "a")
-vd@var_assert(21L, var_nm = "b")
-vd@var_assert("a", var_nm = "c")
-vd@var_assert(100L, var_nm = "d")
-vd@var_assert(c(0.0, 10.0), var_nm = "e")
-vd@var_assert(as.Date("1901-01-01"), var_nm = "f")
+vm@var_assert(1L, var_nm = "a")
+vm@var_assert(21L, var_nm = "b")
+vm@var_assert("a", var_nm = "c")
+vm@var_assert(100L, var_nm = "d")
+vm@var_assert(c(0.0, 10.0), var_nm = "e")
+vm@var_assert(as.Date("1901-01-01"), var_nm = "f")
 my_fun <- function(e_values) {
-  vd@var_assert(e_values, var_nm = "e")
+  vm@var_assert(e_values, var_nm = "e")
   e_values + 1
 }
 my_fun(0.0)
@@ -96,27 +96,27 @@ vm <- vame::VariableMetadata(
   )
 )
 
-vd@var_rename("a", "A")
+vm@var_rename("a", "A")
 stopifnot(
-  identical(vd@var_meta_get("A", "flavour"), "tasty"),
-  identical(names(vd@var_set_value_space_get("set_01")[["dt"]]), c("A", "b")),
-  identical(vd@var_set_meta_get("set_01", "var_nm_set"), c("A", "b"))
+  identical(vm@var_meta_get("A", "flavour"), "tasty"),
+  identical(names(vm@var_set_value_space_get("set_01")[["dt"]]), c("A", "b")),
+  identical(vm@var_set_meta_get("set_01", "var_nm_set"), c("A", "b"))
 )
 
-vd@var_set_rename("set_01", "Ab")
+vm@var_set_rename("set_01", "Ab")
 stopifnot(
-  identical(vd@var_set_meta_get_all("id"), "Ab")
+  identical(vm@var_set_meta_get_all("id"), "Ab")
 )
 
-vd@var_remove("b")
+vm@var_remove("b")
 stopifnot(
-  identical(names(vd@var_set_value_space_get("Ab")[["dt"]]), "A"),
-  identical(vd@var_set_meta_get("Ab", "var_nm_set"), "A")
+  identical(names(vm@var_set_value_space_get("Ab")[["dt"]]), "A"),
+  identical(vm@var_set_meta_get("Ab", "var_nm_set"), "A")
 )
 
-vd@var_set_remove("Ab")
+vm@var_set_remove("Ab")
 stopifnot(
-  identical(length(vd@var_set_meta_get_all("var_nm_set")), 0L)
+  identical(length(vm@var_set_meta_get_all("var_nm_set")), 0L)
 )
 
 # retrieving category space data.tables
@@ -153,7 +153,7 @@ vm <- vame::VariableMetadata(
 
 stopifnot(
   all.equal(
-    vd@vame_category_space_dt(c("a", "b")),
+    vm@vame_category_space_dt(c("a", "b")),
     dt_01[
       i = !duplicated(dt_01, by = c("a", "b")),
       j = .SD,
@@ -162,12 +162,12 @@ stopifnot(
     check.attributes = FALSE
   ),
   all.equal(
-    vd@vame_category_space_dt(c("d", "e")),
+    vm@vame_category_space_dt(c("d", "e")),
     dt_02,
     check.attributes = FALSE
   ),
   all.equal(
-    vd@vame_category_space_dt(c("a", "f")),
+    vm@vame_category_space_dt(c("a", "f")),
     data.table::CJ(a = 1:3, f = 0:10),
     check.attributes = FALSE
   )
@@ -195,7 +195,7 @@ vm <- vame::VariableMetadata(
   )
 )
 
-obs <- vd@vame_category_space_dt(c("a", "b", "e"))
+obs <- vm@vame_category_space_dt(c("a", "b", "e"))
 exp <- data.table::data.table(
   a = c(0L, 0L, 1L, 1L, 1L, 1L, 1L, 1L, 2L, 2L, 2L, 3L, 3L, 3L),
   b = c(NA, NA, 1L, 1L, 2L, 2L, 3L, 3L, 1L, 2L, 3L, 1L, 2L, 3L),
@@ -208,8 +208,8 @@ stopifnot(
 )
 
 stopifnot(
-  vd@var_is_aggregateable_to("a", "a_2"),
-  identical(vd@var_aggregate(0:1, "a", "a_2"), c(1L,1L))
+  vm@var_is_aggregateable_to("a", "a_2"),
+  identical(vm@var_aggregate(0:1, "a", "a_2"), c(1L,1L))
 )
 
 # getting labels for variable levels
@@ -239,14 +239,14 @@ vm <- vame::VariableMetadata(
   )
 )
 
-obs <- vd@var_labels_get(x = 1:4, var_nm = "a", label_col_nm = "en")
+obs <- vm@var_labels_get(x = 1:4, var_nm = "a", label_col_nm = "en")
 exp <- c(paste0("a_level_", 1:3), NA)
 stopifnot(
   identical(obs, exp)
 )
 
 obs <- tryCatch(
-  vd@var_labels_get(
+  vm@var_labels_get(
     x = 1:4,
     var_nm = "a",
     label_col_nm = "this does not exist"
@@ -262,7 +262,7 @@ stopifnot(
 )
 
 obs <- tryCatch(
-  vd@var_labels_get(
+  vm@var_labels_get(
     x = 1:4,
     var_nm = "c",
     label_col_nm = "en"
