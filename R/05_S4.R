@@ -35,7 +35,7 @@ NULL
 #'
 #' # basic example of different kinds of variables
 #' value_space_d <- function() 1:3 * 100L
-#' vd <- vame::VariableMetadata(
+#' vm <- vame::VariableMetadata(
 #'   var_dt = data.table::data.table(
 #'     var_nm = c("a", "b", "c", "d", "e", "f"),
 #'     type = c("categorical", "categorical",
@@ -76,7 +76,7 @@ NULL
 #' my_fun(0.0)
 #'
 #' # renaming, removing variables
-#' vd <- vame::VariableMetadata(
+#' vm <- vame::VariableMetadata(
 #'   var_dt = data.table::data.table(
 #'     var_nm = c("a", "b", "c"),
 #'     flavour = c("tasty", "rancid", "bitter")
@@ -117,7 +117,7 @@ NULL
 #' # retrieving category space data.tables
 #' dt_01 <- data.table::CJ(a = 1:3, b = 3:1, c = 1:3)
 #' dt_02 <- data.table::CJ(d = 1:2, e = 2:1)
-#' vd <- vame::VariableMetadata(
+#' vm <- vame::VariableMetadata(
 #'   var_dt = data.table::data.table(
 #'     var_nm = c("a", "b", "c", "d", "e", "f"),
 #'     type = "categorical"
@@ -174,7 +174,7 @@ NULL
 #' dt_01 <- data.table::CJ(a = 1:3, b = 3:1, c = 1:3)
 #' dt_02 <- data.table::CJ(a = 0:1, e = 2:1)
 #' dt_03 <- data.table::data.table(a = 0:3, a_2 = c(1L,1L, 2L,2L))
-#' vd <- vame::VariableMetadata(
+#' vm <- vame::VariableMetadata(
 #'   var_dt = data.table::data.table(
 #'     var_nm = c("a", "b", "c", "e", "a_2"),
 #'     type = "categorical"
@@ -209,7 +209,7 @@ NULL
 #'
 #' # getting labels for variable levels
 #' dt_01 <- data.table::CJ(a = 1:3, b = 3:1, c = 4:5)
-#' vd <- vame::VariableMetadata(
+#' vm <- vame::VariableMetadata(
 #'   var_dt = data.table::data.table(
 #'     var_nm = c("a", "b", "c"),
 #'     type = "categorical",
