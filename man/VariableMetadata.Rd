@@ -278,7 +278,11 @@ stopifnot(
 vm_1 <- vame::VariableMetadata(
   var_dt = data.table::data.table(
     var_nm = c("a", "b"),
-    type = "categorical"
+    type = "categorical",
+    label_dt = list(
+      a = data.table::data.table(level = 1:2, label = c("a_1", "a_2")),
+      b = NULL
+    )
   ),
   var_set_dt = data.table::data.table(
     id = "ab",
@@ -286,8 +290,8 @@ vm_1 <- vame::VariableMetadata(
     value_space = list(ab = list(dt = data.table::CJ(a = 1:2, b = 3:4)))
   )
 )
-# note that vm_2 var_dt does not have column "type". it still works, and
-# "type" will be NA for c("c", "d").
+# note that vm_2 var_dt does not have columns "type", "label_dt" --- those
+# will be NA / NULL for "c" and "d".
 vm_2 <- vame::VariableMetadata(
   var_dt = data.table::data.table(var_nm = c("c", "d")),
   var_set_dt = data.table::data.table(

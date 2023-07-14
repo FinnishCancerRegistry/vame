@@ -273,7 +273,11 @@ NULL
 #' vm_1 <- vame::VariableMetadata(
 #'   var_dt = data.table::data.table(
 #'     var_nm = c("a", "b"),
-#'     type = "categorical"
+#'     type = "categorical",
+#'     label_dt = list(
+#'       a = data.table::data.table(level = 1:2, label = c("a_1", "a_2")),
+#'       b = NULL
+#'     )
 #'   ),
 #'   var_set_dt = data.table::data.table(
 #'     id = "ab",
@@ -281,8 +285,8 @@ NULL
 #'     value_space = list(ab = list(dt = data.table::CJ(a = 1:2, b = 3:4)))
 #'   )
 #' )
-#' # note that vm_2 var_dt does not have column "type". it still works, and
-#' # "type" will be NA for c("c", "d").
+#' # note that vm_2 var_dt does not have columns "type", "label_dt" --- those
+#' # will be NA / NULL for "c" and "d".
 #' vm_2 <- vame::VariableMetadata(
 #'   var_dt = data.table::data.table(var_nm = c("c", "d")),
 #'   var_set_dt = data.table::data.table(
@@ -1015,13 +1019,17 @@ VariableMetadata <- function(var_dt, var_set_dt) {
         # Robustify `vame_union_append` --- use `use.names = TRUE, fill = TRUE`
         # in `rbind` calls.
         # @codedoc_comment_block news("vame::VariableMetadata@vame_union_append", "2023-07-14", "0.1.5")
+        # @codedoc_comment_block news("vame::VariableMetadata@vame_union_append", "2023-07-14", "0.1.6")
+        # fix `vame_union_append` --- no longer attempt to remove duplicates
+        # in rbind'd `var_dt` because some `by` columns may be of type `list`
+        # which is not supported by `duplicated`.
+        # @codedoc_comment_block news("vame::VariableMetadata@vame_union_append", "2023-07-14", "0.1.6")
         e <- environment(x@vame_union_append)
         vd_1 <- vd_get()
         vsd_1 <- vsd_get()
         vd_2 <- e[["vd_get"]]()
         vsd_2 <- e[["vsd_get"]]()
         vd <- rbind(vd_1, vd_2, use.names = TRUE, fill = TRUE)
-        vd <- vd[!duplicated(vd, by = names(vd)), ]
         vsd <- rbind(vsd_1, vsd_2, use.names = TRUE, fill = TRUE)
         vsd <- vsd[!duplicated(vsd[["var_nm_set"]]), ]
         vd_set(vd)

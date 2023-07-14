@@ -153,6 +153,16 @@ my_fun_2 <- function(dg_age) \{
 
 \section{News}{
 
+\subsection{News for version 0.1.6}{
+\subsection{Object vame::VariableMetadata@vame_union_append news:}{
+
+fix \code{vame_union_append} --- no longer attempt to remove duplicates
+in rbind'd \code{var_dt} because some \code{by} columns may be of type \code{list}
+which is not supported by \code{duplicated}.
+}
+
+}
+
 \subsection{News for version 0.1.5}{
 \subsection{Object vame::VariableMetadata@vame_union_append news:}{
 
