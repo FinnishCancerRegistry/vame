@@ -273,4 +273,26 @@ exp <- "Variable \"c\" has no label_dt defined"
 stopifnot(
   grepl(exp, obs)
 )
+
+# adding data to a pre-existing VariableMetadata object
+vm_1 <- vame::VariableMetadata(
+  var_dt = data.table::data.table(var_nm = c("a", "b")),
+  var_set_dt = data.table::data.table(
+    id = "ab",
+    var_nm_set = list(ab = c("a", "b")),
+    value_space = list(ab = list(dt = data.table::CJ(a = 1:2, b = 3:4)))
+  )
+)
+vm_2 <- vame::VariableMetadata(
+  var_dt = data.table::data.table(var_nm = c("c", "d")),
+  var_set_dt = data.table::data.table(
+    id = "cd",
+    var_nm_set = list(cd = c("c", "d")),
+    value_space = list(cd = list(dt = data.table::CJ(c = 5:6, d = 7:8)))
+  )
+)
+vm_1@vame_union_append(vm_2)
+stopifnot(
+  c("ab", "cd") \%in\% vm_1@var_set_meta_get_all("id")
+)
 }

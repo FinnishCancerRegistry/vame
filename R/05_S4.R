@@ -268,6 +268,28 @@ NULL
 #' stopifnot(
 #'   grepl(exp, obs)
 #' )
+#' 
+#' # adding data to a pre-existing VariableMetadata object
+#' vm_1 <- vame::VariableMetadata(
+#'   var_dt = data.table::data.table(var_nm = c("a", "b")),
+#'   var_set_dt = data.table::data.table(
+#'     id = "ab",
+#'     var_nm_set = list(ab = c("a", "b")),
+#'     value_space = list(ab = list(dt = data.table::CJ(a = 1:2, b = 3:4)))
+#'   )
+#' )
+#' vm_2 <- vame::VariableMetadata(
+#'   var_dt = data.table::data.table(var_nm = c("c", "d")),
+#'   var_set_dt = data.table::data.table(
+#'     id = "cd",
+#'     var_nm_set = list(cd = c("c", "d")),
+#'     value_space = list(cd = list(dt = data.table::CJ(c = 5:6, d = 7:8)))
+#'   )
+#' )
+#' vm_1@vame_union_append(vm_2)
+#' stopifnot(
+#'   c("ab", "cd") %in% vm_1@var_set_meta_get_all("id")
+#' )
 #' @export
 VariableMetadata <- function(var_dt, var_set_dt) {
   # @codedoc_comment_block news("vame::VariableMetadata", "2023-06-30", "0.1.0")
@@ -980,7 +1002,11 @@ VariableMetadata <- function(var_dt, var_set_dt) {
       }
       # slot:vame_union_append
       vame_union_append <- function(x) {
-        e <- environment(x@remove)
+        # @codedoc_comment_block news("vame::VariableMetadata@vame_union_append", "2023-07-14", "0.1.4")
+        # Fixed `vame_union_append` --- used to always raise an error due to
+        # a misnamed object.
+        # @codedoc_comment_block news("vame::VariableMetadata@vame_union_append", "2023-07-14", "0.1.4")
+        e <- environment(x@vame_union_append)
         vd_1 <- vd_get()
         vsd_1 <- vsd_get()
         vd_2 <- e[["vd_get"]]()
