@@ -153,6 +153,15 @@ my_fun_2 <- function(dg_age) \{
 
 \section{News}{
 
+\subsection{News for version 0.1.5}{
+\subsection{Object vame::VariableMetadata@vame_union_append news:}{
+
+Robustify \code{vame_union_append} --- use \verb{use.names = TRUE, fill = TRUE}
+in \code{rbind} calls.
+}
+
+}
+
 \subsection{News for version 0.1.4}{
 \subsection{Object vame::VariableMetadata@vame_union_append news:}{
 
