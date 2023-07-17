@@ -27,6 +27,7 @@ value_space_to_subset_dt__ <- function(
     ]
   } else if ("expr" %in% names(value_space)) {
     expr_eval_env <- new.env(parent = env)
+    expr_eval_env[["var_nms"]] <- var_nms
     out <- tryCatch(
       eval(value_space[["expr"]], envir = expr_eval_env),
       error = function(e) e
