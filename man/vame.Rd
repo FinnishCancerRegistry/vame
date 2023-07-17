@@ -153,6 +153,15 @@ my_fun_2 <- function(dg_age) \{
 
 \section{News}{
 
+\subsection{News for version 0.1.7}{
+\subsection{Object vm@var_set_value_space_eval news:}{
+
+New exported fun \code{vame::var_set_value_space_eval} --- alternative for
+\code{vm@var_set_value_space_eval}.
+}
+
+}
+
 \subsection{News for version 0.1.6}{
 \subsection{Object vm@vame_union_append news:}{
 
