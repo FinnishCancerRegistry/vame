@@ -675,6 +675,11 @@ VariableMetadata <- function(var_dt, var_set_dt) {
             names(value_space) <- "set"
           } else if (is.list(tmp) && "lo" %in% names(tmp)) {
             names(value_space) <- "bounds"
+          } else {
+            stop("value space for var_set with id = ", deparse1(id),
+                 " was either expr or fun, but did not evaluate into ",
+                 "dt, set, nor bounds. output had class(es) ",
+                 deparse1(class(tmp)), ".")
           }
         }
         return(value_space)

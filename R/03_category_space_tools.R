@@ -27,8 +27,30 @@ value_space_to_subset_dt__ <- function(
     ]
   } else if ("expr" %in% names(value_space)) {
     expr_eval_env <- new.env(parent = env)
-    expr_eval_env[["var_nms"]] <- var_nms
-    dt <- eval(value_space[["expr"]], envir = expr_eval_env)
+    out <- tryCatch(
+      eval(value_space[["expr"]], envir = expr_eval_env),
+      error = function(e) e
+    )
+    if (inherits(out, "error")) {
+      stop(
+        "When evaluating expression\n\n",
+        deparse1(value_space[["expr"]]),
+        "\n\n",
+        "Encountered error:\n",
+        out[["message"]]
+      )
+    }
+    if (is.vector(out) && !is.list(out)) {
+      dt <- data.table::data.table(x = out)
+      data.table::setnames(dt, "x", var_nms)
+    } else if (inherits(out, "data.table")) {
+      dt <- out
+    } else {
+      stop("Internal error: no handling defined for result of class ",
+           deparse1(class(out)), " of expression ",
+           deparse1(value_space[["expr"]]), ". ",
+           "Complain to the package maintainer please.")
+    }
   } else if ("set" %in% names(value_space)) {
     dbc::assert_prod_interim_has_length(var_nms, expected_length = 1L)
     dt <- data.table::data.table(x = value_space[["set"]])
