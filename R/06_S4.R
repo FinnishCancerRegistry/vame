@@ -7,15 +7,11 @@ methods::setClass(
 )
 
 #' @title Variable Metadata
+#' @docType class
 #' @description
-#' Create a VariableMetadata object.
-#' @name VariableMetadata
-NULL
-
-#' @rdname VariableMetadata
-#' @section Functions:
-#' - `vame::VariableMetadata`: Use this function to create a new
-#'   VariableMetadata object.
+#' The `VariableMetadata` object.
+#' @name VariableMetadata-class
+#' @aliases VariableMetadata
 #' @param var_dt `[data.table]`
 #'
 #' Contains information for individual variables. Must contain at a minimum
@@ -640,49 +636,7 @@ VariableMetadata <- function(var_dt, var_set_dt) {
       }
       # slot:var_set_value_space_eval
       var_set_value_space_eval <- function(id, env = NULL) {
-        # @codedoc_comment_block news("vame::VariableMetadata@var_set_value_space_eval", "2023-07-03", "0.1.1")
-        # New slot `vame::VariableMetadata@var_set_value_space_eval`.
-        # @codedoc_comment_block news("vame::VariableMetadata@var_set_value_space_eval", "2023-07-03", "0.1.1")
-
-        assert_is_var_set_id(id)
-        assert_var_set_value_space_is_defined()
-        dbc::assert_is_one_of(
-          env,
-          funs = list(dbc::report_is_NULL,
-                      dbc::report_is_environment)
-        )
-        if (is.null(env)) {
-          env <- parent.frame(1L)
-        }
-        vsd <- vsd_get()
-        pos <- var_set_id_to_pos(id)
-        value_space <- vsd[["value_space"]][[pos]]
-        var_nms <- vsd[["var_nm_set"]][[pos]]
-        if ("expr" %in% names(value_space)) {
-          eval_env <- new.env(parent = env)
-          eval_env[["var_nms"]] <- var_nms
-          value_space <- list(
-            tmp = eval(value_space[["expr"]], envir = eval_env)
-          )
-        } else if ("fun" %in% names(value_space)) {
-          value_space <- list(tmp = value_space[["fun"]](var_nms))
-        }
-        if ("tmp" %in% names(value_space)) {
-          tmp <- value_space[["tmp"]]
-          if (data.table::is.data.table(tmp)) {
-            names(value_space) <- "dt"
-          } else if (is.vector(tmp) && !is.list(tmp)) {
-            names(value_space) <- "set"
-          } else if (is.list(tmp) && "lo" %in% names(tmp)) {
-            names(value_space) <- "bounds"
-          } else {
-            stop("value space for var_set with id = ", deparse1(id),
-                 " was either expr or fun, but did not evaluate into ",
-                 "dt, set, nor bounds. output had class(es) ",
-                 deparse1(class(tmp)), ".")
-          }
-        }
-        return(value_space)
+        call_slot_fun__("var_set_value_space_eval")
       }
       var_set_value_set_dt_subset_expr <- function(id, expr) {
         assert_var_set_value_space_is_defined()
