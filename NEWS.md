@@ -2,7 +2,7 @@
 
 ## News for version 0.1.6
 
-### Object vame::VariableMetadata@vame_union_append news:
+### Object vm@vame_union_append news:
 
 fix `vame_union_append` --- no longer attempt to remove duplicates
 in rbind'd `var_dt` because some `by` columns may be of type `list`
@@ -11,7 +11,7 @@ which is not supported by `duplicated`.
 
 ## News for version 0.1.5
 
-### Object vame::VariableMetadata@vame_union_append news:
+### Object vm@vame_union_append news:
 
 Robustify `vame_union_append` --- use `use.names = TRUE, fill = TRUE`
 in `rbind` calls.
@@ -19,7 +19,7 @@ in `rbind` calls.
 
 ## News for version 0.1.4
 
-### Object vame::VariableMetadata@vame_union_append news:
+### Object vm@vame_union_append news:
 
 Fixed `vame_union_append` --- used to always raise an error due to
 a misnamed object.
@@ -27,53 +27,53 @@ a misnamed object.
 
 ## News for version 0.1.3
 
-### Object vame::VariableMetadata@var_aggregate news:
+### Object vm@var_aggregate news:
 
 New slot `var_aggregate`.
 
-### Object vame::VariableMetadata@var_assert news:
+### Object vm@var_assert news:
 
-`vame::VariableMetadata@var_assert` gains arg `env`. This is passed
-to `vame::VariableMetadata@var_value_space_eval`.
+`vm@var_assert` gains arg `env`. This is passed
+to `vm@var_value_space_eval`.
 
-### Object vame::VariableMetadata@var_is_aggregateable_to news:
+### Object vm@var_is_aggregateable_to news:
 
 New slot `var_is_aggregateable_to`.
 
 
 ## News for version 0.1.2
 
-### Object vame::VariableMetadata@assert_is_var_set_id news:
+### Object vm@assert_is_var_set_id news:
 
 `var_set_dt$id` no longer needs to be of class character. For clarity
 us character, for marginal speed improvement use integer.
 
-### Object vame::VariableMetadata@vame_category_space_dt news:
+### Object vm@vame_category_space_dt news:
 
 Also `bounds` value space can be used when creating category spaces.
 
-### Object vame::VariableMetadata@vame_category_space_dt_list news:
+### Object vm@vame_category_space_dt_list news:
 
 Also `bounds` value space can be used when creating category spaces.
 
-### Object vame::VariableMetadata@var_assert news:
+### Object vm@var_assert news:
 
 Added arguments `x_nm`, `call`.
 
 
 ## News for version 0.1.1
 
-### Object vame::VariableMetadata@var_assert news:
+### Object vm@var_assert news:
 
 Fixed `var_assert` handling of a value space based on `bounds`.
 
-### Object vame::VariableMetadata@var_set_value_space_eval news:
+### Object vm@var_set_value_space_eval news:
 
-New slot `vame::VariableMetadata@var_set_value_space_eval`.
+New slot `vm@var_set_value_space_eval`.
 
-### Object vame::VariableMetadata@var_value_space_eval news:
+### Object vm@var_value_space_eval news:
 
-New slot `vame::VariableMetadata@var_value_space_eval`.
+New slot `vm@var_value_space_eval`.
 
 
 ## News for version 0.1.0

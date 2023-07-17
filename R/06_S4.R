@@ -353,10 +353,10 @@ VariableMetadata <- function(var_dt, var_set_dt) {
         id,
         assertion_type = NULL
       ) {
-        # @codedoc_comment_block news("vame::VariableMetadata@assert_is_var_set_id", "2023-07-05", "0.1.2")
+        # @codedoc_comment_block news("vm@assert_is_var_set_id", "2023-07-05", "0.1.2")
         # `var_set_dt$id` no longer needs to be of class character. For clarity
         # us character, for marginal speed improvement use integer.
-        # @codedoc_comment_block news("vame::VariableMetadata@assert_is_var_set_id", "2023-07-05", "0.1.2")
+        # @codedoc_comment_block news("vm@assert_is_var_set_id", "2023-07-05", "0.1.2")
         dbc::assert_is_atom(
           id,
           assertion_type = assertion_type
@@ -665,9 +665,9 @@ VariableMetadata <- function(var_dt, var_set_dt) {
       # var funs ---------------------------------------------------------------
       # slot:var_is_aggregateable_to
       var_is_aggregateable_to <- function(from_var_nm, to_var_nm) {
-        # @codedoc_comment_block news("vame::VariableMetadata@var_is_aggregateable_to", "2023-07-10", "0.1.3")
+        # @codedoc_comment_block news("vm@var_is_aggregateable_to", "2023-07-10", "0.1.3")
         # New slot `var_is_aggregateable_to`.
-        # @codedoc_comment_block news("vame::VariableMetadata@var_is_aggregateable_to", "2023-07-10", "0.1.3")
+        # @codedoc_comment_block news("vm@var_is_aggregateable_to", "2023-07-10", "0.1.3")
         assert_is_var_nm(from_var_nm)
         assert_is_var_nm(to_var_nm)
         if (from_var_nm == to_var_nm) {
@@ -678,9 +678,9 @@ VariableMetadata <- function(var_dt, var_set_dt) {
       }
       # slot:var_aggregate
       var_aggregate <- function(x, from_var_nm, to_var_nm) {
-        # @codedoc_comment_block news("vame::VariableMetadata@var_aggregate", "2023-07-10", "0.1.3")
+        # @codedoc_comment_block news("vm@var_aggregate", "2023-07-10", "0.1.3")
         # New slot `var_aggregate`.
-        # @codedoc_comment_block news("vame::VariableMetadata@var_aggregate", "2023-07-10", "0.1.3")
+        # @codedoc_comment_block news("vm@var_aggregate", "2023-07-10", "0.1.3")
         assert_is_var_nm(from_var_nm)
         assert_is_var_nm(to_var_nm)
         dbc::assert_is_vector(x)
@@ -705,9 +705,9 @@ VariableMetadata <- function(var_dt, var_set_dt) {
 
       # slot:var_value_space_eval
       var_value_space_eval <- function(var_nm, env = NULL) {
-        # @codedoc_comment_block news("vame::VariableMetadata@var_value_space_eval", "2023-07-03", "0.1.1")
-        # New slot `vame::VariableMetadata@var_value_space_eval`.
-        # @codedoc_comment_block news("vame::VariableMetadata@var_value_space_eval", "2023-07-03", "0.1.1")
+        # @codedoc_comment_block news("vm@var_value_space_eval", "2023-07-03", "0.1.1")
+        # New slot `vm@var_value_space_eval`.
+        # @codedoc_comment_block news("vm@var_value_space_eval", "2023-07-03", "0.1.1")
 
         assert_is_var_nm(var_nm)
         dbc::assert_is_one_of(
@@ -743,20 +743,20 @@ VariableMetadata <- function(var_dt, var_set_dt) {
         assertion_type = NULL,
         env = NULL
       ) {
-        # @codedoc_comment_block news("vame::VariableMetadata@var_assert", "2023-07-03", "0.1.1")
+        # @codedoc_comment_block news("vm@var_assert", "2023-07-03", "0.1.1")
         # Fixed `var_assert` handling of a value space based on `bounds`.
-        # @codedoc_comment_block news("vame::VariableMetadata@var_assert", "2023-07-03", "0.1.1")
-        # @codedoc_comment_block news("vame::VariableMetadata@var_assert", "2023-07-04", "0.1.2")
+        # @codedoc_comment_block news("vm@var_assert", "2023-07-03", "0.1.1")
+        # @codedoc_comment_block news("vm@var_assert", "2023-07-04", "0.1.2")
         # Added arguments `x_nm`, `call`.
-        # @codedoc_comment_block news("vame::VariableMetadata@var_assert", "2023-07-04", "0.1.2")
+        # @codedoc_comment_block news("vm@var_assert", "2023-07-04", "0.1.2")
         x_nm <- dbc::handle_arg_x_nm(x_nm)
         call <- dbc::handle_arg_call(call)
         assertion_type <- dbc::handle_arg_assertion_type(assertion_type)
 
-        # @codedoc_comment_block news("vame::VariableMetadata@var_assert", "2023-07-11", "0.1.3")
-        # `vame::VariableMetadata@var_assert` gains arg `env`. This is passed
-        # to `vame::VariableMetadata@var_value_space_eval`.
-        # @codedoc_comment_block news("vame::VariableMetadata@var_assert", "2023-07-11", "0.1.3")
+        # @codedoc_comment_block news("vm@var_assert", "2023-07-11", "0.1.3")
+        # `vm@var_assert` gains arg `env`. This is passed
+        # to `vm@var_value_space_eval`.
+        # @codedoc_comment_block news("vm@var_assert", "2023-07-11", "0.1.3")
         dbc::assert_is_one_of(
           env,
           funs = list(dbc::report_is_NULL,
@@ -970,19 +970,19 @@ VariableMetadata <- function(var_dt, var_set_dt) {
       }
       # slot:vame_union_append
       vame_union_append <- function(x) {
-        # @codedoc_comment_block news("vame::VariableMetadata@vame_union_append", "2023-07-14", "0.1.4")
+        # @codedoc_comment_block news("vm@vame_union_append", "2023-07-14", "0.1.4")
         # Fixed `vame_union_append` --- used to always raise an error due to
         # a misnamed object.
-        # @codedoc_comment_block news("vame::VariableMetadata@vame_union_append", "2023-07-14", "0.1.4")
-        # @codedoc_comment_block news("vame::VariableMetadata@vame_union_append", "2023-07-14", "0.1.5")
+        # @codedoc_comment_block news("vm@vame_union_append", "2023-07-14", "0.1.4")
+        # @codedoc_comment_block news("vm@vame_union_append", "2023-07-14", "0.1.5")
         # Robustify `vame_union_append` --- use `use.names = TRUE, fill = TRUE`
         # in `rbind` calls.
-        # @codedoc_comment_block news("vame::VariableMetadata@vame_union_append", "2023-07-14", "0.1.5")
-        # @codedoc_comment_block news("vame::VariableMetadata@vame_union_append", "2023-07-14", "0.1.6")
+        # @codedoc_comment_block news("vm@vame_union_append", "2023-07-14", "0.1.5")
+        # @codedoc_comment_block news("vm@vame_union_append", "2023-07-14", "0.1.6")
         # fix `vame_union_append` --- no longer attempt to remove duplicates
         # in rbind'd `var_dt` because some `by` columns may be of type `list`
         # which is not supported by `duplicated`.
-        # @codedoc_comment_block news("vame::VariableMetadata@vame_union_append", "2023-07-14", "0.1.6")
+        # @codedoc_comment_block news("vm@vame_union_append", "2023-07-14", "0.1.6")
         e <- environment(x@vame_union_append)
         vd_1 <- vd_get()
         vsd_1 <- vsd_get()

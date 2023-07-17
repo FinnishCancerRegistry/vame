@@ -61,9 +61,9 @@ doc_slot_fun__ <- function(fun_nm, description) {
 #'   "Retrieve and evaluate value space for a `var_set` given its `id`."
 #' )
 var_set_value_space_eval <- function(vm, id, env = NULL) {
-  # @codedoc_comment_block news("vame::VariableMetadata@var_set_value_space_eval", "2023-07-03", "0.1.1")
-  # New slot `vame::VariableMetadata@var_set_value_space_eval`.
-  # @codedoc_comment_block news("vame::VariableMetadata@var_set_value_space_eval", "2023-07-03", "0.1.1")
+  # @codedoc_comment_block news("vm@var_set_value_space_eval", "2023-07-03", "0.1.1")
+  # New slot `vm@var_set_value_space_eval`.
+  # @codedoc_comment_block news("vm@var_set_value_space_eval", "2023-07-03", "0.1.1")
 
   #' @param vm `[VariableMetadata]` (no default)
   #'

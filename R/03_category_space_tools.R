@@ -57,11 +57,11 @@ value_space_to_subset_dt__ <- function(
     data.table::setnames(dt, "x", var_nms)
     data.table::setkeyv(dt, var_nms)
   } else if ("bounds" %in% names(value_space)) {
-    # @codedoc_comment_block news("vame::VariableMetadata@vame_category_space_dt_list", "2023-07-04", "0.1.2")
-    # @codedoc_comment_block news("vame::VariableMetadata@vame_category_space_dt", "2023-07-04", "0.1.2")
+    # @codedoc_comment_block news("vm@vame_category_space_dt_list", "2023-07-04", "0.1.2")
+    # @codedoc_comment_block news("vm@vame_category_space_dt", "2023-07-04", "0.1.2")
     # Also `bounds` value space can be used when creating category spaces.
-    # @codedoc_comment_block news("vame::VariableMetadata@vame_category_space_dt", "2023-07-04", "0.1.2")
-    # @codedoc_comment_block news("vame::VariableMetadata@vame_category_space_dt_list", "2023-07-04", "0.1.2")
+    # @codedoc_comment_block news("vm@vame_category_space_dt", "2023-07-04", "0.1.2")
+    # @codedoc_comment_block news("vm@vame_category_space_dt_list", "2023-07-04", "0.1.2")
 
     dbc::assert_prod_interim_has_length(var_nms, expected_length = 1L)
     lo <- value_space[["bounds"]][["lo"]]
