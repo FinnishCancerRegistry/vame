@@ -7,8 +7,9 @@ call_hidden_vame_fun__ <- function(vm, fun_nm, arg_list = NULL)  {
   do.call(fun, call_arg_list, quote = TRUE)
 }
 
-call_slot_fun__ <- function(fun_nm, arg_list = NULL) {
+call_slot_fun__ <- function(fun_nm, self, arg_list = NULL) {
   dbc::assert_prod_input_is_character_nonNA_atom(fun_nm)
+  dbc::assert_prod_input_inherits(self, required_class = "VariableMetadata")
   dbc::assert_prod_input_is_one_of(
     arg_list,
     funs = list(dbc::report_is_NULL,
@@ -29,12 +30,7 @@ call_slot_fun__ <- function(fun_nm, arg_list = NULL) {
     def_arg_nms <- intersect(names(arg_list), ls(arg_env))
     arg_list[def_arg_nms] <- as.list(arg_env)[def_arg_nms]
   }
-
-  vm_env <- parent.frame(2L)
-  vm_nm <- deparse1(utils::tail(sys.calls(), 2L)[[1L]][[1]][[2L]])
-  vm <- get(vm_nm, envir = vm_env)
-  vm
-  arg_list[["vm"]] <- vm
+  arg_list[["vm"]] <- self
 
   do.call(fun, arg_list, quote = TRUE, envir = parent.frame(1L))
 }

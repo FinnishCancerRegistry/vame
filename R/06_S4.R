@@ -320,6 +320,29 @@ VariableMetadata <- function(var_dt, var_set_dt) {
   data <- NULL # appease R CMD CHECK
   local(
     expr = {
+      # self -------------------------------------------------------------------
+      self <- function() {
+        call_stack <- sys.calls()
+        call_stack_strings <- vapply(call_stack, deparse1, character(1L))
+        regex <- paste0(
+          "(@", vame_slot_nms_get__(), "[^a-z_]?)", collapse = "|"
+        )
+
+        is_slot_fun_call <- grepl(regex, call_stack_strings)
+        last_slot_fun_call_idx <- utils::tail(which(is_slot_fun_call), 1L)
+        if (!any(is_slot_fun_call)) {
+          stop("Internal error: could not determine name of VariableMetadata ",
+               "object. Please complain to the package maintainer.")
+        }
+
+        slot_fun_call <- call_stack[[last_slot_fun_call_idx]]
+        vm_nm <- slot_fun_call[[1]][[2]]
+        slot_fun_call_env <- parent.frame(
+          length(call_stack) - last_slot_fun_call_idx - 1L
+        )
+        get(vm_nm, envir = slot_fun_call_env)
+      }
+
       # assertions -------------------------------------------------------------
       assert_is_var_nm <- function(
         var_nm,
@@ -636,7 +659,7 @@ VariableMetadata <- function(var_dt, var_set_dt) {
       }
       # slot:var_set_value_space_eval
       var_set_value_space_eval <- function(id, env = NULL) {
-        call_slot_fun__("var_set_value_space_eval")
+        call_slot_fun__("var_set_value_space_eval", self())
       }
       var_set_value_set_dt_subset_expr <- function(id, expr) {
         assert_var_set_value_space_is_defined()
