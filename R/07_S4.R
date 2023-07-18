@@ -33,14 +33,16 @@ methods::setClass(
 #' value_space_d <- function() 1:3 * 100L
 #' vm <- vame::VariableMetadata(
 #'   var_dt = data.table::data.table(
-#'     var_nm = c("a", "b", "c", "d", "e", "f"),
+#'     var_nm = c("a", "b", "c", "d", "e", "f", "g", "h"),
 #'     type = c("categorical", "categorical",
 #'              "categorical",
-#'              "my_type_1", "my_type_2", "my_type_3")
+#'              "my_type_1", "my_type_2", "my_type_3", "my_type_4", "my_type_5")
 #'   ),
 #'   var_set_dt = data.table::data.table(
-#'     id = c("ab", "c", "d", "e", "f"),
-#'     var_nm_set = list(ab = c("a", "b"), c = "c", d = "d", e = "e", f = "f"),
+#'     id = c("ab", "c", "d", "e", "f", "g", "h"),
+#'     var_nm_set = list(
+#'       ab = c("a", "b"),
+#'       c = "c", d = "d", e = "e", f = "f", g = "g", h = "h"),
 #'     value_space = list(
 #'       ab = list(dt = data.table::data.table(
 #'         a = c(1L, 2L, 2L),
@@ -55,7 +57,9 @@ methods::setClass(
 #'       f = list(bounds = list(
 #'         lo = as.Date("1901-01-01"), hi = as.Date("2023-12-31"),
 #'         lo_inclusive = TRUE, hi_inclusive = TRUE
-#'       ))
+#'       )),
+#'       g = list(unrestricted = list(class_set = c("IDate", "Date"))),
+#'       h = list(regex = "^[a-z]$")
 #'     )
 #'   )
 #' )
@@ -65,6 +69,8 @@ methods::setClass(
 #' vm@var_assert(100L, var_nm = "d")
 #' vm@var_assert(c(0.0, 10.0), var_nm = "e")
 #' vm@var_assert(as.Date("1901-01-01"), var_nm = "f")
+#' vm@var_assert(data.table::as.IDate("1901-01-01"), var_nm = "g")
+#' vm@var_assert(letters, var_nm = "h")
 #' my_fun <- function(e_values) {
 #'   vm@var_assert(e_values, var_nm = "e")
 #'   e_values + 1
@@ -361,9 +367,9 @@ VariableMetadata <- function(var_dt, var_set_dt) {
           return(invisible(NULL))
         }
         dbc::assert_has_length(
-          x = names(x),
+          x = x,
           expected_length = 1L,
-          x_nm = paste0("names(", x_nm, ")"),
+          x_nm = x_nm,
           call = call,
           assertion_type = assertion_type
         )
@@ -381,13 +387,6 @@ VariableMetadata <- function(var_dt, var_set_dt) {
             call = call
           ),
           raise_error_call = call,
-          assertion_type = assertion_type
-        )
-        dbc::assert_is_one_of(
-          x = x,
-          funs = value_space_type_report_funs__(),
-          x_nm = x_nm,
-          call = call,
           assertion_type = assertion_type
         )
       }
@@ -706,7 +705,7 @@ VariableMetadata <- function(var_dt, var_set_dt) {
       }
       # slot:var_set_value_space_eval
       var_set_value_space_eval <- function(id, env = NULL) {
-        call_slot_fun__("var_set_value_space_eval", self())
+        call_slot_fun_alias__("var_set_value_space_eval", self())
       }
       var_set_value_set_dt_subset_expr <- function(id, expr) {
         assert_var_set_value_space_is_defined()
@@ -791,7 +790,8 @@ VariableMetadata <- function(var_dt, var_set_dt) {
         pos <- var_meta_get(var_nm = var_nm, meta_nm = "var_set_dt_pos")
         vsd <- vsd_get(var_nms = "id")
         value_space <- var_set_value_space_eval(
-          id = vsd[["id"]][pos], env = env
+          id = vsd[["id"]][pos],
+          env = env
         )
         if ("dt" %in% names(value_space)) {
           dt_subset <- !duplicated(value_space[["dt"]], by = var_nm)
@@ -848,15 +848,15 @@ VariableMetadata <- function(var_dt, var_set_dt) {
         )
         assertion_fun_list <- value_space_value_assertion_funs__()
         if (!names(vs) %in% names(assertion_fun_list)) {
-          str(vs)
+          str(vs, 1)
           stop("Internal error: no handling defined for value_space printed ",
                 "above --- complain to the vame package maintainer.")
         }
         assertion_fun_list[[names(vs)]](
           x = x,
-          x_nm = NULL,
-          call = NULL,
-          assertion_type = NULL,
+          x_nm = x_nm,
+          call = call,
+          assertion_type = assertion_type,
           var_nm = var_nm,
           value_space = vs
         )

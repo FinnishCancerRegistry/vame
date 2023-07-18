@@ -1,34 +1,51 @@
 value_space_type_report_funs__ <- function() {
   list(
-    dt = function(x, x_nm, call) {
+    dt = function(x, x_nm = NULL, call = NULL) {
+      x_nm <- dbc::handle_arg_x_nm(x_nm)
+      call <- dbc::handle_arg_call(call)
       dbc::report_is_data_table(
-        x,
-        x_nm = x_nm, call = call
+        x[["dt"]],
+        x_nm = paste0(x_nm, "[[\"dt\"]]"),
+        call = call
       )
     },
-    set = function(x, x_nm, call) {
+    set = function(x, x_nm = NULL, call = NULL) {
+      x_nm <- dbc::handle_arg_x_nm(x_nm)
+      call <- dbc::handle_arg_call(call)
       dbc::report_is_vector(
-        x,
-        x_nm = x_nm, call = call
+        x[["set"]],
+        x_nm = paste0(x_nm, "[[\"set\"]]"),
+        call = call
       )
     },
-    expr = function(x, x_nm, call) {
+    expr = function(x, x_nm = NULL, call = NULL) {
+      x_nm <- dbc::handle_arg_x_nm(x_nm)
+      call <- dbc::handle_arg_call(call)
       dbc::report_is_language_object(
-        x,
-        x_nm = x_nm, call = call
+        x[["expr"]],
+        x_nm = paste0(x_nm, "[[\"expr\"]]"),
+        call = call
       )
     },
-    fun = function(x, x_nm, call) {
+    fun = function(x, x_nm = NULL, call = NULL) {
+      x_nm <- dbc::handle_arg_x_nm(x_nm)
+      call <- dbc::handle_arg_call(call)
       dbc::report_is_function(
-        x,
-        x_nm = x_nm, call = call
+        x[["fun"]],
+        x_nm = paste0(x_nm, "[[\"fun\"]]"),
+        call = call
       )
     },
-    unrestricted = function(x, x_nm, call) {
+    unrestricted = function(x, x_nm = NULL, call = NULL) {
+      x_nm <- dbc::handle_arg_x_nm(x_nm)
+      x_nm <- paste0(x_nm, "[[\"unrestricted\"]]")
+      x <- x[["unrestricted"]]
+      call <- dbc::handle_arg_call(call)
       rbind(
         dbc::report_is_list(
-          x,
-          x_nm = x_nm, call = call
+          x = x,
+          x_nm = x_nm,
+          call = call
         ),
         dbc::report_has_length(
           x,
@@ -47,13 +64,21 @@ value_space_type_report_funs__ <- function() {
         )
       )
     },
-    regex = function(x, x_nm, call) {
+    regex = function(x, x_nm = NULL, call = NULL) {
+      x_nm <- dbc::handle_arg_x_nm(x_nm)
+      x_nm <- paste0(x_nm, "[[\"regex\"]]")
+      x <- x[["regex"]]
+      call <- dbc::handle_arg_call(call)
       dbc::report_is_character_nonNA_atom(
         x,
         x_nm = x_nm, call = call
       )
     },
-    bounds = function(x, x_nm, call) {
+    bounds = function(x, x_nm = NULL, call = NULL) {
+      x_nm <- dbc::handle_arg_x_nm(x_nm)
+      x_nm <- paste0(x_nm, "[[\"bounds\"]]")
+      x <- x[["bounds"]]
+      call <- dbc::handle_arg_call(call)
       rbind(
         dbc::report_is_list(
           x,
@@ -84,8 +109,27 @@ value_space_type_report_funs__ <- function() {
   )
 }
 
+value_space_type_assertion_funs__ <- function() {
+  report_funs <- value_space_type_report_funs__()
+  assertion_funs <- lapply(report_funs, function(rf) {
+    af <- function(x, x_nm = NULL, call = NULL, assertion_type = NULL) {
+      x_nm <- dbc::handle_arg_x_nm(x_nm)
+      call <- dbc::handle_arg_call(call)
+      assertion_type <- dbc::handle_arg_assertion_type(assertion_type)
+      df <- rf(x = x, x_nm = x_nm, call = call)
+      dbc::report_to_assertion(
+        df,
+        assertion_type = assertion_type,
+        raise_error_call = call
+      )
+    }
+    return(af)
+  })
+  return(assertion_funs)
+}
+
 value_space_type_names__ <- function() {
-  names(value_space_type_report_funs__)
+  names(value_space_type_report_funs__())
 }
 
 value_space_value_assertion_funs__ <- function() {
@@ -101,6 +145,10 @@ value_space_value_assertion_funs__ <- function() {
       x_nm <- dbc::handle_arg_x_nm(x_nm)
       call <- dbc::handle_arg_call(call)
       assertion_type <- dbc::handle_arg_assertion_type(assertion_type)
+      value_space_type_assertion_funs__()[["dt"]](
+        x = value_space,
+        assertion_type = "prod_input"
+      )
       dbc::assert_has_names(
         x = value_space[["dt"]],
         call = call,
@@ -122,6 +170,10 @@ value_space_value_assertion_funs__ <- function() {
       x_nm <- dbc::handle_arg_x_nm(x_nm)
       call <- dbc::handle_arg_call(call)
       assertion_type <- dbc::handle_arg_assertion_type(assertion_type)
+      value_space_type_assertion_funs__()[["set"]](
+        x = value_space,
+        assertion_type = "prod_input"
+      )
       dbc::assert_is_identical(
         x = class(x),
         x_nm = paste0("class(", x_nm, ")"),
@@ -149,6 +201,10 @@ value_space_value_assertion_funs__ <- function() {
       x_nm <- dbc::handle_arg_x_nm(x_nm)
       call <- dbc::handle_arg_call(call)
       assertion_type <- dbc::handle_arg_assertion_type(assertion_type)
+      value_space_type_assertion_funs__()[["unrestricted"]](
+        x = value_space,
+        assertion_type = "prod_input"
+      )
       dbc::assert_is_identical(
         x = class(x),
         x_nm = paste0("class(", x_nm, ")"),
@@ -169,6 +225,10 @@ value_space_value_assertion_funs__ <- function() {
       x_nm <- dbc::handle_arg_x_nm(x_nm)
       call <- dbc::handle_arg_call(call)
       assertion_type <- dbc::handle_arg_assertion_type(assertion_type)
+      value_space_type_assertion_funs__()[["regex"]](
+        x = value_space,
+        assertion_type = "prod_input"
+      )
       dbc::assert_match_regex(
         x = x,
         x_nm = x_nm,
@@ -185,30 +245,15 @@ value_space_value_assertion_funs__ <- function() {
       value_space,
       var_nm
     ) {
-      dbc::assert_prod_interim_is_list(
-        value_space,
-        x_nm = x_nm,
-        call = call,
-        assertion_type = assertion_type
+      value_space_type_assertion_funs__()[["bounds"]](
+        x = value_space,
+        assertion_type = "prod_input"
       )
-      dbc::assert_prod_interim_has_length(
-        value_space,
-        expected_length = 4L,
-        x_nm = x_nm,
-        call = call,
-        assertion_type = assertion_type
-      )
-      dbc::assert_prod_interim_has_names(
-        value_space,
-        required_names = c("lo", "hi", "lo_inclusive", "hi_inclusive"),
-        x_nm = x_nm,
-        call = call,
-        assertion_type = assertion_type
-      )
-      if (value_space[["lo_inclusive"]]) {
+      b <- value_space[["bounds"]]
+      if (b[["lo_inclusive"]]) {
         dbc::assert_is_gte(
           x = x,
-          lo = value_space[["lo"]],
+          lo = b[["lo"]],
           x_nm = x_nm,
           call = call,
           assertion_type = assertion_type
@@ -216,16 +261,16 @@ value_space_value_assertion_funs__ <- function() {
       } else {
         dbc::assert_is_gt(
           x = x,
-          lo = value_space[["lo"]],
+          lo = b[["lo"]],
           x_nm = x_nm,
           call = call,
           assertion_type = assertion_type
         )
       }
-      if (value_space[["hi_inclusive"]]) {
+      if (b[["hi_inclusive"]]) {
         dbc::assert_is_lte(
           x = x,
-          hi = value_space[["hi"]],
+          hi = b[["hi"]],
           x_nm = x_nm,
           call = call,
           assertion_type = assertion_type
@@ -233,7 +278,7 @@ value_space_value_assertion_funs__ <- function() {
       } else {
         dbc::assert_is_lt(
           x = x,
-          hi = value_space[["hi"]],
+          hi = b[["hi"]],
           x_nm = x_nm,
           call = call,
           assertion_type = assertion_type

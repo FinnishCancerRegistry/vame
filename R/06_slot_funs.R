@@ -1,38 +1,22 @@
 call_hidden_vame_fun__ <- function(vm, fun_nm, arg_list = NULL)  {
-  fun_env <- environment(vm@var_assert)
-  fun <- fun_env[[fun_nm]]
-  call_arg_list <- as.list(formals(fun))
-  arg_list <- as.list(arg_list)
-  call_arg_list[names(arg_list)] <- arg_list
-  do.call(fun, call_arg_list, quote = TRUE)
+  call <- create_call__(
+    fun_nm = paste0("environment(vm@var_assert)[[\"", fun_nm, "\"]]"),
+    arg_list = arg_list,
+    arg_search_env = parent.frame(1L),
+    fun_search_env = parent.frame(1L)
+  )
+  eval(expr = call, envir = parent.frame(1L))
 }
 
-call_slot_fun__ <- function(fun_nm, self, arg_list = NULL) {
-  dbc::assert_prod_input_is_character_nonNA_atom(fun_nm)
-  dbc::assert_prod_input_inherits(self, required_class = "VariableMetadata")
-  dbc::assert_prod_input_is_one_of(
-    arg_list,
-    funs = list(dbc::report_is_NULL,
-                dbc::report_is_uniquely_named_list)
+call_slot_fun_alias__ <- function(fun_nm, self, arg_list = NULL) {
+  call <- create_call__(
+    fun_nm = paste0("vame::", fun_nm),
+    arg_list = arg_list,
+    arg_search_env = parent.frame(1L),
+    fun_search_env = environment(call_slot_fun_alias__)
   )
-  pkg_env <- environment(call_slot_fun__)
-  dbc::assert_prod_input_atom_is_in_set(
-    fun_nm,
-    set = ls(pkg_env)
-  )
-  fun <- pkg_env[[fun_nm]]
-  if (is.null(arg_list)) {
-    arg_list <- formals(fun)
-    if ("..." %in% names(arg_list)) {
-      arg_list["..."] <- NULL
-    }
-    arg_env <- parent.frame(1L)
-    def_arg_nms <- intersect(names(arg_list), ls(arg_env))
-    arg_list[def_arg_nms] <- as.list(arg_env)[def_arg_nms]
-  }
-  arg_list[["vm"]] <- self
-
-  do.call(fun, arg_list, quote = TRUE, envir = parent.frame(1L))
+  call[["vm"]] <- substitute(self)
+  eval(call, envir = parent.frame(1L))
 }
 
 doc_slot_fun__ <- function(fun_nm, description) {
@@ -88,15 +72,23 @@ var_set_value_space_eval <- function(vm, id, env = NULL) {
   if (is.null(env)) {
     env <- parent.frame(1L)
   }
-  vsd <- call_hidden_vame_fun__(vm, "vsd_get")
-  pos <- call_hidden_vame_fun__(vm, "var_set_id_to_pos", list(id = id))
-  value_space <- vsd[["value_space"]][[pos]]
+  vs_expr <- substitute(
+    vm@var_set_meta_get(id = id, meta_nm = "value_space"),
+    list(id = id)
+  )
+  value_space <- eval(vs_expr)
+  this_call <- match.call()
   call_hidden_vame_fun__(
     vm,
     "assert_is_value_space",
-    list(value_space = value_space, assertion_type = "general")
+    list(
+      x = value_space,
+      x_nm = deparse1(vs_expr),
+      call = this_call,
+      assertion_type = "general"
+    )
   )
-  var_nms <- vsd[["var_nm_set"]][[pos]]
+  var_nms <- vm@var_set_meta_get(id = id, meta_nm = "var_nm_set")
   if ("expr" %in% names(value_space)) {
     eval_env <- new.env(parent = env)
     eval_env[["var_nms"]] <- var_nms
