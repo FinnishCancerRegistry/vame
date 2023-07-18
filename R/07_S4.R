@@ -848,7 +848,7 @@ VariableMetadata <- function(var_dt, var_set_dt) {
         )
         assertion_fun_list <- value_space_value_assertion_funs__()
         if (!names(vs) %in% names(assertion_fun_list)) {
-          str(vs, 1)
+          utils::str(vs, 1)
           stop("Internal error: no handling defined for value_space printed ",
                 "above --- complain to the vame package maintainer.")
         }
