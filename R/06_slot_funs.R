@@ -91,6 +91,11 @@ var_set_value_space_eval <- function(vm, id, env = NULL) {
   vsd <- call_hidden_vame_fun__(vm, "vsd_get")
   pos <- call_hidden_vame_fun__(vm, "var_set_id_to_pos", list(id = id))
   value_space <- vsd[["value_space"]][[pos]]
+  call_hidden_vame_fun__(
+    vm,
+    "assert_is_value_space",
+    list(value_space = value_space, assertion_type = "general")
+  )
   var_nms <- vsd[["var_nm_set"]][[pos]]
   if ("expr" %in% names(value_space)) {
     eval_env <- new.env(parent = env)

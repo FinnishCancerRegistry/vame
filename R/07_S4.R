@@ -344,6 +344,53 @@ VariableMetadata <- function(var_dt, var_set_dt) {
       }
 
       # assertions -------------------------------------------------------------
+      assert_is_value_space <- function(
+        x,
+        x_nm = NULL,
+        call = NULL,
+        assertion_type = NULL
+      ) {
+        x_nm <- dbc::handle_arg_x_nm(x_nm)
+        call <- dbc::handle_arg_call(call)
+        assertion_type <- dbc::handle_arg_assertion_type(assertion_type)
+        dbc::assert_is_one_of(
+          x,
+          funs = list(dbc::report_is_NULL, dbc::report_is_list)
+        )
+        if (is.null(x)) {
+          return(invisible(NULL))
+        }
+        dbc::assert_has_length(
+          x = names(x),
+          expected_length = 1L,
+          x_nm = paste0("names(", x_nm, ")"),
+          call = call,
+          assertion_type = assertion_type
+        )
+        dbc::assert_atom_is_in_set(
+          x = names(x),
+          set = value_space_type_names__(),
+          x_nm = paste0("names(", x_nm, ")"),
+          call = call,
+          assertion_type = assertion_type
+        )
+        dbc::report_to_assertion(
+          value_space_type_report_funs__()[[names(x)]](
+            x = x,
+            x_nm = x_nm,
+            call = call
+          ),
+          raise_error_call = call,
+          assertion_type = assertion_type
+        )
+        dbc::assert_is_one_of(
+          x = x,
+          funs = value_space_type_report_funs__(),
+          x_nm = x_nm,
+          call = call,
+          assertion_type = assertion_type
+        )
+      }
       assert_is_var_nm <- function(
         var_nm,
         assertion_type = NULL
@@ -790,9 +837,6 @@ VariableMetadata <- function(var_dt, var_set_dt) {
         }
 
         vs <- var_value_space_eval(var_nm, env = env)
-        if ("dt" %in% names(vs)) {
-          vs <- list(set = vs[["dt"]][[var_nm]])
-        }
         dbc::assert_prod_interim_is_list(
           vs,
           call = call
@@ -802,77 +846,20 @@ VariableMetadata <- function(var_dt, var_set_dt) {
           expected_length = 1L,
           call = call
         )
-        dbc::assert_prod_interim_atom_is_in_set(
-          names(vs),
-          set = c("set", "bounds"),
-          call = call
-        )
-        if (names(vs) == "set") {
-          dbc::assert_vector_elems_are_in_set(
-            x = x,
-            x_nm = x_nm,
-            assertion_type = assertion_type,
-            call = call,
-            set = vs[["set"]]
-          )
-          dbc::assert_is_identical(
-            x = class(x),
-            x_nm = paste0("class(", x_nm, ")"),
-            y = class(vs[["set"]]),
-            y_nm = paste0("class(expected_set)"),
-            call = call
-          )
-        } else {
-          vs <- vs[["bounds"]]
-          dbc::assert_prod_interim_is_list(
-            vs,
-            call = call
-          )
-          dbc::assert_prod_interim_has_length(
-            vs,
-            expected_length = 4L,
-            call = call
-          )
-          dbc::assert_prod_interim_has_names(
-            vs,
-            required_names = c("lo", "hi", "lo_inclusive", "hi_inclusive"),
-            call = call
-          )
-          if (vs[["lo_inclusive"]]) {
-            dbc::assert_is_gte(
-              x = x,
-              lo = vs[["lo"]],
-              x_nm = x_nm,
-              assertion_type = assertion_type,
-              call = call
-            )
-          } else {
-            dbc::assert_is_gt(
-              x = x,
-              lo = vs[["lo"]],
-              x_nm = x_nm,
-              assertion_type = assertion_type,
-              call = call
-            )
-          }
-          if (vs[["hi_inclusive"]]) {
-            dbc::assert_is_lte(
-              x = x,
-              hi = vs[["hi"]],
-              x_nm = x_nm,
-              assertion_type = assertion_type,
-              call = call
-            )
-          } else {
-            dbc::assert_is_lt(
-              x = x,
-              hi = vs[["hi"]],
-              x_nm = x_nm,
-              assertion_type = assertion_type,
-              call = call
-            )
-          }
+        assertion_fun_list <- value_space_value_assertion_funs__()
+        if (!names(vs) %in% names(assertion_fun_list)) {
+          str(vs)
+          stop("Internal error: no handling defined for value_space printed ",
+                "above --- complain to the vame package maintainer.")
         }
+        assertion_fun_list[[names(vs)]](
+          x = x,
+          x_nm = NULL,
+          call = NULL,
+          assertion_type = NULL,
+          var_nm = var_nm,
+          value_space = vs
+        )
       }
 
       # slot:var_meta_get
