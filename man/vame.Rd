@@ -154,6 +154,19 @@ my_fun_2 <- function(dg_age) \{
 \section{News}{
 
 \subsection{News for version 0.1.7}{
+\subsection{Object vame::VariableMetadata news:}{
+
+New \code{value_space} type: "unrestricted". Use this when a variable must
+be of a certain class but can take any value. E.g.
+\code{list(unrestricted = list(class_set = c("IDate", "Date")))}.
+}
+
+\subsection{Object vame::VariableMetadata news:}{
+
+New \code{value_space} type: "regex". Use this when all values of a variable
+must match a specific regex. E.g. \code{list(regex = "^[a-z]$")}.
+}
+
 \subsection{Object vm@var_set_value_space_eval news:}{
 
 New exported fun \code{vame::var_set_value_space_eval} --- alternative for

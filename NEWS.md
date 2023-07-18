@@ -2,6 +2,17 @@
 
 ## News for version 0.1.7
 
+### Object vame::VariableMetadata news:
+
+New `value_space` type: "unrestricted". Use this when a variable must
+be of a certain class but can take any value. E.g.
+`list(unrestricted = list(class_set = c("IDate", "Date")))`.
+
+### Object vame::VariableMetadata news:
+
+New `value_space` type: "regex". Use this when all values of a variable
+must match a specific regex. E.g. `list(regex = "^[a-z]$")`.
+
 ### Object vm@var_set_value_space_eval news:
 
 New exported fun `vame::var_set_value_space_eval` --- alternative for

@@ -198,6 +198,11 @@ value_space_value_assertion_funs__ <- function() {
       value_space,
       var_nm
     ) {
+      # @codedoc_comment_block news("vame::VariableMetadata", "2023-07-18", "0.1.7")
+      # New `value_space` type: "unrestricted". Use this when a variable must
+      # be of a certain class but can take any value. E.g.
+      # `list(unrestricted = list(class_set = c("IDate", "Date")))`.
+      # @codedoc_comment_block news("vame::VariableMetadata", "2023-07-18", "0.1.7")
       x_nm <- dbc::handle_arg_x_nm(x_nm)
       call <- dbc::handle_arg_call(call)
       assertion_type <- dbc::handle_arg_assertion_type(assertion_type)
@@ -222,6 +227,10 @@ value_space_value_assertion_funs__ <- function() {
       value_space,
       var_nm
     ) {
+      # @codedoc_comment_block news("vame::VariableMetadata", "2023-07-18", "0.1.7")
+      # New `value_space` type: "regex". Use this when all values of a variable
+      # must match a specific regex. E.g. `list(regex = "^[a-z]$")`.
+      # @codedoc_comment_block news("vame::VariableMetadata", "2023-07-18", "0.1.7")
       x_nm <- dbc::handle_arg_x_nm(x_nm)
       call <- dbc::handle_arg_call(call)
       assertion_type <- dbc::handle_arg_assertion_type(assertion_type)
