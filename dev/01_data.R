@@ -1,5 +1,13 @@
+src_script_path <- function() {
+  dir("R", pattern = "S4[.]R$", full.names = TRUE)
+}
+
+tgt_script_path <- function() {
+  dir("R", pattern = "vame_slot_nms[.]R$", full.names = TRUE)
+}
+
 vame_slot_nms_read <- function() {
-  lines <- readLines("./R/05_S4.R")
+  lines <- readLines(src_script_path())
   lhs_re <- "^[ ]*#+[ ]*slot:"
   value_re <- "[a-z_]+"
   rhs_re <- "[ ]*$"
@@ -10,9 +18,9 @@ vame_slot_nms_read <- function() {
 }
 vame_slot_nms <- vame_slot_nms_read()
 
-s1 <- system2("git", c("--no-pager", "diff", "./R/04_vame_slot_nms.R"), stdout = TRUE)
+s1 <- system2("git", c("--no-pager", "diff", tgt_script_path()), stdout = TRUE)
 local({
-  lines <- readLines("./R/04_vame_slot_nms.R")
+  lines <- readLines(tgt_script_path())
   wh_start <- which(grepl("# start:vame_slot_nms", lines))
   wh_stop <- which(grepl("# stop:vame_slot_nms", lines))
   lines <- c(
@@ -21,14 +29,16 @@ local({
     sub("[ ]+$", "", paste0("  ", deparse(vame_slot_nms))),
     lines[wh_stop:length(lines)]
   )
-  writeLines(lines, "./R/04_vame_slot_nms.R")
+  writeLines(lines, tgt_script_path())
 })
 Sys.sleep(1.0)
-s2 <- system2("git", c("--no-pager", "diff", "./R/04_vame_slot_nms.R"), stdout = TRUE)
+s2 <- system2("git", c("--no-pager", "diff", tgt_script_path()), stdout = TRUE)
 if (!identical(s1, s2)) {
-  message("Create git commit on ./R/04_vame_slot_nms.R changes? [y/n]")
+  message("Create git commit on ",
+          tgt_script_path(),
+          " changes? [y/n]")
   if (readline(": ") == "y") {
-    git2r::add(path = "./R/04_vame_slot_nms.R")
+    git2r::add(path = tgt_script_path())
     git2r::commit(message = "build: run dev/01_data.R")
   }
 }
