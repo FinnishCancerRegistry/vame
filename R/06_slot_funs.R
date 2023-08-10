@@ -130,6 +130,5 @@ vame_copy <- function(vm) {
   vd <- data.table::copy(call_hidden_vame_fun__(vm, "vd_get"))
   vsd <- data.table::copy(call_hidden_vame_fun__(vm, "vsd_get"))
   out <- vame::VariableMetadata(var_dt = vd, var_set_dt = vsd)
-  environment(out)[["data"]][["self_obj"]] <- out
   return(out)
 }
