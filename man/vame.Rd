@@ -153,6 +153,14 @@ my_fun_2 <- function(dg_age) \{
 
 \section{News}{
 
+\subsection{News for version 0.1.8}{
+\subsection{Object vm@vame_copy news:}{
+
+New slot fun \code{vm@vame_copy} + new exported fun \code{vame::vame_copy}.
+}
+
+}
+
 \subsection{News for version 0.1.7}{
 \subsection{Object vame::VariableMetadata news:}{
 

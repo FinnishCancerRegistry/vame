@@ -301,6 +301,15 @@ methods::setClass(
 #' stopifnot(
 #'   c("ab", "cd") %in% vm_1@var_set_meta_get_all("id")
 #' )
+#' 
+#' # taking a copy of a VariableMetadata object
+#' vm_3 <- vm_2@vame_copy()
+#' vm_2@var_rename("d", "dd")
+#' stopifnot(
+#'   "d" %in% vm_3@var_meta_get_all("var_nm"),
+#'   !"d" %in% vm_2@var_meta_get_all("var_nm"),
+#'   "dd" %in% vm_2@var_meta_get_all("var_nm")
+#' )
 #' @export
 VariableMetadata <- function(var_dt, var_set_dt) {
   # @codedoc_comment_block news("vame::VariableMetadata", "2023-06-30", "0.1.0")
@@ -328,25 +337,7 @@ VariableMetadata <- function(var_dt, var_set_dt) {
     expr = {
       # self -------------------------------------------------------------------
       self <- function() {
-        call_stack <- sys.calls()
-        call_stack_strings <- vapply(call_stack, deparse1, character(1L))
-        regex <- paste0(
-          "(@", vame_slot_nms_get__(), "[^a-z_]?)", collapse = "|"
-        )
-
-        is_slot_fun_call <- grepl(regex, call_stack_strings)
-        last_slot_fun_call_idx <- utils::tail(which(is_slot_fun_call), 1L)
-        if (!any(is_slot_fun_call)) {
-          stop("Internal error: could not determine name of VariableMetadata ",
-               "object. Please complain to the package maintainer.")
-        }
-
-        slot_fun_call <- call_stack[[last_slot_fun_call_idx]]
-        vm_nm <- slot_fun_call[[1]][[2]]
-        slot_fun_call_env <- parent.frame(
-          length(call_stack) - last_slot_fun_call_idx - 1L
-        )
-        get(vm_nm, envir = slot_fun_call_env)
+        data[["self_obj"]]
       }
 
       # assertions -------------------------------------------------------------
@@ -963,6 +954,11 @@ VariableMetadata <- function(var_dt, var_set_dt) {
       }
 
       # vame funs --------------------------------------------------------------
+      # slot:vame_copy
+      vame_copy <- function() {
+        call_slot_fun_alias__("vame_copy", self())
+      }
+
       vame_subset_expr <- function(expr) {
         dbc::assert_is_language_object(expr, assertion_type = "prod_input")
         vd <- vd_get()
@@ -1057,7 +1053,9 @@ VariableMetadata <- function(var_dt, var_set_dt) {
   })
   names(slots) <- vame_slot_nms_get__()
   arg_list <- c(arg_list, slots)
-  do.call(methods::new, arg_list, quote = TRUE)
+  out <- do.call(methods::new, arg_list, quote = TRUE)
+  funs$data$self_obj <- out
+  return(out)
 }
 
 methods::setMethod(

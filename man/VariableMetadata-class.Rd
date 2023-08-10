@@ -3,11 +3,14 @@
 \docType{class}
 \name{var_set_value_space_eval}
 \alias{var_set_value_space_eval}
+\alias{vame_copy}
 \alias{VariableMetadata-class}
 \alias{VariableMetadata}
 \title{Variable Metadata}
 \usage{
 var_set_value_space_eval(vm, id, env = NULL)
+
+vame_copy(vm)
 
 VariableMetadata(var_dt, var_set_dt)
 }
@@ -56,6 +59,14 @@ Usage alternatives given \code{VariableMetadata} object \code{vm}:
 \code{vm@var_set_value_space_eval(id, env)}
 
 \code{vame::var_set_value_space_eval(vm, id, env)}}
+
+\item{\code{vame_copy}}{Take a deep copy of a VariableMetadata object. See \code{?data.table::copy}.
+
+Usage alternatives given \code{VariableMetadata} object \code{vm}:
+
+\code{vm@vame_copy(id, env)}
+
+\code{vame::vame_copy(vm, id, env)}}
 }}
 
 \examples{
@@ -333,5 +344,14 @@ vm_2 <- vame::VariableMetadata(
 vm_1@vame_union_append(vm_2)
 stopifnot(
   c("ab", "cd") \%in\% vm_1@var_set_meta_get_all("id")
+)
+
+# taking a copy of a VariableMetadata object
+vm_3 <- vm_2@vame_copy()
+vm_2@var_rename("d", "dd")
+stopifnot(
+  "d" \%in\% vm_3@var_meta_get_all("var_nm"),
+  !"d" \%in\% vm_2@var_meta_get_all("var_nm"),
+  "dd" \%in\% vm_2@var_meta_get_all("var_nm")
 )
 }

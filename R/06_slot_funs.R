@@ -1,3 +1,4 @@
+# utils ------------------------------------------------------------------------
 call_hidden_vame_fun__ <- function(vm, fun_nm, arg_list = NULL)  {
   call <- create_call__(
     fun_nm = paste0("environment(vm@var_assert)[[\"", fun_nm, "\"]]"),
@@ -36,6 +37,7 @@ doc_slot_fun__ <- function(fun_nm, description) {
   )
 }
 
+# var_set funs -----------------------------------------------------------------
 #' @eval doc_slot_fun__(
 #'   "var_set_value_space_eval",
 #'   "Retrieve and evaluate value space for a `var_set` given its `id`."
@@ -114,4 +116,20 @@ var_set_value_space_eval <- function(vm, id, env = NULL) {
     }
   }
   return(value_space)
+}
+
+# vame funs --------------------------------------------------------------------
+#' @eval doc_slot_fun__(
+#'   "vame_copy",
+#'   "Take a deep copy of a VariableMetadata object. See `?data.table::copy`."
+#' )
+vame_copy <- function(vm) {
+  # @codedoc_comment_block news("vm@vame_copy", "2023-08-10", "0.1.8")
+  # New slot fun `vm@vame_copy` + new exported fun `vame::vame_copy`.
+  # @codedoc_comment_block news("vm@vame_copy", "2023-08-10", "0.1.8")
+  vd <- data.table::copy(call_hidden_vame_fun__(vm, "vd_get"))
+  vsd <- data.table::copy(call_hidden_vame_fun__(vm, "vsd_get"))
+  out <- vame::VariableMetadata(var_dt = vd, var_set_dt = vsd)
+  environment(out)[["data"]][["self_obj"]] <- out
+  return(out)
 }
