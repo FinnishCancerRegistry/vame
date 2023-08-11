@@ -934,8 +934,13 @@ VariableMetadata <- function(var_dt, var_set_dt) {
       }
       # slot:var_remove
       var_remove <- function(var_nm) {
-        assert_is_var_nm(var_nm)
-        expr <- substitute(var_nm != VN, list(VN = var_nm))
+        # @codedoc_comment_block news("vm@var_remove", "2023-08-11", "0.1.9")
+        # `vm@var_remove` can now remove multiple variables in one go.
+        # @codedoc_comment_block news("vm@var_remove", "2023-08-11", "0.1.9")
+        for (vn in var_nm) {
+          assert_is_var_nm(vn)
+        }
+        expr <- substitute(!var_nm %in% VN, list(VN = var_nm))
         vame_subset_expr(expr)
       }
       # slot:var_label_dt_get

@@ -153,6 +153,14 @@ my_fun_2 <- function(dg_age) \{
 
 \section{News}{
 
+\subsection{News for version 0.1.9}{
+\subsection{Object vm@var_remove news:}{
+
+\code{vm@var_remove} can now remove multiple variables in one go.
+}
+
+}
+
 \subsection{News for version 0.1.8}{
 \subsection{Object vm@vame_copy news:}{
 
