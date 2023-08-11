@@ -723,6 +723,22 @@ VariableMetadata <- function(var_dt, var_set_dt) {
       }
 
       # var funs ---------------------------------------------------------------
+      var_is_aggregateable_to__ <- function(from_var_nm, to_var_nm, dt) {
+        if (from_var_nm == to_var_nm) {
+          return(TRUE)
+        }
+        from_type <- var_meta_get(from_var_nm, "type")
+        to_type <- var_meta_get(to_var_nm, "type")
+        if (from_type != to_type || from_type != "categorical") {
+          return(FALSE)
+        }
+        from_pos <- var_meta_get(from_var_nm, "var_set_dt_pos")
+        to_pos <- var_meta_get(to_var_nm, "var_set_dt_pos")
+        if (from_pos != to_pos) {
+          return(TRUE)
+        }
+        sum(duplicated(dt[[from_var_nm]])) == 0L
+      }
       # slot:var_is_aggregateable_to
       var_is_aggregateable_to <- function(from_var_nm, to_var_nm) {
         # @codedoc_comment_block news("vm@var_is_aggregateable_to", "2023-07-10", "0.1.3")
@@ -730,11 +746,11 @@ VariableMetadata <- function(var_dt, var_set_dt) {
         # @codedoc_comment_block news("vm@var_is_aggregateable_to", "2023-07-10", "0.1.3")
         assert_is_var_nm(from_var_nm)
         assert_is_var_nm(to_var_nm)
-        if (from_var_nm == to_var_nm) {
-          return(TRUE)
-        }
-        dt <- vame_category_space_dt(c(from_var_nm, to_var_nm))
-        sum(duplicated(dt[[from_var_nm]])) == 0L
+        var_is_aggregateable_to__(
+          from_var_nm = from_var_nm,
+          to_var_nm = to_var_nm,
+          dt = vame_category_space_dt(c(from_var_nm, to_var_nm))
+        )
       }
       # slot:var_aggregate
       var_aggregate <- function(x, from_var_nm, to_var_nm) {
@@ -745,7 +761,11 @@ VariableMetadata <- function(var_dt, var_set_dt) {
         assert_is_var_nm(to_var_nm)
         dbc::assert_is_vector(x)
         dt <- vame_category_space_dt(c(from_var_nm, to_var_nm))
-        is_aggregateable <- sum(duplicated(dt[[from_var_nm]])) == 0L
+        is_aggregateable <- var_is_aggregateable_to__(
+          from_var_nm = from_var_nm,
+          to_var_nm = to_var_nm,
+          dt = vame_category_space_dt(c(from_var_nm, to_var_nm))
+        )
         if (!is_aggregateable) {
           stop("cannot aggregate ", from_var_nm, " to ", to_var_nm, "; ",
                "aggregation only possible when there is exactly one ",
