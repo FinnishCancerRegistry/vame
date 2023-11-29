@@ -696,7 +696,7 @@ VariableMetadata <- function(var_dt, var_set_dt) {
       }
       # slot:var_set_value_space_eval
       var_set_value_space_eval <- function(id, var_nms = NULL, env = NULL) {
-        call_slot_fun_alias__("var_set_value_space_eval", self())
+        call_slot_fun_alias_in_slot_fun__("var_set_value_space_eval")
       }
       var_set_value_set_dt_subset_expr <- function(id, expr) {
         assert_var_set_value_space_is_defined()
@@ -981,7 +981,7 @@ VariableMetadata <- function(var_dt, var_set_dt) {
       # vame funs --------------------------------------------------------------
       # slot:vame_copy
       vame_copy <- function() {
-        call_slot_fun_alias__("vame_copy", self())
+        call_slot_fun_alias_in_slot_fun__("vame_copy")
       }
 
       vame_subset_expr <- function(expr) {
