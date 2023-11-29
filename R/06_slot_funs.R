@@ -136,6 +136,16 @@ var_set_value_space_eval <- function(vm, id, var_nms = NULL, env = NULL) {
             deparse1(class(tmp)), ".")
     }
   }
+  if ("dt" %in% names(value_space) &&
+        ncol(value_space[["dt"]]) > length(var_nms)) {
+    #' @importFrom data.table .SD
+    value_space <- list(dt = value_space[["dt"]][
+      i = !duplicated(value_space[["dt"]], by = var_nms),
+      j = .SD,
+      .SDcols = var_nms
+    ])
+  }
+
   return(value_space)
 }
 
