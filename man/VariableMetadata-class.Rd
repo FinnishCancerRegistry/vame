@@ -8,7 +8,7 @@
 \alias{VariableMetadata}
 \title{Variable Metadata}
 \usage{
-var_set_value_space_eval(vm, id, env = NULL)
+var_set_value_space_eval(vm, id, var_nms = NULL, env = NULL)
 
 vame_copy(vm)
 
@@ -22,6 +22,12 @@ A \code{VariableMetadata} object.}
 \item{id}{\verb{[any]} (no default)
 
 The ID of a \code{var_set}.}
+
+\item{var_nms}{\verb{[NULL, character]} (default \code{NULL})
+\itemize{
+\item \code{NULL}: Get the value space for variables in the set.
+\item \code{character}: Get the value spaces for only these variables.
+}}
 
 \item{env}{\verb{[NULL, environment]} (default \code{NULL})
 \itemize{

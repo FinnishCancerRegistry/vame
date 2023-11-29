@@ -6,6 +6,12 @@
 
 `vm@var_remove` can now remove multiple variables in one go.
 
+### vm@var_set_value_space_eval
+
+`vame::var_set_value_space_eval` + `vm@var_set_value_space_eval` gain
+arg `var_nms`. You can now evaluate the value space for only a subset of
+the variables in the set.
+
 
 ## News for version 0.1.8
 

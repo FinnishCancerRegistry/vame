@@ -42,7 +42,7 @@ doc_slot_fun__ <- function(fun_nm, description) {
 #'   "var_set_value_space_eval",
 #'   "Retrieve and evaluate value space for a `var_set` given its `id`."
 #' )
-var_set_value_space_eval <- function(vm, id, env = NULL) {
+var_set_value_space_eval <- function(vm, id, var_nms = NULL, env = NULL) {
   # @codedoc_comment_block news("vm@var_set_value_space_eval", "2023-07-03", "0.1.1")
   # New slot `vm@var_set_value_space_eval`.
   # @codedoc_comment_block news("vm@var_set_value_space_eval", "2023-07-03", "0.1.1")
@@ -50,6 +50,11 @@ var_set_value_space_eval <- function(vm, id, env = NULL) {
   # New exported fun `vame::var_set_value_space_eval` --- alternative for
   # `vm@var_set_value_space_eval`.
   # @codedoc_comment_block news("vm@var_set_value_space_eval", "2023-07-17", "0.1.7")
+  # @codedoc_comment_block news("vm@var_set_value_space_eval", "2023-11-29", "0.1.9")
+  # `vame::var_set_value_space_eval` + `vm@var_set_value_space_eval` gain
+  # arg `var_nms`. You can now evaluate the value space for only a subset of
+  # the variables in the set.
+  # @codedoc_comment_block news("vm@var_set_value_space_eval", "2023-11-29", "0.1.9")
 
   #' @param vm `[VariableMetadata]` (no default)
   #'
@@ -61,6 +66,23 @@ var_set_value_space_eval <- function(vm, id, env = NULL) {
   #' The ID of a `var_set`.
   call_hidden_vame_fun__(vm, "assert_is_var_set_id", list(id = id))
   call_hidden_vame_fun__(vm, "assert_var_set_value_space_is_defined")
+  #' @param var_nms `[NULL, character]` (default `NULL`)
+  #' 
+  #' - `NULL`: Get the value space for variables in the set.
+  #' - `character`: Get the value spaces for only these variables.
+  dbc::assert_is_one_of(
+    var_nms,
+    funs = list(
+      dbc::report_is_NULL,
+      dbc::report_is_character_nonNA_vector
+    )
+  )
+  value_space_var_nms <- vm@var_set_meta_get(id = id, meta_nm = "var_nm_set")
+  if (is.null(var_nms)) {
+    var_nms <- value_space_var_nms
+  } else {
+    dbc::assert_vector_elems_are_in_set(x = var_nms, set = value_space_var_nms)
+  }
   #' @param env `[NULL, environment]` (default `NULL`)
   #'
   #' - `NULL`: Take `env <- parent.frame(1L)`.
@@ -90,7 +112,6 @@ var_set_value_space_eval <- function(vm, id, env = NULL) {
       assertion_type = "general"
     )
   )
-  var_nms <- vm@var_set_meta_get(id = id, meta_nm = "var_nm_set")
   if ("expr" %in% names(value_space)) {
     eval_env <- new.env(parent = env)
     eval_env[["var_nms"]] <- var_nms

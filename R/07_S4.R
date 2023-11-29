@@ -695,7 +695,7 @@ VariableMetadata <- function(var_dt, var_set_dt) {
         vsd_set(vsd)
       }
       # slot:var_set_value_space_eval
-      var_set_value_space_eval <- function(id, env = NULL) {
+      var_set_value_space_eval <- function(id, var_nms = NULL, env = NULL) {
         call_slot_fun_alias__("var_set_value_space_eval", self())
       }
       var_set_value_set_dt_subset_expr <- function(id, expr) {

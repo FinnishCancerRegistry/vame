@@ -159,6 +159,13 @@ my_fun_2 <- function(dg_age) \{
 \code{vm@var_remove} can now remove multiple variables in one go.
 }
 
+\subsection{vm@var_set_value_space_eval}{
+
+\code{vame::var_set_value_space_eval} + \code{vm@var_set_value_space_eval} gain
+arg \code{var_nms}. You can now evaluate the value space for only a subset of
+the variables in the set.
+}
+
 }
 
 \subsection{News for version 0.1.8}{
