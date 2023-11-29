@@ -154,7 +154,7 @@ my_fun_2 <- function(dg_age) \{
 \section{News}{
 
 \subsection{News for version 0.1.9}{
-\subsection{Object vm@var_remove news:}{
+\subsection{vm@var_remove}{
 
 \code{vm@var_remove} can now remove multiple variables in one go.
 }
@@ -162,7 +162,7 @@ my_fun_2 <- function(dg_age) \{
 }
 
 \subsection{News for version 0.1.8}{
-\subsection{Object vm@vame_copy news:}{
+\subsection{vm@vame_copy}{
 
 New slot fun \code{vm@vame_copy} + new exported fun \code{vame::vame_copy}.
 }
@@ -170,20 +170,20 @@ New slot fun \code{vm@vame_copy} + new exported fun \code{vame::vame_copy}.
 }
 
 \subsection{News for version 0.1.7}{
-\subsection{Object vame::VariableMetadata news:}{
+\subsection{vame::VariableMetadata}{
 
 New \code{value_space} type: "unrestricted". Use this when a variable must
 be of a certain class but can take any value. E.g.
 \code{list(unrestricted = list(class_set = c("IDate", "Date")))}.
 }
 
-\subsection{Object vame::VariableMetadata news:}{
+\subsection{vame::VariableMetadata}{
 
 New \code{value_space} type: "regex". Use this when all values of a variable
 must match a specific regex. E.g. \code{list(regex = "^[a-z]$")}.
 }
 
-\subsection{Object vm@var_set_value_space_eval news:}{
+\subsection{vm@var_set_value_space_eval}{
 
 New exported fun \code{vame::var_set_value_space_eval} --- alternative for
 \code{vm@var_set_value_space_eval}.
@@ -192,7 +192,7 @@ New exported fun \code{vame::var_set_value_space_eval} --- alternative for
 }
 
 \subsection{News for version 0.1.6}{
-\subsection{Object vm@vame_union_append news:}{
+\subsection{vm@vame_union_append}{
 
 fix \code{vame_union_append} --- no longer attempt to remove duplicates
 in rbind'd \code{var_dt} because some \code{by} columns may be of type \code{list}
@@ -202,7 +202,7 @@ which is not supported by \code{duplicated}.
 }
 
 \subsection{News for version 0.1.5}{
-\subsection{Object vm@vame_union_append news:}{
+\subsection{vm@vame_union_append}{
 
 Robustify \code{vame_union_append} --- use \verb{use.names = TRUE, fill = TRUE}
 in \code{rbind} calls.
@@ -211,7 +211,7 @@ in \code{rbind} calls.
 }
 
 \subsection{News for version 0.1.4}{
-\subsection{Object vm@vame_union_append news:}{
+\subsection{vm@vame_union_append}{
 
 Fixed \code{vame_union_append} --- used to always raise an error due to
 a misnamed object.
@@ -220,18 +220,18 @@ a misnamed object.
 }
 
 \subsection{News for version 0.1.3}{
-\subsection{Object vm@var_aggregate news:}{
+\subsection{vm@var_aggregate}{
 
 New slot \code{var_aggregate}.
 }
 
-\subsection{Object vm@var_assert news:}{
+\subsection{vm@var_assert}{
 
 \code{vm@var_assert} gains arg \code{env}. This is passed
 to \code{vm@var_value_space_eval}.
 }
 
-\subsection{Object vm@var_is_aggregateable_to news:}{
+\subsection{vm@var_is_aggregateable_to}{
 
 New slot \code{var_is_aggregateable_to}.
 }
@@ -239,23 +239,23 @@ New slot \code{var_is_aggregateable_to}.
 }
 
 \subsection{News for version 0.1.2}{
-\subsection{Object vm@assert_is_var_set_id news:}{
+\subsection{vm@assert_is_var_set_id}{
 
 \code{var_set_dt$id} no longer needs to be of class character. For clarity
 us character, for marginal speed improvement use integer.
 }
 
-\subsection{Object vm@vame_category_space_dt news:}{
+\subsection{vm@vame_category_space_dt}{
 
 Also \code{bounds} value space can be used when creating category spaces.
 }
 
-\subsection{Object vm@vame_category_space_dt_list news:}{
+\subsection{vm@vame_category_space_dt_list}{
 
 Also \code{bounds} value space can be used when creating category spaces.
 }
 
-\subsection{Object vm@var_assert news:}{
+\subsection{vm@var_assert}{
 
 Added arguments \code{x_nm}, \code{call}.
 }
@@ -263,17 +263,17 @@ Added arguments \code{x_nm}, \code{call}.
 }
 
 \subsection{News for version 0.1.1}{
-\subsection{Object vm@var_assert news:}{
+\subsection{vm@var_assert}{
 
 Fixed \code{var_assert} handling of a value space based on \code{bounds}.
 }
 
-\subsection{Object vm@var_set_value_space_eval news:}{
+\subsection{vm@var_set_value_space_eval}{
 
 New slot \code{vm@var_set_value_space_eval}.
 }
 
-\subsection{Object vm@var_value_space_eval news:}{
+\subsection{vm@var_value_space_eval}{
 
 New slot \code{vm@var_value_space_eval}.
 }
@@ -281,7 +281,7 @@ New slot \code{vm@var_value_space_eval}.
 }
 
 \subsection{News for version 0.1.0}{
-\subsection{Object vame::VariableMetadata news:}{
+\subsection{vame::VariableMetadata}{
 
 First release.
 }

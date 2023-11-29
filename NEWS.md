@@ -2,32 +2,32 @@
 
 ## News for version 0.1.9
 
-### Object vm@var_remove news:
+### vm@var_remove
 
 `vm@var_remove` can now remove multiple variables in one go.
 
 
 ## News for version 0.1.8
 
-### Object vm@vame_copy news:
+### vm@vame_copy
 
 New slot fun `vm@vame_copy` + new exported fun `vame::vame_copy`.
 
 
 ## News for version 0.1.7
 
-### Object vame::VariableMetadata news:
+### vame::VariableMetadata
 
 New `value_space` type: "unrestricted". Use this when a variable must
 be of a certain class but can take any value. E.g.
 `list(unrestricted = list(class_set = c("IDate", "Date")))`.
 
-### Object vame::VariableMetadata news:
+### vame::VariableMetadata
 
 New `value_space` type: "regex". Use this when all values of a variable
 must match a specific regex. E.g. `list(regex = "^[a-z]$")`.
 
-### Object vm@var_set_value_space_eval news:
+### vm@var_set_value_space_eval
 
 New exported fun `vame::var_set_value_space_eval` --- alternative for
 `vm@var_set_value_space_eval`.
@@ -35,7 +35,7 @@ New exported fun `vame::var_set_value_space_eval` --- alternative for
 
 ## News for version 0.1.6
 
-### Object vm@vame_union_append news:
+### vm@vame_union_append
 
 fix `vame_union_append` --- no longer attempt to remove duplicates
 in rbind'd `var_dt` because some `by` columns may be of type `list`
@@ -44,7 +44,7 @@ which is not supported by `duplicated`.
 
 ## News for version 0.1.5
 
-### Object vm@vame_union_append news:
+### vm@vame_union_append
 
 Robustify `vame_union_append` --- use `use.names = TRUE, fill = TRUE`
 in `rbind` calls.
@@ -52,7 +52,7 @@ in `rbind` calls.
 
 ## News for version 0.1.4
 
-### Object vm@vame_union_append news:
+### vm@vame_union_append
 
 Fixed `vame_union_append` --- used to always raise an error due to
 a misnamed object.
@@ -60,58 +60,58 @@ a misnamed object.
 
 ## News for version 0.1.3
 
-### Object vm@var_aggregate news:
+### vm@var_aggregate
 
 New slot `var_aggregate`.
 
-### Object vm@var_assert news:
+### vm@var_assert
 
 `vm@var_assert` gains arg `env`. This is passed
 to `vm@var_value_space_eval`.
 
-### Object vm@var_is_aggregateable_to news:
+### vm@var_is_aggregateable_to
 
 New slot `var_is_aggregateable_to`.
 
 
 ## News for version 0.1.2
 
-### Object vm@assert_is_var_set_id news:
+### vm@assert_is_var_set_id
 
 `var_set_dt$id` no longer needs to be of class character. For clarity
 us character, for marginal speed improvement use integer.
 
-### Object vm@vame_category_space_dt news:
+### vm@vame_category_space_dt
 
 Also `bounds` value space can be used when creating category spaces.
 
-### Object vm@vame_category_space_dt_list news:
+### vm@vame_category_space_dt_list
 
 Also `bounds` value space can be used when creating category spaces.
 
-### Object vm@var_assert news:
+### vm@var_assert
 
 Added arguments `x_nm`, `call`.
 
 
 ## News for version 0.1.1
 
-### Object vm@var_assert news:
+### vm@var_assert
 
 Fixed `var_assert` handling of a value space based on `bounds`.
 
-### Object vm@var_set_value_space_eval news:
+### vm@var_set_value_space_eval
 
 New slot `vm@var_set_value_space_eval`.
 
-### Object vm@var_value_space_eval news:
+### vm@var_value_space_eval
 
 New slot `vm@var_value_space_eval`.
 
 
 ## News for version 0.1.0
 
-### Object vame::VariableMetadata news:
+### vame::VariableMetadata
 
 First release.
 
