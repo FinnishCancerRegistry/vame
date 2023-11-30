@@ -22,26 +22,6 @@ call_slot_fun_alias_in_slot_fun__ <- function(
   eval(call_expr, envir = slot_fun_eval_env)
 }
 
-call_slot_fun_in_slot_fun_alias__ <- function(
-  fun_nm = NULL
-) {
-  if (is.null(fun_nm)) {
-    fun_nm <- deparse1(sys.call(-1)[[1]])
-    fun_nm <- gsub("^vame:+", "", fun_nm)
-  }
-  fun <- eval(parse(text = fun_nm), envir = environment(vm@var_assert))
-  arg_nms <- names(formals(fun))
-  call_string <- paste0(
-    "vm@",
-    fun_nm,
-    "(",
-    paste0(arg_nms, " = ", arg_nms, collapse = ", "),
-    ")"
-  )
-  call_expr <- parse(text = call_string)[[1]]
-  eval(call_expr, envir = parent.frame(1L))
-}
-
 doc_slot_fun__ <- function(fun_nm, description) {
   c(
     "@rdname VariableMetadata-class",
