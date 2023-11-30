@@ -483,16 +483,31 @@ VariableMetadata <- function(var_dt, var_set_dt) {
       vd_implied_get <- function() {
         vsd <- vsd_get()
         dt <- data.table::data.table(
+          var_nm = unique(unlist(vsd[["var_nm_set"]]))
+        )
+        if (nrow(dt) == 0L) {
+          return(data.table::data.table(
+            var_nm = character(0L),
+            var_set_dt_pos_set = integer(0L)
+          ))
+        }
+        
+        dt <- data.table::data.table(
           var_nm = unlist(vsd[["var_nm_set"]]),
-          var_set_dt_pos = unlist(lapply(
+          var_set_dt_pos_set = unlist(lapply(
             seq_along(vsd[["var_nm_set"]]),
             function(i) {
               rep(i, length(vsd[["var_nm_set"]][[i]]))
             }
           ))
         )
-        if (ncol(dt) > 0) {
-          data.table::setkeyv(dt, names(dt))
+        #' @importFrom data.table .SD
+        dt <- dt[
+          j = list("var_set_dt_pos_set" = list(.SD[["var_set_dt_pos_set"]])),
+          keyby = "var_nm"
+        ]
+        if ("var_nm" %in% names(dt)) {
+          data.table::setkeyv(dt, "var_nm")
         }
         return(dt[])
       }
@@ -520,15 +535,14 @@ VariableMetadata <- function(var_dt, var_set_dt) {
           return(invisible(NULL))
         }
         vdi <- vd_implied_get()
-        data.table::setkeyv(vd, intersect(names(vdi), names(vd)))
-        i.var_set_dt_pos <- NULL # appease R CMD CHECK
+        i.var_set_dt_pos_set <- NULL # appease R CMD CHECK
         #' @importFrom data.table :=
         vd[
           i = vdi,
           on = "var_nm",
-          j = "var_set_dt_pos" := i.var_set_dt_pos
+          j = "var_set_dt_pos_set" := i.var_set_dt_pos_set
         ]
-        data.table::setkeyv(vd, intersect(names(vdi), names(vd)))
+        data.table::setkeyv(vd, "var_nm")
         vd_set(vd)
         return(invisible(NULL))
       }
@@ -600,9 +614,8 @@ VariableMetadata <- function(var_dt, var_set_dt) {
         vsd_get()[["id"]][pos]
       }
       var_to_var_set_id <- function(var_nm) {
-        pos <- var_meta_get(var_nm = var_nm, meta_nm = "var_set_dt_pos")
-        id <- var_set_pos_to_id(pos)
-        return(id)
+        pos <- var_meta_get(var_nm = var_nm, meta_nm = "var_set_dt_pos_set")
+        return(var_set_pos_to_id(pos))
       }
       # slot:var_set_list_get
       var_set_list_get <- function() {
@@ -724,6 +737,9 @@ VariableMetadata <- function(var_dt, var_set_dt) {
 
       # var funs ---------------------------------------------------------------
       var_is_aggregateable_to__ <- function(from_var_nm, to_var_nm, dt) {
+        stopifnot(
+          identical(sort(names(dt)), sort(c(from_var_nm, to_var_nm)))
+        )
         if (from_var_nm == to_var_nm) {
           return(TRUE)
         }
@@ -732,10 +748,10 @@ VariableMetadata <- function(var_dt, var_set_dt) {
         if (from_type != to_type || from_type != "categorical") {
           return(FALSE)
         }
-        from_pos <- var_meta_get(from_var_nm, "var_set_dt_pos")
-        to_pos <- var_meta_get(to_var_nm, "var_set_dt_pos")
-        if (from_pos != to_pos) {
-          return(TRUE)
+        from_pos_set <- var_meta_get(from_var_nm, "var_set_dt_pos_set")
+        to_pos_set <- var_meta_get(to_var_nm, "var_set_dt_pos_set")
+        if (length(intersect(from_pos_set, to_pos_set)) == 0) {
+          return(FALSE)
         }
         sum(duplicated(dt[[from_var_nm]])) == 0L
       }
@@ -764,7 +780,7 @@ VariableMetadata <- function(var_dt, var_set_dt) {
         is_aggregateable <- var_is_aggregateable_to__(
           from_var_nm = from_var_nm,
           to_var_nm = to_var_nm,
-          dt = vame_category_space_dt(c(from_var_nm, to_var_nm))
+          dt = dt
         )
         if (!is_aggregateable) {
           stop("cannot aggregate ", from_var_nm, " to ", to_var_nm, "; ",
@@ -798,12 +814,40 @@ VariableMetadata <- function(var_dt, var_set_dt) {
         if (is.null(env)) {
           env <- parent.frame(1L)
         }
-        pos <- var_meta_get(var_nm = var_nm, meta_nm = "var_set_dt_pos")
+        pos <- var_meta_get(var_nm = var_nm, meta_nm = "var_set_dt_pos_set")
         vsd <- vsd_get(var_nms = "id")
-        value_space <- var_set_value_space_eval(
-          id = vsd[["id"]][pos],
-          env = env
-        )
+        value_space <- lapply(
+          vsd[["id"]][pos],
+          function(id) {
+            var_set_value_space_eval(
+              id = id,
+              var_nms = var_nm,
+              env = env
+            )
+        })
+        value_space <- unique(value_space)
+        if (length(value_space) == 1) {
+          value_space <- value_space[[1]]
+        } else if (var_meta_get(var_nm, "type") == "categorical") {
+          value_space <- lapply(value_space, function(x) {
+            if ("set" %in% names(x)) {
+              x <- list(dt = data.table::data.table(x = x[["set"]]))
+              data.table::setnames(x[["dt"]], "x", var_nm)
+            }
+            if ("dt" %in% names(x)) {
+              x <- x[["dt"]]
+            }
+            x
+          })
+          value_space <- data.table::rbindlist(value_space)
+          value_space <- list(dt = unique(value_space, by = var_nm))
+        } else {
+          stop(
+            "Internal error: var_nm = \"", var_nm, "\" appears in more than ",
+            "one variable set value space, and its own value spaces are not ",
+            "all identical --- no logic has been defined for handling this ",
+            "situation.")
+        }
         if ("dt" %in% names(value_space)) {
           dt_subset <- !duplicated(value_space[["dt"]], by = var_nm)
           value_space[["dt"]] <- value_space[["dt"]][
