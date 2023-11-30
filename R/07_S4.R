@@ -328,316 +328,33 @@ VariableMetadata <- function(var_dt, var_set_dt) {
   dbc::assert_is_nonNA(var_set_dt[["id"]])
   dbc::assert_is_list(var_set_dt[["value_space"]])
   pkg_env <- environment(VariableMetadata)
+  # TODO: pkg_env revamp
   funs <- new.env(parent = pkg_env)
   funs$data <- new.env(parent = emptyenv())
   funs$data$var_dt <- var_dt
   funs$data$var_set_dt <- var_set_dt
-  data <- NULL # appease R CMD CHECK
   local(
     expr = {
-      # self -------------------------------------------------------------------
-      self <- function() {
-        data[["self_obj"]]
-      }
-
-      # assertions -------------------------------------------------------------
-      assert_is_value_space <- function(
-        x,
-        x_nm = NULL,
-        call = NULL,
-        assertion_type = NULL
-      ) {
-        x_nm <- dbc::handle_arg_x_nm(x_nm)
-        call <- dbc::handle_arg_call(call)
-        assertion_type <- dbc::handle_arg_assertion_type(assertion_type)
-        dbc::assert_is_one_of(
-          x,
-          funs = list(dbc::report_is_NULL, dbc::report_is_list)
-        )
-        if (is.null(x)) {
-          return(invisible(NULL))
-        }
-        dbc::assert_has_length(
-          x = x,
-          expected_length = 1L,
-          x_nm = x_nm,
-          call = call,
-          assertion_type = assertion_type
-        )
-        dbc::assert_atom_is_in_set(
-          x = names(x),
-          set = value_space_type_names__(),
-          x_nm = paste0("names(", x_nm, ")"),
-          call = call,
-          assertion_type = assertion_type
-        )
-        dbc::report_to_assertion(
-          value_space_type_report_funs__()[[names(x)]](
-            x = x,
-            x_nm = x_nm,
-            call = call
-          ),
-          raise_error_call = call,
-          assertion_type = assertion_type
-        )
-      }
-      assert_is_var_nm <- function(
-        var_nm,
-        assertion_type = NULL
-      ) {
-        dbc::assert_is_character_nonNA_atom(
-          var_nm,
-          assertion_type = assertion_type
-        )
-        dbc::assert_atom_is_in_set(
-          var_nm,
-          set = vd_get()[["var_nm"]],
-          assertion_type = assertion_type
-        )
-      }
-      assert_is_var_meta_nm <- function(
-        meta_nm,
-        assertion_type = NULL
-      ) {
-        dbc::assert_is_character_nonNA_atom(
-          meta_nm,
-          assertion_type = assertion_type
-        )
-        dbc::assert_atom_is_in_set(
-          meta_nm,
-          set = names(vd_get()),
-          assertion_type = assertion_type
-        )
-      }
-      assert_is_var_set_id <- function(
-        id,
-        assertion_type = NULL
-      ) {
-        # @codedoc_comment_block news("vm@assert_is_var_set_id", "2023-07-05", "0.1.2")
-        # `var_set_dt$id` no longer needs to be of class character. For clarity
-        # us character, for marginal speed improvement use integer.
-        # @codedoc_comment_block news("vm@assert_is_var_set_id", "2023-07-05", "0.1.2")
-        dbc::assert_is_atom(
-          id,
-          assertion_type = assertion_type
-        )
-        dbc::assert_is_nonNA(
-          id,
-          assertion_type = assertion_type
-        )
-        dbc::assert_atom_is_in_set(
-          id,
-          set = vsd_get()[["id"]],
-          assertion_type = assertion_type
-        )
-      }
-      assert_is_var_set_meta_nm <- function(
-        meta_nm,
-        assertion_type = NULL
-      ) {
-        dbc::assert_is_character_nonNA_atom(
-          meta_nm,
-          assertion_type = assertion_type
-        )
-        dbc::assert_atom_is_in_set(
-          meta_nm,
-          set = names(vsd_get()),
-          assertion_type = assertion_type
-        )
-      }
-      assert_var_set_value_space_is_defined <- function() {
-        if (!var_set_value_space_is_defined()) {
-          stop("No value spaces have been defined")
-        }
-      }
-      assert_is_var_label_dt <- function(
-        value,
-        assertion_type = NULL
-      ) {
-        dbc::assert_is_one_of(
-          value,
-          funs = list(
-            dbc::report_is_data_table,
-            dbc::report_is_NULL
-          ),
-          assertion_type = assertion_type
-        )
-        if (data.table::is.data.table(value)) {
-          dbc::assert_has_names(
-            value,
-            required_names = "level",
-            assertion_type = assertion_type
-          )
-        }
-      }
-
-      # vd funs ----------------------------------------------------------------
-      vd_get <- function(var_nms = NULL) {
-        out <- data[["var_dt"]]
-        if (is.null(var_nms)) {
-          var_nms <- names(out)
-        }
-        out <- dt_independent_frame_dependent_contents__(out, var_nms)
-        return(out[])
-      }
-      vd_implied_get <- function() {
-        vsd <- vsd_get()
-        dt <- data.table::data.table(
-          var_nm = unique(unlist(vsd[["var_nm_set"]]))
-        )
-        if (nrow(dt) == 0L) {
-          return(data.table::data.table(
-            var_nm = character(0L),
-            var_set_dt_pos_set = integer(0L)
-          ))
-        }
-        
-        dt <- data.table::data.table(
-          var_nm = unlist(vsd[["var_nm_set"]]),
-          var_set_dt_pos_set = unlist(lapply(
-            seq_along(vsd[["var_nm_set"]]),
-            function(i) {
-              rep(i, length(vsd[["var_nm_set"]][[i]]))
-            }
-          ))
-        )
-        #' @importFrom data.table .SD
-        dt <- dt[
-          j = list("var_set_dt_pos_set" = list(.SD[["var_set_dt_pos_set"]])),
-          keyby = "var_nm"
-        ]
-        if ("var_nm" %in% names(dt)) {
-          data.table::setkeyv(dt, "var_nm")
-        }
-        return(dt[])
-      }
-      vd_set <- function(dt) {
-        data[["var_dt"]] <- dt
-      }
-
-      # vsd funs ---------------------------------------------------------------
-      vsd_get <- function(var_nms = NULL) {
-        out <- data[["var_set_dt"]]
-        if (!is.null(var_nms)) {
-          dbc::assert_vector_elems_are_in_set(var_nms, set = names(out))
-          out <- dt_independent_frame_dependent_contents__(out, var_nms)
-        }
-        return(out[])
-      }
-      vsd_set <- function(dt) {
-        data[["var_set_dt"]] <- dt
-      }
-
-      # vd_vsd funs ------------------------------------------------------------
-      vd_vsd_linkage_refresh <- function() {
-        vd <- vd_get()
-        if (nrow(vd) == 0L) {
-          return(invisible(NULL))
-        }
-        vdi <- vd_implied_get()
-        i.var_set_dt_pos_set <- NULL # appease R CMD CHECK
-        #' @importFrom data.table :=
-        vd[
-          i = vdi,
-          on = "var_nm",
-          j = "var_set_dt_pos_set" := i.var_set_dt_pos_set
-        ]
-        data.table::setkeyv(vd, "var_nm")
-        vd_set(vd)
-        return(invisible(NULL))
-      }
-      vd_vsd_intersect <- function() {
-        vd <- vd_get()
-        vdi <- vd_implied_get()
-        rm_var_nms <- union(
-          setdiff(
-            vd[["var_nm"]],
-            vdi[["var_nm"]]
-          ),
-          setdiff(
-            vdi[["var_nm"]],
-            vd[["var_nm"]]
-          )
-        )
-        if (length(rm_var_nms) > 0) {
-          vd_subset <- !vd[["var_nm"]] %in% rm_var_nms
-          vd <- vd[vd_subset, ]
-          vd_set(vd)
-
-          vsd <- vsd_get()
-          #' @importFrom data.table :=
-          vsd[
-            j = "var_nm_set" := list(
-              var_nm_set = lapply(.SD[["var_nm_set"]], setdiff, y = rm_var_nms)
-            )
-          ]
-          vsd_subset <- vapply(vsd[["var_nm_set"]], length, integer(1L)) > 0L
-          vsd <- vsd[vsd_subset, ]
-          if ("value_space" %in% names(vsd)) {
-            vsd[
-              j = "value_space" := list(
-                #' @importFrom data.table .N
-                value_space = lapply(seq_len(.N), function(i) {
-                  vs_i <- .SD[["value_space"]][[i]]
-                  if ("dt" %in% names(vs_i)) {
-                    dt_i <- vs_i[["dt"]]
-                    keep_nms_i <- setdiff(names(dt_i), rm_var_nms)
-                    keep_dt_i <- dt_i[
-                      i = !duplicated(dt_i, by = keep_nms_i, fromLast = TRUE),
-                      j = .SD,
-                      .SDcols = keep_nms_i
-                    ]
-                    vs_i[["dt"]] <- keep_dt_i
-                  }
-                  vs_i
-                })
-              )
-            ]
-          }
-          vsd_set(vsd)
-        }
-        vd_vsd_linkage_refresh()
-      }
-
-      # var_nm_set funs --------------------------------------------------------
-      var_set_id_to_pos <- function(id) {
-        dt <- data.table::setDT(list(id = var_set_meta_get_all("id")))
-        jdt <- data.table::setDT(list(id = id))
-        out <- dt[
-          i = jdt,
-          on = "id",
-          which = TRUE
-        ]
-        return(out)
-      }
-      var_set_pos_to_id <- function(pos) {
-        vsd_get()[["id"]][pos]
-      }
-      var_to_var_set_id <- function(var_nm) {
-        pos <- var_meta_get(var_nm = var_nm, meta_nm = "var_set_dt_pos_set")
-        return(var_set_pos_to_id(pos))
-      }
       # slot:var_set_list_get
       var_set_list_get <- function() {
-        var_set_list <- var_set_meta_get_all("var_nm_set")
-        names(var_set_list) <- var_set_meta_get_all("id")
-        return(var_set_list)
+        call_slot_fun_alias_in_slot_fun__(
+          "var_set_list_get"
+        )
       }
       # slot:var_set_get
       var_set_get <- function(id) {
-        assert_is_var_set_id(id)
-        vsd <- vsd_get()
-        return(vsd[["var_nm_set"]][[var_set_id_to_pos(id)]])
+        call_slot_fun_alias_in_slot_fun__(
+          "var_set_get"
+        )
       }
       # slot:var_set_meta_get
       var_set_meta_get <- function(
         id,
         meta_nm
       ) {
-        assert_is_var_set_id(id)
-        assert_is_var_set_meta_nm(meta_nm)
-        vsd <- vsd_get()
-        vsd[[meta_nm]][[var_set_id_to_pos(id)]]
+        call_slot_fun_alias_in_slot_fun__(
+          "var_set_meta_get"
+        )
       }
       # slot:var_set_meta_set
       var_set_meta_set <- function(
@@ -645,218 +362,79 @@ VariableMetadata <- function(var_dt, var_set_dt) {
         meta_nm,
         value
       ) {
-        assert_is_var_set_id(id)
-        vsd <- vsd_get()
-        data.table::set(
-          vsd,
-          i = var_set_id_to_pos(id),
-          j = meta_nm,
-          value = value
+        call_slot_fun_alias_in_slot_fun__(
+          "var_set_meta_set"
         )
-        vsd_set(vsd)
       }
       # slot:var_set_meta_get_all
       var_set_meta_get_all <- function(
         meta_nm
       ) {
-        assert_is_var_set_meta_nm(meta_nm)
-        vsd <- vsd_get()
-        vsd[[meta_nm]]
+        call_slot_fun_alias_in_slot_fun__(
+          "var_set_meta_get_all"
+        )
       }
       # slot:var_set_rename
       var_set_rename <- function(old, new) {
-        assert_is_var_set_id(old)
-        dbc::assert_is_character_nonNA_atom(new)
-        var_set_meta_set(id = old, meta_nm = "id", value = new)
+        call_slot_fun_alias_in_slot_fun__(
+          "var_set_rename"
+        )
       }
       # slot:var_set_remove
       var_set_remove <- function(id) {
-        assert_is_var_set_id(id)
-        pos <- var_set_id_to_pos(id)
-        vsd <- vsd_get()
-        vsd_subset <- setdiff(seq_len(nrow(vsd)), pos)
-        vsd <- vsd[vsd_subset, ]
-        vsd_set(vsd)
-        vd_vsd_intersect()
+        call_slot_fun_alias_in_slot_fun__(
+          "var_set_remove"
+        )
       }
 
       # var_set_value_space funs -----------------------------------------------
-      var_set_value_space_is_defined <- function() {
-        vsd <- vsd_get()
-        return("value_space" %in% names(vsd))
-      }
       # slot:var_set_value_space_get
       var_set_value_space_get <- function(id) {
-        assert_is_var_set_id(id)
-        assert_var_set_value_space_is_defined()
-        vsd <- vsd_get()
-        pos <- var_set_id_to_pos(id)
-        return(vsd[["value_space"]][[pos]])
+        call_slot_fun_alias_in_slot_fun__(
+          "var_set_value_space_get"
+        )
       }
       # slot:var_set_value_space_set
       var_set_value_space_set <- function(id, value_space) {
-        assert_var_set_value_space_is_defined()
-        vsd <- vsd_get()
-        pos <- var_set_id_to_pos(id)
-        data.table::set(
-          vsd,
-          i = pos,
-          j = "value_space",
-          # to ensure value_space remains a list
-          value = list(list(value_space))
+        call_slot_fun_alias_in_slot_fun__(
+          "var_set_value_space_set"
         )
-        vsd_set(vsd)
       }
       # slot:var_set_value_space_eval
       var_set_value_space_eval <- function(id, var_nms = NULL, env = NULL) {
-        call_slot_fun_alias_in_slot_fun__("var_set_value_space_eval")
-      }
-      var_set_value_set_dt_subset_expr <- function(id, expr) {
-        assert_var_set_value_space_is_defined()
-        dbc::assert_is_language_object(expr, assertion_type = "prod_input")
-        vs <- var_set_value_space_get(id)
-        dt <- vs[["dt"]]
-        if (!data.table::is.data.table(dt)) {
-          stop("Value space for id = \"", id, "\"  is not a data.table.")
-        }
-        dt_expr <- substitute(dt[i = expr], list(expr = expr))
-        dt <- eval(dt_expr)
-        var_set_value_space_set(id, dt)
-        return(invisible(NULL))
+        call_slot_fun_alias_in_slot_fun__(
+          "var_set_value_space_eval"
+        )
       }
       # slot:var_set_value_space_dt_subset
       var_set_value_space_dt_subset <- function(
         id,
         expr
       ) {
-        assert_var_set_value_space_is_defined()
-        assert_is_var_set_id(id)
-        expr <- substitute(expr)
-        var_set_value_set_dt_subset_expr(id, expr)
+        call_slot_fun_alias_in_slot_fun__(
+          "var_set_value_space_dt_subset"
+        )
       }
 
       # var funs ---------------------------------------------------------------
-      var_is_aggregateable_to__ <- function(from_var_nm, to_var_nm, dt) {
-        stopifnot(
-          identical(sort(names(dt)), sort(c(from_var_nm, to_var_nm)))
-        )
-        if (from_var_nm == to_var_nm) {
-          return(TRUE)
-        }
-        from_type <- var_meta_get(from_var_nm, "type")
-        to_type <- var_meta_get(to_var_nm, "type")
-        if (from_type != to_type || from_type != "categorical") {
-          return(FALSE)
-        }
-        from_pos_set <- var_meta_get(from_var_nm, "var_set_dt_pos_set")
-        to_pos_set <- var_meta_get(to_var_nm, "var_set_dt_pos_set")
-        if (length(intersect(from_pos_set, to_pos_set)) == 0) {
-          return(FALSE)
-        }
-        sum(duplicated(dt[[from_var_nm]])) == 0L
-      }
       # slot:var_is_aggregateable_to
       var_is_aggregateable_to <- function(from_var_nm, to_var_nm) {
-        # @codedoc_comment_block news("vm@var_is_aggregateable_to", "2023-07-10", "0.1.3")
-        # New slot `var_is_aggregateable_to`.
-        # @codedoc_comment_block news("vm@var_is_aggregateable_to", "2023-07-10", "0.1.3")
-        assert_is_var_nm(from_var_nm)
-        assert_is_var_nm(to_var_nm)
-        var_is_aggregateable_to__(
-          from_var_nm = from_var_nm,
-          to_var_nm = to_var_nm,
-          dt = vame_category_space_dt(c(from_var_nm, to_var_nm))
+        call_slot_fun_alias_in_slot_fun__(
+          "var_is_aggregateable_to"
         )
       }
       # slot:var_aggregate
       var_aggregate <- function(x, from_var_nm, to_var_nm) {
-        # @codedoc_comment_block news("vm@var_aggregate", "2023-07-10", "0.1.3")
-        # New slot `var_aggregate`.
-        # @codedoc_comment_block news("vm@var_aggregate", "2023-07-10", "0.1.3")
-        assert_is_var_nm(from_var_nm)
-        assert_is_var_nm(to_var_nm)
-        dbc::assert_is_vector(x)
-        dt <- vame_category_space_dt(c(from_var_nm, to_var_nm))
-        is_aggregateable <- var_is_aggregateable_to__(
-          from_var_nm = from_var_nm,
-          to_var_nm = to_var_nm,
-          dt = dt
+        call_slot_fun_alias_in_slot_fun__(
+          "var_aggregate"
         )
-        if (!is_aggregateable) {
-          stop("cannot aggregate ", from_var_nm, " to ", to_var_nm, "; ",
-               "aggregation only possible when there is exactly one ",
-               "level of the target variable for each level of the starting ",
-               "variable. if e.g. ", from_var_nm, " = 1 can be either ",
-               to_var_nm, " = 1 or 2, cannot aggregate.")
-        }
-        jdt <- data.table::setDT(list(x = x))
-        data.table::setnames(jdt, "x", from_var_nm)
-        dt[
-          i = jdt,
-          on = from_var_nm,
-          j = .SD[[1L]],
-          .SDcols = to_var_nm
-        ]
       }
 
       # slot:var_value_space_eval
       var_value_space_eval <- function(var_nm, env = NULL) {
-        # @codedoc_comment_block news("vm@var_value_space_eval", "2023-07-03", "0.1.1")
-        # New slot `vm@var_value_space_eval`.
-        # @codedoc_comment_block news("vm@var_value_space_eval", "2023-07-03", "0.1.1")
-
-        assert_is_var_nm(var_nm)
-        dbc::assert_is_one_of(
-          env,
-          funs = list(dbc::report_is_NULL,
-                      dbc::report_is_environment)
+        call_slot_fun_alias_in_slot_fun__(
+          "var_value_space_eval"
         )
-        if (is.null(env)) {
-          env <- parent.frame(1L)
-        }
-        pos <- var_meta_get(var_nm = var_nm, meta_nm = "var_set_dt_pos_set")
-        vsd <- vsd_get(var_nms = "id")
-        value_space <- lapply(
-          vsd[["id"]][pos],
-          function(id) {
-            var_set_value_space_eval(
-              id = id,
-              var_nms = var_nm,
-              env = env
-            )
-        })
-        value_space <- unique(value_space)
-        if (length(value_space) == 1) {
-          value_space <- value_space[[1]]
-        } else if (var_meta_get(var_nm, "type") == "categorical") {
-          value_space <- lapply(value_space, function(x) {
-            if ("set" %in% names(x)) {
-              x <- list(dt = data.table::data.table(x = x[["set"]]))
-              data.table::setnames(x[["dt"]], "x", var_nm)
-            }
-            if ("dt" %in% names(x)) {
-              x <- x[["dt"]]
-            }
-            x
-          })
-          value_space <- data.table::rbindlist(value_space)
-          value_space <- list(dt = unique(value_space, by = var_nm))
-        } else {
-          stop(
-            "Internal error: var_nm = \"", var_nm, "\" appears in more than ",
-            "one variable set value space, and its own value spaces are not ",
-            "all identical --- no logic has been defined for handling this ",
-            "situation.")
-        }
-        if ("dt" %in% names(value_space)) {
-          dt_subset <- !duplicated(value_space[["dt"]], by = var_nm)
-          value_space[["dt"]] <- value_space[["dt"]][
-            i = dt_subset,
-            j = .SD,
-            .SDcols = var_nm
-          ]
-        }
-        return(value_space)
       }
 
       # slot:var_assert
@@ -868,73 +446,16 @@ VariableMetadata <- function(var_dt, var_set_dt) {
         assertion_type = NULL,
         env = NULL
       ) {
-        # @codedoc_comment_block news("vm@var_assert", "2023-07-03", "0.1.1")
-        # Fixed `var_assert` handling of a value space based on `bounds`.
-        # @codedoc_comment_block news("vm@var_assert", "2023-07-03", "0.1.1")
-        # @codedoc_comment_block news("vm@var_assert", "2023-07-04", "0.1.2")
-        # Added arguments `x_nm`, `call`.
-        # @codedoc_comment_block news("vm@var_assert", "2023-07-04", "0.1.2")
-        x_nm <- dbc::handle_arg_x_nm(x_nm)
-        call <- dbc::handle_arg_call(call)
-        assertion_type <- dbc::handle_arg_assertion_type(assertion_type)
-
-        # @codedoc_comment_block news("vm@var_assert", "2023-07-11", "0.1.3")
-        # `vm@var_assert` gains arg `env`. This is passed
-        # to `vm@var_value_space_eval`.
-        # @codedoc_comment_block news("vm@var_assert", "2023-07-11", "0.1.3")
-        dbc::assert_is_one_of(
-          env,
-          funs = list(dbc::report_is_NULL,
-                      dbc::report_is_environment)
-        )
-        if (is.null(env)) {
-          env <- parent.frame(1L)
-        }
-
-        vs <- var_value_space_eval(var_nm, env = env)
-        dbc::assert_prod_interim_is_list(
-          vs,
-          call = call
-        )
-        dbc::assert_prod_interim_has_length(
-          vs,
-          expected_length = 1L,
-          call = call
-        )
-        assertion_fun_list <- value_space_value_assertion_funs__()
-        if (!names(vs) %in% names(assertion_fun_list)) {
-          utils::str(vs, 1)
-          stop("Internal error: no handling defined for value_space printed ",
-                "above --- complain to the vame package maintainer.")
-        }
-        assertion_fun_list[[names(vs)]](
-          x = x,
-          x_nm = x_nm,
-          call = call,
-          assertion_type = assertion_type,
-          var_nm = var_nm,
-          value_space = vs
+        call_slot_fun_alias_in_slot_fun__(
+          "var_assert"
         )
       }
 
       # slot:var_meta_get
       var_meta_get <- function(var_nm, meta_nm) {
-        assert_is_var_nm(var_nm)
-        assert_is_var_meta_nm(meta_nm)
-        vd <- vd_get()
-        jdt <- data.table::setDT(list(var_nm = var_nm))
-        # retrieve "pos" instead of joining directly to ensure that list-type
-        # columns are handled correctly.
-        pos <- vd[
-          i = jdt,
-          on = "var_nm",
-          which = TRUE
-        ]
-        out <- vd[[meta_nm]][pos]
-        if (inherits(out, "list") && length(out) == 1L) {
-          out <- out[[1]]
-        }
-        return(out)
+        call_slot_fun_alias_in_slot_fun__(
+          "var_meta_get"
+        )
       }
       # slot:var_meta_set
       var_meta_set <- function(
@@ -942,188 +463,103 @@ VariableMetadata <- function(var_dt, var_set_dt) {
         meta_nm,
         value
       ) {
-        assert_is_var_nm(var_nm)
-        vd <- vd_get()
-        data.table::set(
-          vd,
-          i = data.table::chmatch(var_nm, vd[["var_nm"]]),
-          j = meta_nm,
-          value = value
+        call_slot_fun_alias_in_slot_fun__(
+          "var_meta_set"
         )
-        return(invisible(NULL))
       }
       # slot:var_meta_get_all
       var_meta_get_all <- function(meta_nm) {
-        assert_is_var_meta_nm(meta_nm)
-        vd <- vd_get()
-        vd[[meta_nm]]
+        call_slot_fun_alias_in_slot_fun__(
+          "var_meta_get_all"
+        )
       }
       # slot:var_rename
       var_rename <- function(old, new) {
-        assert_is_var_nm(old)
-        dbc::assert_is_character_nonNA_atom(new)
-        var_meta_set(var_nm = old, meta_nm = "var_nm", value = new)
-        id <- var_to_var_set_id(new)
-        if (var_set_value_space_is_defined()) {
-          vs <- var_set_value_space_get(id = id)
-          if ("dt" %in% names(vs)) {
-            data.table::setnames(vs[["dt"]], old, new)
-          }
-          var_set_value_space_set(id = id, value_space = vs)
-        }
-        var_nm_set <- var_set_meta_get(id = id, meta_nm = "var_nm_set")
-        var_nm_set[var_nm_set == old] <- new
-        var_set_meta_set(id = id, meta_nm = "var_nm_set", value = var_nm_set)
-        invisible(NULL)
+        call_slot_fun_alias_in_slot_fun__(
+          "var_rename"
+        )
       }
       # slot:var_remove
       var_remove <- function(var_nm) {
-        # @codedoc_comment_block news("vm@var_remove", "2023-08-11", "0.1.9")
-        # `vm@var_remove` can now remove multiple variables in one go.
-        # @codedoc_comment_block news("vm@var_remove", "2023-08-11", "0.1.9")
-        for (vn in var_nm) {
-          assert_is_var_nm(vn)
-        }
-        expr <- substitute(!var_nm %in% VN, list(VN = var_nm))
-        vame_subset_expr(expr)
+        call_slot_fun_alias_in_slot_fun__(
+          "var_remove"
+        )
       }
       # slot:var_label_dt_get
       var_label_dt_get <- function(var_nm) {
-        assert_is_var_nm(var_nm)
-        var_meta_get(var_nm, "label_dt")
+        call_slot_fun_alias_in_slot_fun__(
+          "var_label_dt_get"
+        )
       }
       # slot:var_label_dt_set
       var_label_dt_set <- function(var_nm, value) {
-        assert_is_var_nm(var_nm)
-        assert_is_var_label_dt(value)
-        var_meta_set(var_nm, "label_dt", value)
+        call_slot_fun_alias_in_slot_fun__(
+          "var_label_dt_set"
+        )
       }
       # slot:var_labels_get
       var_labels_get <- function(x, var_nm, label_col_nm) {
-        assert_is_var_nm(var_nm)
-        ldt <- var_label_dt_get(var_nm = var_nm)
-        if (is.null(ldt)) {
-          stop("Variable \"", var_nm, "\" has no label_dt defined.")
-        }
-        dbc::assert_is_character_nonNA_atom(label_col_nm)
-        label_col_nm_set <- setdiff(names(ldt), "level")
-        if (!label_col_nm %in% label_col_nm_set) {
-          stop("label_col_nm = \"", label_col_nm, "\" not one of the defined ",
-               "label columns: ", deparse1(label_col_nm_set))
-        }
-        dbc::assert_has_class(x = x, required_class = class(ldt[["level"]]))
-        jdt <- data.table::setDT(list(level = x))
-        #' @importFrom data.table .SD
-        ldt[
-          i = jdt,
-          on = "level",
-          j = .SD[[1]],
-          .SDcols = label_col_nm
-        ]
+        call_slot_fun_alias_in_slot_fun__(
+          "var_labels_get"
+        )
       }
 
       # vame funs --------------------------------------------------------------
       # slot:vame_copy
       vame_copy <- function() {
-        call_slot_fun_alias_in_slot_fun__("vame_copy")
+        call_slot_fun_alias_in_slot_fun__(
+          "vame_copy"
+        )
       }
 
-      vame_subset_expr <- function(expr) {
-        dbc::assert_is_language_object(expr, assertion_type = "prod_input")
-        vd <- vd_get()
-        vd <- eval(
-          substitute(vd[i = expr], list(expr = expr))
-        )
-        vd_set(vd)
-        vd_vsd_intersect()
-      }
       # slot:vame_subset
       vame_subset <- function(expr) {
-        expr <- substitute(expr)
-        vame_subset_expr(expr)
-        invisible(NULL)
+        call_slot_fun_alias_in_slot_fun__(
+          "vame_copy"
+        )
       }
       # slot:vame_union_append
       vame_union_append <- function(x) {
-        # @codedoc_comment_block news("vm@vame_union_append", "2023-07-14", "0.1.4")
-        # Fixed `vame_union_append` --- used to always raise an error due to
-        # a misnamed object.
-        # @codedoc_comment_block news("vm@vame_union_append", "2023-07-14", "0.1.4")
-        # @codedoc_comment_block news("vm@vame_union_append", "2023-07-14", "0.1.5")
-        # Robustify `vame_union_append` --- use `use.names = TRUE, fill = TRUE`
-        # in `rbind` calls.
-        # @codedoc_comment_block news("vm@vame_union_append", "2023-07-14", "0.1.5")
-        # @codedoc_comment_block news("vm@vame_union_append", "2023-07-14", "0.1.6")
-        # fix `vame_union_append` --- no longer attempt to remove duplicates
-        # in rbind'd `var_dt` because some `by` columns may be of type `list`
-        # which is not supported by `duplicated`.
-        # @codedoc_comment_block news("vm@vame_union_append", "2023-07-14", "0.1.6")
-        e <- environment(x@vame_union_append)
-        vd_1 <- vd_get()
-        vsd_1 <- vsd_get()
-        vd_2 <- e[["vd_get"]]()
-        vsd_2 <- e[["vsd_get"]]()
-        vd <- rbind(vd_1, vd_2, use.names = TRUE, fill = TRUE)
-        vsd <- rbind(vsd_1, vsd_2, use.names = TRUE, fill = TRUE)
-        vsd <- vsd[!duplicated(vsd[["var_nm_set"]]), ]
-        vd_set(vd)
-        vsd_set(vsd)
-        vd_vsd_linkage_refresh()
-        return(invisible(NULL))
+        call_slot_fun_alias_in_slot_fun__(
+          "vame_union_append"
+        )
       }
 
       # vame_category_space funs -----------------------------------------------
       # slot:vame_category_space_dt_list
       vame_category_space_dt_list <- function(var_nms, env = NULL) {
-        dbc::assert_is_one_of(
-          env,
-          funs = list(dbc::report_is_NULL,
-                      dbc::report_is_environment)
+        call_slot_fun_alias_in_slot_fun__(
+          "vame_category_space_dt_list"
         )
-        if (is.null(env)) {
-          env <- parent.frame(1L)
-        }
-        vd <- vd_get(c("var_nm", "type"))
-        is_categorical <- vd[["type"]] == "categorical"
-        dbc::assert_vector_elems_are_in_set(
-          var_nms,
-          set = vd[["var_nm"]][is_categorical]
-        )
-        vsd <- vsd_get(c("id", "var_nm_set", "value_space"))
-        dtl <- category_space_dt_list__(
-          var_nms = var_nms,
-          vsd = vsd,
-          env = env
-        )
-        return(dtl)
       }
       # slot:vame_category_space_dt
       vame_category_space_dt <- function(var_nms, env = NULL) {
-        if (is.null(env)) {
-          env <- parent.frame(1L)
-        }
-        dtl <- vame_category_space_dt_list(var_nms = var_nms, env = env)
-        dt <- category_space_dt_list_to_category_space_dt__(dtl)
-        return(dt[])
+        call_slot_fun_alias_in_slot_fun__(
+          "vame_category_space_dt"
+        )
+      }
+
+      # self -------------------------------------------------------------------
+      self <- function() {
+        get("self_obj", envir = get("data"))
       }
     },
     envir = funs
   )
-  funs[["vd_vsd_intersect"]]()
-  if (nrow(funs[["vd_get"]]()) == 0) {
+  not_slot_fun_nms <- c("data", "self")
+  slot_fun_nms <- setdiff(ls(funs), not_slot_fun_nms)
+  slots <- lapply(slot_fun_nms, function(fun_nm) {
+    funs[[fun_nm]]
+  })
+  names(slots) <- slot_fun_nms
+  arg_list <- c(list(Class = "VariableMetadata"), slots)
+  out <- do.call(methods::new, arg_list, quote = TRUE)
+  funs$data$self_obj <- out
+  vd_vsd_intersect(out)
+  if (nrow(vd_get(out)) == 0) {
     stop("vame::VariableMetadata call resulted in no variables being defined. ",
          "do var_dt and var_set_dt use the same variable names?")
   }
-  arg_list <- list(
-    Class = "VariableMetadata"
-  )
-  slots <- lapply(vame_slot_nms_get__(), function(fun_nm) {
-    funs[[fun_nm]]
-  })
-  names(slots) <- vame_slot_nms_get__()
-  arg_list <- c(arg_list, slots)
-  out <- do.call(methods::new, arg_list, quote = TRUE)
-  funs$data$self_obj <- out
   return(out)
 }
 

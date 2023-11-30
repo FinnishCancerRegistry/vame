@@ -12,7 +12,7 @@ dt_join_assign__ <- function(
   i_col_nms
 ) {
   expr_rhs <- parse(
-    text = paste0("list(", paste0(i_col_nms, collapse = ", "), ")")
+    text = paste0("list(", paste0("i.", i_col_nms, collapse = ", "), ")")
   )[[1]]
   expr <- substitute(
     dt[
@@ -22,6 +22,7 @@ dt_join_assign__ <- function(
     ],
     list(LHS = dt_col_nms, RHS = expr_rhs)
   )
+  
   eval(expr)
 }
 
