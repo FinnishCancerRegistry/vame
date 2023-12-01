@@ -82,11 +82,6 @@ New slot `var_is_aggregateable_to`.
 
 ## News for version 0.1.2
 
-### vm@assert_is_var_set_id
-
-`var_set_dt$id` no longer needs to be of class character. For clarity
-us character, for marginal speed improvement use integer.
-
 ### vm@vame_category_space_dt
 
 Also `bounds` value space can be used when creating category spaces.

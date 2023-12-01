@@ -246,12 +246,6 @@ New slot \code{var_is_aggregateable_to}.
 }
 
 \subsection{News for version 0.1.2}{
-\subsection{vm@assert_is_var_set_id}{
-
-\code{var_set_dt$id} no longer needs to be of class character. For clarity
-us character, for marginal speed improvement use integer.
-}
-
 \subsection{vm@vame_category_space_dt}{
 
 Also \code{bounds} value space can be used when creating category spaces.

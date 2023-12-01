@@ -411,6 +411,7 @@ vame_subset_expr <- function(
   vm,
   expr
 ) {
+  # TODO: rename expr -> var_dt_expr, maybe add var_set_dt_expr
   assert_is_variablemetadata(vm, assertion_type = "prod_input")
   dbc::assert_is_language_object(expr, assertion_type = "prod_input")
   vd <- vd_get(vm)

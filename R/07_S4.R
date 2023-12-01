@@ -1,3 +1,69 @@
+doc_slot_fun_arg__ <- function(df, arg_nm, with_tag = FALSE) {
+  key <- paste0("param_", arg_nm)
+  if (!key %in% df[["key"]]) {
+    return(paste0("TODO: document argument ", arg_nm))
+  }
+  lines <- unlist(df[["comment_block"]][df[["key"]] == key])
+  if (length(lines) == 0) {
+    warning("arg_nm = \"", arg_nm, "\" has not been documented")
+    return(lines)
+  }
+  while (lines[1] == "") {
+    lines <- lines[-1]
+  }
+  if (!with_tag) {
+    lines <- gsub("^@param +", "", lines)
+    lines <- gsub(sprintf("(?<!\\w)%s(?!=\\w)", arg_nm),
+                  sprintf("`%s`", arg_nm),
+                  lines,
+                  perl = TRUE)
+    lines <- gsub("``", "`", lines)
+  }
+  if (lines[length(lines)] != "") {
+    lines <- c(lines, "")
+  }
+  return(lines)
+}
+
+doc_slot_fun__ <- function(df, fun_nm) {
+  key <- paste0("vm@", fun_nm)
+  description <- unlist(df[["comment_block"]][df[["key"]] == key])
+  fun_arg_nms <- names(formals(match.fun(fun_nm)))
+  slot_fun_arg_nms <- setdiff(fun_arg_nms, "vm")
+  slot_call_string <- paste0(
+    "vm@", fun_nm, "(", paste0(slot_fun_arg_nms, collapse = ", "), ")"
+  )
+  lines <- c(
+    paste0("@slot ", fun_nm),
+    "",
+    "*Description*",
+    "",
+    description,
+    "",
+    "*Usage*",
+    "",
+    paste0("`", slot_call_string, "`"),
+    ""
+  )
+  if (length(slot_fun_arg_nms) > 0) {
+    lines <- c(
+      lines,
+      "*Arguments*",
+      "",
+      unlist(lapply(slot_fun_arg_nms, doc_slot_fun_arg__, df = df))
+    )
+  }
+  return(lines)
+}
+doc_slot_funs__ <- function(fun_nms = NULL) {
+  if (is.null(fun_nms)) {
+    fun_nms <- vame_slot_nms_get__()
+  }
+  df <- codedoc::extract_keyed_comment_blocks()
+  out <- lapply(fun_nms, doc_slot_fun__, df = df)
+  unlist(out)
+}
+
 methods::setClass(
   Class = "VariableMetadata",
   slots = structure(
@@ -311,6 +377,7 @@ methods::setClass(
 #'   "dd" %in% vm_2@var_meta_get_all("var_nm")
 #' )
 #' @export
+#' @eval doc_slot_funs__()
 VariableMetadata <- function(var_dt, var_set_dt) {
   # @codedoc_comment_block news("vame::VariableMetadata", "2023-06-30", "0.1.0")
   # First release.
