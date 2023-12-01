@@ -204,6 +204,19 @@ var_set_value_space_eval <- function(
   # the variables in the set.
   # @codedoc_comment_block news("vm@var_set_value_space_eval", "2023-11-29", "0.1.9")
 
+  # @codedoc_comment_block feature(VariableMetadata, value spaces)
+  # The value spaces feature allows you to define what values (combinations of)
+  # variables can have. This information can then be retrieved from one single
+  # place (the `VariableMetadata` object) for use elsewhere, e.g. for computing
+  # something by strata. See also the category spaces and assertions features.
+  #
+  # The value spaces feature becomes available when `var_set_dt` contains column
+  # `value_space`. You can include it when `VariableMetadata` is constructed
+  # or you can use `vm@var_set_value_space_set` later.
+  #
+  # @codedoc_insert_comment_block specification(var_set_dt$value_space)
+  # @codedoc_comment_block feature(VariableMetadata, value spaces)
+
   dbc::assert_inherits(vm, required_class = "VariableMetadata")
 
   assert_is_var_set_id(vm, id = id)
@@ -529,6 +542,14 @@ var_assert <- function(
   # @codedoc_comment_block news("vm@var_assert", "2023-07-04", "0.1.2")
   # Added arguments `x_nm`, `call`.
   # @codedoc_comment_block news("vm@var_assert", "2023-07-04", "0.1.2")
+
+  # @codedoc_comment_block feature(VariableMetadata, assertions)
+  # The assertions feature allows you to check that variables look like what
+  # you expect. This feature relies on the value spaces feature --- see that
+  # for more information. Once the value spaces feature is available, the main
+  # way to use this feature is via `vm@var_assert`.
+  # @codedoc_comment_block feature(VariableMetadata, assertions)
+
   # @codedoc_comment_block param_x_nm
   # @param x_nm `[NULL, character]` (default `NULL`)
   # 
@@ -738,7 +759,7 @@ var_labels_get <- function(
   # for a variable. You can include `labeler` in `var_dt` when the
   # `VariableMetadata` object is constructed or use `vm@var_labeler_set` later.
   #
-  # @codedoc_insert_comment_block specification(labeler)
+  # @codedoc_insert_comment_block specification(var_dt$labeler)
   #
   # The main way to use the labeling feature is via `vm@var_labels_get`.
   # There may be edge cases where you may want to retrieve all labels with
@@ -938,6 +959,24 @@ vame_category_space_dt <- function(
   # @codedoc_comment_block vm@vame_category_space_dt
   # Get a category space `data.table`.
   # @codedoc_comment_block vm@vame_category_space_dt
+  
+  # @codedoc_comment_block feature(VariableMetadata, category spaces)
+  # The category spaces feature becomes available when the value spaces feature
+  # is available and when
+  # the `var_dt` of a `VariableMetadata` object has a `type` column, with
+  # value `"categorical"` for at least one variable.
+  # This features differs from the value spaces feature by being more specific
+  # and being able to produce one (large) `data.table` of allowed variable
+  # value combinations.
+  #
+  # @codedoc_insert_comment_block specification(var_dt$type)
+  # 
+  # This feature relies on the value spaces feature. See the documentation
+  # for that feature for more information.
+  #
+  # The category spaces feature is used via
+  # `vm@vame_category_space_dt` and `vm@vame_category_space_dt_list`.
+  # @codedoc_comment_block feature(VariableMetadata, category spaces)
   if (is.null(env)) {
     env <- parent.frame(1L)
   }

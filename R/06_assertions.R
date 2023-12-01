@@ -41,11 +41,12 @@ assert_is_labeler <- function(
     # A `labeler` can now be of type `function` in addition to `data.table`.
     # @codedoc_comment_block news("vm@var_labeler_set", "2023-12-01", "0.1.10")
 
-    # @codedoc_comment_block specification(labeler)
+    # @codedoc_comment_block specification(var_dt$labeler)
+    # `var_dt$labeler` must be a list column.
     # A `labeler` for a variable can be one of these:
     #
     # - A function with arguments named `x` and `label_col_nm`.
-    # @codedoc_comment_block specification(labeler)
+    # @codedoc_comment_block specification(var_dt$labeler)
     dbc::assert_is_function_with_required_argument_names(
       x = x,
       x_nm = x_nm,
@@ -54,11 +55,11 @@ assert_is_labeler <- function(
       assertion_type = assertion_type
     )
   } else if (data.table::is.data.table(x)) {
-    # @codedoc_comment_block specification(labeler)
+    # @codedoc_comment_block specification(var_dt$labeler)
     # - A `data.table` with column `level` and label columns --- you decide
     #   their names. For labels in different languages it is recommended to use
     #   ISO language codes as column names, e.g. "en".
-    # @codedoc_comment_block specification(labeler)
+    # @codedoc_comment_block specification(var_dt$labeler)
     dbc::assert_has_names(
       x = x,
       x_nm = x_nm,
@@ -85,6 +86,17 @@ assert_is_value_space <- function(
   if (is.null(x)) {
     return(invisible(NULL))
   }
+  # @codedoc_comment_block specification(var_set_dt$value_space)
+  # `var_set_dt$value_space` must be a list column.
+  # A `value_space` for a variable set must be named list of length one or
+  # `NULL`. Therefore `var_set_dt$value_space` is a list, in turn containing
+  # lists of length one or `NULL` values.
+  # The following element names are allowed and determine the type of the
+  # `value_space`: ${deparse1(value_space_type_names__())}.
+  #
+  # The `value_space` element must be one of the following:
+  # @codedoc_insert_comment_block types(var_set_dt$value_space)
+  # @codedoc_comment_block specification(var_set_dt$value_space)
   dbc::assert_has_length(
     x = x,
     expected_length = 1L,
@@ -131,6 +143,18 @@ assert_is_var_dt <- function(
            x_nm = x_nm,
            call = call,
            assertion_type = assertion_type)
+  }
+  if ("type" %in% names(x)) {
+    # @codedoc_comment_block specification(var_dt$type)
+    # `var_dt$type` must be a character string vector. Missing values are
+    # allowed.
+    # @codedoc_comment_block specification(var_dt$type)
+    dbc::assert_is_character_vector(
+      x = x[["type"]],
+      x_nm = paste0(x_nm, "$type"),
+      call = call,
+      assertion_type = assertion_type
+    )
   }
   return(invisible(NULL))
 }

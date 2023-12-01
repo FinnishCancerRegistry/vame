@@ -3,6 +3,12 @@ value_space_type_report_funs__ <- function() {
     dt = function(x, x_nm = NULL, call = NULL) {
       x_nm <- dbc::handle_arg_x_nm(x_nm)
       call <- dbc::handle_arg_call(call)
+      # @codedoc_comment_block types(var_set_dt$value_space)
+      # - `"dt"`: A `data.table`. The column names must be the same as those
+      #   in the variable set. This can be used to define the (joint) value
+      #   space of one or more variables.
+      #   E.g. `list(dt = data.table::CJ(a = 1:2, b = 3:4))`.
+      # @codedoc_comment_block types(var_set_dt$value_space)
       dbc::report_is_data_table(
         x[["dt"]],
         x_nm = paste0(x_nm, "[[\"dt\"]]"),
@@ -12,6 +18,11 @@ value_space_type_report_funs__ <- function() {
     set = function(x, x_nm = NULL, call = NULL) {
       x_nm <- dbc::handle_arg_x_nm(x_nm)
       call <- dbc::handle_arg_call(call)
+      # @codedoc_comment_block types(var_set_dt$value_space)
+      # - `"set"`: A vector of any kinds of values. Only allowed for a variable
+      #   set containing exactly one variable.
+      #   E.g. `list(set = 1:2)`.
+      # @codedoc_comment_block types(var_set_dt$value_space)
       dbc::report_is_vector(
         x[["set"]],
         x_nm = paste0(x_nm, "[[\"set\"]]"),
@@ -21,6 +32,16 @@ value_space_type_report_funs__ <- function() {
     expr = function(x, x_nm = NULL, call = NULL) {
       x_nm <- dbc::handle_arg_x_nm(x_nm)
       call <- dbc::handle_arg_call(call)
+      # @codedoc_comment_block types(var_set_dt$value_space)
+      # - `"expr"`: An unevaluated R expression.
+      #   This can be used to define the (joint) value
+      #   space of one or more variables. What to do with the result of the
+      #   expression is deduced from the type of the result --- e.g. a 
+      #   `data.table` result will be handled in the same manner as if the
+      #   `value_space` had been of type `dt`. This can be useful for making use
+      #   of functions to define the value space:
+      #   E.g. `list(expr = quote(my_fun()))`.
+      # @codedoc_comment_block types(var_set_dt$value_space)
       dbc::report_is_language_object(
         x[["expr"]],
         x_nm = paste0(x_nm, "[[\"expr\"]]"),
@@ -30,6 +51,14 @@ value_space_type_report_funs__ <- function() {
     fun = function(x, x_nm = NULL, call = NULL) {
       x_nm <- dbc::handle_arg_x_nm(x_nm)
       call <- dbc::handle_arg_call(call)
+      # @codedoc_comment_block types(var_set_dt$value_space)
+      # - `"fun"`: A function.
+      #   The idea is the same as `expr`, but assigning a function as the
+      #   value space is less safe: The function's enclosing environment may
+      #   not be what was intended if a `VariableMetadata` object is read from
+      #   disk.
+      #   E.g. `list(fun = my_fun)`.
+      # @codedoc_comment_block types(var_set_dt$value_space)
       dbc::report_is_function(
         x[["fun"]],
         x_nm = paste0(x_nm, "[[\"fun\"]]"),
@@ -41,6 +70,12 @@ value_space_type_report_funs__ <- function() {
       x_nm <- paste0(x_nm, "[[\"unrestricted\"]]")
       x <- x[["unrestricted"]]
       call <- dbc::handle_arg_call(call)
+      # @codedoc_comment_block types(var_set_dt$value_space)
+      # - `"unrestricted"`: A list with named element `class_set`.
+      #   Sometimes a variable has no restrictions besides its class.
+      #   String variables can often have any value.
+      #   E.g. `list(unrestricted = list(class_set = "character"))`.
+      # @codedoc_comment_block types(var_set_dt$value_space)
       rbind(
         dbc::report_is_list(
           x = x,
@@ -65,6 +100,12 @@ value_space_type_report_funs__ <- function() {
       )
     },
     regex = function(x, x_nm = NULL, call = NULL) {
+      # @codedoc_comment_block types(var_set_dt$value_space)
+      # - `"regex"`: A character string regular expression.
+      #   Some string variables are known in advance to always match a specific
+      #   regular expression.
+      #   E.g. `list(regex = "^C[0-9.]+$")`.
+      # @codedoc_comment_block types(var_set_dt$value_space)
       x_nm <- dbc::handle_arg_x_nm(x_nm)
       x_nm <- paste0(x_nm, "[[\"regex\"]]")
       x <- x[["regex"]]
@@ -75,6 +116,12 @@ value_space_type_report_funs__ <- function() {
       )
     },
     bounds = function(x, x_nm = NULL, call = NULL) {
+      # @codedoc_comment_block types(var_set_dt$value_space)
+      # - `"bounds"`: A list defining the upper and lower bounds.
+      #   You can define upper and lower limits for one variable with this
+      #   approach.
+      #   E.g. `list(bounds = list(lo = 0.0, hi = 1.0, lo_inclusive = FALSE, hi_inclusive = TRUE))`
+      # @codedoc_comment_block types(var_set_dt$value_space)
       x_nm <- dbc::handle_arg_x_nm(x_nm)
       x_nm <- paste0(x_nm, "[[\"bounds\"]]")
       x <- x[["bounds"]]

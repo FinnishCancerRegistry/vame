@@ -26,7 +26,8 @@ vector of variable names. e.g. \code{list(c("a", "b"))}.
 }}
 }
 \description{
-The \code{VariableMetadata} object.
+The \code{VariableMetadata} object. See section \strong{Features} for what you can do
+with one.
 }
 \section{Slots}{
 
@@ -565,6 +566,68 @@ Environment where a value space will be evaluated, if applicable.
 
 \section{Features}{
 
+\strong{Value spaces}
+
+The value spaces feature allows you to define what values (combinations of)
+variables can have. This information can then be retrieved from one single
+place (the \code{VariableMetadata} object) for use elsewhere, e.g. for computing
+something by strata. See also the category spaces and assertions features.
+
+The value spaces feature becomes available when \code{var_set_dt} contains column
+\code{value_space}. You can include it when \code{VariableMetadata} is constructed
+or you can use \code{vm@var_set_value_space_set} later.
+
+\code{var_set_dt$value_space} must be a list column.
+A \code{value_space} for a variable set must be named list of length one or
+\code{NULL}. Therefore \code{var_set_dt$value_space} is a list, in turn containing
+lists of length one or \code{NULL} values.
+The following element names are allowed and determine the type of the
+\code{value_space}: c("dt", "set", "expr", "fun", "unrestricted", "regex", "bounds").
+
+The \code{value_space} element must be one of the following:
+\itemize{
+\item \code{"dt"}: A \code{data.table}. The column names must be the same as those
+in the variable set. This can be used to define the (joint) value
+space of one or more variables.
+E.g. \code{list(dt = data.table::CJ(a = 1:2, b = 3:4))}.
+\item \code{"set"}: A vector of any kinds of values. Only allowed for a variable
+set containing exactly one variable.
+E.g. \code{list(set = 1:2)}.
+\item \code{"expr"}: An unevaluated R expression.
+This can be used to define the (joint) value
+space of one or more variables. What to do with the result of the
+expression is deduced from the type of the result --- e.g. a
+\code{data.table} result will be handled in the same manner as if the
+\code{value_space} had been of type \code{dt}. This can be useful for making use
+of functions to define the value space:
+E.g. \code{list(expr = quote(my_fun()))}.
+\item \code{"fun"}: A function.
+The idea is the same as \code{expr}, but assigning a function as the
+value space is less safe: The function's enclosing environment may
+not be what was intended if a \code{VariableMetadata} object is read from
+disk.
+E.g. \code{list(fun = my_fun)}.
+\item \code{"unrestricted"}: A list with named element \code{class_set}.
+Sometimes a variable has no restrictions besides its class.
+String variables can often have any value.
+E.g. \code{list(unrestricted = list(class_set = "character"))}.
+\item \code{"regex"}: A character string regular expression.
+Some string variables are known in advance to always match a specific
+regular expression.
+E.g. \code{list(regex = "^C[0-9.]+$")}.
+\item \code{"bounds"}: A list defining the upper and lower bounds.
+You can define upper and lower limits for one variable with this
+approach.
+E.g. \code{list(bounds = list(lo = 0.0, hi = 1.0, lo_inclusive = FALSE, hi_inclusive = TRUE))}
+}
+
+\strong{Assertions}
+
+The assertions feature allows you to check that variables look like what
+you expect. This feature relies on the value spaces feature --- see that
+for more information. Once the value spaces feature is available, the main
+way to use this feature is via \code{vm@var_assert}.
+
 \strong{Labeling}
 
 The labeling feature becomes available if
@@ -572,6 +635,7 @@ the \code{var_dt} of a \code{VariableMetadata} object has a \code{labeler} colum
 for a variable. You can include \code{labeler} in \code{var_dt} when the
 \code{VariableMetadata} object is constructed or use \code{vm@var_labeler_set} later.
 
+\code{var_dt$labeler} must be a list column.
 A \code{labeler} for a variable can be one of these:
 \itemize{
 \item A function with arguments named \code{x} and \code{label_col_nm}.
@@ -583,6 +647,25 @@ ISO language codes as column names, e.g. "en".
 The main way to use the labeling feature is via \code{vm@var_labels_get}.
 There may be edge cases where you may want to retrieve all labels with
 \code{vm@var_labeler_get}.
+
+\strong{Category spaces}
+
+The category spaces feature becomes available when the value spaces feature
+is available and when
+the \code{var_dt} of a \code{VariableMetadata} object has a \code{type} column, with
+value \code{"categorical"} for at least one variable.
+This features differs from the value spaces feature by being more specific
+and being able to produce one (large) \code{data.table} of allowed variable
+value combinations.
+
+\code{var_dt$type} must be a character string vector. Missing values are
+allowed.
+
+This feature relies on the value spaces feature. See the documentation
+for that feature for more information.
+
+The category spaces feature is used via
+\code{vm@vame_category_space_dt} and \code{vm@vame_category_space_dt_list}.
 }
 
 \examples{

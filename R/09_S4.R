@@ -103,7 +103,8 @@ methods::setClass(
 #' @title Variable Metadata
 #' @docType class
 #' @description
-#' The `VariableMetadata` object.
+#' The `VariableMetadata` object. See section **Features** for what you can do
+#' with one.
 #' @name VariableMetadata-class
 #' @aliases VariableMetadata
 #' @param var_dt `[data.table]`
@@ -411,8 +412,8 @@ methods::setClass(
 #' @eval local({
 #'   df <- codedoc::extract_keyed_comment_blocks()
 #'   c(
-#'     doc_slot_funs__(df = df),
-#'     doc_variablemetadata_features__(df = df)
+#'     doc_variablemetadata_features__(df = df),
+#'     doc_slot_funs__(df = df)
 #'   )
 #' })
 VariableMetadata <- function(var_dt, var_set_dt) {
