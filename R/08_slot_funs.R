@@ -673,26 +673,52 @@ var_meta_get_all <- function(
 
 var_rename <- function(
   vm,
-  old,
-  new
+  old_var_nms,
+  new_var_nms
 ) {
   # @codedoc_comment_block vm@var_rename
-  # Rename a variable.
+  # Rename variables.
   # @codedoc_comment_block vm@var_rename
-  assert_is_var_nm(vm, old)
-  dbc::assert_is_character_nonNA_atom(new)
-  var_meta_set(vm, var_nm = old, meta_nm = "var_nm", value = new)
-  id <- var_to_var_set_id(vm, new)
-  if (var_set_value_space_is_defined(vm)) {
-    vs <- var_set_value_space_get(vm, id = id)
-    if ("dt" %in% names(vs)) {
-      data.table::setnames(vs[["dt"]], old, new)
+
+  # @codedoc_comment_block news("vm@var_rename", "2023-12-01", "0.2.0")
+  # Rename `old` to `old_var_nms` and `new` to `new_var_nms`.
+  # @codedoc_comment_block news("vm@var_rename", "2023-12-01", "0.2.0")
+
+  # @codedoc_comment_block param_old_var_nms
+  # @param old_var_nms `[character]` (no default)
+  #
+  # Variable names to change.
+  # @codedoc_comment_block param_old_var_nms
+  dbc::assert_is_character_nonNA_vector(old_var_nms)
+  # @codedoc_comment_block param_new_var_nms
+  # @param new_var_nms `[character]` (no default)
+  #
+  # Variable names to change to.
+  # @codedoc_comment_block param_new_var_nms
+  dbc::assert_is_character_nonNA_vector(new_var_nms)
+  stopifnot(length(old_var_nms) == length(new_var_nms))
+  lapply(seq_along(old_var_nms), function(i) {
+    old_var_nm <- old_var_nms[i]
+    assert_is_var_nm(vm, old_var_nm)
+    new_var_nm <- new_var_nms[i]
+    var_meta_set(
+      vm,
+      var_nm = old_var_nm,
+      meta_nm = "var_nm",
+      value = new_var_nm
+    )
+    id <- var_to_var_set_id(vm, new_var_nm)
+    if (var_set_value_space_is_defined(vm)) {
+      vs <- var_set_value_space_get(vm, id = id)
+      if ("dt" %in% names(vs)) {
+        data.table::setnames(vs[["dt"]], old_var_nm, new_var_nm)
+      }
+      var_set_value_space_set(vm, id = id, value_space = vs)
     }
-    var_set_value_space_set(vm, id = id, value_space = vs)
-  }
-  var_nm_set <- var_set_meta_get(vm, id = id, meta_nm = "var_nm_set")
-  var_nm_set[var_nm_set == old] <- new
-  var_set_meta_set(vm, id = id, meta_nm = "var_nm_set", value = var_nm_set)
+    var_nm_set <- var_set_meta_get(vm, id = id, meta_nm = "var_nm_set")
+    var_nm_set[var_nm_set == old_var_nm] <- new_var_nm
+    var_set_meta_set(vm, id = id, meta_nm = "var_nm_set", value = var_nm_set)
+  })
   invisible(NULL)
 }
 

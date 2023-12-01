@@ -569,7 +569,7 @@ VariableMetadata <- function(var_dt, var_set_dt) {
         )
       }
       # slot:var_rename
-      var_rename <- function(old, new) {
+      var_rename <- function(old_var_nms, new_var_nms) {
         call_slot_fun_alias_in_slot_fun__(
           "var_rename"
         )

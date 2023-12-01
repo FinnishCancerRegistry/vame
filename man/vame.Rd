@@ -169,6 +169,11 @@ Rename \code{expr} to \code{var_dt_expr}. Add arg \code{var_set_dt_expr}.
 Rename \code{x} to \code{vm_2}.
 }
 
+\subsection{vm@var_rename}{
+
+Rename \code{old} to \code{old_var_nms} and \code{new} to \code{new_var_nms}.
+}
+
 }
 
 \subsection{News for version 0.1.10}{

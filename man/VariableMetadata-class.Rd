@@ -388,16 +388,21 @@ of a \code{VariableMetadata} object.}
 
 \item{\code{var_rename}}{\emph{Description}
 
-Rename a variable.
+Rename variables.
 
 \emph{Usage}
 
-\code{vm@var_rename(old, new)}
+\code{vm@var_rename(old_var_nms, new_var_nms)}
 
 \emph{Arguments}
 
-TODO: document argument old
-TODO: document argument new}
+\code{old_var_nms} \verb{[character]} (no default)
+
+Variable names to change.
+
+\code{new_var_nms} \verb{[character]} (no default)
+
+Variable names to change to.}
 
 \item{\code{var_remove}}{\emph{Description}
 
