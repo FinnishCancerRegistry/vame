@@ -835,15 +835,40 @@ vame_copy <- function(vm) {
 
 vame_subset <- function(
   vm,
-  expr
+  var_dt_expr = NULL,
+  var_set_dt_expr = NULL
 ) {
   # @codedoc_comment_block vm@vame_subset
-  # Subset whole `VariableMetadata` object.
+  # Subset whole `VariableMetadata` object. Subset either `var_dt` or
+  # `var_set_dt` (or both) and keep only metadata for variables that appear in
+  # both `var_dt` and `var_set_dt`.
   # @codedoc_comment_block vm@vame_subset
-  # TODO: rename expr -> var_dt_expr, maybe add var_set_dt_expr
-  expr <- substitute(expr)
-  vame_subset_expr(expr)
-  invisible(NULL)
+
+  # @codedoc_comment_block news("vm@vame_subset", "2023-12-01", "0.2.0")
+  # Rename `expr` to `var_dt_expr`. Add arg `var_set_dt_expr`.
+  # @codedoc_comment_block news("vm@vame_subset", "2023-12-01", "0.2.0")
+  
+  # @codedoc_comment_block param_var_dt_expr
+  # @param var_dt_expr `[NULL, logical, integer]` (default `NULL`)
+  #
+  # An R expression that should evaluate into `NULL`, `logical`, or `integer`.
+  # The latter two are used to subset `var_dt`. `NULL` implies no subset.
+  # @codedoc_comment_block param_var_dt_expr
+  var_dt_expr <- substitute(var_dt_expr)
+  # @codedoc_comment_block param_var_set_dt_expr
+  # @param var_set_dt_expr `[NULL, logical, integer]` (default `NULL`)
+  #
+  # An R expression that should evaluate into `NULL`, `logical`, or `integer`.
+  # The latter two are used to subset `var_set_dt_expr`. `NULL` implies no
+  # subset.
+  # @codedoc_comment_block param_var_set_dt_expr
+  var_set_dt_expr <- substitute(var_set_dt_expr)
+  vame_subset_expr(
+    vm = vm,
+    var_dt_expr = var_dt_expr,
+    var_set_dt_expr = var_set_dt_expr
+  )
+  return(invisible(NULL))
 }
 
 

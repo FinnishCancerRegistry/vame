@@ -487,18 +487,26 @@ Take a deep copy of a VariableMetadata object. See \code{?data.table::copy}.
 
 \item{\code{vame_subset}}{\emph{Description}
 
-Subset whole \code{VariableMetadata} object.
+Subset whole \code{VariableMetadata} object. Subset either \code{var_dt} or
+\code{var_set_dt} (or both) and keep only metadata for variables that appear in
+both \code{var_dt} and \code{var_set_dt}.
 
 \emph{Usage}
 
-\code{vm@vame_subset(expr)}
+\code{vm@vame_subset(var_dt_expr, var_set_dt_expr)}
 
 \emph{Arguments}
 
-\code{expr} \verb{[any]} (no default)
+\code{var_dt_expr} \verb{[NULL, logical, integer]} (default \code{NULL})
 
-Expression to subset a \code{data.table} object. Available columns depends on
-context.}
+An R expression that should evaluate into \code{NULL}, \code{logical}, or \code{integer}.
+The latter two are used to subset \code{var_dt}. \code{NULL} implies no subset.
+
+\code{var_set_dt_expr} \verb{[NULL, logical, integer]} (default \code{NULL})
+
+An R expression that should evaluate into \code{NULL}, \code{logical}, or \code{integer}.
+The latter two are used to subset \code{var_set_dt_expr}. \code{NULL} implies no
+subset.}
 
 \item{\code{vame_union_append}}{\emph{Description}
 

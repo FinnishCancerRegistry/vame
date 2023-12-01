@@ -153,6 +153,14 @@ my_fun_2 <- function(dg_age) \{
 
 \section{News}{
 
+\subsection{News for version 0.2.0}{
+\subsection{vm@vame_subset}{
+
+Rename \code{expr} to \code{var_dt_expr}. Add arg \code{var_set_dt_expr}.
+}
+
+}
+
 \subsection{News for version 0.1.10}{
 \subsection{VariableMetadata}{
 

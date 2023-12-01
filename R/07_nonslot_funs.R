@@ -345,15 +345,18 @@ var_is_aggregateable_to__ <- function(
 
 vame_subset_expr <- function(
   vm,
-  expr
+  var_dt_expr,
+  var_set_dt_expr
 ) {
-  # TODO: rename expr -> var_dt_expr, maybe add var_set_dt_expr
   assert_is_variablemetadata(vm, assertion_type = "prod_input")
-  dbc::assert_is_language_object(expr, assertion_type = "prod_input")
+  dbc::assert_is_language_object(var_dt_expr, assertion_type = "prod_input")
+  dbc::assert_is_language_object(var_set_dt_expr, assertion_type = "prod_input")
   vd <- vd_get(vm)
-  vd <- eval(
-    substitute(vd[i = expr], list(expr = expr))
-  )
+  vd <- eval(substitute(vd[i = expr], list(expr = var_dt_expr)))
   vd_set(vm, vd)
+  vsd <- vsd_get(vm)
+  vsd <- eval(substitute(vsd[i = expr], list(expr = var_set_dt_expr)))
+  vsd_set(vm, vsd)
   vd_vsd_intersect(vm)
+  return(invisible(NULL))
 }
