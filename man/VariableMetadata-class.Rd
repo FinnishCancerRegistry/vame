@@ -563,6 +563,28 @@ Environment where a value space will be evaluated, if applicable.
 }}
 }}
 
+\section{Features}{
+
+\strong{Labeling}
+
+The labeling feature becomes available if
+the \code{var_dt} of a \code{VariableMetadata} object has a \code{labeler} column value
+for a variable. You can include \code{labeler} in \code{var_dt} when the
+\code{VariableMetadata} object is constructed or use \code{vm@var_labeler_set} later.
+
+A \code{labeler} for a variable can be one of these:
+\itemize{
+\item A function with arguments named \code{x} and \code{label_col_nm}.
+\item A \code{data.table} with column \code{level} and label columns --- you decide
+their names. For labels in different languages it is recommended to use
+ISO language codes as column names, e.g. "en".
+}
+
+The main way to use the labeling feature is via \code{vm@var_labels_get}.
+There may be edge cases where you may want to retrieve all labels with
+\code{vm@var_labeler_get}.
+}
+
 \examples{
 
 # vame::VariableMetadata ----------------------------------------------------

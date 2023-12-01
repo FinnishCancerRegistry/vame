@@ -153,6 +153,24 @@ my_fun_2 <- function(dg_age) \{
 
 \section{News}{
 
+\subsection{News for version 0.1.10}{
+\subsection{VariableMetadata}{
+
+\code{label_dt} was renamed to \code{labeler}.
+}
+
+\subsection{vm@var_labeler_set}{
+
+A \code{labeler} can now be of type \code{function} in addition to \code{data.table}.
+}
+
+\subsection{vm@var_labels_get}{
+
+\code{vm@var_labels_get} now can handle \code{labeler}s of type \code{function}.
+}
+
+}
+
 \subsection{News for version 0.1.9}{
 \subsection{vm@var_remove}{
 

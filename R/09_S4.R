@@ -55,13 +55,41 @@ doc_slot_fun__ <- function(df, fun_nm) {
   }
   return(lines)
 }
-doc_slot_funs__ <- function(fun_nms = NULL) {
+doc_slot_funs__ <- function(df = NULL, fun_nms = NULL) {
+  if (is.null(df)) {
+    df <- codedoc::extract_keyed_comment_blocks()
+  }
   if (is.null(fun_nms)) {
     fun_nms <- vame_slot_nms_get__()
   }
-  df <- codedoc::extract_keyed_comment_blocks()
   out <- lapply(fun_nms, doc_slot_fun__, df = df)
   unlist(out)
+}
+doc_variablemetadata_features__ <- function(df = NULL) {
+  if (is.null(df)) {
+    df <- codedoc::extract_keyed_comment_blocks()
+  }
+  feature_keys <- unique(df[["key"]])
+  feature_regex <- "^feature[(]VariableMetadata, "
+  feature_keys <- feature_keys[
+    grepl(feature_regex, feature_keys)
+  ]
+  if (length(feature_keys) == 0) {
+    return(character(0L))
+  }
+  c(
+    "@section Features:",
+    unlist(lapply(feature_keys, function(feature_key) {
+      lines <- unlist(df[["comment_block"]][df[["key"]] == feature_key])
+      feat_nm <- sub(feature_regex, "", feature_key)
+      feat_nm <- gsub("[()]", "", feat_nm)
+      feat_nm <- paste0(
+        toupper(substr(feat_nm, 1, 1)),
+        substr(feat_nm, 2, nchar(feat_nm))
+      )
+      c(paste0("**", feat_nm, "**"), "", lines, "")
+    }))
+  ) 
 }
 
 methods::setClass(
@@ -380,11 +408,18 @@ methods::setClass(
 #'   "dd" %in% vm_2@var_meta_get_all("var_nm")
 #' )
 #' @export
-#' @eval doc_slot_funs__()
+#' @eval local({
+#'   df <- codedoc::extract_keyed_comment_blocks()
+#'   c(
+#'     doc_slot_funs__(df = df),
+#'     doc_variablemetadata_features__(df = df)
+#'   )
+#' })
 VariableMetadata <- function(var_dt, var_set_dt) {
   # @codedoc_comment_block news("vame::VariableMetadata", "2023-06-30", "0.1.0")
   # First release.
   # @codedoc_comment_block news("vame::VariableMetadata", "2023-06-30", "0.1.0")
+  
   assert_is_var_dt(var_dt)
   assert_is_var_set_dt(var_set_dt)
   pkg_env <- environment(VariableMetadata)

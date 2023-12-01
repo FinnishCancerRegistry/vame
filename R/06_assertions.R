@@ -37,6 +37,15 @@ assert_is_labeler <- function(
     assertion_type = assertion_type
   )
   if (is.function(x)) {
+    # @codedoc_comment_block news("vm@var_labeler_set", "2023-12-01", "0.1.10")
+    # A `labeler` can now be of type `function` in addition to `data.table`.
+    # @codedoc_comment_block news("vm@var_labeler_set", "2023-12-01", "0.1.10")
+
+    # @codedoc_comment_block specification(labeler)
+    # A `labeler` for a variable can be one of these:
+    #
+    # - A function with arguments named `x` and `label_col_nm`.
+    # @codedoc_comment_block specification(labeler)
     dbc::assert_is_function_with_required_argument_names(
       x = x,
       x_nm = x_nm,
@@ -45,6 +54,11 @@ assert_is_labeler <- function(
       assertion_type = assertion_type
     )
   } else if (data.table::is.data.table(x)) {
+    # @codedoc_comment_block specification(labeler)
+    # - A `data.table` with column `level` and label columns --- you decide
+    #   their names. For labels in different languages it is recommended to use
+    #   ISO language codes as column names, e.g. "en".
+    # @codedoc_comment_block specification(labeler)
     dbc::assert_has_names(
       x = x,
       x_nm = x_nm,
@@ -109,6 +123,9 @@ assert_is_var_dt <- function(
     assertion_type = assertion_type,
     required_names = c("var_nm")
   )
+  # @codedoc_comment_block news("VariableMetadata", "2023-12-01", "0.1.10")
+  # `label_dt` was renamed to `labeler`. 
+  # @codedoc_comment_block news("VariableMetadata", "2023-12-01", "0.1.10")
   if ("labeler" %in% names(x)) {
     lapply(x[["labeler"]], assert_is_labeler,
            x_nm = x_nm,

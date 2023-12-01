@@ -731,6 +731,19 @@ var_labels_get <- function(
   # @codedoc_comment_block vm@var_labels_get
   # Get label for each value in `x` for `var_nm`.
   # @codedoc_comment_block vm@var_labels_get
+  
+  # @codedoc_comment_block feature(VariableMetadata, labeling)
+  # The labeling feature becomes available if
+  # the `var_dt` of a `VariableMetadata` object has a `labeler` column value
+  # for a variable. You can include `labeler` in `var_dt` when the
+  # `VariableMetadata` object is constructed or use `vm@var_labeler_set` later.
+  #
+  # @codedoc_insert_comment_block specification(labeler)
+  #
+  # The main way to use the labeling feature is via `vm@var_labels_get`.
+  # There may be edge cases where you may want to retrieve all labels with
+  # `vm@var_labeler_get`.
+  # @codedoc_comment_block feature(VariableMetadata, labeling)
   assert_is_var_nm(vm, var_nm)
   labeler <- var_labeler_get(vm, var_nm = var_nm)
   
@@ -767,6 +780,9 @@ var_labels_get <- function(
       .SDcols = label_col_nm
     ]
   } else if (is.function(labeler)) {
+    # @codedoc_comment_block news("vm@var_labels_get", "2023-12-01", "0.1.10")
+    # `vm@var_labels_get` now can handle `labeler`s of type `function`.
+    # @codedoc_comment_block news("vm@var_labels_get", "2023-12-01", "0.1.10")
     if (is.null(label_col_nm)) {
       stop("label_col_nm = NULL, but labeler is a function so cannot ",
            "determine label_col_nm automatically.")
