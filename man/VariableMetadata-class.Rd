@@ -116,21 +116,21 @@ of a \code{VariableMetadata} object.}
 
 \item{\code{var_set_rename}}{\emph{Description}
 
-Rename a variable set --- change its \code{id}.
+Rename variable sets --- change \code{var_set_dt$id} values.
 
 \emph{Usage}
 
-\code{vm@var_set_rename(old, new)}
+\code{vm@var_set_rename(old_ids, new_ids)}
 
 \emph{Arguments}
 
-\code{old} \verb{[character]} (no default)
+\code{old_ids} \verb{[any]} (no default)
 
-Old names.
+Old variable set IDs.
 
-\code{new} \verb{[character]} (no default)
+\code{new_ids} \verb{[any]} (no default)
 
-New names.}
+New variable set IDs.}
 
 \item{\code{var_set_remove}}{\emph{Description}
 
@@ -396,13 +396,8 @@ Rename a variable.
 
 \emph{Arguments}
 
-\code{old} \verb{[character]} (no default)
-
-Old names.
-
-\code{new} \verb{[character]} (no default)
-
-New names.}
+TODO: document argument old
+TODO: document argument new}
 
 \item{\code{var_remove}}{\emph{Description}
 

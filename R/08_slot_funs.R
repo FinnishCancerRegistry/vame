@@ -131,36 +131,36 @@ var_set_meta_get_all <- function(
   vsd[[meta_nm]]
 }
 
-
-
 var_set_rename <- function(
   vm,
-  old,
-  new
-) {
-  # TODO: rename old & new
-  
+  old_ids,
+  new_ids
+) {  
   # @codedoc_comment_block vm@var_set_rename
-  # Rename a variable set --- change its `id`.
+  # Rename variable sets --- change `var_set_dt$id` values.
   # @codedoc_comment_block vm@var_set_rename
 
-  # @codedoc_comment_block param_old
-  # @param old `[character]` (no default)
+  # @codedoc_comment_block news("vm@vame_subset", "2023-12-01", "0.2.0")
+  # Rename `old` to `old_ids` and `new` to `new_ids`.
+  # @codedoc_comment_block news("vm@vame_subset", "2023-12-01", "0.2.0")
+
+  # @codedoc_comment_block param_old_ids
+  # @param old_ids `[any]` (no default)
   # 
-  # Old names.
-  # @codedoc_comment_block param_old
-  assert_is_var_set_id(vm, old)
-  # @codedoc_comment_block param_new
-  # @param new `[character]` (no default)
+  # Old variable set IDs.
+  # @codedoc_comment_block param_old_ids
+  # @codedoc_comment_block param_new_ids
+  # @param new_ids `[any]` (no default)
   # 
-  # New names.
-  # @codedoc_comment_block param_new
-  dbc::assert_is_nonNA(new)
-  dbc::assert_is_vector(new)
-  lapply(seq_along(old), function(i) {
-    var_set_meta_set(vm, id = old[i], meta_nm = "id", value = new[i])
-  })  
-  return(TRUE)
+  # New variable set IDs.
+  # @codedoc_comment_block param_new_ids
+  dbc::assert_is_nonNA(new_ids)
+  dbc::assert_is_vector(new_ids)
+  lapply(seq_along(old_ids), function(i) {
+    assert_is_var_set_id(vm, old_ids[i])
+    var_set_meta_set(vm, id = old_ids[i], meta_nm = "id", value = new_ids[i])
+  })
+  return(invisible(NULL))
 }
 
 
@@ -178,6 +178,7 @@ var_set_remove <- function(
   vsd <- vsd[vsd_subset, ]
   vsd_set(vm, vsd)
   vd_vsd_intersect(vm)
+  return(invisible(NULL))
 }
 
 
@@ -847,7 +848,7 @@ vame_subset <- function(
   # @codedoc_comment_block news("vm@vame_subset", "2023-12-01", "0.2.0")
   # Rename `expr` to `var_dt_expr`. Add arg `var_set_dt_expr`.
   # @codedoc_comment_block news("vm@vame_subset", "2023-12-01", "0.2.0")
-  
+
   # @codedoc_comment_block param_var_dt_expr
   # @param var_dt_expr `[NULL, logical, integer]` (default `NULL`)
   #

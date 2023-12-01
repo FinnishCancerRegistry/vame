@@ -4,6 +4,10 @@
 
 ### vm@vame_subset
 
+Rename `old` to `old_ids` and `new` to `new_ids`.
+
+### vm@vame_subset
+
 Rename `expr` to `var_dt_expr`. Add arg `var_set_dt_expr`.
 
 

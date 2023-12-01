@@ -470,7 +470,7 @@ VariableMetadata <- function(var_dt, var_set_dt) {
         )
       }
       # slot:var_set_rename
-      var_set_rename <- function(old, new) {
+      var_set_rename <- function(old_ids, new_ids) {
         call_slot_fun_alias_in_slot_fun__(
           "var_set_rename"
         )
