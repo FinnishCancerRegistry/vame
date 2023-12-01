@@ -157,7 +157,7 @@ var_set_rename <- function(
   # @codedoc_comment_block param_new
   dbc::assert_is_nonNA(new)
   dbc::assert_is_vector(new)
-  lapply(seq_len(old), function(i) {
+  lapply(seq_along(old), function(i) {
     var_set_meta_set(vm, id = old[i], meta_nm = "id", value = new[i])
   })  
   return(TRUE)
