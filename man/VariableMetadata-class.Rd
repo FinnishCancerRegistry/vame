@@ -417,14 +417,14 @@ Remove a variable.
 
 Name of a variable.}
 
-\item{\code{var_label_dt_get}}{\emph{Description}
+\item{\code{var_labeler_get}}{\emph{Description}
 
-Get a \code{data.table} of labels for a variable.
-Set a \code{data.table} of labels for a variable.
+Get the labeler for a variable.
+Set the labeler for a variable.
 
 \emph{Usage}
 
-\code{vm@var_label_dt_get(var_nm)}
+\code{vm@var_labeler_get(var_nm)}
 
 \emph{Arguments}
 
@@ -432,11 +432,11 @@ Set a \code{data.table} of labels for a variable.
 
 Name of a variable.}
 
-\item{\code{var_label_dt_set}}{\emph{Description}
+\item{\code{var_labeler_set}}{\emph{Description}
 
 \emph{Usage}
 
-\code{vm@var_label_dt_set(var_nm, value)}
+\code{vm@var_labeler_set(var_nm, value)}
 
 \emph{Arguments}
 
@@ -468,10 +468,11 @@ Name of a variable.
 
 \code{label_col_nm} \verb{[NULL, character]} (default \code{NULL})
 
-Name of a column in the \code{label_dt} that has been assigned for the variable.
+Name of a column in the \code{labeler} that has been assigned for the variable.
 Labels will be taken from this column.
 \itemize{
-\item \code{NULL}: Use first column name in \code{label_dt} that is not \code{"level"}.
+\item \code{NULL}: Use first column name in \code{labeler} that is not \code{"level"} --- if
+\code{labeler} is a \code{data.table}.
 \item \code{character}: Use this column name.
 }}
 
@@ -752,15 +753,18 @@ vm <- vame::VariableMetadata(
   var_dt = data.table::data.table(
     var_nm = c("a", "b", "c"),
     type = "categorical",
-    label_dt = list(
+    labeler = list(
       a = data.table::data.table(
         level = 1:3,
         en = paste0("a_level_", 1:3)
       ),
-      b = data.table::data.table(
-        level = 1:3,
-        en = paste0("b_level_", 1:3)
-      ),
+      b = function(x, label_col_nm) {
+        dt <- data.table::data.table(
+          level = 1:3,
+          en = paste0("b_level_", 1:3)
+        )
+        dt[[label_col_nm]][match(x, dt[["level"]])]
+      },
       c = NULL
     )
   ),
@@ -803,7 +807,7 @@ obs <- tryCatch(
   ),
   error = function(e) e[["message"]]
 )
-exp <- "Variable \"c\" has no label_dt defined"
+exp <- "Variable \"c\" has no labeler defined"
 stopifnot(
   grepl(exp, obs)
 )
@@ -813,7 +817,7 @@ vm_1 <- vame::VariableMetadata(
   var_dt = data.table::data.table(
     var_nm = c("a", "b"),
     type = "categorical",
-    label_dt = list(
+    labeler = list(
       a = data.table::data.table(level = 1:2, label = c("a_1", "a_2")),
       b = NULL
     )
@@ -824,7 +828,7 @@ vm_1 <- vame::VariableMetadata(
     value_space = list(ab = list(dt = data.table::CJ(a = 1:2, b = 3:4)))
   )
 )
-# note that vm_2 var_dt does not have columns "type", "label_dt" --- those
+# note that vm_2 var_dt does not have columns "type", "labeler" --- those
 # will be NA / NULL for "c" and "d".
 vm_2 <- vame::VariableMetadata(
   var_dt = data.table::data.table(var_nm = c("c", "d")),

@@ -281,15 +281,18 @@ methods::setClass(
 #'   var_dt = data.table::data.table(
 #'     var_nm = c("a", "b", "c"),
 #'     type = "categorical",
-#'     label_dt = list(
+#'     labeler = list(
 #'       a = data.table::data.table(
 #'         level = 1:3,
 #'         en = paste0("a_level_", 1:3)
 #'       ),
-#'       b = data.table::data.table(
-#'         level = 1:3,
-#'         en = paste0("b_level_", 1:3)
-#'       ),
+#'       b = function(x, label_col_nm) {
+#'         dt <- data.table::data.table(
+#'           level = 1:3,
+#'           en = paste0("b_level_", 1:3)
+#'         )
+#'         dt[[label_col_nm]][match(x, dt[["level"]])]
+#'       },
 #'       c = NULL
 #'     )
 #'   ),
@@ -332,7 +335,7 @@ methods::setClass(
 #'   ),
 #'   error = function(e) e[["message"]]
 #' )
-#' exp <- "Variable \"c\" has no label_dt defined"
+#' exp <- "Variable \"c\" has no labeler defined"
 #' stopifnot(
 #'   grepl(exp, obs)
 #' )
@@ -342,7 +345,7 @@ methods::setClass(
 #'   var_dt = data.table::data.table(
 #'     var_nm = c("a", "b"),
 #'     type = "categorical",
-#'     label_dt = list(
+#'     labeler = list(
 #'       a = data.table::data.table(level = 1:2, label = c("a_1", "a_2")),
 #'       b = NULL
 #'     )
@@ -353,7 +356,7 @@ methods::setClass(
 #'     value_space = list(ab = list(dt = data.table::CJ(a = 1:2, b = 3:4)))
 #'   )
 #' )
-#' # note that vm_2 var_dt does not have columns "type", "label_dt" --- those
+#' # note that vm_2 var_dt does not have columns "type", "labeler" --- those
 #' # will be NA / NULL for "c" and "d".
 #' vm_2 <- vame::VariableMetadata(
 #'   var_dt = data.table::data.table(var_nm = c("c", "d")),
@@ -382,20 +385,9 @@ VariableMetadata <- function(var_dt, var_set_dt) {
   # @codedoc_comment_block news("vame::VariableMetadata", "2023-06-30", "0.1.0")
   # First release.
   # @codedoc_comment_block news("vame::VariableMetadata", "2023-06-30", "0.1.0")
-  dbc::assert_is_data_table_with_required_names(
-    var_dt,
-    required_names = c("var_nm")
-  )
-  dbc::assert_is_character_nonNA_vector(var_dt[["var_nm"]])
-  dbc::assert_is_data_table_with_required_names(
-    var_set_dt,
-    required_names = c("id", "value_space")
-  )
-  dbc::assert_is_vector(var_set_dt[["id"]])
-  dbc::assert_is_nonNA(var_set_dt[["id"]])
-  dbc::assert_is_list(var_set_dt[["value_space"]])
+  assert_is_var_dt(var_dt)
+  assert_is_var_set_dt(var_set_dt)
   pkg_env <- environment(VariableMetadata)
-  # TODO: pkg_env revamp
   funs <- new.env(parent = pkg_env)
   funs$data <- new.env(parent = emptyenv())
   funs$data$var_dt <- var_dt
@@ -552,16 +544,16 @@ VariableMetadata <- function(var_dt, var_set_dt) {
           "var_remove"
         )
       }
-      # slot:var_label_dt_get
-      var_label_dt_get <- function(var_nm) {
+      # slot:var_labeler_get
+      var_labeler_get <- function(var_nm) {
         call_slot_fun_alias_in_slot_fun__(
-          "var_label_dt_get"
+          "var_labeler_get"
         )
       }
-      # slot:var_label_dt_set
-      var_label_dt_set <- function(var_nm, value) {
+      # slot:var_labeler_set
+      var_labeler_set <- function(var_nm, value) {
         call_slot_fun_alias_in_slot_fun__(
-          "var_label_dt_set"
+          "var_labeler_set"
         )
       }
       # slot:var_labels_get

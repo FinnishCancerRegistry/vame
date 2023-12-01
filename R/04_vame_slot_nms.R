@@ -6,7 +6,7 @@ vame_slot_nms_get__ <- function() {
   "var_set_value_space_set", "var_set_value_space_eval", "var_set_value_space_dt_subset",
   "var_is_aggregateable_to", "var_aggregate", "var_value_space_eval",
   "var_assert", "var_meta_get", "var_meta_set", "var_meta_get_all",
-  "var_rename", "var_remove", "var_label_dt_get", "var_label_dt_set",
+  "var_rename", "var_remove", "var_labeler_get", "var_labeler_set",
   "var_labels_get", "vame_copy", "vame_subset", "vame_union_append",
   "vame_category_space_dt_list", "vame_category_space_dt")
   # stop:vame_slot_nms

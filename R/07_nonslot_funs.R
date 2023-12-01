@@ -24,49 +24,7 @@ data_obj_set <- function(
   vm_env[["data"]][[obj_nm]] <- value
 }
 
-# assertions -------------------------------------------------------------
-assert_is_value_space <- function(
-  vm,
-  x,
-  x_nm = NULL,
-  call = NULL,
-  assertion_type = NULL
-) {
-  assert_is_variablemetadata(vm, assertion_type = "prod_input")
-  x_nm <- dbc::handle_arg_x_nm(x_nm)
-  call <- dbc::handle_arg_call(call)
-  assertion_type <- dbc::handle_arg_assertion_type(assertion_type)
-  dbc::assert_is_one_of(
-    x,
-    funs = list(dbc::report_is_NULL, dbc::report_is_list)
-  )
-  if (is.null(x)) {
-    return(invisible(NULL))
-  }
-  dbc::assert_has_length(
-    x = x,
-    expected_length = 1L,
-    x_nm = x_nm,
-    call = call,
-    assertion_type = assertion_type
-  )
-  dbc::assert_atom_is_in_set(
-    x = names(x),
-    set = value_space_type_names__(),
-    x_nm = paste0("names(", x_nm, ")"),
-    call = call,
-    assertion_type = assertion_type
-  )
-  dbc::report_to_assertion(
-    value_space_type_report_funs__()[[names(x)]](
-      x = x,
-      x_nm = x_nm,
-      call = call
-    ),
-    raise_error_call = call,
-    assertion_type = assertion_type
-  )
-}
+# assertions -------------------------------------------------------------------
 assert_is_var_nm <- function(
   vm,
   var_nm,
@@ -141,28 +99,6 @@ assert_var_set_value_space_is_defined <- function(
   assert_is_variablemetadata(vm, assertion_type = "prod_input")
   if (!var_set_value_space_is_defined(vm)) {
     stop("No value spaces have been defined")
-  }
-}
-assert_is_var_label_dt <- function(
-  vm,
-  value,
-  assertion_type = NULL
-) {
-  assert_is_variablemetadata(vm, assertion_type = "prod_input")
-  dbc::assert_is_one_of(
-    value,
-    funs = list(
-      dbc::report_is_data_table,
-      dbc::report_is_NULL
-    ),
-    assertion_type = assertion_type
-  )
-  if (data.table::is.data.table(value)) {
-    dbc::assert_has_names(
-      value,
-      required_names = "level",
-      assertion_type = assertion_type
-    )
   }
 }
 

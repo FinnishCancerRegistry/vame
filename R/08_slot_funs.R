@@ -250,7 +250,6 @@ var_set_value_space_eval <- function(
   value_space <- eval(vs_expr)
   this_call <- match.call()
   assert_is_value_space(
-    vm,
     x = value_space,
     x_nm = deparse1(vs_expr),
     call = this_call,
@@ -677,7 +676,6 @@ var_rename <- function(
   invisible(NULL)
 }
 
-
 var_remove <- function(
   vm,
   var_nm
@@ -696,32 +694,33 @@ var_remove <- function(
   vame_subset_expr(vm, expr)
 }
 
-
-var_label_dt_get <- function(
+var_labeler_get <- function(
   vm,
   var_nm
 ) {
-  # @codedoc_comment_block vm@var_label_dt_get
-  # Get a `data.table` of labels for a variable.
-  # @codedoc_comment_block vm@var_label_dt_get
+  # @codedoc_comment_block vm@var_labeler_get
+  # Get the labeler for a variable.
+  # @codedoc_comment_block vm@var_labeler_get
   assert_is_var_nm(vm, var_nm)
-  var_meta_get(vm, var_nm, "label_dt")
+  out <- var_meta_get(vm, var_nm, "labeler")
+  if (is.null(out)) {
+    stop("Variable \"", var_nm, "\" has no labeler defined.")
+  }
+  return(out)
 }
 
-
-var_label_dt_set <- function(
+var_labeler_set <- function(
   vm,
   var_nm,
   value
 ) {
-  # @codedoc_comment_block vm@var_label_dt_get
-  # Set a `data.table` of labels for a variable.
-  # @codedoc_comment_block vm@var_label_dt_get
+  # @codedoc_comment_block vm@var_labeler_get
+  # Set the labeler for a variable.
+  # @codedoc_comment_block vm@var_labeler_get
   assert_is_var_nm(vm, var_nm)
-  assert_is_var_label_dt(vm, value)
-  var_meta_set(vm, var_nm, "label_dt", value)
+  assert_is_labeler(value)
+  var_meta_set(vm, var_nm, "labeler", value)
 }
-
 
 var_labels_get <- function(
   vm,
@@ -733,18 +732,16 @@ var_labels_get <- function(
   # Get label for each value in `x` for `var_nm`.
   # @codedoc_comment_block vm@var_labels_get
   assert_is_var_nm(vm, var_nm)
-  ldt <- var_label_dt_get(vm, var_nm = var_nm)
-  if (is.null(ldt)) {
-    stop("Variable \"", var_nm, "\" has no label_dt defined.")
-  }
+  labeler <- var_labeler_get(vm, var_nm = var_nm)
   
   # @codedoc_comment_block param_label_col_nm
   # @param label_col_nm `[NULL, character]` (default `NULL`)
   # 
-  # Name of a column in the `label_dt` that has been assigned for the variable.
+  # Name of a column in the `labeler` that has been assigned for the variable.
   # Labels will be taken from this column.
   #
-  # - `NULL`: Use first column name in `label_dt` that is not `"level"`.
+  # - `NULL`: Use first column name in `labeler` that is not `"level"` --- if
+  #   `labeler` is a `data.table`.
   # - `character`: Use this column name.
   # @codedoc_comment_block param_label_col_nm
   dbc::assert_is_one_of(
@@ -752,24 +749,34 @@ var_labels_get <- function(
     funs = list(dbc::report_is_NULL,
                 dbc::report_is_character_nonNA_atom)
   )
-  label_col_nm_set <- setdiff(names(ldt), "level")
-  if (is.null(label_col_nm)) {
-    label_col_nm <- label_col_nm_set[1]
-  } else if (!label_col_nm %in% names(ldt)) {
-    if (!label_col_nm %in% label_col_nm_set) {
+  if (inherits(labeler, "data.table")) {
+    label_col_nm_set <- setdiff(names(labeler), "level")
+    if (is.null(label_col_nm)) {
+      label_col_nm <- label_col_nm_set[1]
+    } else if (!label_col_nm %in% label_col_nm_set) {
       stop("label_col_nm = \"", label_col_nm, "\" not one of the defined ",
             "label columns: ", deparse1(label_col_nm_set))
     }
+    dbc::assert_has_class(x = x, required_class = class(labeler[["level"]]))
+    jdt <- data.table::setDT(list(level = x))
+    #' @importFrom data.table .SD
+    out <- labeler[
+      i = jdt,
+      on = "level",
+      j = .SD[[1]],
+      .SDcols = label_col_nm
+    ]
+  } else if (is.function(labeler)) {
+    if (is.null(label_col_nm)) {
+      stop("label_col_nm = NULL, but labeler is a function so cannot ",
+           "determine label_col_nm automatically.")
+    }
+    out <- labeler(x = x, label_col_nm = label_col_nm)
+  } else {
+    stop("no handling defined for labeler of class(es) ",
+         deparse1(class(labeler)))
   }
-  dbc::assert_has_class(x = x, required_class = class(ldt[["level"]]))
-  jdt <- data.table::setDT(list(level = x))
-  #' @importFrom data.table .SD
-  ldt[
-    i = jdt,
-    on = "level",
-    j = .SD[[1]],
-    .SDcols = label_col_nm
-  ]
+  return(out)
 }
 
 # vame funs --------------------------------------------------------------------
