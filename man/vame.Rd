@@ -164,6 +164,11 @@ Rename \code{old} to \code{old_ids} and \code{new} to \code{new_ids}.
 Rename \code{expr} to \code{var_dt_expr}. Add arg \code{var_set_dt_expr}.
 }
 
+\subsection{vm@vame_union_append}{
+
+Rename \code{x} to \code{vm_2}.
+}
+
 }
 
 \subsection{News for version 0.1.10}{

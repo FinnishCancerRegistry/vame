@@ -676,8 +676,6 @@ var_rename <- function(
   old,
   new
 ) {
-  # TODO: rename old, new
-
   # @codedoc_comment_block vm@var_rename
   # Rename a variable.
   # @codedoc_comment_block vm@var_rename
@@ -875,9 +873,16 @@ vame_subset <- function(
 
 vame_union_append <- function(
   vm,
-  x
+  vm_2
 ) {
-  # TODO: rename x -> vm_2
+  assert_is_variablemetadata(vm)
+  # @codedoc_comment_block param_vm_2
+  # @param vm_2 `[VariableMetadata]` (no default)
+  #
+  # `VariableMetadata` object whose metadata will be appended to the current
+  # `VariableMetadata` object.
+  # @codedoc_comment_block param_vm_2
+  assert_is_variablemetadata(vm_2)
 
   # @codedoc_comment_block vm@vame_union_append
   # Append new data into `VariableMetadata` object from another.
@@ -897,10 +902,13 @@ vame_union_append <- function(
   # in rbind'd `var_dt` because some `by` columns may be of type `list`
   # which is not supported by `duplicated`.
   # @codedoc_comment_block news("vm@vame_union_append", "2023-07-14", "0.1.6")
+  # @codedoc_comment_block news("vm@vame_union_append", "2023-12-01", "0.2.0")
+  # Rename `x` to `vm_2`.
+  # @codedoc_comment_block news("vm@vame_union_append", "2023-12-01", "0.2.0")
   vd_1 <- vd_get(vm)
   vsd_1 <- vsd_get(vm)
-  vd_2 <- vd_get(x)
-  vsd_2 <- vsd_get(x)
+  vd_2 <- vd_get(vm_2)
+  vsd_2 <- vsd_get(vm_2)
   vd <- data.table::data.table(
     var_nm = sort(union(vd_1[["var_nm"]], vd_2[["var_nm"]]))
   )

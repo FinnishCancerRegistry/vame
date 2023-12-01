@@ -510,13 +510,14 @@ No pre-existing data are overwritten.
 
 \emph{Usage}
 
-\code{vm@vame_union_append(x)}
+\code{vm@vame_union_append(vm_2)}
 
 \emph{Arguments}
 
-\code{x} \verb{[any]} (no default)
+\code{vm_2} \verb{[VariableMetadata]} (no default)
 
-Values of a specified variable.}
+\code{VariableMetadata} object whose metadata will be appended to the current
+\code{VariableMetadata} object.}
 
 \item{\code{vame_category_space_dt_list}}{\emph{Description}
 

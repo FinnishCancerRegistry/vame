@@ -614,7 +614,7 @@ VariableMetadata <- function(var_dt, var_set_dt) {
         )
       }
       # slot:vame_union_append
-      vame_union_append <- function(x) {
+      vame_union_append <- function(vm_2) {
         call_slot_fun_alias_in_slot_fun__(
           "vame_union_append"
         )

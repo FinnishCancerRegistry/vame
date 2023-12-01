@@ -10,6 +10,10 @@ Rename `old` to `old_ids` and `new` to `new_ids`.
 
 Rename `expr` to `var_dt_expr`. Add arg `var_set_dt_expr`.
 
+### vm@vame_union_append
+
+Rename `x` to `vm_2`.
+
 
 ## News for version 0.1.10
 
