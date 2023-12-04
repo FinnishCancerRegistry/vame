@@ -184,6 +184,12 @@ A \code{labeler} can now be of type \code{function} in addition to \code{data.ta
 Rename \code{old} to \code{old_var_nms} and \code{new} to \code{new_var_nms}.
 }
 
+\subsection{vm@var_set_meta_get_all}{
+
+\code{vm@var_set_meta_get_all} now always sets \code{var_set_dt$id} as the names
+of the output list or vector.
+}
+
 \subsection{vm@var_set_rename}{
 
 Rename \code{old} to \code{old_ids} and \code{new} to \code{new_ids}.

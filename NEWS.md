@@ -26,6 +26,11 @@ A `labeler` can now be of type `function` in addition to `data.table`.
 
 Rename `old` to `old_var_nms` and `new` to `new_var_nms`.
 
+### vm@var_set_meta_get_all
+
+`vm@var_set_meta_get_all` now always sets `var_set_dt$id` as the names
+of the output list or vector.
+
 ### vm@var_set_rename
 
 Rename `old` to `old_ids` and `new` to `new_ids`.

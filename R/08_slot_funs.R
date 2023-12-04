@@ -86,9 +86,15 @@ var_set_meta_get_all <- function(
   # @codedoc_comment_block vm@var_set_meta_get_all
   # Get all metadata for a specific variable set.
   # @codedoc_comment_block vm@var_set_meta_get_all
+  # @codedoc_comment_block news("vm@var_set_meta_get_all", "2023-12-04", "0.2.0")
+  # `vm@var_set_meta_get_all` now always sets `var_set_dt$id` as the names
+  # of the output list or vector.
+  # @codedoc_comment_block news("vm@var_set_meta_get_all", "2023-12-04", "0.2.0")
   assert_is_var_set_meta_nm(vm, meta_nm)
   vsd <- vsd_get(vm)
-  vsd[[meta_nm]]
+  out <- vsd[[meta_nm]]
+  names(out) <- vsd[["id"]]
+  return(out)
 }
 
 var_set_var_nm_set_get_all <- function(
