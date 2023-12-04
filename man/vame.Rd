@@ -199,6 +199,11 @@ Rename \code{vm@var_set_get} to \code{vm@var_set_var_nm_set_get}.
 Rename \code{vm@var_set_list_get} to \code{vm@var_set_var_nm_set_get_all}.
 }
 
+\subsection{vm@var_set_var_nm_set_set}{
+
+New function \code{vm@var_set_var_nm_set_set}.
+}
+
 }
 
 \subsection{News for version 0.1.9}{

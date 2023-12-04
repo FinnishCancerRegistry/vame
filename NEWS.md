@@ -38,6 +38,10 @@ Rename `vm@var_set_get` to `vm@var_set_var_nm_set_get`.
 
 Rename `vm@var_set_list_get` to `vm@var_set_var_nm_set_get_all`.
 
+### vm@var_set_var_nm_set_set
+
+New function `vm@var_set_var_nm_set_set`.
+
 
 ## News for version 0.1.9
 

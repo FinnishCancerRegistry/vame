@@ -64,6 +64,25 @@ Get a specific variable name set.
 ID, or "name", of a variable set. The class of \code{id} is defined when you
 create the \code{VariableMetadata} object and it can be pretty much anything.}
 
+\item{\code{var_set_var_nm_set_set}}{\emph{Description}
+
+Set a new value for a specific variable name set.
+
+\emph{Usage}
+
+\code{vm@var_set_var_nm_set_set(id, value)}
+
+\emph{Arguments}
+
+\code{id} \verb{[any]} (no default)
+
+ID, or "name", of a variable set. The class of \code{id} is defined when you
+create the \code{VariableMetadata} object and it can be pretty much anything.
+
+\code{value} \verb{[any]} (no default)
+
+In \verb{_set} functions the \code{value} to set for the specified metadata.}
+
 \item{\code{var_set_meta_get}}{\emph{Description}
 
 Get metadata for a specific variable set.

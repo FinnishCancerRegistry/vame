@@ -137,6 +137,27 @@ var_set_var_nm_set_get <- function(
   return(vsd[["var_nm_set"]][[var_set_id_to_pos(vm, id)]])
 }
 
+var_set_var_nm_set_set <- function(
+  vm,
+  id,
+  value
+) {
+  # @codedoc_comment_block vm@var_set_var_nm_set_set
+  # Set a new value for a specific variable name set.
+  # @codedoc_comment_block vm@var_set_var_nm_set_set
+  
+  # @codedoc_comment_block news("vm@var_set_var_nm_set_set", "2023-12-04", "0.2.0")
+  # New function `vm@var_set_var_nm_set_set`.
+  # @codedoc_comment_block news("vm@var_set_var_nm_set_set", "2023-12-04", "0.2.0")
+
+  var_set_meta_set(
+    vm = vm,
+    id = id,
+    meta_nm = "var_set_nm",
+    value = value
+  )
+}
+
 var_set_rename <- function(
   vm,
   old_ids,

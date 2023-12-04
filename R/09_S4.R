@@ -437,18 +437,6 @@ VariableMetadata <- function(var_dt, var_set_dt) {
   funs$data$var_set_dt <- var_set_dt
   local(
     expr = {
-      # slot:var_set_var_nm_set_get_all
-      var_set_var_nm_set_get_all <- function() {
-        call_slot_fun_alias_in_slot_fun__(
-          "var_set_var_nm_set_get_all"
-        )
-      }
-      # slot:var_set_var_nm_set_get
-      var_set_var_nm_set_get <- function(id) {
-        call_slot_fun_alias_in_slot_fun__(
-          "var_set_var_nm_set_get"
-        )
-      }
       # slot:var_set_meta_get
       var_set_meta_get <- function(
         id,
@@ -474,6 +462,24 @@ VariableMetadata <- function(var_dt, var_set_dt) {
       ) {
         call_slot_fun_alias_in_slot_fun__(
           "var_set_meta_get_all"
+        )
+      }      
+      # slot:var_set_var_nm_set_get_all
+      var_set_var_nm_set_get_all <- function() {
+        call_slot_fun_alias_in_slot_fun__(
+          "var_set_var_nm_set_get_all"
+        )
+      }
+      # slot:var_set_var_nm_set_get
+      var_set_var_nm_set_get <- function(id) {
+        call_slot_fun_alias_in_slot_fun__(
+          "var_set_var_nm_set_get"
+        )
+      }
+      # slot:var_set_var_nm_set_set
+      var_set_var_nm_set_set <- function(id) {
+        call_slot_fun_alias_in_slot_fun__(
+          "var_set_var_nm_set_get"
         )
       }
       # slot:var_set_rename
