@@ -26,8 +26,17 @@ vector of variable names. e.g. \code{list(c("a", "b"))}.
 }}
 }
 \description{
-The \code{VariableMetadata} object. See section \strong{Features} for what you can do
-with one.
+Create and make use of a \code{VariableMetadata} object. It contains
+\itemize{
+\item \code{var_dt}: A \code{data.table} containing metadata for variables,
+\item \code{var_set_dt}: Metadata for variable sets,
+\item A number of functions in S4 slots for making use of the metadata via e.g.
+\code{vm@var_assert} where \code{vm} is the \code{VariableMetadata} object.
+}
+
+A \code{VariableMetadata} object is created via calling the
+\code{vame::VariableMetadata} function.
+See section \strong{Features} for what you can do with \code{VariableMetadata} objects.
 }
 \section{Slots}{
 

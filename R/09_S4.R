@@ -103,8 +103,15 @@ methods::setClass(
 #' @title Variable Metadata
 #' @docType class
 #' @description
-#' The `VariableMetadata` object. See section **Features** for what you can do
-#' with one.
+#' Create and make use of a `VariableMetadata` object. It contains
+#' - `var_dt`: A `data.table` containing metadata for variables,
+#' - `var_set_dt`: Metadata for variable sets,
+#' - A number of functions in S4 slots for making use of the metadata via e.g.
+#'   `vm@var_assert` where `vm` is the `VariableMetadata` object.
+#' 
+#' A `VariableMetadata` object is created via calling the
+#' `vame::VariableMetadata` function.
+#' See section **Features** for what you can do with `VariableMetadata` objects.
 #' @name VariableMetadata-class
 #' @aliases VariableMetadata
 #' @param var_dt `[data.table]`
