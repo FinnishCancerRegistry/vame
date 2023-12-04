@@ -60,6 +60,12 @@ var_set_meta_set <- function(
   
   assert_is_variablemetadata(vm)
   
+  # @codedoc_comment_block param_id
+  # @param id `[any]` (no default)
+  # 
+  # ID, or "name", of a variable set. The class of `id` is defined when you
+  # create the `VariableMetadata` object and it can be pretty much anything.
+  # @codedoc_comment_block param_id
   assert_is_var_set_id(vm, id)
   
   assert_is_var_set_meta_nm(vm, meta_nm)
@@ -113,10 +119,7 @@ var_set_var_nm_set_get_all <- function(
   # 
   # A `VariableMetadata` object.
   # @codedoc_comment_block param_vm
-  assert_is_variablemetadata(vm)
-  var_set_list <- var_set_meta_get_all(vm, "var_nm_set")
-  names(var_set_list) <- var_set_meta_get_all(vm, "id")
-  return(var_set_list)
+  var_set_meta_get_all(vm, meta_nm = "var_nm_set")
 }
 
 var_set_var_nm_set_get <- function(
@@ -130,17 +133,7 @@ var_set_var_nm_set_get <- function(
   # @codedoc_comment_block news("vm@var_set_var_nm_set_get", "2023-12-04", "0.2.0")
   # Rename `vm@var_set_get` to `vm@var_set_var_nm_set_get`.
   # @codedoc_comment_block news("vm@var_set_var_nm_set_get", "2023-12-04", "0.2.0")
-
-  assert_is_variablemetadata(vm)
-  # @codedoc_comment_block param_id
-  # @param id `[any]` (no default)
-  # 
-  # ID, or "name", of a variable set. The class of `id` is defined when you
-  # create the `VariableMetadata` object and it can be pretty much anything.
-  # @codedoc_comment_block param_id
-  assert_is_var_set_id(vm, id)
-  vsd <- vsd_get(vm)
-  return(vsd[["var_nm_set"]][[var_set_id_to_pos(vm, id)]])
+  var_set_meta_get(vm, id = id, meta_nm = "var_nm_set")
 }
 
 var_set_var_nm_set_set <- function(
