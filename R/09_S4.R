@@ -209,7 +209,7 @@ methods::setClass(
 #'
 #' vm@var_set_rename("set_01", "Ab")
 #' stopifnot(
-#'   identical(vm@var_set_meta_get_all("id"), "Ab")
+#'   identical(vm@var_set_meta_get_all("id"), c("Ab" = "Ab"))
 #' )
 #'
 #' vm@var_remove("b")
