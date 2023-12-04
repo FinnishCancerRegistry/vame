@@ -41,13 +41,13 @@ See section \strong{Features} for what you can do with \code{VariableMetadata} o
 \section{Slots}{
 
 \describe{
-\item{\code{var_set_list_get}}{\emph{Description}
+\item{\code{var_set_var_nm_set_get_all}}{\emph{Description}
 
 Get every variable name set.
 
 \emph{Usage}
 
-\code{vm@var_set_list_get()}}
+\code{vm@var_set_var_nm_set_get_all()}}
 
 \item{\code{var_set_get}}{\emph{Description}
 

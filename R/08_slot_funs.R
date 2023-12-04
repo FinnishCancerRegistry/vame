@@ -23,12 +23,16 @@ call_slot_fun_alias_in_slot_fun__ <- function(
 }
 
 # var_set funs -----------------------------------------------------------------
-var_set_list_get <- function(
+var_set_var_nm_set_get_all <- function(
   vm
 ) {
-  # @codedoc_comment_block vm@var_set_list_get
+  # @codedoc_comment_block vm@var_set_var_nm_set_get_all
   # Get every variable name set.
-  # @codedoc_comment_block vm@var_set_list_get
+  # @codedoc_comment_block vm@var_set_var_nm_set_get_all
+
+  # @codedoc_comment_block news("vm@var_set_var_nm_set_get_all", "2023-12-04", "0.2.0")
+  # Rename `vm@var_set_list_get` to `vm@var_set_var_nm_set_get_all`.
+  # @codedoc_comment_block news("vm@var_set_var_nm_set_get_all", "2023-12-04", "0.2.0")
     
   # @codedoc_comment_block param_vm
   # @param vm `[VariableMetadata]` (no default)

@@ -30,6 +30,10 @@ Rename `old` to `old_var_nms` and `new` to `new_var_nms`.
 
 Rename `old` to `old_ids` and `new` to `new_ids`.
 
+### vm@var_set_var_nm_set_get_all
+
+Rename `vm@var_set_list_get` to `vm@var_set_var_nm_set_get_all`.
+
 
 ## News for version 0.1.9
 
