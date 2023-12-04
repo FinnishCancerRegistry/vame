@@ -593,7 +593,7 @@ lists of length one or \code{NULL} values.
 The following element names are allowed and determine the type of the
 \code{value_space}: c("dt", "set", "expr", "fun", "unrestricted", "regex", "bounds").
 
-The \code{value_space} element must be one of the following:
+The \code{value_space} element must be \code{NULL} or one of the following:
 \itemize{
 \item \code{"dt"}: A \code{data.table}. The column names must be the same as those
 in the variable set. This can be used to define the (joint) value

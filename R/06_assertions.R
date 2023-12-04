@@ -94,7 +94,7 @@ assert_is_value_space <- function(
   # The following element names are allowed and determine the type of the
   # `value_space`: ${deparse1(value_space_type_names__())}.
   #
-  # The `value_space` element must be one of the following:
+  # The `value_space` element must be `NULL` or one of the following:
   # @codedoc_insert_comment_block types(var_set_dt$value_space)
   # @codedoc_comment_block specification(var_set_dt$value_space)
   dbc::assert_has_length(
