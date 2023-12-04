@@ -2,6 +2,10 @@
 
 ## News for version 0.2.0
 
+### VariableMetadata
+
+`label_dt` was renamed to `labeler`. 
+
 ### vm@vame_subset
 
 Rename `old` to `old_ids` and `new` to `new_ids`.
@@ -14,17 +18,6 @@ Rename `expr` to `var_dt_expr`. Add arg `var_set_dt_expr`.
 
 Rename `x` to `vm_2`.
 
-### vm@var_rename
-
-Rename `old` to `old_var_nms` and `new` to `new_var_nms`.
-
-
-## News for version 0.1.10
-
-### VariableMetadata
-
-`label_dt` was renamed to `labeler`. 
-
 ### vm@var_labeler_set
 
 A `labeler` can now be of type `function` in addition to `data.table`.
@@ -32,6 +25,10 @@ A `labeler` can now be of type `function` in addition to `data.table`.
 ### vm@var_labels_get
 
 `vm@var_labels_get` now can handle `labeler`s of type `function`.
+
+### vm@var_rename
+
+Rename `old` to `old_var_nms` and `new` to `new_var_nms`.
 
 
 ## News for version 0.1.9

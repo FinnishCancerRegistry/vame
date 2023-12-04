@@ -154,6 +154,11 @@ my_fun_2 <- function(dg_age) \{
 \section{News}{
 
 \subsection{News for version 0.2.0}{
+\subsection{VariableMetadata}{
+
+\code{label_dt} was renamed to \code{labeler}.
+}
+
 \subsection{vm@vame_subset}{
 
 Rename \code{old} to \code{old_ids} and \code{new} to \code{new_ids}.
@@ -169,19 +174,6 @@ Rename \code{expr} to \code{var_dt_expr}. Add arg \code{var_set_dt_expr}.
 Rename \code{x} to \code{vm_2}.
 }
 
-\subsection{vm@var_rename}{
-
-Rename \code{old} to \code{old_var_nms} and \code{new} to \code{new_var_nms}.
-}
-
-}
-
-\subsection{News for version 0.1.10}{
-\subsection{VariableMetadata}{
-
-\code{label_dt} was renamed to \code{labeler}.
-}
-
 \subsection{vm@var_labeler_set}{
 
 A \code{labeler} can now be of type \code{function} in addition to \code{data.table}.
@@ -190,6 +182,11 @@ A \code{labeler} can now be of type \code{function} in addition to \code{data.ta
 \subsection{vm@var_labels_get}{
 
 \code{vm@var_labels_get} now can handle \code{labeler}s of type \code{function}.
+}
+
+\subsection{vm@var_rename}{
+
+Rename \code{old} to \code{old_var_nms} and \code{new} to \code{new_var_nms}.
 }
 
 }

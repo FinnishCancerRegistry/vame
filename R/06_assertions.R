@@ -37,9 +37,9 @@ assert_is_labeler <- function(
     assertion_type = assertion_type
   )
   if (is.function(x)) {
-    # @codedoc_comment_block news("vm@var_labeler_set", "2023-12-01", "0.1.10")
+    # @codedoc_comment_block news("vm@var_labeler_set", "2023-12-01", "0.2.0")
     # A `labeler` can now be of type `function` in addition to `data.table`.
-    # @codedoc_comment_block news("vm@var_labeler_set", "2023-12-01", "0.1.10")
+    # @codedoc_comment_block news("vm@var_labeler_set", "2023-12-01", "0.2.0")
 
     # @codedoc_comment_block specification(var_dt$labeler)
     # `var_dt$labeler` must be a list column.
@@ -135,9 +135,9 @@ assert_is_var_dt <- function(
     assertion_type = assertion_type,
     required_names = c("var_nm")
   )
-  # @codedoc_comment_block news("VariableMetadata", "2023-12-01", "0.1.10")
+  # @codedoc_comment_block news("VariableMetadata", "2023-12-01", "0.2.0")
   # `label_dt` was renamed to `labeler`. 
-  # @codedoc_comment_block news("VariableMetadata", "2023-12-01", "0.1.10")
+  # @codedoc_comment_block news("VariableMetadata", "2023-12-01", "0.2.0")
   if ("labeler" %in% names(x)) {
     lapply(x[["labeler"]], assert_is_labeler,
            x_nm = x_nm,

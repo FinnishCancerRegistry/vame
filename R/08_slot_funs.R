@@ -826,9 +826,9 @@ var_labels_get <- function(
       .SDcols = label_col_nm
     ]
   } else if (is.function(labeler)) {
-    # @codedoc_comment_block news("vm@var_labels_get", "2023-12-01", "0.1.10")
+    # @codedoc_comment_block news("vm@var_labels_get", "2023-12-01", "0.2.0")
     # `vm@var_labels_get` now can handle `labeler`s of type `function`.
-    # @codedoc_comment_block news("vm@var_labels_get", "2023-12-01", "0.1.10")
+    # @codedoc_comment_block news("vm@var_labels_get", "2023-12-01", "0.2.0")
     if (is.null(label_col_nm)) {
       stop("label_col_nm = NULL, but labeler is a function so cannot ",
            "determine label_col_nm automatically.")
