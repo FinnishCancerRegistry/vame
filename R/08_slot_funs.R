@@ -691,9 +691,16 @@ var_meta_get_all <- function(
   # @codedoc_comment_block vm@var_meta_get_all
   # Get metadata for all variables.
   # @codedoc_comment_block vm@var_meta_get_all
+  
   assert_is_var_meta_nm(vm, meta_nm)
   vd <- vd_get(vm)
-  vd[[meta_nm]]
+  # @codedoc_comment_block news("vm@var_meta_get_all", "2023-12-04", "0.2.0")
+  # `vm@var_meta_get_all` now always sets `var_dt$var_nm` as the names
+  # of the output list or vector.
+  # @codedoc_comment_block news("vm@var_meta_get_all", "2023-12-04", "0.2.0")
+  out <- vd[[meta_nm]]
+  names(out) <- vd[["var_nm"]]
+  return(out)
 }
 
 

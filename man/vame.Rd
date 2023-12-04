@@ -179,6 +179,12 @@ A \code{labeler} can now be of type \code{function} in addition to \code{data.ta
 \code{vm@var_labels_get} now can handle \code{labeler}s of type \code{function}.
 }
 
+\subsection{vm@var_meta_get_all}{
+
+\code{vm@var_meta_get_all} now always sets \code{var_dt$var_nm} as the names
+of the output list or vector.
+}
+
 \subsection{vm@var_rename}{
 
 Rename \code{old} to \code{old_var_nms} and \code{new} to \code{new_var_nms}.

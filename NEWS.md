@@ -22,6 +22,11 @@ A `labeler` can now be of type `function` in addition to `data.table`.
 
 `vm@var_labels_get` now can handle `labeler`s of type `function`.
 
+### vm@var_meta_get_all
+
+`vm@var_meta_get_all` now always sets `var_dt$var_nm` as the names
+of the output list or vector.
+
 ### vm@var_rename
 
 Rename `old` to `old_var_nms` and `new` to `new_var_nms`.
