@@ -189,6 +189,11 @@ Rename \code{old} to \code{old_var_nms} and \code{new} to \code{new_var_nms}.
 Rename \code{old} to \code{old_ids} and \code{new} to \code{new_ids}.
 }
 
+\subsection{vm@var_set_var_nm_set_get}{
+
+Rename \code{vm@var_set_get} to \code{vm@var_set_var_nm_set_get}.
+}
+
 \subsection{vm@var_set_var_nm_set_get_all}{
 
 Rename \code{vm@var_set_list_get} to \code{vm@var_set_var_nm_set_get_all}.

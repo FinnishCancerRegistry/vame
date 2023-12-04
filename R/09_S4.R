@@ -443,10 +443,10 @@ VariableMetadata <- function(var_dt, var_set_dt) {
           "var_set_var_nm_set_get_all"
         )
       }
-      # slot:var_set_get
-      var_set_get <- function(id) {
+      # slot:var_set_var_nm_set_get
+      var_set_var_nm_set_get <- function(id) {
         call_slot_fun_alias_in_slot_fun__(
-          "var_set_get"
+          "var_set_var_nm_set_get"
         )
       }
       # slot:var_set_meta_get

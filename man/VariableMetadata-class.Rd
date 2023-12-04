@@ -49,13 +49,13 @@ Get every variable name set.
 
 \code{vm@var_set_var_nm_set_get_all()}}
 
-\item{\code{var_set_get}}{\emph{Description}
+\item{\code{var_set_var_nm_set_get}}{\emph{Description}
 
 Get a specific variable name set.
 
 \emph{Usage}
 
-\code{vm@var_set_get(id)}
+\code{vm@var_set_var_nm_set_get(id)}
 
 \emph{Arguments}
 

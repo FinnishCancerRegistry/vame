@@ -45,14 +45,18 @@ var_set_var_nm_set_get_all <- function(
   return(var_set_list)
 }
 
-var_set_get <- function(
+var_set_var_nm_set_get <- function(
   vm,
   id
 ) {
-  # @codedoc_comment_block vm@var_set_get
+  # @codedoc_comment_block vm@var_set_var_nm_set_get
   # Get a specific variable name set.
-  # @codedoc_comment_block vm@var_set_get
+  # @codedoc_comment_block vm@var_set_var_nm_set_get
   
+  # @codedoc_comment_block news("vm@var_set_var_nm_set_get", "2023-12-04", "0.2.0")
+  # Rename `vm@var_set_get` to `vm@var_set_var_nm_set_get`.
+  # @codedoc_comment_block news("vm@var_set_var_nm_set_get", "2023-12-04", "0.2.0")
+
   assert_is_variablemetadata(vm)
   # @codedoc_comment_block param_id
   # @param id `[any]` (no default)
