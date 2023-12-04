@@ -857,7 +857,8 @@ var_labels_get <- function(
   vm,
   x,
   var_nm,
-  label_col_nm = NULL
+  label_col_nm = NULL,
+  labeler_env = NULL
 ) {
   # @codedoc_comment_block vm@var_labels_get
   # Get label for each value in `x` for `var_nm`.
@@ -895,6 +896,24 @@ var_labels_get <- function(
     funs = list(dbc::report_is_NULL,
                 dbc::report_is_character_nonNA_atom)
   )
+
+  # @codedoc_comment_block param_labeler_env
+  # @param labeler_env `[NULL, environment]` (default `NULL`)
+  # 
+  # Environment where `labeler` of class `call` is evaluated.
+  #
+  # - `NULL`: Use the environment where this function is called.
+  # - `environment`: Use this environment.
+  # @codedoc_comment_block param_labeler_env
+  dbc::assert_is_one_of(
+    labeler_env,
+    funs = list(dbc::report_is_NULL,
+                dbc::report_is_environment)
+  )
+  if (is.null(labeler_env)) {
+    labeler_env <- parent.frame(1L)
+  }
+
   if (inherits(labeler, "data.table")) {
     label_col_nm_set <- setdiff(names(labeler), "level")
     if (is.null(label_col_nm)) {
@@ -921,6 +940,28 @@ var_labels_get <- function(
            "determine label_col_nm automatically.")
     }
     out <- labeler(x = x, label_col_nm = label_col_nm)
+  } else if (is.call(labeler)) {
+    # @codedoc_comment_block news("vm@var_labels_get", "2023-12-01", "0.2.1")
+    # `vm@var_labels_get` now can handle `labeler`s of class `call`.
+    # Added argument `labeler_env` for this purpose.
+    # @codedoc_comment_block news("vm@var_labels_get", "2023-12-01", "0.2.1")
+    out <- tryCatch(
+      eval(labeler, envir = labeler_env),
+      error = function(e) {
+        stop(
+          "Labeler for var_nm = \"", var_nm, "\" was of class 'call', but ",
+          "evaluation failed. Error message: \"", e[["message"]], "\""
+        )
+      }
+    )
+    if (!is.character(out)) {
+      utils::str(out)
+      stop(
+        "Labeler for var_nm = \"", var_nm, "\" was of class 'call', but ",
+        "evaluation did not produce a character string vector. See what ",
+        "`str(result)` printed above this error message."
+      )     
+    }
   } else {
     stop("no handling defined for labeler of class(es) ",
          deparse1(class(labeler)))

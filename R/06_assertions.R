@@ -32,7 +32,8 @@ assert_is_labeler <- function(
     funs = list(
       dbc::report_is_NULL,
       dbc::report_is_data_table,
-      dbc::report_is_function
+      dbc::report_is_function,
+      dbc::report_is_call
     ),
     assertion_type = assertion_type
   )
@@ -66,6 +67,34 @@ assert_is_labeler <- function(
       call = call,
       required_names = "level",
       assertion_type = assertion_type
+    )
+  } else if (is.language(x)) {
+    # @codedoc_comment_block news("vm@var_labeler_set", "2023-12-04", "0.2.1")
+    # A `labeler` can now also be of class `call`.
+    # @codedoc_comment_block news("vm@var_labeler_set", "2023-12-04", "0.2.1")
+
+    # @codedoc_comment_block specification(var_dt$labeler)
+    # - An R expression object of class `call`.
+    #   The expression must contain the variables `x` and `label_col_nm`.
+    # @codedoc_comment_block specification(var_dt$labeler)
+    report_df <- dbc::expressions_to_report(
+      expressions = list(
+        quote("x" %in% all.vars(x)),
+        quote("label_col_nm" %in% all.vars(x))
+      ),
+      fail_messages = c(
+        paste0("R expression `", deparse1(x), "` from object/expression `",
+               x_nm , "` must contain variable `x`"),
+        paste0("R expression `", deparse1(x), "` from object/expression `",
+               x_nm , "` must contain variable `label_col_nm`")
+      ),
+      call = call,
+      env = environment()
+    )
+    dbc::report_to_assertion(
+      report_df,
+      assertion_type = assertion_type,
+      raise_error_call = call
     )
   }
 }

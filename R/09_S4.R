@@ -327,13 +327,13 @@ methods::setClass(
 #'         level = 1:3,
 #'         en = paste0("a_level_", 1:3)
 #'       ),
-#'       b = function(x, label_col_nm) {
+#'       b = quote({
 #'         dt <- data.table::data.table(
 #'           level = 1:3,
 #'           en = paste0("b_level_", 1:3)
 #'         )
 #'         dt[[label_col_nm]][match(x, dt[["level"]])]
-#'       },
+#'       }),
 #'       c = NULL
 #'     )
 #'   ),
@@ -612,7 +612,12 @@ VariableMetadata <- function(var_dt, var_set_dt) {
         )
       }
       # slot:var_labels_get
-      var_labels_get <- function(x, var_nm, label_col_nm) {
+      var_labels_get <- function(
+        x,
+        var_nm,
+        label_col_nm = NULL,
+        labeler_env = NULL
+      ) {
         call_slot_fun_alias_in_slot_fun__(
           "var_labels_get"
         )

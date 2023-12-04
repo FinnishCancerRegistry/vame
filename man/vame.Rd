@@ -153,6 +153,20 @@ my_fun_2 <- function(dg_age) \{
 
 \section{News}{
 
+\subsection{News for version 0.2.1}{
+\subsection{vm@var_labeler_set}{
+
+A \code{labeler} can now also be of class \code{call}.
+}
+
+\subsection{vm@var_labels_get}{
+
+\code{vm@var_labels_get} now can handle \code{labeler}s of class \code{call}.
+Added argument \code{labeler_env} for this purpose.
+}
+
+}
+
 \subsection{News for version 0.2.0}{
 \subsection{VariableMetadata}{
 

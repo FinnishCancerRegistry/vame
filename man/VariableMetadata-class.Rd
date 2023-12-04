@@ -491,7 +491,7 @@ Get label for each value in \code{x} for \code{var_nm}.
 
 \emph{Usage}
 
-\code{vm@var_labels_get(x, var_nm, label_col_nm)}
+\code{vm@var_labels_get(x, var_nm, label_col_nm, labeler_env)}
 
 \emph{Arguments}
 
@@ -511,6 +511,14 @@ Labels will be taken from this column.
 \item \code{NULL}: Use first column name in \code{labeler} that is not \code{"level"} --- if
 \code{labeler} is a \code{data.table}.
 \item \code{character}: Use this column name.
+}
+
+\code{labeler_env} \verb{[NULL, environment]} (default \code{NULL})
+
+Environment where \code{labeler} of class \code{call} is evaluated.
+\itemize{
+\item \code{NULL}: Use the environment where this function is called.
+\item \code{environment}: Use this environment.
 }}
 
 \item{\code{vame_copy}}{\emph{Description}
@@ -700,6 +708,8 @@ A \code{labeler} for a variable can be one of these:
 \item A \code{data.table} with column \code{level} and label columns --- you decide
 their names. For labels in different languages it is recommended to use
 ISO language codes as column names, e.g. "en".
+\item An R expression object of class \code{call}.
+The expression must contain the variables \code{x} and \code{label_col_nm}.
 }
 
 The following functions are related to this feature:
@@ -732,6 +742,15 @@ The following functions are part of this feature:
 \item \code{vm@vame_category_space_dt_list}
 \item \code{vm@vame_category_space_dt}
 }
+}
+
+\section{News for version 0.2.1}{
+
+
+A \code{labeler} can now also be of class \code{call}.
+
+\code{vm@var_labels_get} now can handle \code{labeler}s of class \code{call}.
+Added argument \code{labeler_env} for this purpose.
 }
 
 \section{News for version 0.2.0}{
@@ -1046,13 +1065,13 @@ vm <- vame::VariableMetadata(
         level = 1:3,
         en = paste0("a_level_", 1:3)
       ),
-      b = function(x, label_col_nm) {
+      b = quote({
         dt <- data.table::data.table(
           level = 1:3,
           en = paste0("b_level_", 1:3)
         )
         dt[[label_col_nm]][match(x, dt[["level"]])]
-      },
+      }),
       c = NULL
     )
   ),
