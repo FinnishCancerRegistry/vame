@@ -91,6 +91,11 @@ doc_variablemetadata_features__ <- function(df = NULL) {
     }))
   ) 
 }
+doc_variablemetadata_news__ <- function() {
+  codedoc::codedoc_roxygen_news_by_version(
+    detect_allowed_keys = "(vm@)|(vame::VariableMetadata)"
+  )
+}
 
 methods::setClass(
   Class = "VariableMetadata",
@@ -420,7 +425,8 @@ methods::setClass(
 #'   df <- codedoc::extract_keyed_comment_blocks()
 #'   c(
 #'     doc_variablemetadata_features__(df = df),
-#'     doc_slot_funs__(df = df)
+#'     doc_slot_funs__(df = df),
+#'     doc_variablemetadata_news__()
 #'   )
 #' })
 VariableMetadata <- function(var_dt, var_set_dt) {

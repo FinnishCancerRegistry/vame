@@ -705,6 +705,123 @@ The category spaces feature is used via
 \code{vm@vame_category_space_dt} and \code{vm@vame_category_space_dt_list}.
 }
 
+\section{News for version 0.2.0}{
+
+
+Rename \code{expr} to \code{var_dt_expr}. Add arg \code{var_set_dt_expr}.
+
+Rename \code{x} to \code{vm_2}.
+
+A \code{labeler} can now be of type \code{function} in addition to \code{data.table}.
+
+\code{vm@var_labels_get} now can handle \code{labeler}s of type \code{function}.
+
+\code{vm@var_meta_get_all} now always sets \code{var_dt$var_nm} as the names
+of the output list or vector.
+
+Rename \code{old} to \code{old_var_nms} and \code{new} to \code{new_var_nms}.
+
+\code{vm@var_set_meta_get_all} now always sets \code{var_set_dt$id} as the names
+of the output list or vector.
+
+Rename \code{old} to \code{old_ids} and \code{new} to \code{new_ids}.
+
+Rename \code{vm@var_set_get} to \code{vm@var_set_var_nm_set_get}.
+
+Rename \code{vm@var_set_list_get} to \code{vm@var_set_var_nm_set_get_all}.
+
+New function \code{vm@var_set_var_nm_set_set}.
+}
+
+\section{News for version 0.1.9}{
+
+
+\code{vm@var_remove} can now remove multiple variables in one go.
+
+\code{vame::var_set_value_space_eval} + \code{vm@var_set_value_space_eval} gain
+arg \code{var_nms}. You can now evaluate the value space for only a subset of
+the variables in the set.
+}
+
+\section{News for version 0.1.8}{
+
+
+New slot fun \code{vm@vame_copy} + new exported fun \code{vame::vame_copy}.
+}
+
+\section{News for version 0.1.7}{
+
+
+New \code{value_space} type: "unrestricted". Use this when a variable must
+be of a certain class but can take any value. E.g.
+\code{list(unrestricted = list(class_set = c("IDate", "Date")))}.
+
+New \code{value_space} type: "regex". Use this when all values of a variable
+must match a specific regex. E.g. \code{list(regex = "^[a-z]$")}.
+
+New exported fun \code{vame::var_set_value_space_eval} --- alternative for
+\code{vm@var_set_value_space_eval}.
+}
+
+\section{News for version 0.1.6}{
+
+
+fix \code{vame_union_append} --- no longer attempt to remove duplicates
+in rbind'd \code{var_dt} because some \code{by} columns may be of type \code{list}
+which is not supported by \code{duplicated}.
+}
+
+\section{News for version 0.1.5}{
+
+
+Robustify \code{vame_union_append} --- use \verb{use.names = TRUE, fill = TRUE}
+in \code{rbind} calls.
+}
+
+\section{News for version 0.1.4}{
+
+
+Fixed \code{vame_union_append} --- used to always raise an error due to
+a misnamed object.
+}
+
+\section{News for version 0.1.3}{
+
+
+New slot \code{var_aggregate}.
+
+\code{vm@var_assert} gains arg \code{env}. This is passed
+to \code{vm@var_value_space_eval}.
+
+New slot \code{var_is_aggregateable_to}.
+}
+
+\section{News for version 0.1.2}{
+
+
+Also \code{bounds} value space can be used when creating category spaces.
+
+Also \code{bounds} value space can be used when creating category spaces.
+
+Added arguments \code{x_nm}, \code{call}.
+}
+
+\section{News for version 0.1.1}{
+
+
+Fixed \code{var_assert} handling of a value space based on \code{bounds}.
+
+New slot \code{vm@var_set_value_space_eval}.
+
+New slot \code{vm@var_value_space_eval}.
+}
+
+\section{News for version 0.1.0}{
+
+
+First release.
+}
+
 \examples{
 
 # vame::VariableMetadata ----------------------------------------------------
