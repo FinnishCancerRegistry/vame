@@ -658,12 +658,25 @@ approach.
 E.g. \code{list(bounds = list(lo = 0.0, hi = 1.0, lo_inclusive = FALSE, hi_inclusive = TRUE))}
 }
 
+The following functions are related to this feature:
+\itemize{
+\item \code{vm@var_set_value_space_eval}
+\item \code{vm@var_set_value_space_get}
+\item \code{vm@var_set_value_space_set}
+\item \code{vm@var_set_value_space_dt_subset}
+\item \code{vm@var_value_space_eval}
+}
+
 \strong{Assertions}
 
 The assertions feature allows you to check that variables look like what
 you expect. This feature relies on the value spaces feature --- see that
-for more information. Once the value spaces feature is available, the main
-way to use this feature is via \code{vm@var_assert}.
+for more information.
+
+The following functions are related to this feature:
+\itemize{
+\item \code{vm@var_assert}
+}
 
 \strong{Labeling}
 
@@ -681,9 +694,12 @@ their names. For labels in different languages it is recommended to use
 ISO language codes as column names, e.g. "en".
 }
 
-The main way to use the labeling feature is via \code{vm@var_labels_get}.
-There may be edge cases where you may want to retrieve all labels with
-\code{vm@var_labeler_get}.
+The following functions are related to this feature:
+\itemize{
+\item \code{vm@var_labeler_get}
+\item \code{vm@var_labeler_set}
+\item \code{vm@var_labels_get}
+}
 
 \strong{Category spaces}
 
@@ -701,8 +717,13 @@ allowed.
 This feature relies on the value spaces feature. See the documentation
 for that feature for more information.
 
-The category spaces feature is used via
-\code{vm@vame_category_space_dt} and \code{vm@vame_category_space_dt_list}.
+The following functions are part of this feature:
+\itemize{
+\item \code{vm@var_is_aggregateable_to}
+\item \code{vm@var_aggregate}
+\item \code{vm@vame_category_space_dt_list}
+\item \code{vm@vame_category_space_dt}
+}
 }
 
 \section{News for version 0.2.0}{

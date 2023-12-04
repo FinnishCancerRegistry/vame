@@ -217,6 +217,9 @@ var_set_value_space_eval <- function(
   # @codedoc_comment_block vm@var_set_value_space_eval
   # Retrieve and evaluate value space for a variable set given its `id`.
   # @codedoc_comment_block vm@var_set_value_space_eval
+  # @codedoc_comment_block feature_funs(VariableMetadata, value spaces)
+  # - `vm@var_set_value_space_eval`
+  # @codedoc_comment_block feature_funs(VariableMetadata, value spaces)
 
   # @codedoc_comment_block news("vm@var_set_value_space_eval", "2023-07-03", "0.1.1")
   # New slot `vm@var_set_value_space_eval`.
@@ -242,6 +245,9 @@ var_set_value_space_eval <- function(
   # or you can use `vm@var_set_value_space_set` later.
   #
   # @codedoc_insert_comment_block specification(var_set_dt$value_space)
+  #
+  # The following functions are related to this feature:
+  # @codedoc_insert_comment_block feature_funs(VariableMetadata, value spaces)
   # @codedoc_comment_block feature(VariableMetadata, value spaces)
 
   dbc::assert_inherits(vm, required_class = "VariableMetadata")
@@ -340,6 +346,9 @@ var_set_value_space_get <- function(
   # @codedoc_comment_block vm@var_set_value_space_get
   # Get the value space of a specific variable set without evaluting it.
   # @codedoc_comment_block vm@var_set_value_space_get
+  # @codedoc_comment_block feature_funs(VariableMetadata, value spaces)
+  # - `vm@var_set_value_space_get`
+  # @codedoc_comment_block feature_funs(VariableMetadata, value spaces)
   assert_is_var_set_id(vm, id)
   assert_var_set_value_space_is_defined(vm)
   vsd <- vsd_get(vm)
@@ -356,6 +365,9 @@ var_set_value_space_set <- function(
   # @codedoc_comment_block vm@var_set_value_space_set
   # Set the value space of a specific variable set.
   # @codedoc_comment_block vm@var_set_value_space_set
+  # @codedoc_comment_block feature_funs(VariableMetadata, value spaces)
+  # - `vm@var_set_value_space_set`
+  # @codedoc_comment_block feature_funs(VariableMetadata, value spaces)
   assert_var_set_value_space_is_defined(vm)
   vsd <- vsd_get(vm)
   pos <- var_set_id_to_pos(vm, id)
@@ -383,6 +395,9 @@ var_set_value_space_dt_subset <- function(
   # @codedoc_comment_block vm@var_set_value_space_dt_subset
   # Take a subset of a value space dt for a variable set and set that as the value space.
   # @codedoc_comment_block vm@var_set_value_space_dt_subset
+  # @codedoc_comment_block feature_funs(VariableMetadata, value spaces)
+  # - `vm@var_set_value_space_dt_subset`
+  # @codedoc_comment_block feature_funs(VariableMetadata, value spaces)
   assert_var_set_value_space_is_defined(vm)
   assert_is_var_set_id(vm, id)
   # @codedoc_comment_block param_expr
@@ -404,6 +419,9 @@ var_is_aggregateable_to <- function(
   # @codedoc_comment_block vm@var_is_aggregateable_to
   # Returns `TRUE` if `from_var_nm` can be aggregated into `to_var_nm`.
   # @codedoc_comment_block vm@var_is_aggregateable_to
+  # @codedoc_comment_block feature_funs(VariableMetadata, category spaces)
+  # - `vm@var_is_aggregateable_to`
+  # @codedoc_comment_block feature_funs(VariableMetadata, category spaces)
 
   # @codedoc_comment_block news("vm@var_is_aggregateable_to", "2023-07-10", "0.1.3")
   # New slot `var_is_aggregateable_to`.
@@ -439,6 +457,9 @@ var_aggregate <- function(
   # @codedoc_comment_block vm@var_aggregate
   # Returns correspoding level of `to_var_nm` for each value in `x`.
   # @codedoc_comment_block vm@var_aggregate
+  # @codedoc_comment_block feature_funs(VariableMetadata, category spaces)
+  # - `vm@var_aggregate`
+  # @codedoc_comment_block feature_funs(VariableMetadata, category spaces)
 
   # @codedoc_comment_block news("vm@var_aggregate", "2023-07-10", "0.1.3")
   # New slot `var_aggregate`.
@@ -484,6 +505,9 @@ var_value_space_eval <- function(
   # @codedoc_comment_block vm@var_aggregate
   # Get and evaluate value space for a variable.
   # @codedoc_comment_block vm@var_aggregate
+  # @codedoc_comment_block feature_funs(VariableMetadata, value spaces)
+  # - `vm@var_value_space_eval`
+  # @codedoc_comment_block feature_funs(VariableMetadata, value spaces)
 
   # @codedoc_comment_block news("vm@var_value_space_eval", "2023-07-03", "0.1.1")
   # New slot `vm@var_value_space_eval`.
@@ -562,6 +586,9 @@ var_assert <- function(
   # @codedoc_comment_block vm@var_assert
   # Assert that values in `x` are proper values of `var_nm`.
   # @codedoc_comment_block vm@var_assert
+  # @codedoc_comment_block feature_funs(VariableMetadata, assertions)
+  # - `vm@var_assert`
+  # @codedoc_comment_block feature_funs(VariableMetadata, assertions)
 
   # @codedoc_comment_block news("vm@var_assert", "2023-07-03", "0.1.1")
   # Fixed `var_assert` handling of a value space based on `bounds`.
@@ -573,8 +600,10 @@ var_assert <- function(
   # @codedoc_comment_block feature(VariableMetadata, assertions)
   # The assertions feature allows you to check that variables look like what
   # you expect. This feature relies on the value spaces feature --- see that
-  # for more information. Once the value spaces feature is available, the main
-  # way to use this feature is via `vm@var_assert`.
+  # for more information.
+  #
+  # The following functions are related to this feature:
+  # @codedoc_insert_comment_block feature_funs(VariableMetadata, assertions)
   # @codedoc_comment_block feature(VariableMetadata, assertions)
 
   # @codedoc_comment_block param_x_nm
@@ -780,6 +809,9 @@ var_labeler_get <- function(
   # @codedoc_comment_block vm@var_labeler_get
   # Get the labeler for a variable.
   # @codedoc_comment_block vm@var_labeler_get
+  # @codedoc_comment_block feature_funs(VariableMetadata, labeling)
+  # - `vm@var_labeler_get`
+  # @codedoc_comment_block feature_funs(VariableMetadata, labeling)
   assert_is_var_nm(vm, var_nm)
   out <- var_meta_get(vm, var_nm, "labeler")
   if (is.null(out)) {
@@ -796,6 +828,9 @@ var_labeler_set <- function(
   # @codedoc_comment_block vm@var_labeler_get
   # Set the labeler for a variable.
   # @codedoc_comment_block vm@var_labeler_get
+  # @codedoc_comment_block feature_funs(VariableMetadata, labeling)
+  # - `vm@var_labeler_set`
+  # @codedoc_comment_block feature_funs(VariableMetadata, labeling)
   assert_is_var_nm(vm, var_nm)
   assert_is_labeler(value)
   var_meta_set(vm, var_nm, "labeler", value)
@@ -819,10 +854,12 @@ var_labels_get <- function(
   #
   # @codedoc_insert_comment_block specification(var_dt$labeler)
   #
-  # The main way to use the labeling feature is via `vm@var_labels_get`.
-  # There may be edge cases where you may want to retrieve all labels with
-  # `vm@var_labeler_get`.
+  # The following functions are related to this feature:
+  # @codedoc_insert_comment_block feature_funs(VariableMetadata, labeling)
   # @codedoc_comment_block feature(VariableMetadata, labeling)
+  # @codedoc_comment_block feature_funs(VariableMetadata, labeling)
+  # - `vm@var_labels_get`
+  # @codedoc_comment_block feature_funs(VariableMetadata, labeling)
   assert_is_var_nm(vm, var_nm)
   labeler <- var_labeler_get(vm, var_nm = var_nm)
   
@@ -1020,6 +1057,9 @@ vame_category_space_dt_list <- function(
   # @codedoc_comment_block vm@vame_category_space_dt_list
   # Get list of category space `data.table` objects.
   # @codedoc_comment_block vm@vame_category_space_dt_list
+  # @codedoc_comment_block feature_funs(VariableMetadata, category spaces)
+  # - `vm@vame_category_space_dt_list`
+  # @codedoc_comment_block feature_funs(VariableMetadata, category spaces)
   dbc::assert_is_one_of(
     env,
     funs = list(dbc::report_is_NULL,
@@ -1067,9 +1107,14 @@ vame_category_space_dt <- function(
   # This feature relies on the value spaces feature. See the documentation
   # for that feature for more information.
   #
-  # The category spaces feature is used via
-  # `vm@vame_category_space_dt` and `vm@vame_category_space_dt_list`.
+  # The following functions are part of this feature:
+  # @codedoc_insert_comment_block feature_funs(VariableMetadata, category spaces)
+  # 
   # @codedoc_comment_block feature(VariableMetadata, category spaces)
+  
+  # @codedoc_comment_block feature_funs(VariableMetadata, category spaces)
+  # - `vm@vame_category_space_dt`
+  # @codedoc_comment_block feature_funs(VariableMetadata, category spaces)
   if (is.null(env)) {
     env <- parent.frame(1L)
   }
