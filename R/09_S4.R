@@ -608,7 +608,10 @@ VariableMetadata <- function(var_dt, var_set_dt) {
       }
 
       # slot:vame_subset
-      vame_subset <- function(var_dt_expr = NULL, var_set_dt_expr = NULL) {
+      vame_subset <- function(      
+        var_dt_expr = NULL,
+        var_set_dt_expr = NULL
+      ) {
         call_slot_fun_alias_in_slot_fun__(
           "vame_copy"
         )

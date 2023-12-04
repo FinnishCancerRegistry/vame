@@ -737,7 +737,7 @@ var_remove <- function(
     assert_is_var_nm(vm, vn)
   }
   expr <- substitute(!var_nm %in% VN, list(VN = var_nm))
-  vame_subset_expr(vm, expr)
+  vame_subset_expr(vm, var_dt_expr = expr, var_set_dt_expr = NULL)
 }
 
 var_labeler_get <- function(

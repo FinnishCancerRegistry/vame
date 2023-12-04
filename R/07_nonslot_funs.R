@@ -345,18 +345,35 @@ var_is_aggregateable_to__ <- function(
 
 vame_subset_expr <- function(
   vm,
-  var_dt_expr,
-  var_set_dt_expr
+  var_dt_expr = NULL,
+  var_set_dt_expr = NULL
 ) {
   assert_is_variablemetadata(vm, assertion_type = "prod_input")
-  dbc::assert_is_language_object(var_dt_expr, assertion_type = "prod_input")
-  dbc::assert_is_language_object(var_set_dt_expr, assertion_type = "prod_input")
-  vd <- vd_get(vm)
-  vd <- eval(substitute(vd[i = expr], list(expr = var_dt_expr)))
-  vd_set(vm, vd)
-  vsd <- vsd_get(vm)
-  vsd <- eval(substitute(vsd[i = expr], list(expr = var_set_dt_expr)))
-  vsd_set(vm, vsd)
-  vd_vsd_intersect(vm)
+  dbc::assert_is_one_of(
+    var_dt_expr,
+    funs = list(dbc::report_is_NULL,
+                dbc::report_is_language_object)
+  )
+  dbc::assert_is_one_of(
+    var_set_dt_expr,
+    funs = list(dbc::report_is_NULL,
+                dbc::report_is_language_object)
+  )
+  need_to_intersect <- FALSE
+  if (!is.null(var_dt_expr)) {
+    vd <- vd_get(vm)
+    vd <- eval(substitute(vd[i = expr], list(expr = var_dt_expr)))
+    vd_set(vm, vd)
+    need_to_intersect <- TRUE
+  }
+  if (!is.null(var_set_dt_expr)) {
+    vsd <- vsd_get(vm)
+    vsd <- eval(substitute(vsd[i = expr], list(expr = var_set_dt_expr)))
+    vsd_set(vm, vsd)
+    need_to_intersect <- TRUE
+  }
+  if (need_to_intersect) {
+    vd_vsd_intersect(vm)
+  }
   return(invisible(NULL))
 }
