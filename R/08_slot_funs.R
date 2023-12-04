@@ -23,6 +23,74 @@ call_slot_fun_alias_in_slot_fun__ <- function(
 }
 
 # var_set funs -----------------------------------------------------------------
+
+var_set_meta_get <- function(
+  vm,
+  id,
+  meta_nm
+) {
+  # @codedoc_comment_block vm@var_set_meta_get
+  # Get metadata for a specific variable set.
+  # @codedoc_comment_block vm@var_set_meta_get
+  
+  assert_is_variablemetadata(vm)
+  
+  assert_is_var_set_id(vm, id)
+    
+  # @codedoc_comment_block param_meta_nm
+  # @param meta_nm `[character]` (no default)
+  # 
+  # Name of a metadata column in `var_set_dt` or `var_dt` (depending on context)
+  # of a `VariableMetadata` object.
+  # @codedoc_comment_block param_meta_nm
+  assert_is_var_set_meta_nm(vm, meta_nm)
+  vsd <- vsd_get(vm)
+  vsd[[meta_nm]][[var_set_id_to_pos(vm, id)]]
+}
+
+var_set_meta_set <- function(
+  vm,
+  id,
+  meta_nm,
+  value
+) {
+  # @codedoc_comment_block vm@var_set_meta_set
+  # Set metadata for a specific variable set.
+  # @codedoc_comment_block vm@var_set_meta_set
+  
+  assert_is_variablemetadata(vm)
+  
+  assert_is_var_set_id(vm, id)
+  
+  assert_is_var_set_meta_nm(vm, meta_nm)
+    
+  # @codedoc_comment_block param_value
+  # @param value `[any]` (no default)
+  # 
+  # In `_set` functions the value to set for the specified metadata.
+  # @codedoc_comment_block param_value
+  vsd <- vsd_get(vm)
+  data.table::set(
+    vsd,
+    i = var_set_id_to_pos(vm, id),
+    j = meta_nm,
+    value = value
+  )
+  vsd_set(vm, vsd)
+}
+
+var_set_meta_get_all <- function(
+  vm,
+  meta_nm
+) {
+  # @codedoc_comment_block vm@var_set_meta_get_all
+  # Get all metadata for a specific variable set.
+  # @codedoc_comment_block vm@var_set_meta_get_all
+  assert_is_var_set_meta_nm(vm, meta_nm)
+  vsd <- vsd_get(vm)
+  vsd[[meta_nm]]
+}
+
 var_set_var_nm_set_get_all <- function(
   vm
 ) {
@@ -67,76 +135,6 @@ var_set_var_nm_set_get <- function(
   assert_is_var_set_id(vm, id)
   vsd <- vsd_get(vm)
   return(vsd[["var_nm_set"]][[var_set_id_to_pos(vm, id)]])
-}
-
-
-var_set_meta_get <- function(
-  vm,
-  id,
-  meta_nm
-) {
-  # @codedoc_comment_block vm@var_set_meta_get
-  # Get metadata for a specific variable set.
-  # @codedoc_comment_block vm@var_set_meta_get
-  
-  assert_is_variablemetadata(vm)
-  
-  assert_is_var_set_id(vm, id)
-    
-  # @codedoc_comment_block param_meta_nm
-  # @param meta_nm `[character]` (no default)
-  # 
-  # Name of a metadata column in `var_set_dt` or `var_dt` (depending on context)
-  # of a `VariableMetadata` object.
-  # @codedoc_comment_block param_meta_nm
-  assert_is_var_set_meta_nm(vm, meta_nm)
-  vsd <- vsd_get(vm)
-  vsd[[meta_nm]][[var_set_id_to_pos(vm, id)]]
-}
-
-
-var_set_meta_set <- function(
-  vm,
-  id,
-  meta_nm,
-  value
-) {
-  # @codedoc_comment_block vm@var_set_meta_set
-  # Set metadata for a specific variable set.
-  # @codedoc_comment_block vm@var_set_meta_set
-  
-  assert_is_variablemetadata(vm)
-  
-  assert_is_var_set_id(vm, id)
-  
-  assert_is_var_set_meta_nm(vm, meta_nm)
-    
-  # @codedoc_comment_block param_value
-  # @param value `[any]` (no default)
-  # 
-  # In `_set` functions the value to set for the specified metadata.
-  # @codedoc_comment_block param_value
-  vsd <- vsd_get(vm)
-  data.table::set(
-    vsd,
-    i = var_set_id_to_pos(vm, id),
-    j = meta_nm,
-    value = value
-  )
-  vsd_set(vm, vsd)
-}
-
-
-var_set_meta_get_all <- function(
-  vm,
-  meta_nm
-) {
-  # @codedoc_comment_block vm@var_set_meta_get_all
-  # Get all metadata for a specific variable set.
-  # @codedoc_comment_block vm@var_set_meta_get_all
-  assert_is_var_set_meta_nm(vm, meta_nm)
-  vsd <- vsd_get(vm)
-  vsd[[meta_nm]]
 }
 
 var_set_rename <- function(
