@@ -416,7 +416,15 @@ of a \code{VariableMetadata} object.}
 
 \item{\code{var_rename}}{\emph{Description}
 
-Rename variables.
+Rename variables. The name is changed in the following places:
+\itemize{
+\item \code{var_dt$var_nm}
+\item \code{var_set_dt$value_space}, if the \code{value_space} object is of type \code{dt}.
+If the \code{value_space} is of type \code{expr} or \code{fun}, \code{vm@var_rename} emits
+a warning because it does not attempt to alter R expressions or
+functions --- you will have to do that youself.
+\item \code{var_set_dt$var_nm_set}
+}
 
 \emph{Usage}
 
