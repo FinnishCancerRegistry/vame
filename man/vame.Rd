@@ -161,11 +161,6 @@ my_fun_2 <- function(dg_age) \{
 
 \subsection{vm@vame_subset}{
 
-Rename \code{old} to \code{old_ids} and \code{new} to \code{new_ids}.
-}
-
-\subsection{vm@vame_subset}{
-
 Rename \code{expr} to \code{var_dt_expr}. Add arg \code{var_set_dt_expr}.
 }
 
@@ -187,6 +182,11 @@ A \code{labeler} can now be of type \code{function} in addition to \code{data.ta
 \subsection{vm@var_rename}{
 
 Rename \code{old} to \code{old_var_nms} and \code{new} to \code{new_var_nms}.
+}
+
+\subsection{vm@var_set_rename}{
+
+Rename \code{old} to \code{old_ids} and \code{new} to \code{new_ids}.
 }
 
 }

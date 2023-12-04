@@ -140,9 +140,9 @@ var_set_rename <- function(
   # Rename variable sets --- change `var_set_dt$id` values.
   # @codedoc_comment_block vm@var_set_rename
 
-  # @codedoc_comment_block news("vm@vame_subset", "2023-12-01", "0.2.0")
+  # @codedoc_comment_block news("vm@var_set_rename", "2023-12-01", "0.2.0")
   # Rename `old` to `old_ids` and `new` to `new_ids`.
-  # @codedoc_comment_block news("vm@vame_subset", "2023-12-01", "0.2.0")
+  # @codedoc_comment_block news("vm@var_set_rename", "2023-12-01", "0.2.0")
 
   # @codedoc_comment_block param_old_ids
   # @param old_ids `[any]` (no default)

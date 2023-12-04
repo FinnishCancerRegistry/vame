@@ -8,10 +8,6 @@
 
 ### vm@vame_subset
 
-Rename `old` to `old_ids` and `new` to `new_ids`.
-
-### vm@vame_subset
-
 Rename `expr` to `var_dt_expr`. Add arg `var_set_dt_expr`.
 
 ### vm@vame_union_append
@@ -29,6 +25,10 @@ A `labeler` can now be of type `function` in addition to `data.table`.
 ### vm@var_rename
 
 Rename `old` to `old_var_nms` and `new` to `new_var_nms`.
+
+### vm@var_set_rename
+
+Rename `old` to `old_ids` and `new` to `new_ids`.
 
 
 ## News for version 0.1.9
