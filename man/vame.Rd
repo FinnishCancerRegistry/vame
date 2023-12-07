@@ -153,6 +153,14 @@ my_fun_2 <- function(dg_age) \{
 
 \section{News}{
 
+\subsection{News for version 0.2.2}{
+\subsection{vm@var_rename}{
+
+Fix renaming multiple variables on one go.
+}
+
+}
+
 \subsection{News for version 0.2.1}{
 \subsection{vm@var_labeler_set}{
 

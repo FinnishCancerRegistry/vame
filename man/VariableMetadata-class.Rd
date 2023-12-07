@@ -744,6 +744,12 @@ The following functions are part of this feature:
 }
 }
 
+\section{News for version 0.2.2}{
+
+
+Fix renaming multiple variables on one go.
+}
+
 \section{News for version 0.2.1}{
 
 

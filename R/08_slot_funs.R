@@ -738,7 +738,6 @@ var_rename <- function(
   old_var_nms,
   new_var_nms
 ) {
-
   # @codedoc_comment_block news("vm@var_rename", "2023-12-01", "0.2.0")
   # Rename `old` to `old_var_nms` and `new` to `new_var_nms`.
   # @codedoc_comment_block news("vm@var_rename", "2023-12-01", "0.2.0")
@@ -777,19 +776,24 @@ var_rename <- function(
     #   a warning because it does not attempt to alter R expressions or 
     #   functions --- you will have to do that youself.
     # @codedoc_comment_block vm@var_rename
-    id <- var_to_var_set_id(vm, new_var_nm)
+    # @codedoc_comment_block news("vm@var_rename", "2023-12-07", "0.2.2")
+    # Fix renaming multiple variables on one go.
+    # @codedoc_comment_block news("vm@var_rename", "2023-12-07", "0.2.2")
+    id_set <- var_to_var_set_id(vm, new_var_nm)
     if (var_set_value_space_is_defined(vm)) {
-      vs <- var_set_value_space_get(vm, id = id)
-      if ("dt" %in% names(vs)) {
-        data.table::setnames(vs[["dt"]], old_var_nm, new_var_nm)
-      } else if (any(c("expr", "fun") %in% names(vs))) {
-        warning(
-          "vm@var_rename cannot handle value_space object of type ", 
-          names(vs)[1], "; you must alter the value_space object for ",
-          "id = ", id, " yourself"
-        )
-      }
-      var_set_value_space_set(vm, id = id, value_space = vs)
+      lapply(id_set, function(id) {
+        vs <- var_set_value_space_get(vm, id = id)
+        if ("dt" %in% names(vs)) {
+          data.table::setnames(vs[["dt"]], old_var_nm, new_var_nm)
+        } else if (any(c("expr", "fun") %in% names(vs))) {
+          warning(
+            "vm@var_rename cannot handle value_space object of type ", 
+            names(vs)[1], "; you must alter the value_space object for ",
+            "id = ", id, " yourself"
+          )
+        }
+        var_set_value_space_set(vm, id = id, value_space = vs)          
+      })
     }
     var_nm_set <- var_set_meta_get(vm, id = id, meta_nm = "var_nm_set")
     var_nm_set[var_nm_set == old_var_nm] <- new_var_nm
