@@ -767,14 +767,14 @@ var_rename <- function(
             "id = ", id, " yourself"
           )
         }
+        var_set_value_space_set(vm, id = id, value_space = vs)   
+        var_nm_set <- var_set_meta_get(vm, id = id, meta_nm = "var_nm_set")
+        var_nm_set[var_nm_set == old_var_nm] <- new_var_nm      
+        # @codedoc_comment_block vm@var_rename
+        # - `var_set_dt$var_nm_set`
+        # @codedoc_comment_block vm@var_rename
+        var_set_meta_set(vm, id = id, meta_nm = "var_nm_set", value = var_nm_set) 
       })
-      var_set_value_space_set(vm, id = id, value_space = vs)   
-      var_nm_set <- var_set_meta_get(vm, id = id, meta_nm = "var_nm_set")
-      var_nm_set[var_nm_set == old_var_nm] <- new_var_nm      
-      # @codedoc_comment_block vm@var_rename
-      # - `var_set_dt$var_nm_set`
-      # @codedoc_comment_block vm@var_rename
-      var_set_meta_set(vm, id = id, meta_nm = "var_nm_set", value = var_nm_set) 
     }
   })
   invisible(NULL)
