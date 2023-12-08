@@ -1,3 +1,14 @@
+.__VAME_SLOT_FUN_NMS__ <- local({
+  lines <- readLines("./R/09_slot_funs.R")
+  fun_def_lines <- lines[grepl(" <- function[(]", lines)]
+  slot_fun_nms <- sub(" <- function.+$", "", fun_def_lines)
+  return(slot_fun_nms)
+})
+
+vame_slot_nms_get__ <- function() {
+  return(.__VAME_SLOT_FUN_NMS__)
+}
+
 doc_slot_fun_arg__ <- function(df, arg_nm, with_tag = FALSE) {
   key <- paste0("param_", arg_nm)
   if (!key %in% df[["key"]]) {
@@ -441,235 +452,48 @@ VariableMetadata <- function(var_dt, var_set_dt) {
   funs$data <- new.env(parent = emptyenv())
   funs$data$var_dt <- var_dt
   funs$data$var_set_dt <- var_set_dt
-  local(
-    expr = {
-      # slot:var_set_meta_get
-      var_set_meta_get <- function(
-        id,
-        meta_nm
-      ) {
-        call_slot_fun_alias_in_slot_fun__(
-          "var_set_meta_get"
-        )
-      }
-      # slot:var_set_meta_set
-      var_set_meta_set <- function(
-        id,
-        meta_nm,
-        value
-      ) {
-        call_slot_fun_alias_in_slot_fun__(
-          "var_set_meta_set"
-        )
-      }
-      # slot:var_set_meta_get_all
-      var_set_meta_get_all <- function(
-        meta_nm
-      ) {
-        call_slot_fun_alias_in_slot_fun__(
-          "var_set_meta_get_all"
-        )
-      }      
-      # slot:var_set_var_nm_set_get_all
-      var_set_var_nm_set_get_all <- function() {
-        call_slot_fun_alias_in_slot_fun__(
-          "var_set_var_nm_set_get_all"
-        )
-      }
-      # slot:var_set_var_nm_set_get
-      var_set_var_nm_set_get <- function(id) {
-        call_slot_fun_alias_in_slot_fun__(
-          "var_set_var_nm_set_get"
-        )
-      }
-      # slot:var_set_var_nm_set_set
-      var_set_var_nm_set_set <- function(id) {
-        call_slot_fun_alias_in_slot_fun__(
-          "var_set_var_nm_set_get"
-        )
-      }
-      # slot:var_set_rename
-      var_set_rename <- function(old_ids, new_ids) {
-        call_slot_fun_alias_in_slot_fun__(
-          "var_set_rename"
-        )
-      }
-      # slot:var_set_remove
-      var_set_remove <- function(id) {
-        call_slot_fun_alias_in_slot_fun__(
-          "var_set_remove"
-        )
-      }
-
-      # var_set_value_space funs -----------------------------------------------
-      # slot:var_set_value_space_get
-      var_set_value_space_get <- function(id) {
-        call_slot_fun_alias_in_slot_fun__(
-          "var_set_value_space_get"
-        )
-      }
-      # slot:var_set_value_space_set
-      var_set_value_space_set <- function(id, value_space) {
-        call_slot_fun_alias_in_slot_fun__(
-          "var_set_value_space_set"
-        )
-      }
-      # slot:var_set_value_space_eval
-      var_set_value_space_eval <- function(id, var_nms = NULL, env = NULL) {
-        call_slot_fun_alias_in_slot_fun__(
-          "var_set_value_space_eval"
-        )
-      }
-      # slot:var_set_value_space_dt_subset
-      var_set_value_space_dt_subset <- function(
-        id,
-        expr
-      ) {
-        call_slot_fun_alias_in_slot_fun__(
-          "var_set_value_space_dt_subset"
-        )
-      }
-
-      # var funs ---------------------------------------------------------------
-      # slot:var_is_aggregateable_to
-      var_is_aggregateable_to <- function(from_var_nm, to_var_nm) {
-        call_slot_fun_alias_in_slot_fun__(
-          "var_is_aggregateable_to"
-        )
-      }
-      # slot:var_aggregate
-      var_aggregate <- function(x, from_var_nm, to_var_nm) {
-        call_slot_fun_alias_in_slot_fun__(
-          "var_aggregate"
-        )
-      }
-
-      # slot:var_value_space_eval
-      var_value_space_eval <- function(var_nm, env = NULL) {
-        call_slot_fun_alias_in_slot_fun__(
-          "var_value_space_eval"
-        )
-      }
-
-      # slot:var_assert
-      var_assert <- function(
-        x,
-        var_nm,
-        x_nm = NULL,
-        call = NULL,
-        assertion_type = NULL,
-        env = NULL
-      ) {
-        call_slot_fun_alias_in_slot_fun__(
-          "var_assert"
-        )
-      }
-
-      # slot:var_meta_get
-      var_meta_get <- function(var_nm, meta_nm) {
-        call_slot_fun_alias_in_slot_fun__(
-          "var_meta_get"
-        )
-      }
-      # slot:var_meta_set
-      var_meta_set <- function(
-        var_nm,
-        meta_nm,
-        value
-      ) {
-        call_slot_fun_alias_in_slot_fun__(
-          "var_meta_set"
-        )
-      }
-      # slot:var_meta_get_all
-      var_meta_get_all <- function(meta_nm) {
-        call_slot_fun_alias_in_slot_fun__(
-          "var_meta_get_all"
-        )
-      }
-      # slot:var_rename
-      var_rename <- function(old_var_nms, new_var_nms) {
-        call_slot_fun_alias_in_slot_fun__(
-          "var_rename"
-        )
-      }
-      # slot:var_remove
-      var_remove <- function(var_nm) {
-        call_slot_fun_alias_in_slot_fun__(
-          "var_remove"
-        )
-      }
-      # slot:var_labeler_get
-      var_labeler_get <- function(var_nm) {
-        call_slot_fun_alias_in_slot_fun__(
-          "var_labeler_get"
-        )
-      }
-      # slot:var_labeler_set
-      var_labeler_set <- function(var_nm, value) {
-        call_slot_fun_alias_in_slot_fun__(
-          "var_labeler_set"
-        )
-      }
-      # slot:var_labels_get
-      var_labels_get <- function(
-        x,
-        var_nm,
-        label_col_nm = NULL,
-        labeler_env = NULL
-      ) {
-        call_slot_fun_alias_in_slot_fun__(
-          "var_labels_get"
-        )
-      }
-
-      # vame funs --------------------------------------------------------------
-      # slot:vame_copy
-      vame_copy <- function() {
-        call_slot_fun_alias_in_slot_fun__(
-          "vame_copy"
-        )
-      }
-
-      # slot:vame_subset
-      vame_subset <- function(      
-        var_dt_expr = NULL,
-        var_set_dt_expr = NULL
-      ) {
-        call_slot_fun_alias_in_slot_fun__(
-          "vame_copy"
-        )
-      }
-      # slot:vame_union_append
-      vame_union_append <- function(vm_2) {
-        call_slot_fun_alias_in_slot_fun__(
-          "vame_union_append"
-        )
-      }
-
-      # vame_category_space funs -----------------------------------------------
-      # slot:vame_category_space_dt_list
-      vame_category_space_dt_list <- function(var_nms, env = NULL) {
-        call_slot_fun_alias_in_slot_fun__(
-          "vame_category_space_dt_list"
-        )
-      }
-      # slot:vame_category_space_dt
-      vame_category_space_dt <- function(var_nms, env = NULL) {
-        call_slot_fun_alias_in_slot_fun__(
-          "vame_category_space_dt"
-        )
-      }
-
-      # self -------------------------------------------------------------------
-      self <- function() {
-        get("self_obj", envir = get("data"))
-      }
-    },
-    envir = funs
-  )
-  not_slot_fun_nms <- c("data", "self")
-  slot_fun_nms <- setdiff(ls(funs), not_slot_fun_nms)
+  funs$self <- function() {
+    get("self_obj", envir = get("data"))
+  }
+  environment(funs$self) <- funs
+  slot_fun_nms <- vame_slot_nms_get__()
+  lapply(slot_fun_nms, function(slot_fun_nm) {
+    alias_fun <- eval(parse(text = paste0("vame:::", slot_fun_nm)))
+    args <- formals(alias_fun)
+    arg_lines <- paste0(
+      names(args), " = ", vapply(args, deparse1, character(1L))
+    )
+    arg_lines <- sub(" = $", "", arg_lines)
+    arg_lines <- setdiff(arg_lines, "vm")
+    arg_lines <- paste0(arg_lines, ",")
+    arg_lines[length(arg_lines)] <- sub(",$", "", arg_lines[length(arg_lines)])
+    # body_lines <- sprintf(
+    #   "vame:::call_slot_fun_alias_in_slot_fun__(\"%s\")",
+    #   slot_fun_nm
+    # )
+    body_arg_lines <- paste0(names(args), " = ", names(args))
+    body_arg_lines[names(args) == "vm"] <- "vm = self()"
+    body_arg_lines <- paste0(body_arg_lines, ",")
+    body_arg_lines[length(body_arg_lines)] <- sub(
+      ",$", "", body_arg_lines[length(body_arg_lines)]
+    )
+    body_lines <- c(
+      paste0("vame:::", slot_fun_nm, "("),
+      paste0("  ", body_arg_lines),
+      ")"
+    )
+    lines <- c(
+      sprintf("%s <- function(", slot_fun_nm), 
+      paste0("  ", arg_lines),
+      ") {",
+      paste0("  ", body_lines),
+      "}"
+    )
+    # browser()
+    funs[[slot_fun_nm]] <- eval(parse(text = lines))
+    environment(funs[[slot_fun_nm]]) <- funs
+    return(NULL)
+  })  
   slots <- lapply(slot_fun_nms, function(fun_nm) {
     funs[[fun_nm]]
   })
