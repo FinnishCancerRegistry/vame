@@ -327,21 +327,32 @@ value_space_type_funs__ <- list(
     }
   )
 )
-value_space_type_funs__ <- lapply(value_space_type_funs__, function(x) {
-  af <- function(x, x_nm = NULL, call = NULL, assertion_type = NULL) {
-    x_nm <- dbc::handle_arg_x_nm(x_nm)
-    call <- dbc::handle_arg_call(call)
-    assertion_type <- dbc::handle_arg_assertion_type(assertion_type)
-    df <- x[["report"]](x = x, x_nm = x_nm, call = call)
-    dbc::report_to_assertion(
-      df,
-      assertion_type = assertion_type,
-      raise_error_call = call
-    )
-  }
-  x[["assertion"]] <- af
-  return(x)
-})
+for (vst in names(value_space_type_funs__)) {
+  value_space_type_funs__[[vst]][["assertion"]] <- eval(substitute(
+    function(
+      x,
+      x_nm = NULL,
+      call = NULL,
+      assertion_type = NULL
+    ) {
+      x_nm <- dbc::handle_arg_x_nm(x_nm)
+      call <- dbc::handle_arg_call(call)
+      assertion_type <- dbc::handle_arg_assertion_type(assertion_type)
+      df <- value_space_type_funs__[[VST]][["report"]](
+        x = x,
+        x_nm = x_nm,
+        call = call
+      )
+      dbc::report_to_assertion(
+        df,
+        assertion_type = assertion_type,
+        raise_error_call = call
+      )
+    },
+    list(VST = vst)
+  ))
+}
+rm(list = "vst")
 
 get_value_space_type_fun__ <- function(value_space_type, fun_nm) {
   dbc::assert_atom_is_in_set(
@@ -362,12 +373,12 @@ get_value_space_type_report_fun__ <- function(value_space_type) {
   get_value_space_type_fun__(value_space_type, "report")
 }
 
-get_value_space_type_assertion_fun__ <- function() {
+get_value_space_type_assertion_fun__ <- function(value_space_type) {
   get_value_space_type_fun__(value_space_type, "assertion")
 }
 
 get_var_value_assertion_fun__ <- function(value_space_type) {
-  get_value_space_type_fun__(value_space_type, "var_value_assert")
+  get_value_space_type_fun__(value_space_type, "var_value_assertion")
 }
 
 get_value_space_type_names__ <- function() {
