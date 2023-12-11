@@ -121,7 +121,7 @@ assert_is_value_space <- function(
   # `NULL`. Therefore `var_set_dt$value_space` is a list, in turn containing
   # lists of length one or `NULL` values.
   # The following element names are allowed and determine the type of the
-  # `value_space`: ${deparse1(value_space_type_names__())}.
+  # `value_space`: ${deparse1(get_value_space_type_names__())}.
   #
   # The `value_space` element must be `NULL` or one of the following:
   # @codedoc_insert_comment_block types(var_set_dt$value_space)
@@ -135,13 +135,13 @@ assert_is_value_space <- function(
   )
   dbc::assert_atom_is_in_set(
     x = names(x),
-    set = value_space_type_names__(),
+    set = get_value_space_type_names__(),
     x_nm = paste0("names(", x_nm, ")"),
     call = call,
     assertion_type = assertion_type
   )
   dbc::report_to_assertion(
-    value_space_type_report_funs__()[[names(x)]](
+    get_value_space_type_report_fun__(names(x))(
       x = x,
       x_nm = x_nm,
       call = call

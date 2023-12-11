@@ -623,13 +623,7 @@ var_assert <- function(
     expected_length = 1L,
     call = call
   )
-  assertion_fun_list <- value_space_value_assertion_funs__()
-  if (!names(vs) %in% names(assertion_fun_list)) {
-    utils::str(vs, 1)
-    stop("Internal error: no handling defined for value_space printed ",
-          "above --- complain to the vame package maintainer.")
-  }
-  assertion_fun_list[[names(vs)]](
+  get_var_value_assertion_fun__(names(vs))(
     x = x,
     x_nm = x_nm,
     call = call,

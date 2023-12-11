@@ -1,6 +1,6 @@
-value_space_type_report_funs__ <- function() {
-  list(
-    dt = function(x, x_nm = NULL, call = NULL) {
+value_space_type_funs__ <- list(
+  dt = list(
+    report = function(x, x_nm = NULL, call = NULL) {
       x_nm <- dbc::handle_arg_x_nm(x_nm)
       call <- dbc::handle_arg_call(call)
       # @codedoc_comment_block types(var_set_dt$value_space)
@@ -15,7 +15,34 @@ value_space_type_report_funs__ <- function() {
         call = call
       )
     },
-    set = function(x, x_nm = NULL, call = NULL) {
+    var_value_assertion = function(
+      x,
+      x_nm = NULL,
+      call = NULL,
+      assertion_type = NULL,
+      value_space,
+      var_nm
+    ) {
+      x_nm <- dbc::handle_arg_x_nm(x_nm)
+      call <- dbc::handle_arg_call(call)
+      assertion_type <- dbc::handle_arg_assertion_type(assertion_type)
+      get_value_space_type_assertion_fun__("dt")(
+        x = value_space,
+        assertion_type = "prod_input"
+      )
+      dbc::assert_has_names(
+        x = value_space[["dt"]],
+        call = call,
+        required_names = var_nm,
+        assertion_type = "prod_input"
+      )
+      value_space <- list(set = value_space[["dt"]][[var_nm]])
+      fun <- get_var_value_assertion_fun__("set")
+      do.call(fun, mget(names(formals(fun))), quote = TRUE)
+    }
+  ),
+  set = list(
+    report = function(x, x_nm = NULL, call = NULL) {
       x_nm <- dbc::handle_arg_x_nm(x_nm)
       call <- dbc::handle_arg_call(call)
       # @codedoc_comment_block types(var_set_dt$value_space)
@@ -29,7 +56,40 @@ value_space_type_report_funs__ <- function() {
         call = call
       )
     },
-    expr = function(x, x_nm = NULL, call = NULL) {
+    var_value_assertion = function(
+      x,
+      x_nm = NULL,
+      call = NULL,
+      assertion_type = NULL,
+      value_space,
+      var_nm
+    ) {
+      x_nm <- dbc::handle_arg_x_nm(x_nm)
+      call <- dbc::handle_arg_call(call)
+      assertion_type <- dbc::handle_arg_assertion_type(assertion_type)
+      get_value_space_type_assertion_fun__("set")(
+        x = value_space,
+        assertion_type = "prod_input"
+      )
+      dbc::assert_is_identical(
+        x = class(x),
+        x_nm = paste0("class(", x_nm, ")"),
+        y = class(value_space[["set"]]),
+        y_nm = deparse1(class(value_space[["set"]])),
+        call = call,
+        assertion_type = assertion_type
+      )
+      dbc::assert_vector_elems_are_in_set(
+        x = x,
+        x_nm = x_nm,
+        call = call,
+        assertion_type = assertion_type,
+        set = value_space[["set"]]
+      )
+    }
+  ),
+  expr = list(
+    report = function(x, x_nm = NULL, call = NULL) {
       x_nm <- dbc::handle_arg_x_nm(x_nm)
       call <- dbc::handle_arg_call(call)
       # @codedoc_comment_block types(var_set_dt$value_space)
@@ -47,8 +107,10 @@ value_space_type_report_funs__ <- function() {
         x_nm = paste0(x_nm, "[[\"expr\"]]"),
         call = call
       )
-    },
-    fun = function(x, x_nm = NULL, call = NULL) {
+    }
+  ),
+  fun = list(
+    report = function(x, x_nm = NULL, call = NULL) {
       x_nm <- dbc::handle_arg_x_nm(x_nm)
       call <- dbc::handle_arg_call(call)
       # @codedoc_comment_block types(var_set_dt$value_space)
@@ -64,8 +126,10 @@ value_space_type_report_funs__ <- function() {
         x_nm = paste0(x_nm, "[[\"fun\"]]"),
         call = call
       )
-    },
-    unrestricted = function(x, x_nm = NULL, call = NULL) {
+    }
+  ),
+  unrestricted = list(
+    report = function(x, x_nm = NULL, call = NULL) {
       x_nm <- dbc::handle_arg_x_nm(x_nm)
       x_nm <- paste0(x_nm, "[[\"unrestricted\"]]")
       x <- x[["unrestricted"]]
@@ -99,7 +163,38 @@ value_space_type_report_funs__ <- function() {
         )
       )
     },
-    regex = function(x, x_nm = NULL, call = NULL) {
+    var_value_assertion = function(
+      x,
+      x_nm = NULL,
+      call = NULL,
+      assertion_type = NULL,
+      value_space,
+      var_nm
+    ) {
+      # @codedoc_comment_block news("vame::VariableMetadata", "2023-07-18", "0.1.7")
+      # New `value_space` type: "unrestricted". Use this when a variable must
+      # be of a certain class but can take any value. E.g.
+      # `list(unrestricted = list(class_set = c("IDate", "Date")))`.
+      # @codedoc_comment_block news("vame::VariableMetadata", "2023-07-18", "0.1.7")
+      x_nm <- dbc::handle_arg_x_nm(x_nm)
+      call <- dbc::handle_arg_call(call)
+      assertion_type <- dbc::handle_arg_assertion_type(assertion_type)
+      get_value_space_type_assertion_fun__("unrestricted")(
+        x = value_space,
+        assertion_type = "prod_input"
+      )
+      dbc::assert_is_identical(
+        x = class(x),
+        x_nm = paste0("class(", x_nm, ")"),
+        y = value_space[["unrestricted"]][["class_set"]],
+        y_nm = deparse1(value_space[["unrestricted"]][["class_set"]]),
+        call = call,
+        assertion_type = assertion_type
+      )
+    }
+  ),
+  regex = list(
+    report = function(x, x_nm = NULL, call = NULL) {
       # @codedoc_comment_block types(var_set_dt$value_space)
       # - `"regex"`: A character string regular expression.
       #   Some string variables are known in advance to always match a specific
@@ -115,7 +210,36 @@ value_space_type_report_funs__ <- function() {
         x_nm = x_nm, call = call
       )
     },
-    bounds = function(x, x_nm = NULL, call = NULL) {
+    var_value_assertion = function(
+      x,
+      x_nm = NULL,
+      call = NULL,
+      assertion_type = NULL,
+      value_space,
+      var_nm
+    ) {
+      # @codedoc_comment_block news("vame::VariableMetadata", "2023-07-18", "0.1.7")
+      # New `value_space` type: "regex". Use this when all values of a variable
+      # must match a specific regex. E.g. `list(regex = "^[a-z]$")`.
+      # @codedoc_comment_block news("vame::VariableMetadata", "2023-07-18", "0.1.7")
+      x_nm <- dbc::handle_arg_x_nm(x_nm)
+      call <- dbc::handle_arg_call(call)
+      assertion_type <- dbc::handle_arg_assertion_type(assertion_type)
+      get_value_space_type_assertion_fun__("regex")(
+        x = value_space,
+        assertion_type = "prod_input"
+      )
+      dbc::assert_match_regex(
+        x = x,
+        x_nm = x_nm,
+        call = call,
+        assertion_type = assertion_type,
+        grepl.arg.list = list(pattern = value_space[["regex"]])
+      )
+    }
+  ),
+  bounds = list(
+    report = function(x, x_nm = NULL, call = NULL) {
       # @codedoc_comment_block types(var_set_dt$value_space)
       # - `"bounds"`: A list defining the upper and lower bounds.
       #   You can define upper and lower limits for one variable with this
@@ -152,61 +276,8 @@ value_space_type_report_funs__ <- function() {
           call = call
         )
       )
-    }
-  )
-}
-
-value_space_type_assertion_funs__ <- function() {
-  report_funs <- value_space_type_report_funs__()
-  assertion_funs <- lapply(report_funs, function(rf) {
-    af <- function(x, x_nm = NULL, call = NULL, assertion_type = NULL) {
-      x_nm <- dbc::handle_arg_x_nm(x_nm)
-      call <- dbc::handle_arg_call(call)
-      assertion_type <- dbc::handle_arg_assertion_type(assertion_type)
-      df <- rf(x = x, x_nm = x_nm, call = call)
-      dbc::report_to_assertion(
-        df,
-        assertion_type = assertion_type,
-        raise_error_call = call
-      )
-    }
-    return(af)
-  })
-  return(assertion_funs)
-}
-
-value_space_type_names__ <- function() {
-  names(value_space_type_report_funs__())
-}
-
-value_space_value_assertion_funs__ <- function() {
-  list(
-    dt = function(
-      x,
-      x_nm = NULL,
-      call = NULL,
-      assertion_type = NULL,
-      value_space,
-      var_nm
-    ) {
-      x_nm <- dbc::handle_arg_x_nm(x_nm)
-      call <- dbc::handle_arg_call(call)
-      assertion_type <- dbc::handle_arg_assertion_type(assertion_type)
-      value_space_type_assertion_funs__()[["dt"]](
-        x = value_space,
-        assertion_type = "prod_input"
-      )
-      dbc::assert_has_names(
-        x = value_space[["dt"]],
-        call = call,
-        required_names = var_nm,
-        assertion_type = "prod_input"
-      )
-      value_space <- list(set = value_space[["dt"]][[var_nm]])
-      fun <- value_space_value_assertion_funs__()[["set"]]
-      do.call(fun, mget(names(formals(fun))), quote = TRUE)
     },
-    set = function(
+    var_value_assertion = function(
       x,
       x_nm = NULL,
       call = NULL,
@@ -214,94 +285,7 @@ value_space_value_assertion_funs__ <- function() {
       value_space,
       var_nm
     ) {
-      x_nm <- dbc::handle_arg_x_nm(x_nm)
-      call <- dbc::handle_arg_call(call)
-      assertion_type <- dbc::handle_arg_assertion_type(assertion_type)
-      value_space_type_assertion_funs__()[["set"]](
-        x = value_space,
-        assertion_type = "prod_input"
-      )
-      dbc::assert_is_identical(
-        x = class(x),
-        x_nm = paste0("class(", x_nm, ")"),
-        y = class(value_space[["set"]]),
-        y_nm = deparse1(class(value_space[["set"]])),
-        call = call,
-        assertion_type = assertion_type
-      )
-      dbc::assert_vector_elems_are_in_set(
-        x = x,
-        x_nm = x_nm,
-        call = call,
-        assertion_type = assertion_type,
-        set = value_space[["set"]]
-      )
-    },
-    unrestricted = function(
-      x,
-      x_nm = NULL,
-      call = NULL,
-      assertion_type = NULL,
-      value_space,
-      var_nm
-    ) {
-      # @codedoc_comment_block news("vame::VariableMetadata", "2023-07-18", "0.1.7")
-      # New `value_space` type: "unrestricted". Use this when a variable must
-      # be of a certain class but can take any value. E.g.
-      # `list(unrestricted = list(class_set = c("IDate", "Date")))`.
-      # @codedoc_comment_block news("vame::VariableMetadata", "2023-07-18", "0.1.7")
-      x_nm <- dbc::handle_arg_x_nm(x_nm)
-      call <- dbc::handle_arg_call(call)
-      assertion_type <- dbc::handle_arg_assertion_type(assertion_type)
-      value_space_type_assertion_funs__()[["unrestricted"]](
-        x = value_space,
-        assertion_type = "prod_input"
-      )
-      dbc::assert_is_identical(
-        x = class(x),
-        x_nm = paste0("class(", x_nm, ")"),
-        y = value_space[["unrestricted"]][["class_set"]],
-        y_nm = deparse1(value_space[["unrestricted"]][["class_set"]]),
-        call = call,
-        assertion_type = assertion_type
-      )
-    },
-    regex = function(
-      x,
-      x_nm = NULL,
-      call = NULL,
-      assertion_type = NULL,
-      value_space,
-      var_nm
-    ) {
-      # @codedoc_comment_block news("vame::VariableMetadata", "2023-07-18", "0.1.7")
-      # New `value_space` type: "regex". Use this when all values of a variable
-      # must match a specific regex. E.g. `list(regex = "^[a-z]$")`.
-      # @codedoc_comment_block news("vame::VariableMetadata", "2023-07-18", "0.1.7")
-      x_nm <- dbc::handle_arg_x_nm(x_nm)
-      call <- dbc::handle_arg_call(call)
-      assertion_type <- dbc::handle_arg_assertion_type(assertion_type)
-      value_space_type_assertion_funs__()[["regex"]](
-        x = value_space,
-        assertion_type = "prod_input"
-      )
-      dbc::assert_match_regex(
-        x = x,
-        x_nm = x_nm,
-        call = call,
-        assertion_type = assertion_type,
-        grepl.arg.list = list(pattern = value_space[["regex"]])
-      )
-    },
-    bounds = function(
-      x,
-      x_nm = NULL,
-      call = NULL,
-      assertion_type = NULL,
-      value_space,
-      var_nm
-    ) {
-      value_space_type_assertion_funs__()[["bounds"]](
+      get_value_space_type_assertion_fun__("bounds")(
         x = value_space,
         assertion_type = "prod_input"
       )
@@ -342,4 +326,50 @@ value_space_value_assertion_funs__ <- function() {
       }
     }
   )
+)
+value_space_type_funs__ <- lapply(value_space_type_funs__, function(x) {
+  af <- function(x, x_nm = NULL, call = NULL, assertion_type = NULL) {
+    x_nm <- dbc::handle_arg_x_nm(x_nm)
+    call <- dbc::handle_arg_call(call)
+    assertion_type <- dbc::handle_arg_assertion_type(assertion_type)
+    df <- x[["report"]](x = x, x_nm = x_nm, call = call)
+    dbc::report_to_assertion(
+      df,
+      assertion_type = assertion_type,
+      raise_error_call = call
+    )
+  }
+  x[["assertion"]] <- af
+  return(x)
+})
+
+get_value_space_type_fun__ <- function(value_space_type, fun_nm) {
+  dbc::assert_atom_is_in_set(
+    value_space_type,
+    set = names(value_space_type_funs__),
+    assertion_type = "prod_input"
+  )
+  x <- value_space_type_funs__[[value_space_type]]
+  dbc::assert_atom_is_in_set(
+    fun_nm,
+    set = names(x),
+    assertion_type = "prod_input"
+  )
+  x[[fun_nm]]
+}
+
+get_value_space_type_report_fun__ <- function(value_space_type) {
+  get_value_space_type_fun__(value_space_type, "report")
+}
+
+get_value_space_type_assertion_fun__ <- function() {
+  get_value_space_type_fun__(value_space_type, "assertion")
+}
+
+get_var_value_assertion_fun__ <- function(value_space_type) {
+  get_value_space_type_fun__(value_space_type, "var_value_assert")
+}
+
+get_value_space_type_names__ <- function() {
+  return(names(value_space_type_funs__))
 }
