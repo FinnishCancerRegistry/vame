@@ -42,9 +42,6 @@ var_set_meta_set <- function(
   # create the `VariableMetadata` object and it can be pretty much anything.
   # @codedoc_comment_block param_id
   assert_is_var_set_id(vm, id)
-  
-  assert_is_var_set_meta_nm(vm, meta_nm)
-    
   # @codedoc_comment_block param_value
   # @param value `[any]` (no default)
   # 
