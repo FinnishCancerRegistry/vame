@@ -1,4 +1,17 @@
 # var_set funs -----------------------------------------------------------------
+var_set_meta_defined <- function(
+  vm,
+  id,
+  meta_nm
+) {
+  assert_is_variablemetadata(vm)
+  vsd <- vsd_get(vm)
+  if (!meta_nm %in% names(vsd)) {
+    return(FALSE)
+  }
+  meta <- vsd[[meta_nm]][[var_set_id_to_pos(vm, id)]]
+  return(meta %in% list(NULL, NA, list(NULL), list(NA)))
+}
 var_set_meta_get <- function(
   vm,
   id,
@@ -630,6 +643,21 @@ var_assert <- function(
   )
 }
 
+
+# var funs ---------------------------------------------------------------------
+var_meta_defined <- function(
+  vm,
+  var_nm,
+  meta_nm
+) {
+  assert_is_var_nm(vm)
+  vd <- vd_get(vm)
+  if (!meta_nm %in% names(vd)) {
+    return(FALSE)
+  }
+  meta <- vd[[meta_nm]][[data.table::chmatch(var_nm, vd[["var_nm"]])]]
+  return(meta %in% list(NULL, NA, list(NULL), list(NA)))
+}
 
 var_meta_get <- function(
   vm,
