@@ -159,6 +159,12 @@ my_fun_2 <- function(dg_age) \{
 New function \code{vm@var_meta_is_defined}.`
 }
 
+\subsection{vm@var_meta_set}{
+
+\code{vm@var_meta_set} now wraps \code{value} into a list if it isn't a list
+and if the target column is a list.
+}
+
 \subsection{vm@var_rename}{
 
 Fix renaming multiple variables on one go.
@@ -167,6 +173,32 @@ Fix renaming multiple variables on one go.
 \subsection{vm@var_set_meta_is_defined}{
 
 New function \code{vm@var_set_meta_is_defined}.`
+}
+
+\subsection{vm@var_set_meta_set}{
+
+\code{vm@var_set_meta_set} now wraps \code{value} into a list if it isn't a list
+and if the target column is a list.
+}
+
+\subsection{vm@var_set_value_space_sample}{
+
+New slot function \code{var_set_value_space_sample}.
+}
+
+\subsection{vm@var_set_value_space_sampler_get}{
+
+New slot function \code{var_set_value_space_sampler_get}.
+}
+
+\subsection{vm@var_set_value_space_sampler_set}{
+
+New slot function \code{var_set_value_space_sampler_set}.
+}
+
+\subsection{vm@var_value_space_sample}{
+
+New function \code{vm@var_value_space_sample}.`
 }
 
 }

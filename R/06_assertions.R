@@ -209,3 +209,55 @@ assert_is_var_set_dt <- function(
   }
   return(invisible(NULL))
 }
+
+assert_is_sampler <- function(
+  x,
+  x_nm = NULL,
+  call = NULL,
+  assertion_type = NULL
+) {
+  x_nm <- dbc::handle_arg_x_nm(x_nm)
+  call <- dbc::handle_arg_call(call)
+  assertion_type <- dbc::handle_arg_assertion_type(assertion_type)
+  dbc::assert_is_one_of(
+    x = x,
+    x_nm = x_nm,
+    call = call,
+    assertion_type = assertion_type,
+    funs = list(dbc::report_is_NULL,
+                dbc::report_is_function,
+                dbc::report_is_call)
+  )
+  if (is.null(x)) {
+    return(invisible(NULL))
+  } else if (is.function(x)) {
+    dbc::assert_is_function_with_required_argument_names(
+      x = x,
+      x_nm = x_nm,
+      call = call,
+      assertion_type = assertion_type,
+      required_argument_names = c("x", "var_nms", "n")
+    )
+    x <- body(x)
+    x_nm <- paste0("body(", x_nm, ")")
+  }
+  report_df <- dbc::expressions_to_report(
+    expressions = list(
+      quote("x" %in% all.vars(x)),
+      quote("n" %in% all.vars(x))
+    ),
+    fail_messages = c(
+      paste0("R expression `", deparse1(x), "` from object/expression `",
+              x_nm , "` must contain variable `x`"),
+      paste0("R expression `", deparse1(x), "` from object/expression `",
+              x_nm , "` must contain variable `n`")
+    ),
+    call = call,
+    env = environment()
+  )
+  dbc::report_to_assertion(
+    report_df,
+    assertion_type = assertion_type,
+    raise_error_call = call
+  )
+}

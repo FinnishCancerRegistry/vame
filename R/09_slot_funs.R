@@ -263,7 +263,7 @@ var_set_value_space_eval <- function(
   # @codedoc_comment_block param_var_nms
   # @param var_nms `[NULL, character]` (default `NULL`)
   # 
-  # - `NULL`: Get the value space for variables in the set.
+  # - `NULL`: Get the value space for all variables in the set.
   # - `character`: Get the value spaces for only these variables.
   # @codedoc_comment_block param_var_nms
   dbc::assert_is_one_of(
@@ -308,10 +308,10 @@ var_set_value_space_eval <- function(
     assertion_type = "general"
   )
   if ("expr" %in% names(value_space)) {
-    eval_env <- new.env(parent = env)
-    eval_env[["var_nms"]] <- var_nms
+    call_eval_env <- new.env(parent = env)
+    call_eval_env[["var_nms"]] <- var_nms
     value_space <- list(
-      tmp = eval(value_space[["expr"]], envir = eval_env)
+      tmp = eval(value_space[["expr"]], envir = call_eval_env)
     )
   } else if ("fun" %in% names(value_space)) {
     value_space <- list(tmp = value_space[["fun"]](var_nms))
@@ -416,6 +416,147 @@ var_set_value_space_dt_subset <- function(
   var_set_value_set_dt_subset_expr(vm, id, expr)
 }
 
+var_set_value_space_sampler_get <- function(
+  vm,
+  id
+) {
+  # @codedoc_comment_block vm@var_set_value_space_sampler_get
+  # Retrieve value space sampler for given `id` from `var_set_dt$sampler`.
+  # @codedoc_comment_block vm@var_set_value_space_sampler_get
+  # @codedoc_comment_block feature_funs(VariableMetadata, random sampling)
+  # - `vm@var_set_value_space_sampler_get`
+  # @codedoc_comment_block feature_funs(VariableMetadata, random sampling)
+  # @codedoc_comment_block news("vm@var_set_value_space_sampler_get", "2023-12-12", "0.2.2")
+  # New slot function `var_set_value_space_sampler_get`.
+  # @codedoc_comment_block news("vm@var_set_value_space_sampler_get", "2023-12-12", "0.2.2")
+  var_set_meta_get(vm, id = id, meta_nm = "sampler")
+}
+
+var_set_value_space_sampler_set <- function(
+  vm,
+  id,
+  value
+) {
+  # @codedoc_comment_block vm@var_set_value_space_sampler_set
+  # Assign value space sampler for given `id` in `var_set_dt$sampler`.
+  # @codedoc_comment_block vm@var_set_value_space_sampler_set
+  # @codedoc_comment_block feature_funs(VariableMetadata, random sampling)
+  # - `vm@var_set_value_space_sampler_set`
+  # @codedoc_comment_block feature_funs(VariableMetadata, random sampling)
+  # @codedoc_comment_block news("vm@var_set_value_space_sampler_set", "2023-12-12", "0.2.2")
+  # New slot function `var_set_value_space_sampler_set`.
+  # @codedoc_comment_block news("vm@var_set_value_space_sampler_set", "2023-12-12", "0.2.2")
+  assert_is_sampler(value)
+  var_set_meta_set(vm, id = id, meta_nm = "sampler", value = value)
+}
+
+var_set_value_space_sample <- function(
+  vm,
+  id,
+  var_nms = NULL,
+  env = NULL,
+  n = 1L
+) {  
+  # @codedoc_comment_block vm@var_set_value_space_sample
+  # Returns `n` samples from the value space of `id`. 
+  #
+  # @codedoc_insert_comment_block feature_process(random sampling)
+  # @codedoc_comment_block vm@var_set_value_space_sample
+
+  # @codedoc_comment_block news("vm@var_set_value_space_sample", "2023-12-11", "0.2.2")
+  # New slot function `var_set_value_space_sample`.
+  # @codedoc_comment_block news("vm@var_set_value_space_sample", "2023-12-11", "0.2.2")
+
+  # @codedoc_comment_block feature_funs(VariableMetadata, random sampling)
+  # - `vm@var_set_value_space_sample`
+  # @codedoc_comment_block feature_funs(VariableMetadata, random sampling)
+
+  # @codedoc_comment_block feature(VariableMetadata, random sampling)
+  # The random sampling feature is available when the value spaces feature
+  # is available.
+  # 
+  # @codedoc_insert_comment_block feature_process(random sampling)
+  #
+  # The following functions are related to this feature:
+  # @codedoc_insert_comment_block feature_funs(VariableMetadata, random sampling)
+  # @codedoc_comment_block feature(VariableMetadata, random sampling)
+
+  assert_is_var_set_id(vm, id)
+  dbc::assert_is_one_of(
+    var_nms,
+    funs = list(dbc::report_is_NULL,
+                dbc::report_is_character_nonNA_vector)
+  )
+  allowed_var_nms <- var_set_meta_get(vm, id = id, meta_nm = "var_nm_set")
+  dbc::assert_vector_elems_are_in_set(
+    var_nms,
+    set = allowed_var_nms
+  )
+  if (is.null(var_nms)) {
+    var_nms <- allowed_var_nms
+  }
+  dbc::assert_is_one_of(
+    env,
+    funs = list(dbc::report_is_NULL,
+                dbc::report_is_environment)
+  )
+  if (is.null(env)) {
+    env <- parent.frame(1L)
+  }
+  # @codedoc_comment_block param_n
+  # @param n `[integer]` (default `1L`)
+  # 
+  # Number of random samples to take.
+  # @codedoc_comment_block param_n
+  dbc::assert_is_integer_nonNA_gtzero_atom(n)
+
+  # @codedoc_comment_block feature_process(random sampling)
+  # Random sampling is performed as follows:
+  #
+  # - `vm@var_set_value_space_eval` is called for the appropriate value space
+  # @codedoc_comment_block feature_process(random sampling)
+  vs <- var_set_value_space_eval(
+    vm = vm,
+    id = id,
+    var_nms = var_nms,
+    env = env
+  )
+  assert_is_value_space(
+    x = vs,
+    assertion_type = "prod_interim"
+  )
+
+  # @codedoc_comment_block feature_process(random sampling)
+  # - The appropriate sampler is retrieved --- this is either the corresponding
+  #   sampler stored in `var_set_dt$sampler`, or no sampler exists there,
+  #   one of the defaults depending on the type of the value space:
+  # @codedoc_insert_comment_block defaults(var_set_dt$sampler)
+  # @codedoc_comment_block feature_process(random sampling)
+  if (var_set_meta_is_defined(vm, id = id, meta_nm = "sampler")) {
+    sampler <- var_set_value_space_sampler_get(vm, id = id)
+    assert_is_sampler(sampler, assertion_type = "general")
+  } else {
+    sampler <- get_value_space_type_fun__(
+      value_space_type = names(vs),
+      fun_nm = "sampler"
+    )
+  }
+  # @codedoc_comment_block feature_process(random sampling)
+  # - The sampler is called or evaluated, which results in the random samples,
+  #   and these are returned.
+  # @codedoc_comment_block feature_process(random sampling)
+  if (is.function(sampler)) {
+    sample <- sampler(x = vs, var_nms = var_nms, n = n)
+  } else if (is.call(sampler)) {
+    call_eval_env <- new.env(parent = env)
+    call_eval_env[["var_nms"]] <- var_nms
+    call_eval_env[["n"]] <- n
+    call_eval_env[["x"]] <- vs
+    sample <- eval(sampler, envir = call_eval_env)
+  }
+
+  return(sample)
+}
 
 var_is_aggregateable_to <- function(
   vm,
@@ -679,6 +820,7 @@ var_meta_is_defined <- function(
   # @codedoc_comment_block news("vm@var_meta_is_defined", "2023-12-12", "0.2.2")
   assert_is_var_nm(vm)
   vd <- vd_get(vm)
+  pos <- data.table::chmatch(var_nm, vd[["var_nm"]])
   if (!meta_nm %in% names(vd)) {
     return(FALSE)
   }
@@ -994,8 +1136,38 @@ var_labels_get <- function(
   return(out)
 }
 
-# vame funs --------------------------------------------------------------------
+var_value_space_sample <- function(
+  vm,
+  var_nm,
+  env = NULL,
+  n = 1L
+) {
+  # @codedoc_comment_block vm@var_value_space_sample
+  # Calls `vm@var_set_value_space_sample` with `var_nms = var_nm`.
+  # Output is always a vector.
+  # @codedoc_comment_block vm@var_value_space_sample
 
+  # @codedoc_comment_block news("vm@var_value_space_sample", "2023-12-12", "0.2.2")
+  # New function `vm@var_value_space_sample`.`
+  # @codedoc_comment_block news("vm@var_value_space_sample", "2023-12-12", "0.2.2")
+
+  # @codedoc_comment_block feature_funs(VariableMetadata, random sampling)
+  # - `vm@var_value_space_sample`
+  # @codedoc_comment_block feature_funs(VariableMetadata, random sampling)
+  id <- var_to_var_set_id(vm = vm, var_nm = var_nm)
+  out <- var_set_value_space_sample(
+    vm = vm,
+    id = id,
+    var_nms = var_nm,
+    n = n
+  )
+  if (inherits(out, "data.table")) {
+    out <- out[[1]]
+  }
+  return(out)
+}
+
+# vame funs --------------------------------------------------------------------
 vame_copy <- function(vm) {
   # @codedoc_comment_block vm@vame_copy
   # Take a deep copy of a VariableMetadata object. See `?data.table::copy`.

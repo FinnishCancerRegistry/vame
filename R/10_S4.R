@@ -144,9 +144,8 @@ methods::setClass(
 #' - `var_nm_set` `[list]`: Each list element contains a character string
 #'   vector of variable names. e.g. `list(c("a", "b"))`.
 #' @examples
-#'
 #' # vame::VariableMetadata ----------------------------------------------------
-#'
+#' 
 #' # basic example of different kinds of variables
 #' value_space_d <- function() 1:3 * 100L
 #' vm <- vame::VariableMetadata(
@@ -194,7 +193,17 @@ methods::setClass(
 #'   e_values + 1
 #' }
 #' my_fun(0.0)
-#'
+#' 
+#' # assignment after creating a VariableMetadata object
+#' vm@var_meta_set(var_nm = "f", meta_nm = "type", value = "my_date")
+#' stopifnot(
+#'   vm@var_meta_get(var_nm = "f", meta_nm = "type") == "my_date"
+#' )
+#' vm@var_set_value_space_set(id = "c", value_space = list(set = c("x", "z")))
+#' stopifnot(
+#'   identical(vm@var_set_value_space_get(id = "c"), list(set = c("x", "z")))
+#' )
+#' 
 #' # renaming, removing variables
 #' vm <- vame::VariableMetadata(
 #'   var_dt = data.table::data.table(
@@ -210,30 +219,30 @@ methods::setClass(
 #'     )))
 #'   )
 #' )
-#'
+#' 
 #' vm@var_rename("a", "A")
 #' stopifnot(
 #'   identical(vm@var_meta_get("A", "flavour"), "tasty"),
 #'   identical(names(vm@var_set_value_space_get("set_01")[["dt"]]), c("A", "b")),
 #'   identical(vm@var_set_meta_get("set_01", "var_nm_set"), c("A", "b"))
 #' )
-#'
+#' 
 #' vm@var_set_rename("set_01", "Ab")
 #' stopifnot(
 #'   identical(vm@var_set_meta_get_all("id"), c("Ab" = "Ab"))
 #' )
-#'
+#' 
 #' vm@var_remove("b")
 #' stopifnot(
 #'   identical(names(vm@var_set_value_space_get("Ab")[["dt"]]), "A"),
 #'   identical(vm@var_set_meta_get("Ab", "var_nm_set"), "A")
 #' )
-#'
+#' 
 #' vm@var_set_remove("Ab")
 #' stopifnot(
 #'   identical(length(vm@var_set_meta_get_all("var_nm_set")), 0L)
 #' )
-#'
+#' 
 #' # retrieving category space data.tables
 #' dt_01 <- data.table::CJ(a = 1:3, b = 3:1, c = 1:3)
 #' dt_02 <- data.table::CJ(d = 1:2, e = 2:1)
@@ -265,7 +274,7 @@ methods::setClass(
 #'     )
 #'   )
 #' )
-#'
+#' 
 #' stopifnot(
 #'   all.equal(
 #'     vm@vame_category_space_dt(c("a", "b")),
@@ -287,7 +296,7 @@ methods::setClass(
 #'     check.attributes = FALSE
 #'   )
 #' )
-#'
+#' 
 #' # getting category space data.tables --- here a variable appears in
 #' # two different value spaces. this can be handy for defining joint value
 #' # spaces and also conversions & aggregations.
@@ -309,7 +318,7 @@ methods::setClass(
 #'     )
 #'   )
 #' )
-#'
+#' 
 #' obs <- vm@vame_category_space_dt(c("a", "b", "e"))
 #' exp <- data.table::data.table(
 #'   a = c(0L, 0L, 1L, 1L, 1L, 1L, 1L, 1L, 2L, 2L, 2L, 3L, 3L, 3L),
@@ -321,12 +330,12 @@ methods::setClass(
 #' stopifnot(
 #'   all.equal(obs, exp, check.attributes = FALSE)
 #' )
-#'
+#' 
 #' stopifnot(
 #'   vm@var_is_aggregateable_to("a", "a_2"),
 #'   identical(vm@var_aggregate(0:1, "a", "a_2"), c(1L,1L))
 #' )
-#'
+#' 
 #' # getting labels for variable levels
 #' dt_01 <- data.table::CJ(a = 1:3, b = 3:1, c = 4:5)
 #' vm <- vame::VariableMetadata(
@@ -356,13 +365,13 @@ methods::setClass(
 #'     )
 #'   )
 #' )
-#'
+#' 
 #' obs <- vm@var_labels_get(x = 1:4, var_nm = "a", label_col_nm = "en")
 #' exp <- c(paste0("a_level_", 1:3), NA)
 #' stopifnot(
 #'   identical(obs, exp)
 #' )
-#'
+#' 
 #' obs <- tryCatch(
 #'   vm@var_labels_get(
 #'     x = 1:4,
@@ -378,7 +387,7 @@ methods::setClass(
 #' stopifnot(
 #'   grepl(exp, obs)
 #' )
-#'
+#' 
 #' obs <- tryCatch(
 #'   vm@var_labels_get(
 #'     x = 1:4,
@@ -391,7 +400,7 @@ methods::setClass(
 #' stopifnot(
 #'   grepl(exp, obs)
 #' )
-#'
+#' 
 #' # adding data to a pre-existing VariableMetadata object
 #' vm_1 <- vame::VariableMetadata(
 #'   var_dt = data.table::data.table(
@@ -431,6 +440,67 @@ methods::setClass(
 #'   !"d" %in% vm_2@var_meta_get_all("var_nm"),
 #'   "dd" %in% vm_2@var_meta_get_all("var_nm")
 #' )
+#' 
+#' # random sampling
+#' vm <- vame::VariableMetadata(
+#'   var_dt = data.table::data.table(
+#'     var_nm = c("a", "d", "b", "c"),
+#'     type = c("categorical", "categorical", "categorical", "my_type")
+#'   ),
+#'   var_set_dt = data.table::data.table(
+#'     id = c("ad", "b", "c"),
+#'     var_nm_set = list(ad = c("a", "d"), b = "b", c = "c"),
+#'     value_space = list(
+#'       ad = list(dt = data.table::CJ(a = 1:2, d = 3:4)),
+#'       b = list(set = 3:4),
+#'       c = list(bounds = list(
+#'         lo = 0.0,
+#'         hi = 2.0,
+#'         lo_inclusive = TRUE,
+#'         hi_inclusive = TRUE
+#'       ))
+#'     ),
+#'     sampler = list(
+#'       ad = NULL,
+#'       b = quote({
+#'         p <- c(0.25, 0.75)
+#'         sample(x[["set"]], size = n, replace = TRUE, p = p)
+#'       }),
+#'       c = NULL
+#'     )
+#'   )
+#' )
+#' vm@var_set_value_space_sampler_set(
+#'   id = "c",
+#'   value = quote({
+#'     pool <- runif(min = x[["bounds"]][["lo"]], max = x[["bounds"]][["hi"]],
+#'                   n = n * 100)
+#'     p <- dnorm(x = pool, mean = 1.0)
+#'     sample(pool, size = n, replace = FALSE, prob = p)
+#'   })
+#' )
+#' 
+#' ad_sample <- vm@var_set_value_space_sample(id = "ad", n = 4L)
+#' a_sample <- vm@var_set_value_space_sample(id = "ad", var_nms = "a", n = 4L)
+#' b_sample <- vm@var_set_value_space_sample(id = "b", n = 4L)
+#' c_sample <- vm@var_set_value_space_sample(id = "c", n = 4L)
+#' stopifnot(
+#'   inherits(ad_sample, "data.table"),
+#'   nrow(ad_sample) == 4,
+#'   inherits(a_sample, "data.table"),
+#'   nrow(a_sample) == 4,
+#'   is.integer(b_sample),
+#'   length(b_sample) == 4,
+#'   is.double(c_sample),
+#'   length(c_sample) == 4
+#' )
+#' 
+#' a_sample <- vm@var_value_space_sample(var_nm = "a", n = 4L)
+#' stopifnot(
+#'   is.integer(a_sample),
+#'   length(a_sample) == 4
+#' )
+#' 
 #' @export
 #' @eval local({
 #'   df <- codedoc::extract_keyed_comment_blocks()

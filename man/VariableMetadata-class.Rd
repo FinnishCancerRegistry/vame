@@ -212,7 +212,7 @@ create the \code{VariableMetadata} object and it can be pretty much anything.
 
 \code{var_nms} \verb{[NULL, character]} (default \code{NULL})
 \itemize{
-\item \code{NULL}: Get the value space for variables in the set.
+\item \code{NULL}: Get the value space for all variables in the set.
 \item \code{character}: Get the value spaces for only these variables.
 }
 
@@ -277,6 +277,96 @@ create the \code{VariableMetadata} object and it can be pretty much anything.
 
 Expression to subset a \code{data.table} object. Available columns depends on
 context.}
+
+\item{\code{var_set_value_space_sampler_get}}{\emph{Description}
+
+Retrieve value space sampler for given \code{id} from \code{var_set_dt$sampler}.
+
+\emph{Usage}
+
+\code{vm@var_set_value_space_sampler_get(id)}
+
+\emph{Arguments}
+
+\code{id} \verb{[any]} (no default)
+
+ID, or "name", of a variable set. The class of \code{id} is defined when you
+create the \code{VariableMetadata} object and it can be pretty much anything.}
+
+\item{\code{var_set_value_space_sampler_set}}{\emph{Description}
+
+Assign value space sampler for given \code{id} in \code{var_set_dt$sampler}.
+
+\emph{Usage}
+
+\code{vm@var_set_value_space_sampler_set(id, value)}
+
+\emph{Arguments}
+
+\code{id} \verb{[any]} (no default)
+
+ID, or "name", of a variable set. The class of \code{id} is defined when you
+create the \code{VariableMetadata} object and it can be pretty much anything.
+
+\code{value} \verb{[any]} (no default)
+
+In \verb{_set} functions the \code{value} to set for the specified metadata.}
+
+\item{\code{var_set_value_space_sample}}{\emph{Description}
+
+Returns \code{n} samples from the value space of \code{id}.
+
+Random sampling is performed as follows:
+\itemize{
+\item \code{vm@var_set_value_space_eval} is called for the appropriate value space
+\item The appropriate sampler is retrieved --- this is either the corresponding
+sampler stored in \code{var_set_dt$sampler}, or no sampler exists there,
+one of the defaults depending on the type of the value space:
+\itemize{
+\item \code{dt}: Sample uniformly rows from \code{data.table} with replacement.
+\item \code{set}: Sample uniformly from set with replacement.
+\item \code{expr} & \code{fun}: Handling depends on the type of output: A vector
+output is handled as a \code{set} and a \code{data.table} output as a \code{dt}.
+\item \code{unrestricted}: If \code{class_set = "character"}, sample random strings
+of length 16 using character pool \code{c(letters, LETTERS, 0:9)}. If
+\code{class_set} is anything else, raise an error because no sampler is
+defined for the general case.
+\item \code{regex}: Raise error because no sampler defined.
+\item \code{bounds}: Sample uniformly between \code{lo} and \code{hi} --- with
+replacement for integer-valued bounds.
+}
+\item The sampler is called or evaluated, which results in the random samples,
+and these are returned.
+}
+
+\emph{Usage}
+
+\code{vm@var_set_value_space_sample(id, var_nms, env, n)}
+
+\emph{Arguments}
+
+\code{id} \verb{[any]} (no default)
+
+ID, or "name", of a variable set. The class of \code{id} is defined when you
+create the \code{VariableMetadata} object and it can be pretty much anything.
+
+\code{var_nms} \verb{[NULL, character]} (default \code{NULL})
+\itemize{
+\item \code{NULL}: Get the value space for all variables in the set.
+\item \code{character}: Get the value spaces for only these variables.
+}
+
+\code{env} \verb{[NULL, }env\verb{ironment]} (default \code{NULL})
+
+Environment where a value space will be evaluated, if applicable.
+\itemize{
+\item \code{NULL}: Use the \code{env}ironment where the function was called.
+\item \code{env}ironment\verb{: Use this }env`ironment.
+}
+
+\code{n} \verb{[integer]} (default \code{1L})
+
+Number of random samples to take.}
 
 \item{\code{var_is_aggregateable_to}}{\emph{Description}
 
@@ -395,6 +485,7 @@ Name of a variable.
 
 Name of a metadata column in \code{var_set_dt} or \code{var_dt} (depending on context)
 of a \code{VariableMetadata} object.}
+
 \item{\code{var_meta_get}}{\emph{Description}
 
 Get metadata for a variable.
@@ -559,6 +650,33 @@ Environment where \code{labeler} of class \code{call} is evaluated.
 \item \code{environment}: Use this environment.
 }}
 
+\item{\code{var_value_space_sample}}{\emph{Description}
+
+Calls \code{vm@var_set_value_space_sample} with \code{var_nms = var_nm}.
+Output is always a vector.
+
+\emph{Usage}
+
+\code{vm@var_value_space_sample(var_nm, env, n)}
+
+\emph{Arguments}
+
+\code{var_nm} \verb{[character]} (no default)
+
+Name of a variable.
+
+\code{env} \verb{[NULL, }env\verb{ironment]} (default \code{NULL})
+
+Environment where a value space will be evaluated, if applicable.
+\itemize{
+\item \code{NULL}: Use the \code{env}ironment where the function was called.
+\item \code{env}ironment\verb{: Use this }env`ironment.
+}
+
+\code{n} \verb{[integer]} (default \code{1L})
+
+Number of random samples to take.}
+
 \item{\code{vame_copy}}{\emph{Description}
 
 Take a deep copy of a VariableMetadata object. See \code{?data.table::copy}.
@@ -618,7 +736,7 @@ Get list of category space \code{data.table} objects.
 
 \code{var_nms} \verb{[NULL, character]} (default \code{NULL})
 \itemize{
-\item \code{NULL}: Get the value space for variables in the set.
+\item \code{NULL}: Get the value space for all variables in the set.
 \item \code{character}: Get the value spaces for only these variables.
 }
 
@@ -642,7 +760,7 @@ Get a category space \code{data.table}.
 
 \code{var_nms} \verb{[NULL, character]} (default \code{NULL})
 \itemize{
-\item \code{NULL}: Get the value space for variables in the set.
+\item \code{NULL}: Get the value space for all variables in the set.
 \item \code{character}: Get the value spaces for only these variables.
 }
 
@@ -721,6 +839,42 @@ The following functions are related to this feature:
 \item \code{vm@var_value_space_eval}
 }
 
+\strong{Random sampling}
+
+The random sampling feature is available when the value spaces feature
+is available.
+
+Random sampling is performed as follows:
+\itemize{
+\item \code{vm@var_set_value_space_eval} is called for the appropriate value space
+\item The appropriate sampler is retrieved --- this is either the corresponding
+sampler stored in \code{var_set_dt$sampler}, or no sampler exists there,
+one of the defaults depending on the type of the value space:
+\itemize{
+\item \code{dt}: Sample uniformly rows from \code{data.table} with replacement.
+\item \code{set}: Sample uniformly from set with replacement.
+\item \code{expr} & \code{fun}: Handling depends on the type of output: A vector
+output is handled as a \code{set} and a \code{data.table} output as a \code{dt}.
+\item \code{unrestricted}: If \code{class_set = "character"}, sample random strings
+of length 16 using character pool \code{c(letters, LETTERS, 0:9)}. If
+\code{class_set} is anything else, raise an error because no sampler is
+defined for the general case.
+\item \code{regex}: Raise error because no sampler defined.
+\item \code{bounds}: Sample uniformly between \code{lo} and \code{hi} --- with
+replacement for integer-valued bounds.
+}
+\item The sampler is called or evaluated, which results in the random samples,
+and these are returned.
+}
+
+The following functions are related to this feature:
+\itemize{
+\item \code{vm@var_set_value_space_sampler_get}
+\item \code{vm@var_set_value_space_sampler_set}
+\item \code{vm@var_set_value_space_sample}
+\item \code{vm@var_value_space_sample}
+}
+
 \strong{Assertions}
 
 The assertions feature allows you to check that variables look like what
@@ -794,6 +948,16 @@ Fix renaming multiple variables on one go.
 
 New function \code{vm@var_set_meta_is_defined}.`
 
+\code{vm@var_set_meta_set} now wraps \code{value} into a list if it isn't a list
+and if the target column is a list.
+
+New slot function \code{var_set_value_space_sample}.
+
+New slot function \code{var_set_value_space_sampler_get}.
+
+New slot function \code{var_set_value_space_sampler_set}.
+
+New function \code{vm@var_value_space_sample}.`
 }
 
 \section{News for version 0.2.1}{
@@ -923,7 +1087,6 @@ First release.
 }
 
 \examples{
-
 # vame::VariableMetadata ----------------------------------------------------
 
 # basic example of different kinds of variables
@@ -973,6 +1136,16 @@ my_fun <- function(e_values) {
   e_values + 1
 }
 my_fun(0.0)
+
+# assignment after creating a VariableMetadata object
+vm@var_meta_set(var_nm = "f", meta_nm = "type", value = "my_date")
+stopifnot(
+  vm@var_meta_get(var_nm = "f", meta_nm = "type") == "my_date"
+)
+vm@var_set_value_space_set(id = "c", value_space = list(set = c("x", "z")))
+stopifnot(
+  identical(vm@var_set_value_space_get(id = "c"), list(set = c("x", "z")))
+)
 
 # renaming, removing variables
 vm <- vame::VariableMetadata(
@@ -1210,4 +1383,65 @@ stopifnot(
   !"d" \%in\% vm_2@var_meta_get_all("var_nm"),
   "dd" \%in\% vm_2@var_meta_get_all("var_nm")
 )
+
+# random sampling
+vm <- vame::VariableMetadata(
+  var_dt = data.table::data.table(
+    var_nm = c("a", "d", "b", "c"),
+    type = c("categorical", "categorical", "categorical", "my_type")
+  ),
+  var_set_dt = data.table::data.table(
+    id = c("ad", "b", "c"),
+    var_nm_set = list(ad = c("a", "d"), b = "b", c = "c"),
+    value_space = list(
+      ad = list(dt = data.table::CJ(a = 1:2, d = 3:4)),
+      b = list(set = 3:4),
+      c = list(bounds = list(
+        lo = 0.0,
+        hi = 2.0,
+        lo_inclusive = TRUE,
+        hi_inclusive = TRUE
+      ))
+    ),
+    sampler = list(
+      ad = NULL,
+      b = quote({
+        p <- c(0.25, 0.75)
+        sample(x[["set"]], size = n, replace = TRUE, p = p)
+      }),
+      c = NULL
+    )
+  )
+)
+vm@var_set_value_space_sampler_set(
+  id = "c",
+  value = quote({
+    pool <- runif(min = x[["bounds"]][["lo"]], max = x[["bounds"]][["hi"]],
+                  n = n * 100)
+    p <- dnorm(x = pool, mean = 1.0)
+    sample(pool, size = n, replace = FALSE, prob = p)
+  })
+)
+
+ad_sample <- vm@var_set_value_space_sample(id = "ad", n = 4L)
+a_sample <- vm@var_set_value_space_sample(id = "ad", var_nms = "a", n = 4L)
+b_sample <- vm@var_set_value_space_sample(id = "b", n = 4L)
+c_sample <- vm@var_set_value_space_sample(id = "c", n = 4L)
+stopifnot(
+  inherits(ad_sample, "data.table"),
+  nrow(ad_sample) == 4,
+  inherits(a_sample, "data.table"),
+  nrow(a_sample) == 4,
+  is.integer(b_sample),
+  length(b_sample) == 4,
+  is.double(c_sample),
+  length(c_sample) == 4
+)
+
+a_sample <- vm@var_value_space_sample(var_nm = "a", n = 4L)
+stopifnot(
+  is.integer(a_sample),
+  length(a_sample) == 4
+)
+
 }

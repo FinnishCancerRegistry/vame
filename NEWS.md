@@ -24,6 +24,22 @@ New function `vm@var_set_meta_is_defined`.`
 `vm@var_set_meta_set` now wraps `value` into a list if it isn't a list
 and if the target column is a list.
 
+### vm@var_set_value_space_sample
+
+New slot function `var_set_value_space_sample`.
+
+### vm@var_set_value_space_sampler_get
+
+New slot function `var_set_value_space_sampler_get`.
+
+### vm@var_set_value_space_sampler_set
+
+New slot function `var_set_value_space_sampler_set`.
+
+### vm@var_value_space_sample
+
+New function `vm@var_value_space_sample`.`
+
 
 ## News for version 0.2.1
 
