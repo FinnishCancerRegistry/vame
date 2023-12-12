@@ -9,9 +9,16 @@ var_set_meta_defined <- function(
   if (!meta_nm %in% names(vsd)) {
     return(FALSE)
   }
-  meta <- vsd[[meta_nm]][[var_set_id_to_pos(vm, id)]]
-  return(meta %in% list(NULL, NA, list(NULL), list(NA)))
+  pos <- var_set_id_to_pos(vm, id)
+  if (is.list(vsd[[meta_nm]])) {
+    meta <- vsd[[meta_nm]][[pos]]
+    return(!is.null(meta))
+  } else {
+    meta <- vsd[[meta_nm]][pos]
+    return(!is.na(meta))
+  }
 }
+
 var_set_meta_get <- function(
   vm,
   id,
@@ -55,6 +62,7 @@ var_set_meta_set <- function(
   # create the `VariableMetadata` object and it can be pretty much anything.
   # @codedoc_comment_block param_id
   assert_is_var_set_id(vm, id)
+      
   # @codedoc_comment_block param_value
   # @param value `[any]` (no default)
   # 
@@ -655,8 +663,13 @@ var_meta_defined <- function(
   if (!meta_nm %in% names(vd)) {
     return(FALSE)
   }
-  meta <- vd[[meta_nm]][[data.table::chmatch(var_nm, vd[["var_nm"]])]]
-  return(meta %in% list(NULL, NA, list(NULL), list(NA)))
+  if (is.list(vd[[meta_nm]])) {
+    meta <- vd[[meta_nm]][[pos]]
+    return(!is.null(meta))
+  } else {
+    meta <- vd[[meta_nm]][pos]
+    return(!is.na(meta))
+  }
 }
 
 var_meta_get <- function(
