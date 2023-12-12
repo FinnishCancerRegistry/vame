@@ -279,12 +279,20 @@ var_set_pos_to_id <- function(
   assert_is_variablemetadata(vm, assertion_type = "prod_input")
   vsd_get(vm)[["id"]][pos]
 }
-var_to_var_set_id <- function(
+var_to_var_set_pos <- function(
   vm,
   var_nm
 ) {
   assert_is_variablemetadata(vm, assertion_type = "prod_input")
   pos <- var_meta_get(vm, var_nm = var_nm, meta_nm = "var_set_dt_pos_set")
+  return(pos)
+}
+var_to_var_set_id <- function(
+  vm,
+  var_nm
+) {
+  # TODO: rename -> var_nm_to_var_set_id
+  pos <- var_to_var_set_pos(vm = vm, var_nm = var_nm)
   return(var_set_pos_to_id(vm, pos))
 }
 
