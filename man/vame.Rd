@@ -154,9 +154,19 @@ my_fun_2 <- function(dg_age) \{
 \section{News}{
 
 \subsection{News for version 0.2.2}{
+\subsection{vm@var_meta_is_defined}{
+
+New function \code{vm@var_meta_is_defined}.`
+}
+
 \subsection{vm@var_rename}{
 
 Fix renaming multiple variables on one go.
+}
+
+\subsection{vm@var_set_meta_is_defined}{
+
+New function \code{vm@var_set_meta_is_defined}.`
 }
 
 }

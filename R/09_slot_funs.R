@@ -1,9 +1,15 @@
 # var_set funs -----------------------------------------------------------------
-var_set_meta_defined <- function(
+var_set_meta_is_defined <- function(
   vm,
   id,
   meta_nm
 ) {
+  # @codedoc_comment_block vm@var_set_meta_is_defined
+  # Returns `TRUE` if `var_set_dt[[meta_nm]]` exists.
+  # @codedoc_comment_block vm@var_set_meta_is_defined
+  # @codedoc_comment_block news("vm@var_set_meta_is_defined", "2023-12-12", "0.2.2")
+  # New function `vm@var_set_meta_is_defined`.`
+  # @codedoc_comment_block news("vm@var_set_meta_is_defined", "2023-12-12", "0.2.2")
   assert_is_variablemetadata(vm)
   vsd <- vsd_get(vm)
   if (!meta_nm %in% names(vsd)) {
@@ -660,11 +666,17 @@ var_assert <- function(
 
 
 # var funs ---------------------------------------------------------------------
-var_meta_defined <- function(
+var_meta_is_defined <- function(
   vm,
   var_nm,
   meta_nm
 ) {
+  # @codedoc_comment_block vm@var_meta_is_defined
+  # Returns `TRUE` if `var_dt[[meta_nm]]` exists.
+  # @codedoc_comment_block vm@var_meta_is_defined
+  # @codedoc_comment_block news("vm@var_meta_is_defined", "2023-12-12", "0.2.2")
+  # New function `vm@var_meta_is_defined`.`
+  # @codedoc_comment_block news("vm@var_meta_is_defined", "2023-12-12", "0.2.2")
   assert_is_var_nm(vm)
   vd <- vd_get(vm)
   if (!meta_nm %in% names(vd)) {

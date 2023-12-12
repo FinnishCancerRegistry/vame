@@ -41,6 +41,26 @@ See section \strong{Features} for what you can do with \code{VariableMetadata} o
 \section{Slots}{
 
 \describe{
+\item{\code{var_set_meta_is_defined}}{\emph{Description}
+
+Returns \code{TRUE} if \code{var_set_dt[[meta_nm]]} exists.
+
+\emph{Usage}
+
+\code{vm@var_set_meta_is_defined(id, meta_nm)}
+
+\emph{Arguments}
+
+\code{id} \verb{[any]} (no default)
+
+ID, or "name", of a variable set. The class of \code{id} is defined when you
+create the \code{VariableMetadata} object and it can be pretty much anything.
+
+\code{meta_nm} \verb{[character]} (no default)
+
+Name of a metadata column in \code{var_set_dt} or \code{var_dt} (depending on context)
+of a \code{VariableMetadata} object.}
+
 \item{\code{var_set_meta_get}}{\emph{Description}
 
 Get metadata for a specific variable set.
@@ -357,6 +377,24 @@ Environment where a value space will be evaluated, if applicable.
 \item \code{env}ironment\verb{: Use this }env`ironment.
 }}
 
+\item{\code{var_meta_is_defined}}{\emph{Description}
+
+Returns \code{TRUE} if \code{var_dt[[meta_nm]]} exists.
+
+\emph{Usage}
+
+\code{vm@var_meta_is_defined(var_nm, meta_nm)}
+
+\emph{Arguments}
+
+\code{var_nm} \verb{[character]} (no default)
+
+Name of a variable.
+
+\code{meta_nm} \verb{[character]} (no default)
+
+Name of a metadata column in \code{var_set_dt} or \code{var_dt} (depending on context)
+of a \code{VariableMetadata} object.}
 \item{\code{var_meta_get}}{\emph{Description}
 
 Get metadata for a variable.
@@ -747,7 +785,15 @@ The following functions are part of this feature:
 \section{News for version 0.2.2}{
 
 
+New function \code{vm@var_meta_is_defined}.`
+
+\code{vm@var_meta_set} now wraps \code{value} into a list if it isn't a list
+and if the target column is a list.
+
 Fix renaming multiple variables on one go.
+
+New function \code{vm@var_set_meta_is_defined}.`
+
 }
 
 \section{News for version 0.2.1}{
