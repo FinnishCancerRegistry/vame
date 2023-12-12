@@ -690,21 +690,9 @@ var_meta_get <- function(
   assert_is_var_nm(vm, var_nm)
   assert_is_var_meta_nm(vm, meta_nm)
   vd <- vd_get(vm)
-  jdt <- data.table::setDT(list(var_nm = var_nm))
-  # retrieve "pos" instead of joining directly to ensure that list-type
-  # columns are handled correctly.
-  pos <- vd[
-    i = jdt,
-    on = "var_nm",
-    which = TRUE
-  ]
-  out <- vd[[meta_nm]][pos]
-  if (inherits(out, "list") && length(out) == 1L) {
-    out <- out[[1]]
-  }
-  return(out)
+  pos <- data.table::chmatch(var_nm, vd[["var_nm"]])
+  return(vd[[meta_nm]][[pos]])
 }
-
 
 var_meta_set <- function(
   vm,
