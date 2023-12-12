@@ -69,6 +69,13 @@ var_set_meta_set <- function(
   # In `_set` functions the value to set for the specified metadata.
   # @codedoc_comment_block param_value
   vsd <- vsd_get(vm)
+  # @codedoc_comment_block news("vm@var_set_meta_set", "2023-12-12", "0.2.2")
+  # `vm@var_set_meta_set` now wraps `value` into a list if it isn't a list
+  # and if the target column is a list.
+  # @codedoc_comment_block news("vm@var_set_meta_set", "2023-12-12", "0.2.2")
+  if (is.atomic(value) && meta_nm %in% names(vsd) && is.list(vsd[[meta_nm]])) {
+    value <- list(value)
+  }
   data.table::set(
     vsd,
     i = var_set_id_to_pos(vm, id),
@@ -710,6 +717,13 @@ var_meta_set <- function(
   # @codedoc_comment_block vm@var_meta_set
   assert_is_var_nm(vm, var_nm)
   vd <- vd_get(vm)
+  # @codedoc_comment_block news("vm@var_meta_set", "2023-12-12", "0.2.2")
+  # `vm@var_meta_set` now wraps `value` into a list if it isn't a list
+  # and if the target column is a list.
+  # @codedoc_comment_block news("vm@var_meta_set", "2023-12-12", "0.2.2")
+  if (is.atomic(value) && meta_nm %in% names(vd) && is.list(vd[[meta_nm]])) {
+    value <- list(value)
+  }
   data.table::set(
     vd,
     i = data.table::chmatch(var_nm, vd[["var_nm"]]),

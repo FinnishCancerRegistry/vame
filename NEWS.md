@@ -2,9 +2,19 @@
 
 ## News for version 0.2.2
 
+### vm@var_meta_set
+
+`vm@var_meta_set` now wraps `value` into a list if it isn't a list
+and if the target column is a list.
+
 ### vm@var_rename
 
 Fix renaming multiple variables on one go.
+
+### vm@var_set_meta_set
+
+`vm@var_set_meta_set` now wraps `value` into a list if it isn't a list
+and if the target column is a list.
 
 
 ## News for version 0.2.1
