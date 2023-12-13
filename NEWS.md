@@ -2,9 +2,45 @@
 
 ## News for version 0.2.2
 
+### vame::VariableMetadata
+
+`vame::VariableMetadata` gains arg `vame_list`.
+
+### vm@vame_list_copy
+
+Assign `meta_list$sampler`.
+
+### vm@vame_meta_get
+
+New function `vm@vame_meta_get`.
+
+### vm@vame_meta_is_defined
+
+New function `vm@vame_meta_is_defined`.
+
+### vm@vame_meta_set
+
+New function `vm@vame_meta_set`.
+
+### vm@vame_value_space_sample
+
+New function `vm@var_set_meta_is_defined`.
+
+### vm@vame_value_space_sample_default
+
+New function `vm@vame_value_space_sample_default`.
+
+### vm@vame_value_space_sampler_get
+
+Assign `meta_list$sampler`.
+
+### vm@vame_value_space_sampler_set
+
+Assign `meta_list$sampler`.
+
 ### vm@var_meta_is_defined
 
-New function `vm@var_meta_is_defined`.`
+New function `vm@var_meta_is_defined`.
 
 ### vm@var_meta_set
 
@@ -17,7 +53,7 @@ Fix renaming multiple variables on one go.
 
 ### vm@var_set_meta_is_defined
 
-New function `vm@var_set_meta_is_defined`.`
+New function `vm@var_set_meta_is_defined`.
 
 ### vm@var_set_meta_set
 
@@ -38,7 +74,7 @@ New slot function `var_set_value_space_sampler_set`.
 
 ### vm@var_value_space_sample
 
-New function `vm@var_value_space_sample`.`
+New function `vm@var_value_space_sample`.
 
 
 ## News for version 0.2.1

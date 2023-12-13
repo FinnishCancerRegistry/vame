@@ -154,9 +154,54 @@ my_fun_2 <- function(dg_age) \{
 \section{News}{
 
 \subsection{News for version 0.2.2}{
+\subsection{vame::VariableMetadata}{
+
+\code{vame::VariableMetadata} gains arg \code{vame_list}.
+}
+
+\subsection{vm@vame_list_copy}{
+
+Assign \code{meta_list$sampler}.
+}
+
+\subsection{vm@vame_meta_get}{
+
+New function \code{vm@vame_meta_get}.
+}
+
+\subsection{vm@vame_meta_is_defined}{
+
+New function \code{vm@vame_meta_is_defined}.
+}
+
+\subsection{vm@vame_meta_set}{
+
+New function \code{vm@vame_meta_set}.
+}
+
+\subsection{vm@vame_value_space_sample}{
+
+New function \code{vm@var_set_meta_is_defined}.
+}
+
+\subsection{vm@vame_value_space_sample_default}{
+
+New function \code{vm@vame_value_space_sample_default}.
+}
+
+\subsection{vm@vame_value_space_sampler_get}{
+
+Assign \code{meta_list$sampler}.
+}
+
+\subsection{vm@vame_value_space_sampler_set}{
+
+Assign \code{meta_list$sampler}.
+}
+
 \subsection{vm@var_meta_is_defined}{
 
-New function \code{vm@var_meta_is_defined}.`
+New function \code{vm@var_meta_is_defined}.
 }
 
 \subsection{vm@var_meta_set}{
@@ -172,7 +217,7 @@ Fix renaming multiple variables on one go.
 
 \subsection{vm@var_set_meta_is_defined}{
 
-New function \code{vm@var_set_meta_is_defined}.`
+New function \code{vm@var_set_meta_is_defined}.
 }
 
 \subsection{vm@var_set_meta_set}{
@@ -198,7 +243,7 @@ New slot function \code{var_set_value_space_sampler_set}.
 
 \subsection{vm@var_value_space_sample}{
 
-New function \code{vm@var_value_space_sample}.`
+New function \code{vm@var_value_space_sample}.
 }
 
 }

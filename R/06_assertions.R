@@ -219,6 +219,12 @@ assert_is_sampler <- function(
   x_nm <- dbc::handle_arg_x_nm(x_nm)
   call <- dbc::handle_arg_call(call)
   assertion_type <- dbc::handle_arg_assertion_type(assertion_type)
+  # @codedoc_comment_block specification(var_set_dt$sampler)
+  # @codedoc_comment_block specification(vame_list$sampler)
+  # The `sampler` can be a `function` or a `call` object. A `NULL` `sampler`
+  # object is considered to mean that one has not been defined.
+  # @codedoc_comment_block specification(vame_list$sampler)
+  # @codedoc_comment_block specification(var_set_dt$sampler)
   dbc::assert_is_one_of(
     x = x,
     x_nm = x_nm,
@@ -231,6 +237,13 @@ assert_is_sampler <- function(
   if (is.null(x)) {
     return(invisible(NULL))
   } else if (is.function(x)) {
+    # @codedoc_comment_block specification(var_set_dt$sampler)
+    # @codedoc_comment_block specification(vame_list$sampler)
+    # A `sampler` of type `function` must have arguments `x`, `var_nms`, and
+    # `n`. `x` contains input data, `var_nms` are the names of variables for
+    # which to sample data, and `n` the number of samples.
+    # @codedoc_comment_block specification(vame_list$sampler)
+    # @codedoc_comment_block specification(var_set_dt$sampler)
     dbc::assert_is_function_with_required_argument_names(
       x = x,
       x_nm = x_nm,
@@ -241,6 +254,12 @@ assert_is_sampler <- function(
     x <- body(x)
     x_nm <- paste0("body(", x_nm, ")")
   }
+  # @codedoc_comment_block specification(var_set_dt$sampler)
+  # @codedoc_comment_block specification(vame_list$sampler)
+  # A `sampler` of type `call` must contain (mention) variables `x` and `n` ---
+  # see `?all.vars`.
+  # @codedoc_comment_block specification(vame_list$sampler)
+  # @codedoc_comment_block specification(var_set_dt$sampler)
   report_df <- dbc::expressions_to_report(
     expressions = list(
       quote("x" %in% all.vars(x)),
@@ -259,5 +278,24 @@ assert_is_sampler <- function(
     report_df,
     assertion_type = assertion_type,
     raise_error_call = call
+  )
+}
+
+assert_is_vame_list <- function(
+  x,
+  x_nm = NULL,
+  call = NULL,
+  assertion_type = NULL
+) {
+  x_nm <- dbc::handle_arg_x_nm(x_nm)
+  call <- dbc::handle_arg_call(call)
+  assertion_type <- dbc::handle_arg_assertion_type(assertion_type)
+  dbc::assert_is_one_of(
+    x = x,
+    x_nm = x_nm,
+    call = call,
+    assertion_type = assertion_type,
+    funs = list(dbc::report_is_NULL,
+                dbc::report_is_list)
   )
 }

@@ -118,31 +118,8 @@ methods::setClass(
 
 #' @title Variable Metadata
 #' @docType class
-#' @description
-#' Create and make use of a `VariableMetadata` object. It contains
-#' - `var_dt`: A `data.table` containing metadata for variables,
-#' - `var_set_dt`: Metadata for variable sets,
-#' - A number of functions in S4 slots for making use of the metadata via e.g.
-#'   `vm@var_assert` where `vm` is the `VariableMetadata` object.
-#' 
-#' A `VariableMetadata` object is created via calling the
-#' `vame::VariableMetadata` function.
-#' See section **Features** for what you can do with `VariableMetadata` objects.
 #' @name VariableMetadata-class
 #' @aliases VariableMetadata
-#' @param var_dt `[data.table]`
-#'
-#' Contains information for individual variables. Must contain at a minimum
-#' column `var_nm`.
-#' @param var_set_dt `[data.table]`
-#'
-#' Contains information for sets of variables --- e.g. a common value space.
-#' Must contain at a minimum columns
-#'
-#' - `id` [`character`]: Identifies each set of variable names. E.g.
-#'   `"my_set"`.
-#' - `var_nm_set` `[list]`: Each list element contains a character string
-#'   vector of variable names. e.g. `list(c("a", "b"))`.
 #' @examples
 #' # vame::VariableMetadata ----------------------------------------------------
 #' 
@@ -501,6 +478,42 @@ methods::setClass(
 #'   length(a_sample) == 4
 #' )
 #' 
+#' vame_sample <- vm@vame_value_space_sample(
+#'   var_nms = c("a", "b", "c", "d"),
+#'   n = 10L
+#' )
+#' stopifnot(
+#'   inherits(vame_sample, "data.table"),
+#'   identical(c("a", "b", "c", "d"), names(vame_sample)),
+#'   nrow(vame_sample) == 10
+#' )
+#' 
+#' vm@vame_value_space_sampler_set(quote({
+#'   # see vame_value_space_sampler_set in ?vame::VariableMetadata
+#'   stopifnot(
+#'     "VariableMetadata" %in% class(x),
+#'     is.character(var_nms),
+#'     is.integer(n),
+#'     n > 0
+#'   )
+#'   # in this example we take the default sample and modify it a bit.
+#'   dt <- x@vame_value_space_sample_default(var_nms = var_nms, n = n)
+#'   if ("c" %in% var_nms) {
+#'     dt[j = "c" := runif(min = 0.0, max = .SD[["a"]], n = n)]
+#'   }
+#'   dt[]
+#' }))
+#' vame_sample <- vm@vame_value_space_sample(
+#'   var_nms = c("a", "b", "c", "d"),
+#'   n = 10L
+#' )
+#' stopifnot(
+#'   inherits(vame_sample, "data.table"),
+#'   identical(c("a", "b", "c", "d"), names(vame_sample)),
+#'   nrow(vame_sample) == 10,
+#'   vame_sample[["c"]] < vame_sample[["a"]]
+#' )
+#' 
 #' @export
 #' @eval local({
 #'   df <- codedoc::extract_keyed_comment_blocks()
@@ -510,18 +523,56 @@ methods::setClass(
 #'     doc_variablemetadata_news__()
 #'   )
 #' })
-VariableMetadata <- function(var_dt, var_set_dt) {
+VariableMetadata <- function(
+  var_dt,
+  var_set_dt,
+  vame_list = NULL
+) {
   # @codedoc_comment_block news("vame::VariableMetadata", "2023-06-30", "0.1.0")
   # First release.
   # @codedoc_comment_block news("vame::VariableMetadata", "2023-06-30", "0.1.0")
-  
+  #' @param var_dt `[data.table]`
+  #'
+  #' Contains information for individual variables. Must contain at a minimum
+  #' column `var_nm`.
   assert_is_var_dt(var_dt)
+  #' @param var_set_dt `[data.table]`
+  #'
+  #' Contains information for sets of variables --- e.g. a common value space.
+  #' Must contain at a minimum columns
+  #'
+  #' - `id` `[integer, character]`: Identifies each set of variable names. E.g.
+  #'   `c("my_set_01", "my_set_02")` or `1:2`.
+  #' - `var_nm_set` `[list]`: Each list element contains a character string
+  #'   vector of variable names. e.g. `list(c("a", "b"))`.
   assert_is_var_set_dt(var_set_dt)
+  # @codedoc_comment_block news("vame::VariableMetadata", "2023-12-12", "0.2.2")
+  # `vame::VariableMetadata` gains arg `vame_list`.
+  # @codedoc_comment_block news("vame::VariableMetadata", "2023-12-12", "0.2.2")
+  #' @param vame_list `[NULL, list]` (default `NULL`)
+  #' 
+  #' A list of metadata concerning the whole `VariableMetadata` object.
+  #' Its elements can be anything you want.
+  #' E.g. `vame_list = list(dataset_version = "1.0.0")`.
+  assert_is_vame_list(vame_list)
+  vame_list <- as.list(vame_list)
   pkg_env <- environment(VariableMetadata)
+#' @description
+#' Create and make use of a `VariableMetadata` object. It contains
+#' - `var_dt`: A `data.table` containing metadata for variables,
+#' - `var_set_dt`: Metadata for variable sets,
+#' - `vame_list`: A list of metadata for the `VariableMetadata` object itself,
+#' - A number of functions in S4 slots for making use of the metadata via e.g.
+#'   `vm@var_assert` where `vm` is the `VariableMetadata` object.
+#' 
+#' A `VariableMetadata` object is created via calling the
+#' `vame::VariableMetadata` function.
+#' See section **Features** for what you can do with `VariableMetadata` objects.
   funs <- new.env(parent = pkg_env)
   funs$data <- new.env(parent = emptyenv())
   funs$data$var_dt <- var_dt
   funs$data$var_set_dt <- var_set_dt
+  funs$data$vame_list <- vame_list
   funs$self <- function() {
     get("self_obj", envir = get("data"))
   }

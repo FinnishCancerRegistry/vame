@@ -6,7 +6,7 @@
 \alias{VariableMetadata}
 \title{Variable Metadata}
 \usage{
-VariableMetadata(var_dt, var_set_dt)
+VariableMetadata(var_dt, var_set_dt, vame_list = NULL)
 }
 \arguments{
 \item{var_dt}{\verb{[data.table]}
@@ -19,17 +19,24 @@ column \code{var_nm}.}
 Contains information for sets of variables --- e.g. a common value space.
 Must contain at a minimum columns
 \itemize{
-\item \code{id} \code{\link{character}}: Identifies each set of variable names. E.g.
-\code{"my_set"}.
+\item \code{id} \verb{[integer, character]}: Identifies each set of variable names. E.g.
+\code{c("my_set_01", "my_set_02")} or \code{1:2}.
 \item \code{var_nm_set} \verb{[list]}: Each list element contains a character string
 vector of variable names. e.g. \code{list(c("a", "b"))}.
 }}
+
+\item{vame_list}{\verb{[NULL, list]} (default \code{NULL})
+
+A list of metadata concerning the whole \code{VariableMetadata} object.
+Its elements can be anything you want.
+E.g. \code{vame_list = list(dataset_version = "1.0.0")}.}
 }
 \description{
 Create and make use of a \code{VariableMetadata} object. It contains
 \itemize{
 \item \code{var_dt}: A \code{data.table} containing metadata for variables,
 \item \code{var_set_dt}: Metadata for variable sets,
+\item \code{vame_list}: A list of metadata for the \code{VariableMetadata} object itself,
 \item A number of functions in S4 slots for making use of the metadata via e.g.
 \code{vm@var_assert} where \code{vm} is the \code{VariableMetadata} object.
 }
@@ -297,6 +304,17 @@ create the \code{VariableMetadata} object and it can be pretty much anything.}
 
 Assign value space sampler for given \code{id} in \code{var_set_dt$sampler}.
 
+The \code{sampler} can be a \code{function} or a \code{call} object. A \code{NULL} \code{sampler}
+object is considered to mean that one has not been defined.
+A \code{sampler} of type \code{function} must have arguments \code{x}, \code{var_nms}, and
+\code{n}. \code{x} contains input data, \code{var_nms} are the names of variables for
+which to sample data, and \code{n} the number of samples.
+A \code{sampler} of type \code{call} must contain (mention) variables \code{x} and \code{n} ---
+see \code{?all.vars}.
+
+See the documentation for \code{var_set_value_space_sample} to understand how
+the \code{sampler} object is used.
+
 \emph{Usage}
 
 \code{vm@var_set_value_space_sampler_set(id, value)}
@@ -335,8 +353,12 @@ defined for the general case.
 \item \code{bounds}: Sample uniformly between \code{lo} and \code{hi} --- with
 replacement for integer-valued bounds.
 }
-\item The sampler is called or evaluated, which results in the random samples,
-and these are returned.
+\item The \code{sampler} is called or evaluated, which results in the random samples,
+and these are returned. If the \code{sampler} is a function it is called via
+\code{sampler(x = vs, var_nms = var_nms, n = n)}, where \code{vs} is the evaluated
+value space. If it is an expression, it is evaluated in a new environment
+that contains \code{x}, \code{arg_nms}, and \code{n}. This new environment's parent is
+\code{env}.
 }
 
 \emph{Usage}
@@ -724,6 +746,166 @@ No pre-existing data are overwritten.
 \code{VariableMetadata} object whose metadata will be appended to the current
 \code{VariableMetadata} object.}
 
+\item{\code{vame_meta_is_defined}}{\emph{Description}
+
+Returns \code{TRUE} if \code{vame_list} has non-\code{NULL} element named \code{meta_nm}.
+
+\emph{Usage}
+
+\code{vm@vame_meta_is_defined(meta_nm)}
+
+\emph{Arguments}
+
+\code{meta_nm} \verb{[character]} (no default)
+
+Name of a metadata column in \code{var_set_dt} or \code{var_dt} (depending on context)
+of a \code{VariableMetadata} object.}
+
+\item{\code{vame_meta_get}}{\emph{Description}
+
+Retrieve an element of \code{vame_list}.
+
+\emph{Usage}
+
+\code{vm@vame_meta_get(meta_nm)}
+
+\emph{Arguments}
+
+\code{meta_nm} \verb{[character]} (no default)
+
+Name of a metadata column in \code{var_set_dt} or \code{var_dt} (depending on context)
+of a \code{VariableMetadata} object.}
+
+\item{\code{vame_meta_set}}{\emph{Description}
+
+Assign an element of \code{vame_meta_set}.
+
+\emph{Usage}
+
+\code{vm@vame_meta_set(meta_nm, value)}
+
+\emph{Arguments}
+
+\code{meta_nm} \verb{[character]} (no default)
+
+Name of a metadata column in \code{var_set_dt} or \code{var_dt} (depending on context)
+of a \code{VariableMetadata} object.
+
+\code{value} \verb{[any]} (no default)
+
+In \verb{_set} functions the \code{value} to set for the specified metadata.}
+
+\item{\code{vame_value_space_sampler_get}}{\emph{Description}
+
+Retrieve \code{meta_list$sampler}.
+
+\emph{Usage}
+
+\code{vm@vame_value_space_sampler_get()}}
+
+\item{\code{vame_value_space_sampler_set}}{\emph{Description}
+
+Assign \code{meta_list$sampler}.
+
+The \code{sampler} can be a \code{function} or a \code{call} object. A \code{NULL} \code{sampler}
+object is considered to mean that one has not been defined.
+A \code{sampler} of type \code{function} must have arguments \code{x}, \code{var_nms}, and
+\code{n}. \code{x} contains input data, \code{var_nms} are the names of variables for
+which to sample data, and \code{n} the number of samples.
+A \code{sampler} of type \code{call} must contain (mention) variables \code{x} and \code{n} ---
+see \code{?all.vars}.
+
+See the documentation for \code{vame_value_space_sample} to understand how
+the \code{sampler} object is used.
+
+\emph{Usage}
+
+\code{vm@vame_value_space_sampler_set(value)}
+
+\emph{Arguments}
+
+\code{value} \verb{[any]} (no default)
+
+In \verb{_set} functions the \code{value} to set for the specified metadata.}
+
+\item{\code{vame_value_space_sample}}{\emph{Description}
+
+Take \code{n} random samples of the value spaces of \code{var_nms}.
+
+If \code{vame_list$sampler} exists and is a function, it is called via
+\code{vame_list$sampler(x = vm, var_nms = var_nms, n = n)}, where
+\code{vm} is the pertinent \code{VariableMetadata} object itself.
+If \code{vame_list$sampler} is a \code{call} object, it is evaluated in a new
+environment whose parent is \code{env}.
+If \code{vame_list$sampler} has not been set, \code{vm@vame_value_space_sample}
+calls \code{vm@vame_value_space_sample_default}.
+\code{vm@vame_value_space_sample} always returns a \code{data.table} with \code{n} rows
+and columns \code{var_nms}.
+
+\emph{Usage}
+
+\code{vm@vame_value_space_sample(var_nms, env, n)}
+
+\emph{Arguments}
+
+\code{var_nms} \verb{[NULL, character]} (default \code{NULL})
+\itemize{
+\item \code{NULL}: Get the value space for all variables in the set.
+\item \code{character}: Get the value spaces for only these variables.
+}
+
+\code{env} \verb{[NULL, }env\verb{ironment]} (default \code{NULL})
+
+Environment where a value space will be evaluated, if applicable.
+\itemize{
+\item \code{NULL}: Use the \code{env}ironment where the function was called.
+\item \code{env}ironment\verb{: Use this }env`ironment.
+}
+
+\code{n} \verb{[integer]} (default \code{1L})
+
+Number of random samples to take.}
+
+\item{\code{vame_value_space_sample_default}}{\emph{Description}
+
+\code{vm@vame_value_space_sample_default}
+calls \code{vm@var_set_value_space_sample} for every pertinent variable set
+and combines the results into one large \code{data.table}.
+\code{vm@vame_value_space_sample_default} always returns a \code{data.table} with \code{n}
+rows and columns \code{var_nms}.
+
+\emph{Usage}
+
+\code{vm@vame_value_space_sample_default(var_nms, env, n)}
+
+\emph{Arguments}
+
+\code{var_nms} \verb{[NULL, character]} (default \code{NULL})
+\itemize{
+\item \code{NULL}: Get the value space for all variables in the set.
+\item \code{character}: Get the value spaces for only these variables.
+}
+
+\code{env} \verb{[NULL, }env\verb{ironment]} (default \code{NULL})
+
+Environment where a value space will be evaluated, if applicable.
+\itemize{
+\item \code{NULL}: Use the \code{env}ironment where the function was called.
+\item \code{env}ironment\verb{: Use this }env`ironment.
+}
+
+\code{n} \verb{[integer]} (default \code{1L})
+
+Number of random samples to take.}
+
+\item{\code{vame_list_copy}}{\emph{Description}
+
+Get a deep copy of \code{meta_list}.
+
+\emph{Usage}
+
+\code{vm@vame_list_copy()}}
+
 \item{\code{vame_category_space_dt_list}}{\emph{Description}
 
 Get list of category space \code{data.table} objects.
@@ -863,8 +1045,12 @@ defined for the general case.
 \item \code{bounds}: Sample uniformly between \code{lo} and \code{hi} --- with
 replacement for integer-valued bounds.
 }
-\item The sampler is called or evaluated, which results in the random samples,
-and these are returned.
+\item The \code{sampler} is called or evaluated, which results in the random samples,
+and these are returned. If the \code{sampler} is a function it is called via
+\code{sampler(x = vs, var_nms = var_nms, n = n)}, where \code{vs} is the evaluated
+value space. If it is an expression, it is evaluated in a new environment
+that contains \code{x}, \code{arg_nms}, and \code{n}. This new environment's parent is
+\code{env}.
 }
 
 The following functions are related to this feature:
@@ -873,6 +1059,10 @@ The following functions are related to this feature:
 \item \code{vm@var_set_value_space_sampler_set}
 \item \code{vm@var_set_value_space_sample}
 \item \code{vm@var_value_space_sample}
+\item \code{vm@vame_value_space_sampler_get}
+\item \code{vm@vame_value_space_sampler_set}
+\item \code{vm@vame_value_space_sample}
+\item \code{vm@vame_value_space_sample_default}
 }
 
 \strong{Assertions}
@@ -939,14 +1129,32 @@ The following functions are part of this feature:
 \section{News for version 0.2.2}{
 
 
-New function \code{vm@var_meta_is_defined}.`
+\code{vame::VariableMetadata} gains arg \code{vame_list}.
+
+Assign \code{meta_list$sampler}.
+
+New function \code{vm@vame_meta_get}.
+
+New function \code{vm@vame_meta_is_defined}.
+
+New function \code{vm@vame_meta_set}.
+
+New function \code{vm@var_set_meta_is_defined}.
+
+New function \code{vm@vame_value_space_sample_default}.
+
+Assign \code{meta_list$sampler}.
+
+Assign \code{meta_list$sampler}.
+
+New function \code{vm@var_meta_is_defined}.
 
 \code{vm@var_meta_set} now wraps \code{value} into a list if it isn't a list
 and if the target column is a list.
 
 Fix renaming multiple variables on one go.
 
-New function \code{vm@var_set_meta_is_defined}.`
+New function \code{vm@var_set_meta_is_defined}.
 
 \code{vm@var_set_meta_set} now wraps \code{value} into a list if it isn't a list
 and if the target column is a list.
@@ -957,7 +1165,7 @@ New slot function \code{var_set_value_space_sampler_get}.
 
 New slot function \code{var_set_value_space_sampler_set}.
 
-New function \code{vm@var_value_space_sample}.`
+New function \code{vm@var_value_space_sample}.
 }
 
 \section{News for version 0.2.1}{
@@ -1442,6 +1650,42 @@ a_sample <- vm@var_value_space_sample(var_nm = "a", n = 4L)
 stopifnot(
   is.integer(a_sample),
   length(a_sample) == 4
+)
+
+vame_sample <- vm@vame_value_space_sample(
+  var_nms = c("a", "b", "c", "d"),
+  n = 10L
+)
+stopifnot(
+  inherits(vame_sample, "data.table"),
+  identical(c("a", "b", "c", "d"), names(vame_sample)),
+  nrow(vame_sample) == 10
+)
+
+vm@vame_value_space_sampler_set(quote({
+  # see vame_value_space_sampler_set in ?vame::VariableMetadata
+  stopifnot(
+    "VariableMetadata" \%in\% class(x),
+    is.character(var_nms),
+    is.integer(n),
+    n > 0
+  )
+  # in this example we take the default sample and modify it a bit.
+  dt <- x@vame_value_space_sample_default(var_nms = var_nms, n = n)
+  if ("c" \%in\% var_nms) {
+    dt[j = "c" := runif(min = 0.0, max = .SD[["a"]], n = n)]
+  }
+  dt[]
+}))
+vame_sample <- vm@vame_value_space_sample(
+  var_nms = c("a", "b", "c", "d"),
+  n = 10L
+)
+stopifnot(
+  inherits(vame_sample, "data.table"),
+  identical(c("a", "b", "c", "d"), names(vame_sample)),
+  nrow(vame_sample) == 10,
+  vame_sample[["c"]] < vame_sample[["a"]]
 )
 
 }

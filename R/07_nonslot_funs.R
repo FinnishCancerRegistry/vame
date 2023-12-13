@@ -281,18 +281,32 @@ var_set_pos_to_id <- function(
 }
 var_to_var_set_pos <- function(
   vm,
-  var_nm
+  var_nm,
+  style = c("all", "smallest_set")[1]
 ) {
+  stopifnot(style %in%  c("all", "smallest_set"))
   assert_is_variablemetadata(vm, assertion_type = "prod_input")
   pos <- var_meta_get(vm, var_nm = var_nm, meta_nm = "var_set_dt_pos_set")
+  if (style == "smallest_set" && length(pos) > 1) {
+    vsd <- vsd_get(vm = vm)
+    set_sizes <- vapply(
+      pos,
+      function(p) {
+        length(vsd[["var_nm_set"]][[p]])
+      },
+      integer(1L)
+    )
+    pos <- pos[which.min(set_sizes)]
+  }
   return(pos)
 }
 var_to_var_set_id <- function(
   vm,
-  var_nm
+  var_nm,
+  style = c("all", "smallest_set")[1]
 ) {
   # TODO: rename -> var_nm_to_var_set_id
-  pos <- var_to_var_set_pos(vm = vm, var_nm = var_nm)
+  pos <- var_to_var_set_pos(vm = vm, var_nm = var_nm, style = style)
   return(var_set_pos_to_id(vm, pos))
 }
 
@@ -349,6 +363,19 @@ var_is_aggregateable_to__ <- function(
     return(FALSE)
   }
   sum(duplicated(dt[[from_var_nm]])) == 0L
+}
+
+# vame funs --------------------------------------------------------------------
+vame_list_get <- function(vm) {
+  assert_is_variablemetadata(vm, assertion_type = "prod_input")
+  out <- data_obj_get(vm, "vame_list")
+  return(out)
+}
+
+vame_list_set <- function(vm, value) {
+  assert_is_variablemetadata(vm, assertion_type = "prod_input")
+  dbc::assert_prod_input_is_list(value)
+  data_obj_set(vm, "vame_list", value)
 }
 
 vame_subset_expr <- function(
