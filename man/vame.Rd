@@ -199,6 +199,11 @@ Assign \code{meta_list$sampler}.
 Assign \code{meta_list$sampler}.
 }
 
+\subsection{vm@var_dt_copy}{
+
+New function \code{vm@var_dt_copy}.
+}
+
 \subsection{vm@var_meta_is_defined}{
 
 New function \code{vm@var_meta_is_defined}.
@@ -213,6 +218,11 @@ and if the target column is a list.
 \subsection{vm@var_rename}{
 
 Fix renaming multiple variables on one go.
+}
+
+\subsection{vm@var_set_dt_copy}{
+
+New function \code{vm@var_set_dt_copy}.
 }
 
 \subsection{vm@var_set_meta_is_defined}{

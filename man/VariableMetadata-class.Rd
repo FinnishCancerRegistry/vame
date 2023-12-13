@@ -48,6 +48,14 @@ See section \strong{Features} for what you can do with \code{VariableMetadata} o
 \section{Slots}{
 
 \describe{
+\item{\code{var_set_dt_copy}}{\emph{Description}
+
+Returns a deep copy of \code{var_set_dt_copy}.
+
+\emph{Usage}
+
+\code{vm@var_set_dt_copy()}}
+
 \item{\code{var_set_meta_is_defined}}{\emph{Description}
 
 Returns \code{TRUE} if \code{var_set_dt[[meta_nm]]} exists.
@@ -488,6 +496,14 @@ Environment where a value space will be evaluated, if applicable.
 \item \code{NULL}: Use the \code{env}ironment where the function was called.
 \item \code{env}ironment\verb{: Use this }env`ironment.
 }}
+
+\item{\code{var_dt_copy}}{\emph{Description}
+
+Returns a deep copy of \code{var_dt}.
+
+\emph{Usage}
+
+\code{vm@var_dt_copy()}}
 
 \item{\code{var_meta_is_defined}}{\emph{Description}
 
@@ -1147,12 +1163,16 @@ Assign \code{meta_list$sampler}.
 
 Assign \code{meta_list$sampler}.
 
+New function \code{vm@var_dt_copy}.
+
 New function \code{vm@var_meta_is_defined}.
 
 \code{vm@var_meta_set} now wraps \code{value} into a list if it isn't a list
 and if the target column is a list.
 
 Fix renaming multiple variables on one go.
+
+New function \code{vm@var_set_dt_copy}.
 
 New function \code{vm@var_set_meta_is_defined}.
 

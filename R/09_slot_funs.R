@@ -1,4 +1,14 @@
 # var_set funs -----------------------------------------------------------------
+var_set_dt_copy <- function(vm) {
+  # @codedoc_comment_block vm@var_set_dt_copy
+  # Returns a deep copy of `var_set_dt_copy`.
+  # @codedoc_comment_block vm@var_set_dt_copy
+  # @codedoc_comment_block news("vm@var_set_dt_copy", "2023-12-13", "0.2.2")
+  # New function `vm@var_set_dt_copy`.
+  # @codedoc_comment_block news("vm@var_set_dt_copy", "2023-12-13", "0.2.2")
+  data.table::copy(data_obj_get(vm, "var_dt"))
+}
+
 var_set_meta_is_defined <- function(
   vm,
   id,
@@ -816,6 +826,16 @@ var_assert <- function(
 
 
 # var funs ---------------------------------------------------------------------
+var_dt_copy <- function(vm) {
+  # @codedoc_comment_block vm@var_dt_copy
+  # Returns a deep copy of `var_dt`.
+  # @codedoc_comment_block vm@var_dt_copy
+  # @codedoc_comment_block news("vm@var_dt_copy", "2023-12-13", "0.2.2")
+  # New function `vm@var_dt_copy`.
+  # @codedoc_comment_block news("vm@var_dt_copy", "2023-12-13", "0.2.2")
+  data.table::copy(data_obj_get(vm, "var_set_dt"))
+}
+
 var_meta_is_defined <- function(
   vm,
   var_nm,
