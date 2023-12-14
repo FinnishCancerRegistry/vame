@@ -8,7 +8,7 @@
 
 ### vm@vame_list_copy
 
-Assign `meta_list$sampler`.
+New function `vm@vame_list_copy`.
 
 ### vm@vame_meta_get
 
@@ -32,11 +32,11 @@ New function `vm@vame_value_space_sample_default`.
 
 ### vm@vame_value_space_sampler_get
 
-Assign `meta_list$sampler`.
+New function `vm@vame_value_space_sampler_get`.
 
 ### vm@vame_value_space_sampler_set
 
-Assign `meta_list$sampler`.
+New function `vm@vame_value_space_sampler_set`.
 
 ### vm@var_dt_copy
 

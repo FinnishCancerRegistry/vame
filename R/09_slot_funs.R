@@ -1385,7 +1385,7 @@ vame_value_space_sampler_get <- function(
   # @codedoc_comment_block vm@vame_value_space_sampler_get
 
   # @codedoc_comment_block news("vm@vame_value_space_sampler_get", "2023-12-12", "0.2.2")
-  # Assign `meta_list$sampler`.
+  # New function `vm@vame_value_space_sampler_get`.
   # @codedoc_comment_block news("vm@vame_value_space_sampler_get", "2023-12-12", "0.2.2")
 
   # @codedoc_comment_block feature_funs(VariableMetadata, random sampling)
@@ -1409,7 +1409,7 @@ vame_value_space_sampler_set <- function(
   # @codedoc_comment_block vm@vame_value_space_sampler_set
 
   # @codedoc_comment_block news("vm@vame_value_space_sampler_set", "2023-12-12", "0.2.2")
-  # Assign `meta_list$sampler`.
+  # New function `vm@vame_value_space_sampler_set`.
   # @codedoc_comment_block news("vm@vame_value_space_sampler_set", "2023-12-12", "0.2.2")
 
   # @codedoc_comment_block feature_funs(VariableMetadata, random sampling)
@@ -1578,7 +1578,7 @@ vame_list_copy <- function(vm) {
   # @codedoc_comment_block vm@vame_list_copy
 
   # @codedoc_comment_block news("vm@vame_list_copy", "2023-12-13", "0.2.2")
-  # Assign `meta_list$sampler`.
+  # New function `vm@vame_list_copy`.
   # @codedoc_comment_block news("vm@vame_list_copy", "2023-12-13", "0.2.2")
   data.table::copy(data_obj_get(vm = vm, "vame_list"))
 }

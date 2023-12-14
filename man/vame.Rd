@@ -161,7 +161,7 @@ my_fun_2 <- function(dg_age) \{
 
 \subsection{vm@vame_list_copy}{
 
-Assign \code{meta_list$sampler}.
+New function \code{vm@vame_list_copy}.
 }
 
 \subsection{vm@vame_meta_get}{
@@ -191,12 +191,12 @@ New function \code{vm@vame_value_space_sample_default}.
 
 \subsection{vm@vame_value_space_sampler_get}{
 
-Assign \code{meta_list$sampler}.
+New function \code{vm@vame_value_space_sampler_get}.
 }
 
 \subsection{vm@vame_value_space_sampler_set}{
 
-Assign \code{meta_list$sampler}.
+New function \code{vm@vame_value_space_sampler_set}.
 }
 
 \subsection{vm@var_dt_copy}{

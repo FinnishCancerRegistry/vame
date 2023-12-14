@@ -1147,7 +1147,7 @@ The following functions are part of this feature:
 
 \code{vame::VariableMetadata} gains arg \code{vame_list}.
 
-Assign \code{meta_list$sampler}.
+New function \code{vm@vame_list_copy}.
 
 New function \code{vm@vame_meta_get}.
 
@@ -1159,9 +1159,9 @@ New function \code{vm@var_set_meta_is_defined}.
 
 New function \code{vm@vame_value_space_sample_default}.
 
-Assign \code{meta_list$sampler}.
+New function \code{vm@vame_value_space_sampler_get}.
 
-Assign \code{meta_list$sampler}.
+New function \code{vm@vame_value_space_sampler_set}.
 
 New function \code{vm@var_dt_copy}.
 
