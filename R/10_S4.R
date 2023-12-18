@@ -419,6 +419,10 @@ methods::setClass(
 #' )
 #' 
 #' # random sampling
+#' c_lo <- as.Date("2001-01-01")
+#' c_hi <- as.Date("2020-12-31")
+#' ## see what default samplers does with bounds
+#' storage.mode(c_lo) <- storage.mode(c_hi) <- "integer"
 #' vm <- vame::VariableMetadata(
 #'   var_dt = data.table::data.table(
 #'     var_nm = c("a", "d", "b", "c"),
@@ -431,8 +435,8 @@ methods::setClass(
 #'       ad = list(dt = data.table::CJ(a = 1:2, d = 3:4)),
 #'       b = list(set = 3:4),
 #'       c = list(bounds = list(
-#'         lo = 0.0,
-#'         hi = 2.0,
+#'         lo = c_lo,
+#'         hi = c_hi,
 #'         lo_inclusive = TRUE,
 #'         hi_inclusive = TRUE
 #'       ))
@@ -450,10 +454,10 @@ methods::setClass(
 #' vm@var_set_value_space_sampler_set(
 #'   id = "c",
 #'   value = quote({
-#'     pool <- runif(min = x[["bounds"]][["lo"]], max = x[["bounds"]][["hi"]],
-#'                   n = n * 100)
-#'     p <- dnorm(x = pool, mean = 1.0)
-#'     sample(pool, size = n, replace = FALSE, prob = p)
+#'     pool <- x[["bounds"]][["lo"]]:x[["bounds"]][["hi"]]
+#'     p <- dnorm(x = pool, mean = mean(pool), sd = 10)
+#'     class(pool) <- class(x[["bounds"]][["lo"]])
+#'     pool[sample(length(pool), size = n, replace = FALSE, prob = p)]
 #'   })
 #' )
 #' 
@@ -468,7 +472,8 @@ methods::setClass(
 #'   nrow(a_sample) == 4,
 #'   is.integer(b_sample),
 #'   length(b_sample) == 4,
-#'   is.double(c_sample),
+#'   inherits(c_sample, "Date"),
+#'   storage.mode(c_sample) == "integer",
 #'   length(c_sample) == 4
 #' )
 #' 

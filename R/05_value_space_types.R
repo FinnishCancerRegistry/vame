@@ -379,20 +379,21 @@ value_space_type_funs__ <- list(
     sampler = function(x, var_nms, n) {
       # @codedoc_comment_block defaults(var_set_dt$sampler)
       #   + `bounds`: Sample uniformly between `lo` and `hi` --- with
-      #     replacement for integer-valued bounds.
+      #     replacement from `lo:hi` if `storage.mode(lo) == "integer"`.
       # @codedoc_comment_block defaults(var_set_dt$sampler)
       sample_lo <- x[["bounds"]][["lo"]]
       sample_hi <- x[["bounds"]][["hi"]]
-      if (is.integer(sample_lo) && is.integer(sample_hi)) {
+      out <- rep(sample_lo, n) # to ensure output has correct class
+      if (storage.mode(sample_lo) == "integer") {
         if (!x[["bounds"]][["lo_inclusive"]]) {
           sample_lo <- sample_lo + 1L
         }
         if (!x[["bounds"]][["hi_inclusive"]]) {
           sample_hi <- sample_hi - 1L
         }
-        out <- sample(sample_lo:sample_hi, size = n, replace = TRUE)
+        out[1:n] <- sample(x = sample_lo:sample_hi, size = n, replace = TRUE)
       } else {
-        out <- runif(n = n, min = sample_lo, max = sample_hi)
+        out[1:n] <- runif(n = n, min = sample_lo, max = sample_hi)
       }
       return(out)
     }
