@@ -347,7 +347,7 @@ var_is_aggregateable_to__ <- function(
 ) {
   assert_is_variablemetadata(vm, assertion_type = "prod_input")
   stopifnot(
-    identical(sort(names(dt)), sort(c(from_var_nm, to_var_nm)))
+    identical(sort(names(dt)), sort(union(from_var_nm, to_var_nm)))
   )
   if (from_var_nm == to_var_nm) {
     return(TRUE)
