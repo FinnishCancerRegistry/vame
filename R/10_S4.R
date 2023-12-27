@@ -578,13 +578,14 @@ VariableMetadata <- function(
   funs$data$var_dt <- var_dt
   funs$data$var_set_dt <- var_set_dt
   funs$data$vame_list <- vame_list
-  funs$self <- function() {
+  funs$internal_self <- function() {
     get("self_obj", envir = get("data"))
   }
-  environment(funs$self) <- funs
+  environment(funs$internal_self) <- funs
   slot_fun_nms <- vame_slot_nms_get__()
   lapply(slot_fun_nms, function(slot_fun_nm) {
-    alias_fun <- eval(parse(text = paste0("vame:::", slot_fun_nm)))
+    alias_fun_nm <- paste0("vame:::", slot_fun_nm)
+    alias_fun <- eval(parse(text = alias_fun_nm))
     args <- formals(alias_fun)
     arg_lines <- paste0(
       names(args), " = ", vapply(args, deparse1, character(1L))
@@ -593,18 +594,16 @@ VariableMetadata <- function(
     arg_lines <- setdiff(arg_lines, "vm")
     arg_lines <- paste0(arg_lines, ",")
     arg_lines[length(arg_lines)] <- sub(",$", "", arg_lines[length(arg_lines)])
-    # body_lines <- sprintf(
-    #   "vame:::call_slot_fun_alias_in_slot_fun__(\"%s\")",
-    #   slot_fun_nm
-    # )
     body_arg_lines <- paste0(names(args), " = ", names(args))
-    body_arg_lines[names(args) == "vm"] <- "vm = self()"
+    body_arg_lines[names(args) == "vm"] <- "vm = vame::self()"
     body_arg_lines <- paste0(body_arg_lines, ",")
     body_arg_lines[length(body_arg_lines)] <- sub(
       ",$", "", body_arg_lines[length(body_arg_lines)]
     )
     body_lines <- c(
-      paste0("vame:::", slot_fun_nm, "("),
+      "vame:::self_set(vm = internal_self())",
+      "on.exit(vame:::self_rm())",
+      paste0(alias_fun_nm, "("),
       paste0("  ", body_arg_lines),
       ")"
     )
@@ -615,7 +614,6 @@ VariableMetadata <- function(
       paste0("  ", body_lines),
       "}"
     )
-    # browser()
     funs[[slot_fun_nm]] <- eval(parse(text = lines))
     environment(funs[[slot_fun_nm]]) <- funs
     return(NULL)

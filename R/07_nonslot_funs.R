@@ -412,3 +412,37 @@ vame_subset_expr <- function(
   }
   return(invisible(NULL))
 }
+
+# user_utils -------------------------------------------------------------------
+#' @title Utilities for User-Defined Functions and Expressions
+#' @description
+#' These utility functions make it easier for the user to define functions
+#' and expressions to store into a `VariableMetadata` object.
+#' @name user_utils
+NULL
+
+.__SELF_ENV <- new.env(parent = environment())
+#' @rdname user_utils
+#' @export
+self <- function() {
+  # @codedoc_comment_block vame::maker_dt
+  # `vame::self` gets the `VariableMetadata` object whose slot function was
+  # just called. It is intended only for use within functions and expressions
+  # stored into a `VariableMetadata` object.
+  # @codedoc_comment_block vame::maker_dt
+  if (!"self" %in% ls(.__SELF_ENV)) {
+    stop("No VariableMetadata object could be retrieved --- this function is ",
+         "intended to be called only within functions and expressions stored ",
+         "into a VariableMetadat object and should not work elsewhere.")
+  }
+  return(.__SELF_ENV[["self"]])
+}
+
+self_set <- function(vm) {
+  .__SELF_ENV[["self"]] <- vm
+  return(invisible(NULL))
+}
+
+self_rm <- function() {
+  rm(list = "self", envir = .__SELF_ENV)
+}

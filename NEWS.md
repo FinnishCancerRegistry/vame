@@ -6,6 +6,10 @@
 
 `vame::VariableMetadata` gains arg `vame_list`.
 
+### vame::self
+
+New function `vame::self`.
+
 ### vm@vame_list_copy
 
 New function `vm@vame_list_copy`.

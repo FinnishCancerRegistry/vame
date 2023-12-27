@@ -159,6 +159,11 @@ my_fun_2 <- function(dg_age) \{
 \code{vame::VariableMetadata} gains arg \code{vame_list}.
 }
 
+\subsection{vame::self}{
+
+New function \code{vame::self}.
+}
+
 \subsection{vm@vame_list_copy}{
 
 New function \code{vm@vame_list_copy}.
