@@ -419,7 +419,6 @@ Name of a variable. Aggregation to this from another variable.}
 \item{\code{var_aggregate}}{\emph{Description}
 
 Returns correspoding level of \code{to_var_nm} for each value in \code{x}.
-Get and evaluate value space for a variable.
 
 \emph{Usage}
 
@@ -440,6 +439,21 @@ Name of a variable. Aggregation from this to another variable.
 Name of a variable. Aggregation to this from another variable.}
 
 \item{\code{var_value_space_eval}}{\emph{Description}
+
+Get and evaluate value space for a variable.
+This gets tricky when a variable has been defined in more than one
+\code{var_set_dt$value_space}. If there is a single \code{var_set_dt$value_space}
+for only the variable of interest, that is used. Otherwise:
+\itemize{
+\item Every value space for the variable is evaluated via
+\code{vm@var_set_value_space_eval}. If the exact same value space has been
+produced multiple times, duplicates are removed.
+\item If we now have only one value space, all is well and that is returned.
+\item If the \code{var_dt$type == "categorical"} for this variable, the union of
+all separate value spaces is formed and that will be returned.
+\item In other cases an error is raised because there does not seem to be
+any way to decide which value space to use.
+}
 
 \emph{Usage}
 

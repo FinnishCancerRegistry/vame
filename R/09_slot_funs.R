@@ -224,6 +224,7 @@ var_set_remove <- function(
 }
 
 
+# var_set_value_space funs -----------------------------------------------------
 var_set_value_space_eval <- function(
   vm,
   id,
@@ -354,7 +355,6 @@ var_set_value_space_eval <- function(
   return(value_space)
 }
 
-# var_set_value_space funs -----------------------------------------------------
 var_set_value_space_get <- function(
   vm,
   id
@@ -668,9 +668,6 @@ var_value_space_eval <- function(
   var_nm,
   env = NULL
 ) {
-  # @codedoc_comment_block vm@var_aggregate
-  # Get and evaluate value space for a variable.
-  # @codedoc_comment_block vm@var_aggregate
   # @codedoc_comment_block feature_funs(VariableMetadata, value spaces)
   # - `vm@var_value_space_eval`
   # @codedoc_comment_block feature_funs(VariableMetadata, value spaces)
@@ -693,10 +690,27 @@ var_value_space_eval <- function(
   if (is.null(env)) {
     env <- parent.frame(1L)
   }
-  pos <- var_meta_get(vm, var_nm = var_nm, meta_nm = "var_set_dt_pos_set")
-  vsd <- vsd_get(vm, var_nms = "id")
+  # @codedoc_comment_block vm@var_value_space_eval
+  # Get and evaluate value space for a variable.
+  # This gets tricky when a variable has been defined in more than one
+  # `var_set_dt$value_space`. If there is a single `var_set_dt$value_space`
+  # for only the variable of interest, that is used. Otherwise:
+  # @codedoc_comment_block vm@var_value_space_eval
+  pos_set <- var_meta_get(vm, var_nm = var_nm, meta_nm = "var_set_dt_pos_set")
+  vsd <- var_set_meta_get_all(vm, meta_nm = c("id", "var_nm_set"))
+  vs_lens <- vapply(vsd[["var_nm_set"]], length, integer(1L))
+  is_singular <- vs_lens == 1
+  if (any(is_singular)) {
+    pos_set <- pos_set[is_singular]
+  }
+
+  # @codedoc_comment_block vm@var_value_space_eval
+  # - Every value space for the variable is evaluated via
+  #   `vm@var_set_value_space_eval`. If the exact same value space has been
+  #   produced multiple times, duplicates are removed.
+  # @codedoc_comment_block vm@var_value_space_eval
   value_space <- lapply(
-    vsd[["id"]][pos],
+    vsd[["id"]][pos_set],
     function(id) {
       var_set_value_space_eval(
         vm,
@@ -706,9 +720,16 @@ var_value_space_eval <- function(
       )
   })
   value_space <- unique(value_space)
+  # @codedoc_comment_block vm@var_value_space_eval
+  # - If we now have only one value space, all is well and that is returned.
+  # @codedoc_comment_block vm@var_value_space_eval
   if (length(value_space) == 1) {
     value_space <- value_space[[1]]
   } else if (var_meta_get(vm, var_nm, "type") == "categorical") {
+    # @codedoc_comment_block vm@var_value_space_eval
+    # - If the `var_dt$type == "categorical"` for this variable, the union of
+    #   all separate value spaces is formed and that will be returned.
+    # @codedoc_comment_block vm@var_value_space_eval
     value_space <- lapply(value_space, function(x) {
       if ("set" %in% names(x)) {
         x <- list(dt = data.table::data.table(x = x[["set"]]))
@@ -722,11 +743,15 @@ var_value_space_eval <- function(
     value_space <- data.table::rbindlist(value_space)
     value_space <- list(dt = unique(value_space, by = var_nm))
   } else {
+    # @codedoc_comment_block vm@var_value_space_eval
+    # - In other cases an error is raised because there does not seem to be
+    #   any way to decide which value space to use.
+    # @codedoc_comment_block vm@var_value_space_eval
     stop(
       "Internal error: var_nm = \"", var_nm, "\" appears in more than ",
-      "one variable set value space, and its own value spaces are not ",
-      "all identical --- no logic has been defined for handling this ",
-      "situation.")
+      "one variable set value space, and its value spaces are different ",
+      "in the different sets --- don't know which one to take."
+    )
   }
   if ("dt" %in% names(value_space)) {
     dt_subset <- !duplicated(value_space[["dt"]], by = var_nm)
