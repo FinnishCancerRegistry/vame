@@ -697,10 +697,13 @@ var_value_space_eval <- function(
   # for only the variable of interest, that is used. Otherwise:
   # @codedoc_comment_block vm@var_value_space_eval
   pos_set <- var_meta_get(vm, var_nm = var_nm, meta_nm = "var_set_dt_pos_set")
-  vsd <- var_set_meta_get_all(vm, meta_nm = c("id", "var_nm_set"))
+  vsd <- var_set_meta_get_all(vm, meta_nm = c("id", "var_nm_set", "value_space"))
+  pos_set <- pos_set[
+    !vapply(vsd[["value_space"]][pos_set], is.null, logical(1L))
+  ]
   vs_lens <- vapply(vsd[["var_nm_set"]], length, integer(1L))
   is_singular <- vs_lens == 1
-  if (any(is_singular)) {
+  if (sum(is_singular) == 1) {
     pos_set <- pos_set[is_singular]
   }
 
