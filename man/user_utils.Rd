@@ -2,26 +2,10 @@
 % Please edit documentation in R/07_nonslot_funs.R
 \name{user_utils}
 \alias{user_utils}
-\alias{maker_dt}
 \alias{self}
 \title{Utilities for User-Defined Functions and Expressions}
 \usage{
-maker_dt(dep_var_nm_sets, var_nms)
-
 self()
-}
-\arguments{
-\item{dep_var_nm_sets}{\verb{[list]}
-
-Names list of variables names --- each element the names of variables
-that the corresponding variable, as indicated by the names of this list,
-depends on. E.g. \code{list(my_var_03 = c("my_var_01", "my_var_02"))}.
-This is used by \code{maker_dt} to only collect data that is needed for
-the variables you actually want to make --- see \code{var_nms}.}
-
-\item{var_nms}{\verb{[character]}
-
-Names of variables you want to make.}
 }
 \description{
 These utility functions make it easier for the user to define functions

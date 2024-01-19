@@ -157,6 +157,7 @@ assert_is_var_dt <- function(
   call = NULL,
   assertion_type = NULL
 ) {
+  dbc::handle_args_inplace()
   dbc::assert_is_data_table_with_required_names(
     x = x,
     x_nm = x_nm,
@@ -194,6 +195,7 @@ assert_is_var_set_dt <- function(
   call = NULL,
   assertion_type = NULL
 ) {
+  dbc::handle_args_inplace()
   dbc::assert_is_data_table_with_required_names(
     x = x,
     x_nm = x_nm,
@@ -201,11 +203,67 @@ assert_is_var_set_dt <- function(
     assertion_type = assertion_type,
     required_names = c("id", "var_nm_set")
   )
+  dbc::assert_is_list(
+    x = x[["var_nm_set"]],
+    x_nm = paste0(x_nm, "$var_nm_set"),
+    call = call,
+    assertion_type = assertion_type
+  )
+  for (i in seq_along(x[["var_nm_set"]])) {
+    dbc::assert_is_character_nonNA_vector(
+      x = x[["var_nm_set"]][[i]],
+      x_nm = paste0(x_nm, "$var_nm_set[[", i, "]]"),
+      call = call,
+      assertion_type = assertion_type
+    )
+  }
   if ("value_space" %in% names(x)) {
-    lapply(x[["value_space"]], assert_is_value_space,
-           x_nm = x_nm,
-           call = call,
-           assertion_type = assertion_type)
+    dbc::assert_is_list(
+      x = x[["value_space"]],
+      x_nm = paste0(x_nm, "$value_space"),
+      call = call,
+      assertion_type = assertion_type
+    )
+    for (i in seq_along(x[["value_space"]])) {
+      assert_is_value_space(
+        x = x[["value_space"]][[i]],
+        x_nm = paste0(x_nm, "$value_space[[", i, "]]"),
+        call = call,
+        assertion_type = assertion_type
+      )
+    }
+  }
+  if ("sampler" %in% names(x)) {
+    dbc::assert_is_list(
+      x = x[["sampler"]],
+      x_nm = paste0(x_nm, "$sampler"),
+      call = call,
+      assertion_type = assertion_type
+    )
+    for (i in seq_along(x[["sampler"]])) {
+      assert_is_sampler(
+        x = x[["sampler"]][[i]],
+        x_nm = paste0(x_nm, "$sampler[[", i, "]]"),
+        call = call,
+        assertion_type = assertion_type
+      )
+    }
+  }
+  if ("maker" %in% names(x)) {
+    dbc::assert_is_list(
+      x = x[["maker"]],
+      x_nm = paste0(x_nm, "$maker"),
+      call = call,
+      assertion_type = assertion_type
+    )
+    for (i in seq_along(x[["maker"]])) {
+      assert_is_maker(
+        x = x[["maker"]][[i]],
+        x_nm = paste0(x_nm, "$maker[[", i, "]]"),
+        call = call,
+        assertion_type = assertion_type
+      )
+    }
   }
   return(invisible(NULL))
 }
@@ -225,14 +283,11 @@ assert_is_sampler <- function(
   # object is considered to mean that one has not been defined.
   # @codedoc_comment_block specification(vame_list$sampler)
   # @codedoc_comment_block specification(var_set_dt$sampler)
-  dbc::assert_is_one_of(
+  dbc::assert_has_one_of_classes(
     x = x,
     x_nm = x_nm,
     call = call,
-    assertion_type = assertion_type,
-    funs = list(dbc::report_is_NULL,
-                dbc::report_is_function,
-                dbc::report_is_call)
+    classes = c("NULL", "function", "call", "{", "name")
   )
   if (is.null(x)) {
     return(invisible(NULL))
@@ -297,5 +352,65 @@ assert_is_vame_list <- function(
     assertion_type = assertion_type,
     funs = list(dbc::report_is_NULL,
                 dbc::report_is_list)
+  )
+}
+
+assert_is_maker <- function(
+  x,
+  x_nm = NULL,
+  call = NULL,
+  assertion_type = NULL
+) {
+  dbc::handle_args_inplace()
+  # @codedoc_comment_block specification(var_set_dt$maker)
+  # The `maker` can be `NULL`, a `function`, or a `list`. A `NULL` `maker`
+  # object is considered to mean that one has not been defined.
+  # @codedoc_comment_block specification(var_set_dt$maker)
+  dbc::assert_has_one_of_classes(
+    x = x,
+    x_nm = x_nm,
+    call = call,
+    assertion_type = assertion_type,
+    classes = c("NULL", "function", "list")
+  )
+  if (is.null(x)) {
+    return(invisible(NULL))
+  } else if (is.function(x)) {
+    # @codedoc_comment_block specification(var_set_dt$maker)
+    # A `maker` of type `function` must have as arguments the invididual
+    # required variables. Currently this is not checked in any way.
+    # @codedoc_comment_block specification(var_set_dt$maker)
+    return(invisible(NULL))
+  }
+  # @codedoc_comment_block specification(var_set_dt$maker)
+  # A `maker` of type `list` can be of two kinds. The first kind has named
+  #  elements `maker` of class `call` and
+  # `dep_var_nms` of class `character`, e.g.
+  # `list(maker = quote(make(x, y)), dep_var_nms = c("x", "y"))`.
+  # The second kind is otherwise the same, but `maker` must be string
+  # `"var_aggregate"`, and `dep_var_nms` must be of length one. This second
+  # kind is a shorthand for cases where one variable can be created simply
+  # by aggregating another with `vm@var_aggregate`.
+  # @codedoc_comment_block specification(var_set_dt$maker)
+  dbc::assert_has_names(
+    x = x,
+    x_nm = x_nm,
+    call = call,
+    assertion_type = assertion_type,
+    required_names = c("maker", "dep_var_nms")
+  )
+  dbc::assert_is_one_of(
+    x = x[["maker"]],
+    x_nm = paste0(x_nm, "$maker"),
+    call = call,
+    assertion_type = assertion_type,
+    funs = list(dbc::report_is_call,
+                dbc::report_is_character_nonNA_atom)
+  )
+  dbc::assert_is_character_nonNA_vector(
+    x = x[["dep_var_nms"]],
+    x_nm = paste0(x_nm, "$dep_var_nms"),
+    call = call,
+    assertion_type = assertion_type
   )
 }

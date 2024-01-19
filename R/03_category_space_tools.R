@@ -90,8 +90,8 @@ value_space_to_subset_dt__ <- function(
 }
 
 category_space_dt_list__ <- function(
+  vm,
   var_nms,
-  vsd,
   env,
   assertion_type = "prod_input"
 ) {
@@ -99,23 +99,23 @@ category_space_dt_list__ <- function(
     var_nms,
     assertion_type = assertion_type
   )
-  dbc::assert_is_data_table_with_required_names(
-    vsd,
-    required_names = c("id", "var_nm_set", "value_space"),
-    assertion_type = assertion_type
-  )
   dbc::assert_is_environment(
     env,
     assertion_type = assertion_type
   )
-  dtl <- lapply(seq_along(vsd[["value_space"]]), function(i) {
-    var_nm_set <- intersect(var_nms, vsd[["var_nm_set"]][[i]])
-    if (length(var_nm_set) == 0) {
+  value_spaces <- var_set_meta_get_all(vm, meta_nm = "value_space")
+  var_nm_sets <- var_set_meta_get_all(vm, meta_nm = "var_nm_set")
+  pos_set <- sort(unique(unlist(lapply(var_nms, function(var_nm) {
+    var_to_var_set_pos(vm = vm, var_nm = var_nm, style = "all")
+  }))))
+  dtl <- lapply(pos_set, function(i) {
+    vs_i <- value_spaces[[i]]
+    if (is.null(vs_i)) {
       return(NULL)
     }
     value_space_to_subset_dt__(
-      value_space = vsd[["value_space"]][[i]],
-      var_nms = var_nm_set,
+      value_space = vs_i,
+      var_nms = intersect(var_nms, var_nm_sets[[i]]),
       env = env
     )
   })

@@ -223,6 +223,274 @@ var_set_remove <- function(
   return(invisible(NULL))
 }
 
+# var_set_maker funs -----------------------------------------------------------
+var_set_maker_get <- function(
+  vm,
+  id
+) {
+  # @codedoc_comment_block vm@var_set_maker_get
+  # Get specific `var_set_dt$maker`.
+  # @codedoc_comment_block vm@var_set_maker_get
+  # @codedoc_comment_block feature_funs(make)
+  # - `vm@var_set_maker_get`
+  # @codedoc_comment_block feature_funs(make)
+  var_set_meta_get(vm = vm, id = id, meta_nm = "maker")
+}
+
+var_set_maker_set <- function(
+  vm,
+  id,
+  value
+) {
+  # @codedoc_comment_block vm@var_set_maker_set
+  # Assign specific `var_set_dt$maker`.
+  # @codedoc_comment_block vm@var_set_maker_set
+  # @codedoc_comment_block feature_funs(make)
+  # - `vm@var_set_maker_set`
+  # @codedoc_comment_block feature_funs(make)
+  assert_is_maker(value)
+  var_set_meta_set(vm = vm, id = id, meta_nm = "maker", value = value)
+}
+
+var_set_make <- function(
+  vm,
+  id,
+  data,
+  env = NULL
+) {
+  # @codedoc_comment_block vm@var_set_make
+  # Call specific `var_set_dt$maker`.
+  # @codedoc_comment_block vm@var_set_make
+  # @codedoc_comment_block feature_funs(make)
+  # - `vm@var_set_make`
+  # @codedoc_comment_block feature_funs(make)
+
+  # @codedoc_comment_block feature(make)
+  # The make feature allows for making variable sets based on other variable
+  # sets. For instance, a year column might be "made" based on a data column,
+  # say `start_year` from `start_date`. This feature becomes available
+  # when one or more `var_set_dt$maker` objects have been defined:
+  #
+  # @codedoc_insert_comment_block specification(var_set_dt$maker)
+  #
+  # The following functions are related to this feature:
+  #
+  # @codedoc_insert_comment_block feature_funs(make)
+  # @codedoc_comment_block feature(make)
+
+  # @codedoc_comment_block specification(var_set_dt$maker)
+  # The recommended approach to writing a `maker` for a variable set is to
+  # write a function and store a call to it as the `maker`. See the example
+  # for the `make` feature:
+  # 
+  # ```
+  # @codedoc_insert_comment_block feature_example(make)
+  # ```
+  #
+  # @codedoc_comment_block specification(var_set_dt$maker)
+
+  # @codedoc_comment_block feature_example(make)
+  # # Example of make feature
+  # make_dg_y <- function(
+  #   dg_date
+  # ) {
+  #   out <- data.table::data.table(dg_y = data.table::year(dg_date))
+  #   return(out[])
+  # }
+  # # We do not store `my_fun` here directly because if a `VariableMetadata`
+  # # object is written to disk, the entire enclosing env of `my_fun` is
+  # # included. This can get very messy when it is read back into R.
+  # # It is strongly recommended to store quoted expressions instead
+  # # and store any functions you write somewhere else, ideally in an R package.
+  # my_vame <- vame::VariableMetadata(
+  #   var_dt = data.table::data.table(
+  #     var_nm = c("dg_y", "dg_date", "area_01", "area_02", "area_03"),
+  #     type = c("year", "date", "categorical", "categorical", "categorical")
+  #   ),
+  #   var_set_dt = data.table::data.table(
+  #     id = c("dg_y", "dg_date", "area", "area_01", "area_02"),
+  #     var_nm_set = list(
+  #       dg_y = "dg_y",
+  #       dg_date = "dg_date",
+  #       area = c("area_01", "area_02", "area_03"),
+  #       area_01 = "area_01",
+  #       area_02 = "area_02"
+  #     ),
+  #     maker = list(
+  #       dg_y = list(
+  #         maker = quote(make_dg_y(dg_date = dg_date)),
+  #         dep_var_nms = "dg_date"
+  #       ),
+  #       dg_date = NULL,
+  #       area = NULL,
+  #       area_01 = list(
+  #         maker = quote({
+  #           # This is an example of re-using data from the `VariableMetadata`
+  #           # object itself. 
+  #           vm <- vame::self()
+  #           dt <- data.table::setDT(list(
+  #             x = vm@var_aggregate(
+  #               get(dep_var_nms),
+  #               from_var_nm = dep_var_nms,
+  #               to_var_nm = var_nms
+  #             )
+  #           ))
+  #           data.table::setnames(dt, "x", var_nms)
+  #           dt[]
+  #         }),
+  #         dep_var_nms = "area_02"
+  #       ),
+  #       # This example uses the shorthand var_aggregate approach.
+  #       area_02 = list(maker = "var_aggregate", dep_var_nms = "area_03")
+  #     ),
+  #     value_space = list(
+  #       dg_y = list(set = 1953:2024),
+  #       dg_date = list(bounds = list(
+  #         lo = as.Date("1953-01-01"),
+  #         hi = as.Date("2024-12-31"),
+  #         lo_inclusive = TRUE,
+  #         hi_inclusive = TRUE
+  #       )),
+  #       area = list(dt = data.table::data.table(
+  #         area_01 = c(1L,1L,1L,2L,2L,2L),
+  #         area_02 = c(11L,12L,12L,21L,21L,22L),
+  #         area_03 = c(111L,121L,122L,211L,212L,221L)
+  #       )),
+  #       area_01 = NULL,
+  #       area_02 = NULL
+  #     )
+  #   )
+  # )
+  # obs <- my_vame@var_set_make(
+  #   id = "dg_y",
+  #   data = data.table::data.table(dg_date = as.Date("2001-01-01"))
+  # )
+  # exp <- data.table::data.table(dg_y = 2001L)
+  # stopifnot(identical(obs[["dg_y"]], exp[["dg_y"]]))
+
+  # obs <- my_vame@var_set_make(
+  #   id = "area_01",
+  #   data = data.table::data.table(area_02 = c(11L, 21L))
+  # )
+  # exp <- data.table::data.table(area_01 = c(1L,2L))
+  # stopifnot(identical(obs[["area_01"]], exp[["area_01"]]))
+
+  # obs <- my_vame@var_set_make(
+  #   id = "area_02",
+  #   data = data.table::data.table(area_03 = c(111L, 211L))
+  # )
+  # exp <- data.table::data.table(area_02 = c(11L,21L))
+  # stopifnot(identical(obs[["area_02"]], exp[["area_02"]]))
+
+  # obs <- my_vame@vame_make(
+  #   ids = c("dg_y", "area_02", "area_01"),
+  #   data = data.table::data.table(
+  #     dg_date = as.Date("2001-01-01"),
+  #     area_03 = c(111L,121L,122L,211L,212L,221L)
+  #   )
+  # )
+  # exp <- data.table::data.table(
+  #   dg_y = 2001L,
+  #   area_02 = my_vame@var_aggregate(
+  #     c(111L,121L,122L,211L,212L,221L),
+  #     from_var_nm = "area_03",
+  #     to_var_nm = "area_02"
+  #   )
+  # )
+  # exp[
+  #   j = "area_01" := my_vame@var_aggregate(
+  #     exp[["area_02"]],
+  #     from_var_nm = "area_02",
+  #     to_var_nm = "area_01"
+  #   )
+  # ]
+  # stopifnot(
+  #   identical(obs[["dg_y"]], exp[["dg_y"]]),
+  #   identical(obs[["area_01"]], exp[["area_01"]]),
+  #   identical(obs[["area_02"]], exp[["area_02"]])
+  # ) 
+  # @codedoc_comment_block feature_example(make)
+  dbc::assert_inherits(data, required_class = "data.frame")
+  dbc::assert_has_one_of_classes(env, classes = c("NULL", "environment"))
+  if (is.null(env)) {
+    env <- parent.frame(1L)
+  }
+  maker <- var_set_maker_get(vm = vm, id = id)
+  var_nms <- var_set_var_nm_set_get(vm = vm, id = id)
+  if (is.function(maker)) {
+    dbc::assert_has_names(data, required_names = names(formals(maker)))
+    arg_list <- data
+    dt <- do.call(maker, arg_list, quote = TRUE)
+  } else if (inherits(maker, "list")) {
+    dbc::assert_has_names(data, required_names = maker[["dep_var_nms"]])
+    make_env <- new.env(parent = env)
+    make_env[["var_nms"]] <- var_nms
+    make_env[["dep_var_nms"]] <- maker[["dep_var_nms"]]
+    lapply(names(data), function(obj_nm) {
+      make_env[[obj_nm]] <- data[[obj_nm]]
+    })
+    if (identical(maker[["maker"]], "var_aggregate")) {
+      maker_call <- quote({
+        vm <- vame::self()
+        dt <- data.table::setDT(list(
+          x = vm@var_aggregate(
+            get(dep_var_nms),
+            from_var_nm = dep_var_nms,
+            to_var_nm = var_nms
+          )
+        ))
+        data.table::setnames(dt, "x", var_nms)
+        dt[]
+      })
+    } else if (is.call(maker[["maker"]])) {
+      maker_call <- maker[["maker"]]
+    } else {
+      stop("No logic defined for situation where element `maker` is not ",
+           "a `function`, a `call` object, nor \"var_aggregate\".")
+    }
+    dt <- eval(maker_call, envir = make_env)
+  } else {
+    stop("Internal error: invaild var_set_dt$maker for id = ", deparse1(id))
+  }
+  
+  dbc::assert_prod_output_is_data_table(dt)
+  dbc::assert_prod_output_has_names(dt, required_names = var_nms)
+  return(dt[])
+}
+
+vame_make <- function(
+  vm,
+  ids,
+  data,
+  env = NULL
+) {
+  # @codedoc_comment_block vm@vame_make
+  # Call multiple `var_set_dt$maker`s in sequence.
+  # @codedoc_comment_block vm@vame_make
+  # @codedoc_comment_block feature_funs(make)
+  # - `vm@vame_make`
+  # @codedoc_comment_block feature_funs(make)
+  dbc::assert_inherits(data, required_class = "data.frame")
+  dbc::assert_has_one_of_classes(env, classes = c("NULL", "environment"))
+  if (is.null(env)) {
+    env <- parent.frame(1L)
+  }
+  dt <- dt_independent_frame_dependent_contents__(data)
+  lapply(ids, function(id) {
+    # this called just in case some make expression makes use of a slot function
+    # --- see where the slots are created.
+    self_set__(vm = vm)
+    out <- var_set_make(vm = vm, id = id, data = dt, env = env)
+    data.table::set(
+      x = dt,
+      j = names(out),
+      value = out
+    )
+    NULL
+  })
+  data.table::set(dt, j = names(data), value = NULL)
+  return(dt[])
+}
 
 # var_set_value_space funs -----------------------------------------------------
 var_set_value_space_eval <- function(
@@ -234,9 +502,9 @@ var_set_value_space_eval <- function(
   # @codedoc_comment_block vm@var_set_value_space_eval
   # Retrieve and evaluate value space for a variable set given its `id`.
   # @codedoc_comment_block vm@var_set_value_space_eval
-  # @codedoc_comment_block feature_funs(VariableMetadata, value spaces)
+  # @codedoc_comment_block feature_funs(value spaces)
   # - `vm@var_set_value_space_eval`
-  # @codedoc_comment_block feature_funs(VariableMetadata, value spaces)
+  # @codedoc_comment_block feature_funs(value spaces)
 
   # @codedoc_comment_block news("vm@var_set_value_space_eval", "2023-07-03", "0.1.1")
   # New slot `vm@var_set_value_space_eval`.
@@ -251,7 +519,7 @@ var_set_value_space_eval <- function(
   # the variables in the set.
   # @codedoc_comment_block news("vm@var_set_value_space_eval", "2023-11-29", "0.1.9")
 
-  # @codedoc_comment_block feature(VariableMetadata, value spaces)
+  # @codedoc_comment_block feature(value spaces)
   # The value spaces feature allows you to define what values (combinations of)
   # variables can have. This information can then be retrieved from one single
   # place (the `VariableMetadata` object) for use elsewhere, e.g. for computing
@@ -264,8 +532,8 @@ var_set_value_space_eval <- function(
   # @codedoc_insert_comment_block specification(var_set_dt$value_space)
   #
   # The following functions are related to this feature:
-  # @codedoc_insert_comment_block feature_funs(VariableMetadata, value spaces)
-  # @codedoc_comment_block feature(VariableMetadata, value spaces)
+  # @codedoc_insert_comment_block feature_funs(value spaces)
+  # @codedoc_comment_block feature(value spaces)
 
   dbc::assert_inherits(vm, required_class = "VariableMetadata")
 
@@ -362,9 +630,9 @@ var_set_value_space_get <- function(
   # @codedoc_comment_block vm@var_set_value_space_get
   # Get the value space of a specific variable set without evaluting it.
   # @codedoc_comment_block vm@var_set_value_space_get
-  # @codedoc_comment_block feature_funs(VariableMetadata, value spaces)
+  # @codedoc_comment_block feature_funs(value spaces)
   # - `vm@var_set_value_space_get`
-  # @codedoc_comment_block feature_funs(VariableMetadata, value spaces)
+  # @codedoc_comment_block feature_funs(value spaces)
   assert_is_var_set_id(vm, id)
   assert_var_set_value_space_is_defined(vm)
   vsd <- vsd_get(vm)
@@ -381,9 +649,9 @@ var_set_value_space_set <- function(
   # @codedoc_comment_block vm@var_set_value_space_set
   # Set the value space of a specific variable set.
   # @codedoc_comment_block vm@var_set_value_space_set
-  # @codedoc_comment_block feature_funs(VariableMetadata, value spaces)
+  # @codedoc_comment_block feature_funs(value spaces)
   # - `vm@var_set_value_space_set`
-  # @codedoc_comment_block feature_funs(VariableMetadata, value spaces)
+  # @codedoc_comment_block feature_funs(value spaces)
   assert_var_set_value_space_is_defined(vm)
   vsd <- vsd_get(vm)
   pos <- var_set_id_to_pos(vm, id)
@@ -411,9 +679,9 @@ var_set_value_space_dt_subset <- function(
   # @codedoc_comment_block vm@var_set_value_space_dt_subset
   # Take a subset of a value space dt for a variable set and set that as the value space.
   # @codedoc_comment_block vm@var_set_value_space_dt_subset
-  # @codedoc_comment_block feature_funs(VariableMetadata, value spaces)
+  # @codedoc_comment_block feature_funs(value spaces)
   # - `vm@var_set_value_space_dt_subset`
-  # @codedoc_comment_block feature_funs(VariableMetadata, value spaces)
+  # @codedoc_comment_block feature_funs(value spaces)
   assert_var_set_value_space_is_defined(vm)
   assert_is_var_set_id(vm, id)
   # @codedoc_comment_block param_expr
@@ -433,9 +701,9 @@ var_set_value_space_sampler_get <- function(
   # @codedoc_comment_block vm@var_set_value_space_sampler_get
   # Retrieve value space sampler for given `id` from `var_set_dt$sampler`.
   # @codedoc_comment_block vm@var_set_value_space_sampler_get
-  # @codedoc_comment_block feature_funs(VariableMetadata, random sampling)
+  # @codedoc_comment_block feature_funs(random sampling)
   # - `vm@var_set_value_space_sampler_get`
-  # @codedoc_comment_block feature_funs(VariableMetadata, random sampling)
+  # @codedoc_comment_block feature_funs(random sampling)
   # @codedoc_comment_block news("vm@var_set_value_space_sampler_get", "2023-12-12", "0.2.2")
   # New slot function `var_set_value_space_sampler_get`.
   # @codedoc_comment_block news("vm@var_set_value_space_sampler_get", "2023-12-12", "0.2.2")
@@ -455,9 +723,9 @@ var_set_value_space_sampler_set <- function(
   # See the documentation for `var_set_value_space_sample` to understand how
   # the `sampler` object is used.
   # @codedoc_comment_block vm@var_set_value_space_sampler_set
-  # @codedoc_comment_block feature_funs(VariableMetadata, random sampling)
+  # @codedoc_comment_block feature_funs(random sampling)
   # - `vm@var_set_value_space_sampler_set`
-  # @codedoc_comment_block feature_funs(VariableMetadata, random sampling)
+  # @codedoc_comment_block feature_funs(random sampling)
   # @codedoc_comment_block news("vm@var_set_value_space_sampler_set", "2023-12-12", "0.2.2")
   # New slot function `var_set_value_space_sampler_set`.
   # @codedoc_comment_block news("vm@var_set_value_space_sampler_set", "2023-12-12", "0.2.2")
@@ -482,19 +750,19 @@ var_set_value_space_sample <- function(
   # New slot function `var_set_value_space_sample`.
   # @codedoc_comment_block news("vm@var_set_value_space_sample", "2023-12-11", "0.2.2")
 
-  # @codedoc_comment_block feature_funs(VariableMetadata, random sampling)
+  # @codedoc_comment_block feature_funs(random sampling)
   # - `vm@var_set_value_space_sample`
-  # @codedoc_comment_block feature_funs(VariableMetadata, random sampling)
+  # @codedoc_comment_block feature_funs(random sampling)
 
-  # @codedoc_comment_block feature(VariableMetadata, random sampling)
+  # @codedoc_comment_block feature(random sampling)
   # The random sampling feature is available when the value spaces feature
   # is available.
   # 
   # @codedoc_insert_comment_block feature_process(random sampling)
   #
   # The following functions are related to this feature:
-  # @codedoc_insert_comment_block feature_funs(VariableMetadata, random sampling)
-  # @codedoc_comment_block feature(VariableMetadata, random sampling)
+  # @codedoc_insert_comment_block feature_funs(random sampling)
+  # @codedoc_comment_block feature(random sampling)
 
   assert_is_var_set_id(vm, id)
   dbc::assert_is_one_of(
@@ -585,9 +853,9 @@ var_is_aggregateable_to <- function(
   # @codedoc_comment_block vm@var_is_aggregateable_to
   # Returns `TRUE` if `from_var_nm` can be aggregated into `to_var_nm`.
   # @codedoc_comment_block vm@var_is_aggregateable_to
-  # @codedoc_comment_block feature_funs(VariableMetadata, category spaces)
+  # @codedoc_comment_block feature_funs(category spaces)
   # - `vm@var_is_aggregateable_to`
-  # @codedoc_comment_block feature_funs(VariableMetadata, category spaces)
+  # @codedoc_comment_block feature_funs(category spaces)
 
   # @codedoc_comment_block news("vm@var_is_aggregateable_to", "2023-07-10", "0.1.3")
   # New slot `var_is_aggregateable_to`.
@@ -623,9 +891,9 @@ var_aggregate <- function(
   # @codedoc_comment_block vm@var_aggregate
   # Returns correspoding level of `to_var_nm` for each value in `x`.
   # @codedoc_comment_block vm@var_aggregate
-  # @codedoc_comment_block feature_funs(VariableMetadata, category spaces)
+  # @codedoc_comment_block feature_funs(category spaces)
   # - `vm@var_aggregate`
-  # @codedoc_comment_block feature_funs(VariableMetadata, category spaces)
+  # @codedoc_comment_block feature_funs(category spaces)
 
   # @codedoc_comment_block news("vm@var_aggregate", "2023-07-10", "0.1.3")
   # New slot `var_aggregate`.
@@ -668,9 +936,9 @@ var_value_space_eval <- function(
   var_nm,
   env = NULL
 ) {
-  # @codedoc_comment_block feature_funs(VariableMetadata, value spaces)
+  # @codedoc_comment_block feature_funs(value spaces)
   # - `vm@var_value_space_eval`
-  # @codedoc_comment_block feature_funs(VariableMetadata, value spaces)
+  # @codedoc_comment_block feature_funs(value spaces)
 
   # @codedoc_comment_block news("vm@var_value_space_eval", "2023-07-03", "0.1.1")
   # New slot `vm@var_value_space_eval`.
@@ -697,7 +965,7 @@ var_value_space_eval <- function(
   # for only the variable of interest, that is used. Otherwise:
   # @codedoc_comment_block vm@var_value_space_eval
   pos_set <- var_meta_get(vm, var_nm = var_nm, meta_nm = "var_set_dt_pos_set")
-  vsd <- var_set_meta_get_all(vm, meta_nm = c("id", "var_nm_set", "value_space"))
+  vsd <- vsd_get(vm, var_nms = c("id", "var_nm_set", "value_space"))
   pos_set <- pos_set[
     !vapply(vsd[["value_space"]][pos_set], is.null, logical(1L))
   ]
@@ -780,9 +1048,9 @@ var_assert <- function(
   # @codedoc_comment_block vm@var_assert
   # Assert that values in `x` are proper values of `var_nm`.
   # @codedoc_comment_block vm@var_assert
-  # @codedoc_comment_block feature_funs(VariableMetadata, assertions)
+  # @codedoc_comment_block feature_funs(assertions)
   # - `vm@var_assert`
-  # @codedoc_comment_block feature_funs(VariableMetadata, assertions)
+  # @codedoc_comment_block feature_funs(assertions)
 
   # @codedoc_comment_block news("vm@var_assert", "2023-07-03", "0.1.1")
   # Fixed `var_assert` handling of a value space based on `bounds`.
@@ -791,14 +1059,14 @@ var_assert <- function(
   # Added arguments `x_nm`, `call`.
   # @codedoc_comment_block news("vm@var_assert", "2023-07-04", "0.1.2")
 
-  # @codedoc_comment_block feature(VariableMetadata, assertions)
+  # @codedoc_comment_block feature(assertions)
   # The assertions feature allows you to check that variables look like what
   # you expect. This feature relies on the value spaces feature --- see that
   # for more information.
   #
   # The following functions are related to this feature:
-  # @codedoc_insert_comment_block feature_funs(VariableMetadata, assertions)
-  # @codedoc_comment_block feature(VariableMetadata, assertions)
+  # @codedoc_insert_comment_block feature_funs(assertions)
+  # @codedoc_comment_block feature(assertions)
 
   # @codedoc_comment_block param_x_nm
   # @param x_nm `[NULL, character]` (default `NULL`)
@@ -1050,9 +1318,9 @@ var_labeler_get <- function(
   # @codedoc_comment_block vm@var_labeler_get
   # Get the labeler for a variable.
   # @codedoc_comment_block vm@var_labeler_get
-  # @codedoc_comment_block feature_funs(VariableMetadata, labeling)
+  # @codedoc_comment_block feature_funs(labeling)
   # - `vm@var_labeler_get`
-  # @codedoc_comment_block feature_funs(VariableMetadata, labeling)
+  # @codedoc_comment_block feature_funs(labeling)
   assert_is_var_nm(vm, var_nm)
   out <- var_meta_get(vm, var_nm, "labeler")
   if (is.null(out)) {
@@ -1069,9 +1337,9 @@ var_labeler_set <- function(
   # @codedoc_comment_block vm@var_labeler_get
   # Set the labeler for a variable.
   # @codedoc_comment_block vm@var_labeler_get
-  # @codedoc_comment_block feature_funs(VariableMetadata, labeling)
+  # @codedoc_comment_block feature_funs(labeling)
   # - `vm@var_labeler_set`
-  # @codedoc_comment_block feature_funs(VariableMetadata, labeling)
+  # @codedoc_comment_block feature_funs(labeling)
   assert_is_var_nm(vm, var_nm)
   assert_is_labeler(value)
   var_meta_set(vm, var_nm, "labeler", value)
@@ -1088,7 +1356,7 @@ var_labels_get <- function(
   # Get label for each value in `x` for `var_nm`.
   # @codedoc_comment_block vm@var_labels_get
   
-  # @codedoc_comment_block feature(VariableMetadata, labeling)
+  # @codedoc_comment_block feature(labeling)
   # The labeling feature becomes available if
   # the `var_dt` of a `VariableMetadata` object has a `labeler` column value
   # for a variable. You can include `labeler` in `var_dt` when the
@@ -1097,11 +1365,11 @@ var_labels_get <- function(
   # @codedoc_insert_comment_block specification(var_dt$labeler)
   #
   # The following functions are related to this feature:
-  # @codedoc_insert_comment_block feature_funs(VariableMetadata, labeling)
-  # @codedoc_comment_block feature(VariableMetadata, labeling)
-  # @codedoc_comment_block feature_funs(VariableMetadata, labeling)
+  # @codedoc_insert_comment_block feature_funs(labeling)
+  # @codedoc_comment_block feature(labeling)
+  # @codedoc_comment_block feature_funs(labeling)
   # - `vm@var_labels_get`
-  # @codedoc_comment_block feature_funs(VariableMetadata, labeling)
+  # @codedoc_comment_block feature_funs(labeling)
   assert_is_var_nm(vm, var_nm)
   labeler <- var_labeler_get(vm, var_nm = var_nm)
   
@@ -1208,9 +1476,9 @@ var_value_space_sample <- function(
   # New function `vm@var_value_space_sample`.
   # @codedoc_comment_block news("vm@var_value_space_sample", "2023-12-12", "0.2.2")
 
-  # @codedoc_comment_block feature_funs(VariableMetadata, random sampling)
+  # @codedoc_comment_block feature_funs(random sampling)
   # - `vm@var_value_space_sample`
-  # @codedoc_comment_block feature_funs(VariableMetadata, random sampling)
+  # @codedoc_comment_block feature_funs(random sampling)
   id <- var_to_var_set_id(vm = vm, var_nm = var_nm)
   out <- var_set_value_space_sample(
     vm = vm,
@@ -1416,9 +1684,9 @@ vame_value_space_sampler_get <- function(
   # New function `vm@vame_value_space_sampler_get`.
   # @codedoc_comment_block news("vm@vame_value_space_sampler_get", "2023-12-12", "0.2.2")
 
-  # @codedoc_comment_block feature_funs(VariableMetadata, random sampling)
+  # @codedoc_comment_block feature_funs(random sampling)
   # - `vm@vame_value_space_sampler_get`
-  # @codedoc_comment_block feature_funs(VariableMetadata, random sampling)
+  # @codedoc_comment_block feature_funs(random sampling)
   out <- vame_meta_get(vm = vm, meta_nm = "sampler")
   assert_is_sampler(out, assertion_type = "prod_output")
   return(out)
@@ -1440,9 +1708,9 @@ vame_value_space_sampler_set <- function(
   # New function `vm@vame_value_space_sampler_set`.
   # @codedoc_comment_block news("vm@vame_value_space_sampler_set", "2023-12-12", "0.2.2")
 
-  # @codedoc_comment_block feature_funs(VariableMetadata, random sampling)
+  # @codedoc_comment_block feature_funs(random sampling)
   # - `vm@vame_value_space_sampler_set`
-  # @codedoc_comment_block feature_funs(VariableMetadata, random sampling)
+  # @codedoc_comment_block feature_funs(random sampling)
   assert_is_sampler(value, assertion_type = "input")
   vame_meta_set(vm = vm, meta_nm = "sampler", value = value)
 }
@@ -1456,9 +1724,9 @@ vame_value_space_sample <- function(
   # New function `vm@var_set_meta_is_defined`.
   # @codedoc_comment_block news("vm@vame_value_space_sample", "2023-12-12", "0.2.2")
 
-  # @codedoc_comment_block feature_funs(VariableMetadata, random sampling)
+  # @codedoc_comment_block feature_funs(random sampling)
   # - `vm@vame_value_space_sample`
-  # @codedoc_comment_block feature_funs(VariableMetadata, random sampling)
+  # @codedoc_comment_block feature_funs(random sampling)
   dbc::assert_is_one_of(
     var_nms,
     funs = list(dbc::report_is_NULL,
@@ -1536,9 +1804,9 @@ vame_value_space_sample_default <- function(
   # New function `vm@vame_value_space_sample_default`.
   # @codedoc_comment_block news("vm@vame_value_space_sample_default", "2023-12-12", "0.2.2")
 
-  # @codedoc_comment_block feature_funs(VariableMetadata, random sampling)
+  # @codedoc_comment_block feature_funs(random sampling)
   # - `vm@vame_value_space_sample_default`
-  # @codedoc_comment_block feature_funs(VariableMetadata, random sampling)
+  # @codedoc_comment_block feature_funs(random sampling)
   dbc::assert_is_one_of(
     var_nms,
     funs = list(dbc::report_is_NULL,
@@ -1621,9 +1889,9 @@ vame_category_space_dt_list <- function(
   # @codedoc_comment_block vm@vame_category_space_dt_list
   # Get list of category space `data.table` objects.
   # @codedoc_comment_block vm@vame_category_space_dt_list
-  # @codedoc_comment_block feature_funs(VariableMetadata, category spaces)
+  # @codedoc_comment_block feature_funs(category spaces)
   # - `vm@vame_category_space_dt_list`
-  # @codedoc_comment_block feature_funs(VariableMetadata, category spaces)
+  # @codedoc_comment_block feature_funs(category spaces)
   dbc::assert_is_one_of(
     env,
     funs = list(dbc::report_is_NULL,
@@ -1638,10 +1906,9 @@ vame_category_space_dt_list <- function(
     var_nms,
     set = vd[["var_nm"]][is_categorical]
   )
-  vsd <- vsd_get(vm, c("id", "var_nm_set", "value_space"))
   dtl <- category_space_dt_list__(
+    vm = vm,
     var_nms = var_nms,
-    vsd = vsd,
     env = env
   )
   return(dtl)
@@ -1657,7 +1924,7 @@ vame_category_space_dt <- function(
   # Get a category space `data.table`.
   # @codedoc_comment_block vm@vame_category_space_dt
   
-  # @codedoc_comment_block feature(VariableMetadata, category spaces)
+  # @codedoc_comment_block feature(category spaces)
   # The category spaces feature becomes available when the value spaces feature
   # is available and when
   # the `var_dt` of a `VariableMetadata` object has a `type` column, with
@@ -1672,13 +1939,13 @@ vame_category_space_dt <- function(
   # for that feature for more information.
   #
   # The following functions are part of this feature:
-  # @codedoc_insert_comment_block feature_funs(VariableMetadata, category spaces)
+  # @codedoc_insert_comment_block feature_funs(category spaces)
   # 
-  # @codedoc_comment_block feature(VariableMetadata, category spaces)
+  # @codedoc_comment_block feature(category spaces)
   
-  # @codedoc_comment_block feature_funs(VariableMetadata, category spaces)
+  # @codedoc_comment_block feature_funs(category spaces)
   # - `vm@vame_category_space_dt`
-  # @codedoc_comment_block feature_funs(VariableMetadata, category spaces)
+  # @codedoc_comment_block feature_funs(category spaces)
   if (is.null(env)) {
     env <- parent.frame(1L)
   }

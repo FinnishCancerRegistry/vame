@@ -210,6 +210,84 @@ Remove a variable set by \code{id}.
 ID, or "name", of a variable set. The class of \code{id} is defined when you
 create the \code{VariableMetadata} object and it can be pretty much anything.}
 
+\item{\code{var_set_maker_get}}{\emph{Description}
+
+Get specific \code{var_set_dt$maker}.
+
+\emph{Usage}
+
+\code{vm@var_set_maker_get(id)}
+
+\emph{Arguments}
+
+\code{id} \verb{[any]} (no default)
+
+ID, or "name", of a variable set. The class of \code{id} is defined when you
+create the \code{VariableMetadata} object and it can be pretty much anything.}
+
+\item{\code{var_set_maker_set}}{\emph{Description}
+
+Assign specific \code{var_set_dt$maker}.
+
+\emph{Usage}
+
+\code{vm@var_set_maker_set(id, value)}
+
+\emph{Arguments}
+
+\code{id} \verb{[any]} (no default)
+
+ID, or "name", of a variable set. The class of \code{id} is defined when you
+create the \code{VariableMetadata} object and it can be pretty much anything.
+
+\code{value} \verb{[any]} (no default)
+
+In \verb{_set} functions the \code{value} to set for the specified metadata.}
+
+\item{\code{var_set_make}}{\emph{Description}
+
+Call specific \code{var_set_dt$maker}.
+
+\emph{Usage}
+
+\code{vm@var_set_make(id, data, env)}
+
+\emph{Arguments}
+
+\code{id} \verb{[any]} (no default)
+
+ID, or "name", of a variable set. The class of \code{id} is defined when you
+create the \code{VariableMetadata} object and it can be pretty much anything.
+
+TODO: document argument data
+\code{env} \verb{[NULL, }env\verb{ironment]} (default \code{NULL})
+
+Environment where a value space will be evaluated, if applicable.
+\itemize{
+\item \code{NULL}: Use the \code{env}ironment where the function was called.
+\item \code{env}ironment\verb{: Use this }env`ironment.
+}}
+
+\item{\code{vame_make}}{\emph{Description}
+
+Call multiple \code{var_set_dt$maker}s in sequence.
+
+\emph{Usage}
+
+\code{vm@vame_make(ids, data, env)}
+
+\emph{Arguments}
+
+TODO: document argument ids
+TODO: document argument data
+\code{env} \verb{[NULL, }env\verb{ironment]} (default \code{NULL})
+
+Environment where a value space will be evaluated, if applicable.
+\itemize{
+\item \code{NULL}: Use the \code{env}ironment where the function was called.
+\item \code{env}ironment\verb{: Use this }env`ironment.
+}}
+
 \item{\code{var_set_value_space_eval}}{\emph{Description}
 
 Retrieve and evaluate value space for a variable set given its \code{id}.
@@ -987,6 +1065,158 @@ Environment where a value space will be evaluated, if applicable.
 
 \section{Features}{
 
+\strong{Make}
+
+The make feature allows for making variable sets based on other variable
+sets. For instance, a year column might be "made" based on a data column,
+say \code{start_year} from \code{start_date}. This feature becomes available
+when one or more \code{var_set_dt$maker} objects have been defined:
+
+The \code{maker} can be \code{NULL}, a \code{function}, or a \code{list}. A \code{NULL} \code{maker}
+object is considered to mean that one has not been defined.
+A \code{maker} of type \code{function} must have as arguments the invididual
+required variables. Currently this is not checked in any way.
+A \code{maker} of type \code{list} can be of two kinds. The first kind has named
+elements \code{maker} of class \code{call} and
+\code{dep_var_nms} of class \code{character}, e.g.
+\code{list(maker = quote(make(x, y)), dep_var_nms = c("x", "y"))}.
+The second kind is otherwise the same, but \code{maker} must be string
+\code{"var_aggregate"}, and \code{dep_var_nms} must be of length one. This second
+kind is a shorthand for cases where one variable can be created simply
+by aggregating another with \code{vm@var_aggregate}.
+The recommended approach to writing a \code{maker} for a variable set is to
+write a function and store a call to it as the \code{maker}. See the example
+for the \code{make} feature:
+
+\if{html}{\out{<div class="sourceCode">}}\preformatted{# Example of make feature
+make_dg_y <- function(
+  dg_date
+) \{
+  out <- data.table::data.table(dg_y = data.table::year(dg_date))
+  return(out[])
+\}
+# We do not store `my_fun` here directly because if a `VariableMetadata`
+# object is written to disk, the entire enclosing env of `my_fun` is
+# included. This can get very messy when it is read back into R.
+# It is strongly recommended to store quoted expressions instead
+# and store any functions you write somewhere else, ideally in an R package.
+my_vame <- vame::VariableMetadata(
+  var_dt = data.table::data.table(
+    var_nm = c("dg_y", "dg_date", "area_01", "area_02", "area_03"),
+    type = c("year", "date", "categorical", "categorical", "categorical")
+  ),
+  var_set_dt = data.table::data.table(
+    id = c("dg_y", "dg_date", "area", "area_01", "area_02"),
+    var_nm_set = list(
+      dg_y = "dg_y",
+      dg_date = "dg_date",
+      area = c("area_01", "area_02", "area_03"),
+      area_01 = "area_01",
+      area_02 = "area_02"
+    ),
+    maker = list(
+      dg_y = list(
+        maker = quote(make_dg_y(dg_date = dg_date)),
+        dep_var_nms = "dg_date"
+      ),
+      dg_date = NULL,
+      area = NULL,
+      area_01 = list(
+        maker = quote(\{
+          # This is an example of re-using data from the `VariableMetadata`
+          # object itself. 
+          vm <- vame::self()
+          dt <- data.table::setDT(list(
+            x = vm@var_aggregate(
+              get(dep_var_nms),
+              from_var_nm = dep_var_nms,
+              to_var_nm = var_nms
+            )
+          ))
+          data.table::setnames(dt, "x", var_nms)
+          dt[]
+        \}),
+        dep_var_nms = "area_02"
+      ),
+      # This example uses the shorthand var_aggregate approach.
+      area_02 = list(maker = "var_aggregate", dep_var_nms = "area_03")
+    ),
+    value_space = list(
+      dg_y = list(set = 1953:2024),
+      dg_date = list(bounds = list(
+        lo = as.Date("1953-01-01"),
+        hi = as.Date("2024-12-31"),
+        lo_inclusive = TRUE,
+        hi_inclusive = TRUE
+      )),
+      area = list(dt = data.table::data.table(
+        area_01 = c(1L,1L,1L,2L,2L,2L),
+        area_02 = c(11L,12L,12L,21L,21L,22L),
+        area_03 = c(111L,121L,122L,211L,212L,221L)
+      )),
+      area_01 = NULL,
+      area_02 = NULL
+    )
+  )
+)
+obs <- my_vame@var_set_make(
+  id = "dg_y",
+  data = data.table::data.table(dg_date = as.Date("2001-01-01"))
+)
+exp <- data.table::data.table(dg_y = 2001L)
+stopifnot(identical(obs[["dg_y"]], exp[["dg_y"]]))
+
+obs <- my_vame@var_set_make(
+  id = "area_01",
+  data = data.table::data.table(area_02 = c(11L, 21L))
+)
+exp <- data.table::data.table(area_01 = c(1L,2L))
+stopifnot(identical(obs[["area_01"]], exp[["area_01"]]))
+
+obs <- my_vame@var_set_make(
+  id = "area_02",
+  data = data.table::data.table(area_03 = c(111L, 211L))
+)
+exp <- data.table::data.table(area_02 = c(11L,21L))
+stopifnot(identical(obs[["area_02"]], exp[["area_02"]]))
+
+obs <- my_vame@vame_make(
+  ids = c("dg_y", "area_02", "area_01"),
+  data = data.table::data.table(
+    dg_date = as.Date("2001-01-01"),
+    area_03 = c(111L,121L,122L,211L,212L,221L)
+  )
+)
+exp <- data.table::data.table(
+  dg_y = 2001L,
+  area_02 = my_vame@var_aggregate(
+    c(111L,121L,122L,211L,212L,221L),
+    from_var_nm = "area_03",
+    to_var_nm = "area_02"
+  )
+)
+exp[
+  j = "area_01" := my_vame@var_aggregate(
+    exp[["area_02"]],
+    from_var_nm = "area_02",
+    to_var_nm = "area_01"
+  )
+]
+stopifnot(
+  identical(obs[["dg_y"]], exp[["dg_y"]]),
+  identical(obs[["area_01"]], exp[["area_01"]]),
+  identical(obs[["area_02"]], exp[["area_02"]])
+) 
+}\if{html}{\out{</div>}}
+
+The following functions are related to this feature:
+\itemize{
+\item \code{vm@var_set_maker_get}
+\item \code{vm@var_set_maker_set}
+\item \code{vm@var_set_make}
+\item \code{vm@vame_make}
+}
+
 \strong{Value spaces}
 
 The value spaces feature allows you to define what values (combinations of)
@@ -1727,4 +1957,123 @@ stopifnot(
   vame_sample[["c"]] < vame_sample[["a"]]
 )
 
+# Example of make feature
+make_dg_y <- function(
+  dg_date
+) {
+  out <- data.table::data.table(dg_y = data.table::year(dg_date))
+  return(out[])
+}
+# We do not store `my_fun` here directly because if a `VariableMetadata`
+# object is written to disk, the entire enclosing env of `my_fun` is
+# included. This can get very messy when it is read back into R.
+# It is strongly recommended to store quoted expressions instead
+# and store any functions you write somewhere else, ideally in an R package.
+my_vame <- vame::VariableMetadata(
+  var_dt = data.table::data.table(
+    var_nm = c("dg_y", "dg_date", "area_01", "area_02", "area_03"),
+    type = c("year", "date", "categorical", "categorical", "categorical")
+  ),
+  var_set_dt = data.table::data.table(
+    id = c("dg_y", "dg_date", "area", "area_01", "area_02"),
+    var_nm_set = list(
+      dg_y = "dg_y",
+      dg_date = "dg_date",
+      area = c("area_01", "area_02", "area_03"),
+      area_01 = "area_01",
+      area_02 = "area_02"
+    ),
+    maker = list(
+      dg_y = list(
+        maker = quote(make_dg_y(dg_date = dg_date)),
+        dep_var_nms = "dg_date"
+      ),
+      dg_date = NULL,
+      area = NULL,
+      area_01 = list(
+        maker = quote({
+          # This is an example of re-using data from the `VariableMetadata`
+          # object itself. 
+          vm <- vame::self()
+          dt <- data.table::setDT(list(
+            x = vm@var_aggregate(
+              get(dep_var_nms),
+              from_var_nm = dep_var_nms,
+              to_var_nm = var_nms
+            )
+          ))
+          data.table::setnames(dt, "x", var_nms)
+          dt[]
+        }),
+        dep_var_nms = "area_02"
+      ),
+      # This example uses the shorthand var_aggregate approach.
+      area_02 = list(maker = "var_aggregate", dep_var_nms = "area_03")
+    ),
+    value_space = list(
+      dg_y = list(set = 1953:2024),
+      dg_date = list(bounds = list(
+        lo = as.Date("1953-01-01"),
+        hi = as.Date("2024-12-31"),
+        lo_inclusive = TRUE,
+        hi_inclusive = TRUE
+      )),
+      area = list(dt = data.table::data.table(
+        area_01 = c(1L,1L,1L,2L,2L,2L),
+        area_02 = c(11L,12L,12L,21L,21L,22L),
+        area_03 = c(111L,121L,122L,211L,212L,221L)
+      )),
+      area_01 = NULL,
+      area_02 = NULL
+    )
+  )
+)
+obs <- my_vame@var_set_make(
+  id = "dg_y",
+  data = data.table::data.table(dg_date = as.Date("2001-01-01"))
+)
+exp <- data.table::data.table(dg_y = 2001L)
+stopifnot(identical(obs[["dg_y"]], exp[["dg_y"]]))
+
+obs <- my_vame@var_set_make(
+  id = "area_01",
+  data = data.table::data.table(area_02 = c(11L, 21L))
+)
+exp <- data.table::data.table(area_01 = c(1L,2L))
+stopifnot(identical(obs[["area_01"]], exp[["area_01"]]))
+
+obs <- my_vame@var_set_make(
+  id = "area_02",
+  data = data.table::data.table(area_03 = c(111L, 211L))
+)
+exp <- data.table::data.table(area_02 = c(11L,21L))
+stopifnot(identical(obs[["area_02"]], exp[["area_02"]]))
+
+obs <- my_vame@vame_make(
+  ids = c("dg_y", "area_02", "area_01"),
+  data = data.table::data.table(
+    dg_date = as.Date("2001-01-01"),
+    area_03 = c(111L,121L,122L,211L,212L,221L)
+  )
+)
+exp <- data.table::data.table(
+  dg_y = 2001L,
+  area_02 = my_vame@var_aggregate(
+    c(111L,121L,122L,211L,212L,221L),
+    from_var_nm = "area_03",
+    to_var_nm = "area_02"
+  )
+)
+exp[
+  j = "area_01" := my_vame@var_aggregate(
+    exp[["area_02"]],
+    from_var_nm = "area_02",
+    to_var_nm = "area_01"
+  )
+]
+stopifnot(
+  identical(obs[["dg_y"]], exp[["dg_y"]]),
+  identical(obs[["area_01"]], exp[["area_01"]]),
+  identical(obs[["area_02"]], exp[["area_02"]])
+) 
 }

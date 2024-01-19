@@ -1,7 +1,7 @@
 .__VAME_SLOT_FUN_NMS__ <- local({
   lines <- readLines("./R/09_slot_funs.R")
-  fun_def_lines <- lines[grepl(" <- function[(]", lines)]
-  slot_fun_nms <- sub(" <- function.+$", "", fun_def_lines)
+  fun_def_lines <- lines[grepl("^[a-z_A-Z]+[ ]*<-[ ]*function[(]", lines)]
+  slot_fun_nms <- sub("[ ]*<-[ ]*function.+$", "", fun_def_lines)
   return(slot_fun_nms)
 })
 
@@ -81,10 +81,8 @@ doc_variablemetadata_features__ <- function(df = NULL) {
     df <- codedoc::extract_keyed_comment_blocks()
   }
   feature_keys <- unique(df[["key"]])
-  feature_regex <- "^feature[(]VariableMetadata, "
-  feature_keys <- feature_keys[
-    grepl(feature_regex, feature_keys)
-  ]
+  feature_regex <- "^feature[(]"
+  feature_keys <- feature_keys[ grepl(feature_regex, feature_keys)]
   if (length(feature_keys) == 0) {
     return(character(0L))
   }
@@ -106,6 +104,18 @@ doc_variablemetadata_news__ <- function() {
   codedoc::codedoc_roxygen_news_by_version(
     detect_allowed_keys = "(vm@)|(vame::VariableMetadata)"
   )
+}
+doc_variablemetadata_examples__ <- function(df = NULL) {
+  if (is.null(df)) {
+    df <- codedoc::extract_keyed_comment_blocks()
+  }
+  is_example <- grepl("^feature_example[(]", df[["key"]])
+  lines <- unlist(df[["comment_block"]][is_example])
+  lines <- c(
+    "@examples",
+    lines
+  )
+  return(lines)
 }
 
 methods::setClass(
@@ -525,7 +535,8 @@ methods::setClass(
 #'   c(
 #'     doc_variablemetadata_features__(df = df),
 #'     doc_slot_funs__(df = df),
-#'     doc_variablemetadata_news__()
+#'     doc_variablemetadata_news__(),
+#'     doc_variablemetadata_examples__(df = df)
 #'   )
 #' })
 VariableMetadata <- function(
@@ -601,8 +612,8 @@ VariableMetadata <- function(
       ",$", "", body_arg_lines[length(body_arg_lines)]
     )
     body_lines <- c(
-      "vame:::self_set(vm = internal_self())",
-      "on.exit(vame:::self_rm())",
+      "vame:::self_set__(vm = internal_self())",
+      "on.exit(vame:::self_rm__())",
       paste0(alias_fun_nm, "("),
       paste0("  ", body_arg_lines),
       ")"

@@ -430,19 +430,26 @@ self <- function() {
   # just called. It is intended only for use within functions and expressions
   # stored into a `VariableMetadata` object.
   # @codedoc_comment_block vame::maker_dt
+  # @codedoc_comment_block news("vame::self", "2023-12-27", "0.2.2")
+  # New function `vame::self`.
+  # @codedoc_comment_block news("vame::self", "2023-12-27", "0.2.2")
   if (!"self" %in% ls(.__SELF_ENV)) {
     stop("No VariableMetadata object could be retrieved --- this function is ",
          "intended to be called only within functions and expressions stored ",
-         "into a VariableMetadat object and should not work elsewhere.")
+         "into a VariableMetadata object and does not work elsewhere. If ",
+         "this function was in fact used in the correct context, contact ",
+         "the package maintainer.")
   }
   return(.__SELF_ENV[["self"]])
 }
 
-self_set <- function(vm) {
+self_set__ <- function(vm) {
   .__SELF_ENV[["self"]] <- vm
   return(invisible(NULL))
 }
 
-self_rm <- function() {
-  rm(list = "self", envir = .__SELF_ENV)
+self_rm__ <- function() {
+  if ("self" %in% ls(.__SELF_ENV)) {
+    rm(list = "self", envir = .__SELF_ENV)
+  }
 }
