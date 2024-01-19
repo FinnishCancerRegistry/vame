@@ -153,15 +153,38 @@ my_fun_2 <- function(dg_age) \{
 
 \section{News}{
 
+\subsection{News for version 0.3.0}{
+\subsection{vame::self}{
+
+New function \code{vame::self}.
+}
+
+\subsection{vm@vame_make}{
+
+New function \code{vm@vame_make}.
+}
+
+\subsection{vm@var_set_make}{
+
+New function \code{vm@var_set_make}.
+}
+
+\subsection{vm@var_set_maker_get}{
+
+New function \code{vm@var_set_maker_get}.
+}
+
+\subsection{vm@var_set_maker_set}{
+
+New function \code{vm@var_set_maker_set}.
+}
+
+}
+
 \subsection{News for version 0.2.2}{
 \subsection{vame::VariableMetadata}{
 
 \code{vame::VariableMetadata} gains arg \code{vame_list}.
-}
-
-\subsection{vame::self}{
-
-New function \code{vame::self}.
 }
 
 \subsection{vm@vame_list_copy}{

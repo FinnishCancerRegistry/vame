@@ -430,9 +430,9 @@ self <- function() {
   # just called. It is intended only for use within functions and expressions
   # stored into a `VariableMetadata` object.
   # @codedoc_comment_block vame::maker_dt
-  # @codedoc_comment_block news("vame::self", "2023-12-27", "0.2.2")
+  # @codedoc_comment_block news("vame::self", "2023-12-27", "0.3.0")
   # New function `vame::self`.
-  # @codedoc_comment_block news("vame::self", "2023-12-27", "0.2.2")
+  # @codedoc_comment_block news("vame::self", "2023-12-27", "0.3.0")
   if (!"self" %in% ls(.__SELF_ENV)) {
     stop("No VariableMetadata object could be retrieved --- this function is ",
          "intended to be called only within functions and expressions stored ",

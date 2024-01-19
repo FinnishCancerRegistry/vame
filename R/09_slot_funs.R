@@ -234,6 +234,9 @@ var_set_maker_get <- function(
   # @codedoc_comment_block feature_funs(make)
   # - `vm@var_set_maker_get`
   # @codedoc_comment_block feature_funs(make)
+  # @codedoc_comment_block news("vm@var_set_maker_get", "2024-01-19", "0.3.0")
+  # New function `vm@var_set_maker_get`.
+  # @codedoc_comment_block news("vm@var_set_maker_get", "2024-01-19", "0.3.0")
   var_set_meta_get(vm = vm, id = id, meta_nm = "maker")
 }
 
@@ -248,6 +251,9 @@ var_set_maker_set <- function(
   # @codedoc_comment_block feature_funs(make)
   # - `vm@var_set_maker_set`
   # @codedoc_comment_block feature_funs(make)
+  # @codedoc_comment_block news("vm@var_set_maker_set", "2024-01-19", "0.3.0")
+  # New function `vm@var_set_maker_set`.
+  # @codedoc_comment_block news("vm@var_set_maker_set", "2024-01-19", "0.3.0")
   assert_is_maker(value)
   var_set_meta_set(vm = vm, id = id, meta_nm = "maker", value = value)
 }
@@ -264,6 +270,9 @@ var_set_make <- function(
   # @codedoc_comment_block feature_funs(make)
   # - `vm@var_set_make`
   # @codedoc_comment_block feature_funs(make)
+  # @codedoc_comment_block news("vm@var_set_make", "2024-01-19", "0.3.0")
+  # New function `vm@var_set_make`.
+  # @codedoc_comment_block news("vm@var_set_make", "2024-01-19", "0.3.0")
 
   # @codedoc_comment_block feature(make)
   # The make feature allows for making variable sets based on other variable
@@ -470,6 +479,10 @@ vame_make <- function(
   # @codedoc_comment_block feature_funs(make)
   # - `vm@vame_make`
   # @codedoc_comment_block feature_funs(make)
+  # @codedoc_comment_block news("vm@vame_make", "2024-01-19", "0.3.0")
+  # New function `vm@vame_make`.
+  # @codedoc_comment_block news("vm@vame_make", "2024-01-19", "0.3.0")
+
   dbc::assert_inherits(data, required_class = "data.frame")
   dbc::assert_has_one_of_classes(env, classes = c("NULL", "environment"))
   if (is.null(env)) {

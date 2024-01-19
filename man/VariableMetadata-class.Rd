@@ -1386,6 +1386,18 @@ The following functions are part of this feature:
 }
 }
 
+\section{News for version 0.3.0}{
+
+
+New function \code{vm@vame_make}.
+
+New function \code{vm@var_set_make}.
+
+New function \code{vm@var_set_maker_get}.
+
+New function \code{vm@var_set_maker_set}.
+}
+
 \section{News for version 0.2.2}{
 
 
