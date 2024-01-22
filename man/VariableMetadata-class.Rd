@@ -780,6 +780,69 @@ Environment where \code{labeler} of class \code{call} is evaluated.
 \item \code{environment}: Use this environment.
 }}
 
+\item{\code{var_describer_get}}{\emph{Description}
+
+Get the describer for a variable.
+Set the describer for a variable.
+
+\emph{Usage}
+
+\code{vm@var_describer_get(var_nm)}
+
+\emph{Arguments}
+
+\code{var_nm} \verb{[character]} (no default)
+
+Name of a variable.}
+
+\item{\code{var_describer_set}}{\emph{Description}
+
+\emph{Usage}
+
+\code{vm@var_describer_set(var_nm, value)}
+
+\emph{Arguments}
+
+\code{var_nm} \verb{[character]} (no default)
+
+Name of a variable.
+
+\code{value} \verb{[any]} (no default)
+
+In \verb{_set} functions the \code{value} to set for the specified metadata.}
+
+\item{\code{var_description_get}}{\emph{Description}
+
+Get description for \code{var_nm}.
+
+\emph{Usage}
+
+\code{vm@var_description_get(var_nm, description_name, describer_env)}
+
+\emph{Arguments}
+
+\code{var_nm} \verb{[character]} (no default)
+
+Name of a variable.
+
+\code{description_name} \verb{[NULL, character]} (default \code{NULL})
+
+Name of a description in the \code{describer} that has been assigned for the
+variable.
+\itemize{
+\item \code{NULL}: If \code{describer} is a \code{list}, use first element.
+Else raises an error.
+\item \code{character}: Use this description name.
+}
+
+\code{describer_env} \verb{[NULL, environment]} (default \code{NULL})
+
+Environment where \code{describer} of class \code{call} is evaluated.
+\itemize{
+\item \code{NULL}: Use the environment where this function is called.
+\item \code{environment}: Use this environment.
+}}
+
 \item{\code{var_value_space_sample}}{\emph{Description}
 
 Calls \code{vm@var_set_value_space_sample} with \code{var_nms = var_nm}.
@@ -1361,6 +1424,29 @@ The following functions are related to this feature:
 \item \code{vm@var_labels_get}
 }
 
+\strong{Describing}
+
+The describing feature becomes available if
+the \code{var_dt} of a \code{VariableMetadata} object has a \code{describer} column value
+for a variable. You can include \code{describer} in \code{var_dt} when the
+\code{VariableMetadata} object is constructed or use \code{vm@var_describer_set} later.
+
+The \code{describer} can be \code{NULL}, a \code{list}, a \code{function}, or a \code{call} object.
+A \code{NULL} \code{describer} object is considered to mean that one has not been
+defined.
+A \code{describer} of type \code{list} must be named. Each element must be
+a string.
+A \code{describer} of type \code{function} must have argument \code{description_name}.
+A \code{describer} of type \code{call} must contain (mention) variable
+\code{description_name}.
+
+The following functions are related to this feature:
+\itemize{
+\item \code{vm@var_describer_getr}
+\item \code{vm@var_describer_set}
+\item \code{vm@var_description_get}
+}
+
 \strong{Category spaces}
 
 The category spaces feature becomes available when the value spaces feature
@@ -1384,6 +1470,16 @@ The following functions are part of this feature:
 \item \code{vm@vame_category_space_dt_list}
 \item \code{vm@vame_category_space_dt}
 }
+}
+
+\section{News for version 0.4.0}{
+
+
+New function \code{vm@var_describer_get}.
+
+New function \code{vm@var_describer_set}.
+
+New function \code{vm@var_description_get}.
 }
 
 \section{News for version 0.3.0}{
@@ -2088,4 +2184,44 @@ stopifnot(
   identical(obs[["area_01"]], exp[["area_01"]]),
   identical(obs[["area_02"]], exp[["area_02"]])
 ) 
+my_vame <- vame::VariableMetadata(
+  var_dt = data.table::data.table(
+    var_nm = c("sex", "birth_date"),
+    describer = list(
+      sex = list(
+        en = "Sex assigned at birth.",
+        fi = "Syntymahetken sukupuoli."
+      ),
+      birth_date = quote(switch(
+        description_name,
+        en = "Date of birth.",
+        fi = "Syntymapaivamaara."
+      ))
+    )
+  ),
+  var_set_dt = data.table::data.table(
+    id = c("sex", "birth_date"),
+    var_nm_set = list(sex = "sex", birth_date = "birth_date")
+  )
+)
+stopifnot(
+  identical(
+    my_vame@var_description_get("sex"),
+    "Sex assigned at birth."
+  ),
+  inherits(
+    tryCatch(
+      my_vame@var_description_get("birth_date"),
+      error = function(e) e
+    ),
+    "error"
+  ),
+  identical(
+    my_vame@var_description_get(
+      var_nm = "birth_date",
+      description_name = "fi"
+    ),
+    "Syntymapaivamaara."
+  )
+)
 }

@@ -414,3 +414,80 @@ assert_is_maker <- function(
     assertion_type = assertion_type
   )
 }
+
+assert_is_describer <- function(
+  x,
+  x_nm = NULL,
+  call = NULL,
+  assertion_type = NULL
+) {
+  dbc::handle_args_inplace()
+  # @codedoc_comment_block specification(var_dt$describer)
+  # The `describer` can be `NULL`, a `list`, a `function`, or a `call` object.
+  # A `NULL` `describer` object is considered to mean that one has not been
+  # defined.
+  # @codedoc_comment_block specification(var_dt$describer)
+  dbc::assert_has_one_of_classes(
+    x = x,
+    x_nm = x_nm,
+    call = call,
+    assertion_type = assertion_type,
+    classes = c("NULL", "function", "call", "{", "name", "list")
+  )
+  if (is.null(x)) {
+    return(invisible(NULL))
+  } else if (is.list(x)) {
+    # @codedoc_comment_block specification(var_dt$describer)
+    # A `describer` of type `list` must be named. Each element must be
+    # a string.
+    # @codedoc_comment_block specification(var_dt$describer)
+    dbc::assert_is_uniquely_named(
+      x = x,
+      x_nm = x_nm,
+      call = call,
+      assertion_type = assertion_type
+    )
+    for (i in seq_along(x)) {
+      dbc::assert_is_character_nonNA_atom(
+        x = x[[i]],
+        x_nm = sprintf("%s[[%i]]", x_nm, i),
+        call = call,
+        assertion_type = assertion_type
+      )
+    }
+    return(invisible(NULL))
+  } else if (is.function(x)) {
+    # @codedoc_comment_block specification(var_dt$describer)
+    # A `describer` of type `function` must have argument `description_name`.
+    # @codedoc_comment_block specification(var_dt$describer)
+    dbc::assert_is_function_with_required_argument_names(
+      x = x,
+      x_nm = x_nm,
+      call = call,
+      assertion_type = assertion_type,
+      required_argument_names = c("description_name")
+    )
+    x <- body(x)
+    x_nm <- paste0("body(", x_nm, ")")
+  }
+  # @codedoc_comment_block specification(var_dt$describer)
+  # A `describer` of type `call` must contain (mention) variable
+  # `description_name`.
+  # @codedoc_comment_block specification(var_dt$describer)
+  report_df <- dbc::expressions_to_report(
+    expressions = list(
+      quote("description_name" %in% all.vars(x))
+    ),
+    fail_messages = c(
+      paste0("R expression `", deparse1(x), "` from object/expression `",
+              x_nm , "` must contain variable `description_name`")
+    ),
+    call = call,
+    env = environment()
+  )
+  dbc::report_to_assertion(
+    report_df,
+    assertion_type = assertion_type,
+    raise_error_call = call
+  )
+}

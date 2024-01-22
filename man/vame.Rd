@@ -153,6 +153,24 @@ my_fun_2 <- function(dg_age) \{
 
 \section{News}{
 
+\subsection{News for version 0.4.0}{
+\subsection{vm@var_describer_get}{
+
+New function \code{vm@var_describer_get}.
+}
+
+\subsection{vm@var_describer_set}{
+
+New function \code{vm@var_describer_set}.
+}
+
+\subsection{vm@var_description_get}{
+
+New function \code{vm@var_description_get}.
+}
+
+}
+
 \subsection{News for version 0.3.0}{
 \subsection{vame::self}{
 

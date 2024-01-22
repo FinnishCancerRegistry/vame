@@ -1474,6 +1474,191 @@ var_labels_get <- function(
   return(out)
 }
 
+var_describer_get <- function(
+  vm,
+  var_nm
+) {
+  # @codedoc_comment_block vm@var_describer_get
+  # Get the describer for a variable.
+  # @codedoc_comment_block vm@var_describer_get
+  # @codedoc_comment_block feature_funs(describing)
+  # - `vm@var_describer_getr`
+  # @codedoc_comment_block feature_funs(describing)
+  # @codedoc_comment_block news("vm@var_describer_get", "2024-01-22", "0.4.0")
+  # New function `vm@var_describer_get`.
+  # @codedoc_comment_block news("vm@var_describer_get", "2024-01-22", "0.4.0")
+  assert_is_var_nm(vm, var_nm)
+  out <- var_meta_get(vm, var_nm, "describer")
+  if (is.null(out)) {
+    stop("Variable \"", var_nm, "\" has no describer defined.")
+  }
+  return(out)
+}
+
+var_describer_set <- function(
+  vm,
+  var_nm,
+  value
+) {
+  # @codedoc_comment_block vm@var_describer_get
+  # Set the describer for a variable.
+  # @codedoc_comment_block vm@var_describer_get
+  # @codedoc_comment_block feature_funs(describing)
+  # - `vm@var_describer_set`
+  # @codedoc_comment_block feature_funs(describing)
+  # @codedoc_comment_block news("vm@var_describer_set", "2024-01-22", "0.4.0")
+  # New function `vm@var_describer_set`.
+  # @codedoc_comment_block news("vm@var_describer_set", "2024-01-22", "0.4.0")
+  assert_is_var_nm(vm, var_nm)
+  assert_is_describer(value)
+  var_meta_set(vm, var_nm, "describer", value)
+}
+
+var_description_get <- function(
+  vm,
+  var_nm,
+  description_name = NULL,
+  describer_env = NULL
+) {
+  # @codedoc_comment_block vm@var_description_get
+  # Get description for `var_nm`.
+  # @codedoc_comment_block vm@var_description_get
+  # @codedoc_comment_block feature_funs(describing)
+  # - `vm@var_description_get`
+  # @codedoc_comment_block feature_funs(describing)
+  # @codedoc_comment_block news("vm@var_description_get", "2024-01-22", "0.4.0")
+  # New function `vm@var_description_get`.
+  # @codedoc_comment_block news("vm@var_description_get", "2024-01-22", "0.4.0")
+  
+  # @codedoc_comment_block feature(describing)
+  # The describing feature becomes available if
+  # the `var_dt` of a `VariableMetadata` object has a `describer` column value
+  # for a variable. You can include `describer` in `var_dt` when the
+  # `VariableMetadata` object is constructed or use `vm@var_describer_set` later.
+  #
+  # @codedoc_insert_comment_block specification(var_dt$describer)
+  #
+  # The following functions are related to this feature:
+  # @codedoc_insert_comment_block feature_funs(describing)
+  # @codedoc_comment_block feature(describing)
+  # @codedoc_comment_block feature_example(describing)
+  # my_vame <- vame::VariableMetadata(
+  #   var_dt = data.table::data.table(
+  #     var_nm = c("sex", "birth_date"),
+  #     describer = list(
+  #       sex = list(
+  #         en = "Sex assigned at birth.",
+  #         fi = "Syntymahetken sukupuoli."
+  #       ),
+  #       birth_date = quote(switch(
+  #         description_name,
+  #         en = "Date of birth.",
+  #         fi = "Syntymapaivamaara."
+  #       ))
+  #     )
+  #   ),
+  #   var_set_dt = data.table::data.table(
+  #     id = c("sex", "birth_date"),
+  #     var_nm_set = list(sex = "sex", birth_date = "birth_date")
+  #   )
+  # )
+  # stopifnot(
+  #   identical(
+  #     my_vame@var_description_get("sex"),
+  #     "Sex assigned at birth."
+  #   ),
+  #   inherits(
+  #     tryCatch(
+  #       my_vame@var_description_get("birth_date"),
+  #       error = function(e) e
+  #     ),
+  #     "error"
+  #   ),
+  #   identical(
+  #     my_vame@var_description_get(
+  #       var_nm = "birth_date",
+  #       description_name = "fi"
+  #     ),
+  #     "Syntymapaivamaara."
+  #   )
+  # )
+  # @codedoc_comment_block feature_example(describing)
+  assert_is_var_nm(vm, var_nm)
+  describer <- var_describer_get(vm, var_nm = var_nm)
+  
+  # @codedoc_comment_block param_description_name
+  # @param description_name `[NULL, character]` (default `NULL`)
+  # 
+  # Name of a description in the `describer` that has been assigned for the
+  # variable.
+  #
+  # - `NULL`: If `describer` is a `list`, use first element.
+  #   Else raises an error.
+  # - `character`: Use this description name.
+  # @codedoc_comment_block param_description_name
+  dbc::assert_is_one_of(
+    description_name,
+    funs = list(dbc::report_is_NULL,
+                dbc::report_is_character_nonNA_atom)
+  )
+
+  # @codedoc_comment_block param_describer_env
+  # @param describer_env `[NULL, environment]` (default `NULL`)
+  # 
+  # Environment where `describer` of class `call` is evaluated.
+  #
+  # - `NULL`: Use the environment where this function is called.
+  # - `environment`: Use this environment.
+  # @codedoc_comment_block param_describer_env
+  dbc::assert_is_one_of(
+    describer_env,
+    funs = list(dbc::report_is_NULL,
+                dbc::report_is_environment)
+  )
+  if (is.null(describer_env)) {
+    describer_env <- parent.frame(1L)
+  }
+
+  if (inherits(describer, "list")) {
+    description_name_set <- names(describer)
+    if (is.null(description_name)) {
+      description_name <- description_name_set[1]
+    } else if (!description_name %in% description_name_set) {
+      stop("description_name = \"", description_name,
+           "\" not one of the defined ",
+           "elements: ", deparse1(description_name_set))
+    }
+    out <- describer[[description_name]]
+  } else if (is.function(describer)) {
+    if (is.null(description_name)) {
+      stop("description_name = NULL, but describer is a function so cannot ",
+           "determine description_name automatically.")
+    }
+    out <- describer(description_name = description_name)
+  } else if (is.call(describer)) {
+    if (is.null(description_name)) {
+      stop("description_name = NULL, but describer is a call so cannot ",
+           "determine description_name automatically.")
+    }
+    eval_env <- new.env(parent = describer_env)
+    eval_env[["description_name"]] <- description_name
+    out <- tryCatch(
+      eval(describer, envir = eval_env),
+      error = function(e) {
+        stop(
+          "describer for var_nm = \"", var_nm, "\" was of class 'call', but ",
+          "evaluation failed. Error message: \"", e[["message"]], "\""
+        )
+      }
+    )
+  } else {
+    stop("no handling defined for describer of class(es) ",
+         deparse1(class(describer)))
+  }
+  dbc::assert_prod_output_is_character_nonNA_atom(out)
+  return(out)
+}
+
 var_value_space_sample <- function(
   vm,
   var_nm,
