@@ -46,13 +46,13 @@ assert_is_labeler <- function(
     # `var_dt$labeler` must be a list column.
     # A `labeler` for a variable can be one of these:
     #
-    # - A function with arguments named `x` and `label_col_nm`.
+    # - A function with arguments named `x` and `label_nm`.
     # @codedoc_comment_block specification(var_dt$labeler)
     dbc::assert_is_function_with_required_argument_names(
       x = x,
       x_nm = x_nm,
       call = call,
-      required_argument_names = c("x", "label_col_nm"),
+      required_argument_names = c("x", "label_nm"),
       assertion_type = assertion_type
     )
   } else if (data.table::is.data.table(x)) {
@@ -75,18 +75,18 @@ assert_is_labeler <- function(
 
     # @codedoc_comment_block specification(var_dt$labeler)
     # - An R expression object of class `call`.
-    #   The expression must contain the variables `x` and `label_col_nm`.
+    #   The expression must contain the variables `x` and `label_nm`.
     # @codedoc_comment_block specification(var_dt$labeler)
     report_df <- dbc::expressions_to_report(
       expressions = list(
         quote("x" %in% all.vars(x)),
-        quote("label_col_nm" %in% all.vars(x))
+        quote("label_nm" %in% all.vars(x))
       ),
       fail_messages = c(
         paste0("R expression `", deparse1(x), "` from object/expression `",
                x_nm , "` must contain variable `x`"),
         paste0("R expression `", deparse1(x), "` from object/expression `",
-               x_nm , "` must contain variable `label_col_nm`")
+               x_nm , "` must contain variable `label_nm`")
       ),
       call = call,
       env = environment()
@@ -458,29 +458,29 @@ assert_is_describer <- function(
     return(invisible(NULL))
   } else if (is.function(x)) {
     # @codedoc_comment_block specification(var_dt$describer)
-    # A `describer` of type `function` must have argument `description_name`.
+    # A `describer` of type `function` must have argument `descr_nm`.
     # @codedoc_comment_block specification(var_dt$describer)
     dbc::assert_is_function_with_required_argument_names(
       x = x,
       x_nm = x_nm,
       call = call,
       assertion_type = assertion_type,
-      required_argument_names = c("description_name")
+      required_argument_names = c("descr_nm")
     )
     x <- body(x)
     x_nm <- paste0("body(", x_nm, ")")
   }
   # @codedoc_comment_block specification(var_dt$describer)
   # A `describer` of type `call` must contain (mention) variable
-  # `description_name`.
+  # `descr_nm`.
   # @codedoc_comment_block specification(var_dt$describer)
   report_df <- dbc::expressions_to_report(
     expressions = list(
-      quote("description_name" %in% all.vars(x))
+      quote("descr_nm" %in% all.vars(x))
     ),
     fail_messages = c(
       paste0("R expression `", deparse1(x), "` from object/expression `",
-              x_nm , "` must contain variable `description_name`")
+              x_nm , "` must contain variable `descr_nm`")
     ),
     call = call,
     env = environment()

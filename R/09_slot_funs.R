@@ -1362,13 +1362,13 @@ var_labels_get <- function(
   vm,
   x,
   var_nm,
-  label_col_nm = NULL,
+  label_nm = NULL,
   labeler_env = NULL
 ) {
   # @codedoc_comment_block vm@var_labels_get
   # Get label for each value in `x` for `var_nm`.
   # @codedoc_comment_block vm@var_labels_get
-  
+      
   # @codedoc_comment_block feature(labeling)
   # The labeling feature becomes available if
   # the `var_dt` of a `VariableMetadata` object has a `labeler` column value
@@ -1386,8 +1386,8 @@ var_labels_get <- function(
   assert_is_var_nm(vm, var_nm)
   labeler <- var_labeler_get(vm, var_nm = var_nm)
   
-  # @codedoc_comment_block param_label_col_nm
-  # @param label_col_nm `[NULL, character]` (default `NULL`)
+  # @codedoc_comment_block param_label_nm
+  # @param label_nm `[NULL, character]` (default `NULL`)
   # 
   # Name of a column in the `labeler` that has been assigned for the variable.
   # Labels will be taken from this column.
@@ -1395,9 +1395,12 @@ var_labels_get <- function(
   # - `NULL`: Use first column name in `labeler` that is not `"level"` --- if
   #   `labeler` is a `data.table`.
   # - `character`: Use this column name.
-  # @codedoc_comment_block param_label_col_nm
+  # @codedoc_comment_block param_label_nm
+  # @codedoc_comment_block news("vm@var_labels_get", "2024-01-24", "0.4.0")
+  # `vm@var_labels_get` arg `label_col_nm` renamed to `label_nm`.
+  # @codedoc_comment_block news("vm@var_labels_get", "2024-01-24", "0.4.0")
   dbc::assert_is_one_of(
-    label_col_nm,
+    label_nm,
     funs = list(dbc::report_is_NULL,
                 dbc::report_is_character_nonNA_atom)
   )
@@ -1420,12 +1423,12 @@ var_labels_get <- function(
   }
 
   if (inherits(labeler, "data.table")) {
-    label_col_nm_set <- setdiff(names(labeler), "level")
-    if (is.null(label_col_nm)) {
-      label_col_nm <- label_col_nm_set[1]
-    } else if (!label_col_nm %in% label_col_nm_set) {
-      stop("label_col_nm = \"", label_col_nm, "\" not one of the defined ",
-            "label columns: ", deparse1(label_col_nm_set))
+    label_nm_set <- setdiff(names(labeler), "level")
+    if (is.null(label_nm)) {
+      label_nm <- label_nm_set[1]
+    } else if (!label_nm %in% label_nm_set) {
+      stop("label_nm = \"", label_nm, "\" not one of the defined ",
+            "label columns: ", deparse1(label_nm_set))
     }
     dbc::assert_has_class(x = x, required_class = class(labeler[["level"]]))
     jdt <- data.table::setDT(list(level = x))
@@ -1434,17 +1437,17 @@ var_labels_get <- function(
       i = jdt,
       on = "level",
       j = .SD[[1]],
-      .SDcols = label_col_nm
+      .SDcols = label_nm
     ]
   } else if (is.function(labeler)) {
     # @codedoc_comment_block news("vm@var_labels_get", "2023-12-01", "0.2.0")
     # `vm@var_labels_get` now can handle `labeler`s of type `function`.
     # @codedoc_comment_block news("vm@var_labels_get", "2023-12-01", "0.2.0")
-    if (is.null(label_col_nm)) {
-      stop("label_col_nm = NULL, but labeler is a function so cannot ",
-           "determine label_col_nm automatically.")
+    if (is.null(label_nm)) {
+      stop("label_nm = NULL, but labeler is a function so cannot ",
+           "determine label_nm automatically.")
     }
-    out <- labeler(x = x, label_col_nm = label_col_nm)
+    out <- labeler(x = x, label_nm = label_nm)
   } else if (is.call(labeler)) {
     # @codedoc_comment_block news("vm@var_labels_get", "2023-12-01", "0.2.1")
     # `vm@var_labels_get` now can handle `labeler`s of class `call`.
@@ -1517,7 +1520,7 @@ var_describer_set <- function(
 var_description_get <- function(
   vm,
   var_nm,
-  description_name = NULL,
+  descr_nm = NULL,
   describer_env = NULL
 ) {
   # @codedoc_comment_block vm@var_description_get
@@ -1551,7 +1554,7 @@ var_description_get <- function(
   #         fi = "Syntymahetken sukupuoli."
   #       ),
   #       birth_date = quote(switch(
-  #         description_name,
+  #         descr_nm,
   #         en = "Date of birth.",
   #         fi = "Syntymapaivamaara."
   #       ))
@@ -1577,7 +1580,7 @@ var_description_get <- function(
   #   identical(
   #     my_vame@var_description_get(
   #       var_nm = "birth_date",
-  #       description_name = "fi"
+  #       descr_nm = "fi"
   #     ),
   #     "Syntymapaivamaara."
   #   )
@@ -1586,8 +1589,8 @@ var_description_get <- function(
   assert_is_var_nm(vm, var_nm)
   describer <- var_describer_get(vm, var_nm = var_nm)
   
-  # @codedoc_comment_block param_description_name
-  # @param description_name `[NULL, character]` (default `NULL`)
+  # @codedoc_comment_block param_descr_nm
+  # @param descr_nm `[NULL, character]` (default `NULL`)
   # 
   # Name of a description in the `describer` that has been assigned for the
   # variable.
@@ -1595,9 +1598,12 @@ var_description_get <- function(
   # - `NULL`: If `describer` is a `list`, use first element.
   #   Else raises an error.
   # - `character`: Use this description name.
-  # @codedoc_comment_block param_description_name
+  # @codedoc_comment_block param_descr_nm
+  # @codedoc_comment_block news("vm@var_description_get", "2024-01-24", "0.4.0")
+  # `vm@var_description_get` arg `description_name` renamed to `descr_nm`.
+  # @codedoc_comment_block news("vm@var_description_get", "2024-01-24", "0.4.0")
   dbc::assert_is_one_of(
-    description_name,
+    descr_nm,
     funs = list(dbc::report_is_NULL,
                 dbc::report_is_character_nonNA_atom)
   )
@@ -1620,28 +1626,28 @@ var_description_get <- function(
   }
 
   if (inherits(describer, "list")) {
-    description_name_set <- names(describer)
-    if (is.null(description_name)) {
-      description_name <- description_name_set[1]
-    } else if (!description_name %in% description_name_set) {
-      stop("description_name = \"", description_name,
+    descr_nm_set <- names(describer)
+    if (is.null(descr_nm)) {
+      descr_nm <- descr_nm_set[1]
+    } else if (!descr_nm %in% descr_nm_set) {
+      stop("descr_nm = \"", descr_nm,
            "\" not one of the defined ",
-           "elements: ", deparse1(description_name_set))
+           "elements: ", deparse1(descr_nm_set))
     }
-    out <- describer[[description_name]]
+    out <- describer[[descr_nm]]
   } else if (is.function(describer)) {
-    if (is.null(description_name)) {
-      stop("description_name = NULL, but describer is a function so cannot ",
-           "determine description_name automatically.")
+    if (is.null(descr_nm)) {
+      stop("descr_nm = NULL, but describer is a function so cannot ",
+           "determine descr_nm automatically.")
     }
-    out <- describer(description_name = description_name)
+    out <- describer(descr_nm = descr_nm)
   } else if (is.call(describer)) {
-    if (is.null(description_name)) {
-      stop("description_name = NULL, but describer is a call so cannot ",
-           "determine description_name automatically.")
+    if (is.null(descr_nm)) {
+      stop("descr_nm = NULL, but describer is a call so cannot ",
+           "determine descr_nm automatically.")
     }
     eval_env <- new.env(parent = describer_env)
-    eval_env[["description_name"]] <- description_name
+    eval_env[["descr_nm"]] <- descr_nm
     out <- tryCatch(
       eval(describer, envir = eval_env),
       error = function(e) {

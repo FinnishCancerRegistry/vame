@@ -750,7 +750,7 @@ Get label for each value in \code{x} for \code{var_nm}.
 
 \emph{Usage}
 
-\code{vm@var_labels_get(x, var_nm, label_col_nm, labeler_env)}
+\code{vm@var_labels_get(x, var_nm, label_nm, labeler_env)}
 
 \emph{Arguments}
 
@@ -762,7 +762,7 @@ Values of a specified variable.
 
 Name of a variable.
 
-\code{label_col_nm} \verb{[NULL, character]} (default \code{NULL})
+\code{label_nm} \verb{[NULL, character]} (default \code{NULL})
 
 Name of a column in the \code{labeler} that has been assigned for the variable.
 Labels will be taken from this column.
@@ -817,7 +817,7 @@ Get description for \code{var_nm}.
 
 \emph{Usage}
 
-\code{vm@var_description_get(var_nm, description_name, describer_env)}
+\code{vm@var_description_get(var_nm, descr_nm, describer_env)}
 
 \emph{Arguments}
 
@@ -825,7 +825,7 @@ Get description for \code{var_nm}.
 
 Name of a variable.
 
-\code{description_name} \verb{[NULL, character]} (default \code{NULL})
+\code{descr_nm} \verb{[NULL, character]} (default \code{NULL})
 
 Name of a description in the \code{describer} that has been assigned for the
 variable.
@@ -1409,12 +1409,12 @@ for a variable. You can include \code{labeler} in \code{var_dt} when the
 \code{var_dt$labeler} must be a list column.
 A \code{labeler} for a variable can be one of these:
 \itemize{
-\item A function with arguments named \code{x} and \code{label_col_nm}.
+\item A function with arguments named \code{x} and \code{label_nm}.
 \item A \code{data.table} with column \code{level} and label columns --- you decide
 their names. For labels in different languages it is recommended to use
 ISO language codes as column names, e.g. "en".
 \item An R expression object of class \code{call}.
-The expression must contain the variables \code{x} and \code{label_col_nm}.
+The expression must contain the variables \code{x} and \code{label_nm}.
 }
 
 The following functions are related to this feature:
@@ -1436,9 +1436,9 @@ A \code{NULL} \code{describer} object is considered to mean that one has not bee
 defined.
 A \code{describer} of type \code{list} must be named. Each element must be
 a string.
-A \code{describer} of type \code{function} must have argument \code{description_name}.
+A \code{describer} of type \code{function} must have argument \code{descr_nm}.
 A \code{describer} of type \code{call} must contain (mention) variable
-\code{description_name}.
+\code{descr_nm}.
 
 The following functions are related to this feature:
 \itemize{
@@ -1480,6 +1480,10 @@ New function \code{vm@var_describer_get}.
 New function \code{vm@var_describer_set}.
 
 New function \code{vm@var_description_get}.
+
+\code{vm@var_description_get} arg \code{description_name} renamed to \code{descr_nm}.
+
+\code{vm@var_labels_get} arg \code{label_col_nm} renamed to \code{label_nm}.
 }
 
 \section{News for version 0.3.0}{
@@ -1875,7 +1879,7 @@ vm <- vame::VariableMetadata(
           level = 1:3,
           en = paste0("b_level_", 1:3)
         )
-        dt[[label_col_nm]][match(x, dt[["level"]])]
+        dt[[label_nm]][match(x, dt[["level"]])]
       }),
       c = NULL
     )
@@ -1889,7 +1893,7 @@ vm <- vame::VariableMetadata(
   )
 )
 
-obs <- vm@var_labels_get(x = 1:4, var_nm = "a", label_col_nm = "en")
+obs <- vm@var_labels_get(x = 1:4, var_nm = "a", label_nm = "en")
 exp <- c(paste0("a_level_", 1:3), NA)
 stopifnot(
   identical(obs, exp)
@@ -1899,12 +1903,12 @@ obs <- tryCatch(
   vm@var_labels_get(
     x = 1:4,
     var_nm = "a",
-    label_col_nm = "this does not exist"
+    label_nm = "this does not exist"
   ),
   error = function(e) e[["message"]]
 )
 exp <- paste0(
-  "label_col_nm = \"this does not exist\"",
+  "label_nm = \"this does not exist\"",
   " not one of the defined label columns: \"en\""
 )
 stopifnot(
@@ -1915,7 +1919,7 @@ obs <- tryCatch(
   vm@var_labels_get(
     x = 1:4,
     var_nm = "c",
-    label_col_nm = "en"
+    label_nm = "en"
   ),
   error = function(e) e[["message"]]
 )
@@ -2193,7 +2197,7 @@ my_vame <- vame::VariableMetadata(
         fi = "Syntymahetken sukupuoli."
       ),
       birth_date = quote(switch(
-        description_name,
+        descr_nm,
         en = "Date of birth.",
         fi = "Syntymapaivamaara."
       ))
@@ -2219,7 +2223,7 @@ stopifnot(
   identical(
     my_vame@var_description_get(
       var_nm = "birth_date",
-      description_name = "fi"
+      descr_nm = "fi"
     ),
     "Syntymapaivamaara."
   )

@@ -14,6 +14,14 @@ New function `vm@var_describer_set`.
 
 New function `vm@var_description_get`.
 
+### vm@var_description_get
+
+`vm@var_description_get` arg `description_name` renamed to `descr_nm`.
+
+### vm@var_labels_get
+
+`vm@var_labels_get` arg `label_col_nm` renamed to `label_nm`.
+
 
 ## News for version 0.3.0
 

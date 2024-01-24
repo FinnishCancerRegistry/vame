@@ -339,7 +339,7 @@ methods::setClass(
 #'           level = 1:3,
 #'           en = paste0("b_level_", 1:3)
 #'         )
-#'         dt[[label_col_nm]][match(x, dt[["level"]])]
+#'         dt[[label_nm]][match(x, dt[["level"]])]
 #'       }),
 #'       c = NULL
 #'     )
@@ -353,7 +353,7 @@ methods::setClass(
 #'   )
 #' )
 #' 
-#' obs <- vm@var_labels_get(x = 1:4, var_nm = "a", label_col_nm = "en")
+#' obs <- vm@var_labels_get(x = 1:4, var_nm = "a", label_nm = "en")
 #' exp <- c(paste0("a_level_", 1:3), NA)
 #' stopifnot(
 #'   identical(obs, exp)
@@ -363,12 +363,12 @@ methods::setClass(
 #'   vm@var_labels_get(
 #'     x = 1:4,
 #'     var_nm = "a",
-#'     label_col_nm = "this does not exist"
+#'     label_nm = "this does not exist"
 #'   ),
 #'   error = function(e) e[["message"]]
 #' )
 #' exp <- paste0(
-#'   "label_col_nm = \"this does not exist\"",
+#'   "label_nm = \"this does not exist\"",
 #'   " not one of the defined label columns: \"en\""
 #' )
 #' stopifnot(
@@ -379,7 +379,7 @@ methods::setClass(
 #'   vm@var_labels_get(
 #'     x = 1:4,
 #'     var_nm = "c",
-#'     label_col_nm = "en"
+#'     label_nm = "en"
 #'   ),
 #'   error = function(e) e[["message"]]
 #' )
