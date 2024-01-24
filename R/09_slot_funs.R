@@ -1156,7 +1156,7 @@ var_meta_is_defined <- function(
   # @codedoc_comment_block news("vm@var_meta_is_defined", "2023-12-12", "0.2.2")
   # New function `vm@var_meta_is_defined`.
   # @codedoc_comment_block news("vm@var_meta_is_defined", "2023-12-12", "0.2.2")
-  assert_is_var_nm(vm)
+  assert_is_var_nm(vm, var_nm = var_nm)
   vd <- vd_get(vm)
   pos <- data.table::chmatch(var_nm, vd[["var_nm"]])
   if (!meta_nm %in% names(vd)) {
