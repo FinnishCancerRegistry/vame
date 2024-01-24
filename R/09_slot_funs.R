@@ -1545,6 +1545,8 @@ var_description_get <- function(
   # @codedoc_insert_comment_block feature_funs(describing)
   # @codedoc_comment_block feature(describing)
   # @codedoc_comment_block feature_example(describing)
+  # 
+  # # Example of describing feature
   # my_vame <- vame::VariableMetadata(
   #   var_dt = data.table::data.table(
   #     var_nm = c("sex", "birth_date"),

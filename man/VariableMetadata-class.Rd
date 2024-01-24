@@ -2188,6 +2188,8 @@ stopifnot(
   identical(obs[["area_01"]], exp[["area_01"]]),
   identical(obs[["area_02"]], exp[["area_02"]])
 ) 
+
+# Example of describing feature
 my_vame <- vame::VariableMetadata(
   var_dt = data.table::data.table(
     var_nm = c("sex", "birth_date"),
