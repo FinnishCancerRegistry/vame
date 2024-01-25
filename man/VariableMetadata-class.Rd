@@ -1484,6 +1484,8 @@ New function \code{vm@var_description_get}.
 \code{vm@var_description_get} arg \code{description_name} renamed to \code{descr_nm}.
 
 \code{vm@var_labels_get} arg \code{label_col_nm} renamed to \code{label_nm}.
+
+\code{vm@var_meta_is_defined} internal problem fixed.
 }
 
 \section{News for version 0.3.0}{

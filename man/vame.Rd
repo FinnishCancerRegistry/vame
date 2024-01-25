@@ -179,6 +179,11 @@ New function \code{vm@var_description_get}.
 \code{vm@var_labels_get} arg \code{label_col_nm} renamed to \code{label_nm}.
 }
 
+\subsection{vm@var_meta_is_defined}{
+
+\code{vm@var_meta_is_defined} internal problem fixed.
+}
+
 }
 
 \subsection{News for version 0.3.0}{

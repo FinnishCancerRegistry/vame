@@ -22,6 +22,10 @@ New function `vm@var_description_get`.
 
 `vm@var_labels_get` arg `label_col_nm` renamed to `label_nm`.
 
+### vm@var_meta_is_defined
+
+`vm@var_meta_is_defined` internal problem fixed.
+
 
 ## News for version 0.3.0
 
