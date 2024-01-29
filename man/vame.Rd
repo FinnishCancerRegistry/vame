@@ -6,7 +6,14 @@
 \title{vame: Variable Metadata}
 \description{
 \code{vame} makes it simpler to define and make use of metadata pertaining
-to one more variables (e.g. a tabular dataset).
+to one more variables (e.g. a tabular dataset). It implements the
+\code{VariableMetadata} class, which contains the metadata. The various metadata
+are accessed using slot functions such as \code{vm@var_description_get}.
+
+The \code{VariableMetadata} class is intended for storing metadata for which there
+is "one right way". For instance, a variable has one correct description in
+text. This philosophy excludes tasks such as creating a manual for a dataset,
+which can take many forms.
 
 \href{https://github.com/FinnishCancerRegistry/vame/actions/workflows/R-CMD-check.yaml}{\if{html}{\figure{https://github.com/FinnishCancerRegistry/vame/actions/workflows/R-CMD-check.yaml/badge.svg}}}
 }

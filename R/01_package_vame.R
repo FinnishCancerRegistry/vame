@@ -10,7 +10,14 @@ NULL
 
 # @codedoc_comment_block R_package_description(vame)
 # `vame` makes it simpler to define and make use of metadata pertaining
-# to one more variables (e.g. a tabular dataset).
+# to one more variables (e.g. a tabular dataset). It implements the
+# `VariableMetadata` class, which contains the metadata. The various metadata
+# are accessed using slot functions such as `vm@var_description_get`.
+#
+# The `VariableMetadata` class is intended for storing metadata for which there
+# is "one right way". For instance, a variable has one correct description in
+# text. This philosophy excludes tasks such as creating a manual for a dataset,
+# which can take many forms.
 #
 # <!-- badges: start -->
 # [![R-CMD-check](https://github.com/FinnishCancerRegistry/vame/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/FinnishCancerRegistry/vame/actions/workflows/R-CMD-check.yaml)
