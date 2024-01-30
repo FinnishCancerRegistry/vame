@@ -1431,7 +1431,7 @@ var_labels_get <- function(
       label_nm <- label_nm_set[1]
     } else if (!label_nm %in% label_nm_set) {
       stop("label_nm = \"", label_nm, "\" not one of the defined ",
-            "label columns: ", deparse1(label_nm_set))
+            "label names: ", deparse1(label_nm_set))
     }
     dbc::assert_has_class(x = x, required_class = class(labeler[["level"]]))
     jdt <- data.table::setDT(list(level = x))

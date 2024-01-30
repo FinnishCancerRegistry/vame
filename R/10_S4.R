@@ -369,7 +369,7 @@ methods::setClass(
 #' )
 #' exp <- paste0(
 #'   "label_nm = \"this does not exist\"",
-#'   " not one of the defined label columns: \"en\""
+#'   " not one of the defined label names: \"en\""
 #' )
 #' stopifnot(
 #'   grepl(exp, obs)
