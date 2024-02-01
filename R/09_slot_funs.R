@@ -1395,7 +1395,7 @@ var_labels_get <- function(
   # Name of a column in the `labeler` that has been assigned for the variable.
   # Labels will be taken from this column.
   #
-  # - `NULL`: Use first column name in `labeler` that is not `"level"` --- if
+  # - `NULL`: Use first column name in `labeler` that is not `"x"` --- if
   #   `labeler` is a `data.table`.
   # - `character`: Use this column name.
   # @codedoc_comment_block param_label_nm
@@ -1426,19 +1426,19 @@ var_labels_get <- function(
   }
 
   if (inherits(labeler, "data.table")) {
-    label_nm_set <- setdiff(names(labeler), "level")
+    label_nm_set <- setdiff(names(labeler), "x")
     if (is.null(label_nm)) {
       label_nm <- label_nm_set[1]
     } else if (!label_nm %in% label_nm_set) {
       stop("label_nm = \"", label_nm, "\" not one of the defined ",
             "label names: ", deparse1(label_nm_set))
     }
-    dbc::assert_has_class(x = x, required_class = class(labeler[["level"]]))
-    jdt <- data.table::setDT(list(level = x))
+    dbc::assert_has_class(x = x, required_class = class(labeler[["x"]]))
+    jdt <- data.table::setDT(list(x = x))
     #' @importFrom data.table .SD
     out <- labeler[
       i = jdt,
-      on = "level",
+      on = "x",
       j = .SD[[1]],
       .SDcols = label_nm
     ]

@@ -57,15 +57,20 @@ assert_is_labeler <- function(
     )
   } else if (data.table::is.data.table(x)) {
     # @codedoc_comment_block specification(var_dt$labeler)
-    # - A `data.table` with column `level` and label columns --- you decide
+    # - A `data.table` with column `x` and label columns --- you decide
     #   their names. For labels in different languages it is recommended to use
     #   ISO language codes as column names, e.g. "en".
     # @codedoc_comment_block specification(var_dt$labeler)
+    # @codedoc_comment_block news("vame::VariableMetadata", "2024-02-01", "0.4.0")
+    # `var_dt$labeler` of class `data.table` specs changed: Now column
+    # containing values for the variable in question must be named `x`.
+    # Formerly this was `level`.
+    # @codedoc_comment_block news("vame::VariableMetadata", "2024-02-01", "0.4.0")
     dbc::assert_has_names(
       x = x,
       x_nm = x_nm,
       call = call,
-      required_names = "level",
+      required_names = "x",
       assertion_type = assertion_type
     )
   } else if (is.language(x)) {

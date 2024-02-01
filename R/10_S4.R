@@ -331,15 +331,15 @@ methods::setClass(
 #'     type = "categorical",
 #'     labeler = list(
 #'       a = data.table::data.table(
-#'         level = 1:3,
+#'         x = 1:3,
 #'         en = paste0("a_level_", 1:3)
 #'       ),
 #'       b = quote({
 #'         dt <- data.table::data.table(
-#'           level = 1:3,
+#'           x = 1:3,
 #'           en = paste0("b_level_", 1:3)
 #'         )
-#'         dt[[label_nm]][match(x, dt[["level"]])]
+#'         dt[[label_nm]][match(x, dt[["x"]])]
 #'       }),
 #'       c = NULL
 #'     )
@@ -394,7 +394,7 @@ methods::setClass(
 #'     var_nm = c("a", "b"),
 #'     type = "categorical",
 #'     labeler = list(
-#'       a = data.table::data.table(level = 1:2, label = c("a_1", "a_2")),
+#'       a = data.table::data.table(x = 1:2, label = c("a_1", "a_2")),
 #'       b = NULL
 #'     )
 #'   ),

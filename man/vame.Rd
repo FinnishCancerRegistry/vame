@@ -161,6 +161,13 @@ my_fun_2 <- function(dg_age) \{
 \section{News}{
 
 \subsection{News for version 0.4.0}{
+\subsection{vame::VariableMetadata}{
+
+\code{var_dt$labeler} of class \code{data.table} specs changed: Now column
+containing values for the variable in question must be named \code{x}.
+Formerly this was \code{level}.
+}
+
 \subsection{vm@var_describer_get}{
 
 New function \code{vm@var_describer_get}.

@@ -2,6 +2,12 @@
 
 ## News for version 0.4.0
 
+### vame::VariableMetadata
+
+`var_dt$labeler` of class `data.table` specs changed: Now column
+containing values for the variable in question must be named `x`.
+Formerly this was `level`.
+
 ### vm@var_describer_get
 
 New function `vm@var_describer_get`.

@@ -767,7 +767,7 @@ Name of a variable.
 Name of a column in the \code{labeler} that has been assigned for the variable.
 Labels will be taken from this column.
 \itemize{
-\item \code{NULL}: Use first column name in \code{labeler} that is not \code{"level"} --- if
+\item \code{NULL}: Use first column name in \code{labeler} that is not \code{"x"} --- if
 \code{labeler} is a \code{data.table}.
 \item \code{character}: Use this column name.
 }
@@ -1410,7 +1410,7 @@ for a variable. You can include \code{labeler} in \code{var_dt} when the
 A \code{labeler} for a variable can be one of these:
 \itemize{
 \item A function with arguments named \code{x} and \code{label_nm}.
-\item A \code{data.table} with column \code{level} and label columns --- you decide
+\item A \code{data.table} with column \code{x} and label columns --- you decide
 their names. For labels in different languages it is recommended to use
 ISO language codes as column names, e.g. "en".
 \item An R expression object of class \code{call}.
@@ -1474,6 +1474,10 @@ The following functions are part of this feature:
 
 \section{News for version 0.4.0}{
 
+
+\code{var_dt$labeler} of class \code{data.table} specs changed: Now column
+containing values for the variable in question must be named \code{x}.
+Formerly this was \code{level}.
 
 New function \code{vm@var_describer_get}.
 
@@ -1873,15 +1877,15 @@ vm <- vame::VariableMetadata(
     type = "categorical",
     labeler = list(
       a = data.table::data.table(
-        level = 1:3,
+        x = 1:3,
         en = paste0("a_level_", 1:3)
       ),
       b = quote({
         dt <- data.table::data.table(
-          level = 1:3,
+          x = 1:3,
           en = paste0("b_level_", 1:3)
         )
-        dt[[label_nm]][match(x, dt[["level"]])]
+        dt[[label_nm]][match(x, dt[["x"]])]
       }),
       c = NULL
     )
@@ -1936,7 +1940,7 @@ vm_1 <- vame::VariableMetadata(
     var_nm = c("a", "b"),
     type = "categorical",
     labeler = list(
-      a = data.table::data.table(level = 1:2, label = c("a_1", "a_2")),
+      a = data.table::data.table(x = 1:2, label = c("a_1", "a_2")),
       b = NULL
     )
   ),
