@@ -4,9 +4,7 @@ assert_is_variablemetadata <- function(
   call = NULL,
   assertion_type = NULL
 ) {
-  x_nm <- dbc::handle_arg_x_nm(x_nm)
-  call <- dbc::handle_arg_call(call)
-  assertion_type <- dbc::handle_arg_assertion_type(assertion_type)
+  dbc::handle_args_inplace()
   dbc::assert_inherits(
     x = x,
     x_nm = x_nm,
@@ -22,9 +20,7 @@ assert_is_labeler <- function(
   call = NULL,
   assertion_type = NULL
 ) {
-  x_nm <- dbc::handle_arg_x_nm(x_nm)
-  call <- dbc::handle_arg_call(call)
-  assertion_type <- dbc::handle_arg_assertion_type(assertion_type)
+  dbc::handle_args_inplace()
   dbc::assert_is_one_of(
     x = x,
     x_nm = x_nm,
@@ -110,12 +106,10 @@ assert_is_value_space <- function(
   call = NULL,
   assertion_type = NULL
 ) {
-  x_nm <- dbc::handle_arg_x_nm(x_nm)
-  call <- dbc::handle_arg_call(call)
-  assertion_type <- dbc::handle_arg_assertion_type(assertion_type)
-  dbc::assert_is_one_of(
+  dbc::handle_args_inplace()
+  dbc::assert_has_one_of_classes(
     x,
-    funs = list(dbc::report_is_NULL, dbc::report_is_list)
+    classes = c("NULL", "list")
   )
   if (is.null(x)) {
     return(invisible(NULL))
@@ -279,9 +273,7 @@ assert_is_sampler <- function(
   call = NULL,
   assertion_type = NULL
 ) {
-  x_nm <- dbc::handle_arg_x_nm(x_nm)
-  call <- dbc::handle_arg_call(call)
-  assertion_type <- dbc::handle_arg_assertion_type(assertion_type)
+  dbc::handle_args_inplace()
   # @codedoc_comment_block specification(var_set_dt$sampler)
   # @codedoc_comment_block specification(vame_list$sampler)
   # The `sampler` can be a `function` or a `call` object. A `NULL` `sampler`
@@ -347,9 +339,7 @@ assert_is_vame_list <- function(
   call = NULL,
   assertion_type = NULL
 ) {
-  x_nm <- dbc::handle_arg_x_nm(x_nm)
-  call <- dbc::handle_arg_call(call)
-  assertion_type <- dbc::handle_arg_assertion_type(assertion_type)
+  dbc::handle_args_inplace()
   dbc::assert_is_one_of(
     x = x,
     x_nm = x_nm,
