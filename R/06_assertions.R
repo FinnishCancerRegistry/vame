@@ -385,10 +385,10 @@ assert_is_maker <- function(
   # @codedoc_comment_block specification(var_set_dt$maker)
   # A `maker` of type `list` can be of two kinds. The first kind has named
   #  elements `maker` of class `call` and
-  # `dep_var_nms` of class `character`, e.g.
-  # `list(maker = quote(make(x, y)), dep_var_nms = c("x", "y"))`.
+  # `dep_var_nm_set` of class `character`, e.g.
+  # `list(maker = quote(make(x, y)), dep_var_nm_set = c("x", "y"))`.
   # The second kind is otherwise the same, but `maker` must be string
-  # `"var_aggregate"`, and `dep_var_nms` must be of length one. This second
+  # `"var_aggregate"`, and `dep_var_nm_set` must be of length one. This second
   # kind is a shorthand for cases where one variable can be created simply
   # by aggregating another with `vm@var_aggregate`.
   # @codedoc_comment_block specification(var_set_dt$maker)
@@ -397,7 +397,7 @@ assert_is_maker <- function(
     x_nm = x_nm,
     call = call,
     assertion_type = assertion_type,
-    required_names = c("maker", "dep_var_nms")
+    required_names = c("maker", "dep_var_nm_set")
   )
   dbc::assert_is_one_of(
     x = x[["maker"]],
@@ -408,8 +408,8 @@ assert_is_maker <- function(
                 dbc::report_is_character_nonNA_atom)
   )
   dbc::assert_is_character_nonNA_vector(
-    x = x[["dep_var_nms"]],
-    x_nm = paste0(x_nm, "$dep_var_nms"),
+    x = x[["dep_var_nm_set"]],
+    x_nm = paste0(x_nm, "$dep_var_nm_set"),
     call = call,
     assertion_type = assertion_type
   )

@@ -328,7 +328,7 @@ var_set_make <- function(
   #     maker = list(
   #       dg_y = list(
   #         maker = quote(make_dg_y(dg_date = dg_date)),
-  #         dep_var_nms = "dg_date"
+  #         dep_var_nm_set = "dg_date"
   #       ),
   #       dg_date = NULL,
   #       area = NULL,
@@ -339,18 +339,18 @@ var_set_make <- function(
   #           vm <- vame::self()
   #           dt <- data.table::setDT(list(
   #             x = vm@var_aggregate(
-  #               get(dep_var_nms),
-  #               from_var_nm = dep_var_nms,
+  #               get(dep_var_nm_set),
+  #               from_var_nm = dep_var_nm_set,
   #               to_var_nm = var_nms
   #             )
   #           ))
   #           data.table::setnames(dt, "x", var_nms)
   #           dt[]
   #         }),
-  #         dep_var_nms = "area_02"
+  #         dep_var_nm_set = "area_02"
   #       ),
   #       # This example uses the shorthand var_aggregate approach.
-  #       area_02 = list(maker = "var_aggregate", dep_var_nms = "area_03")
+  #       area_02 = list(maker = "var_aggregate", dep_var_nm_set = "area_03")
   #     ),
   #     value_space = list(
   #       dg_y = list(set = 1953:2024),
@@ -431,10 +431,10 @@ var_set_make <- function(
     arg_list <- data
     dt <- do.call(maker, arg_list, quote = TRUE)
   } else if (inherits(maker, "list")) {
-    dbc::assert_has_names(data, required_names = maker[["dep_var_nms"]])
+    dbc::assert_has_names(data, required_names = maker[["dep_var_nm_set"]])
     make_env <- new.env(parent = env)
     make_env[["var_nms"]] <- var_nms
-    make_env[["dep_var_nms"]] <- maker[["dep_var_nms"]]
+    make_env[["dep_var_nm_set"]] <- maker[["dep_var_nm_set"]]
     lapply(names(data), function(obj_nm) {
       make_env[[obj_nm]] <- data[[obj_nm]]
     })
@@ -443,8 +443,8 @@ var_set_make <- function(
         vm <- vame::self()
         dt <- data.table::setDT(list(
           x = vm@var_aggregate(
-            get(dep_var_nms),
-            from_var_nm = dep_var_nms,
+            get(dep_var_nm_set),
+            from_var_nm = dep_var_nm_set,
             to_var_nm = var_nms
           )
         ))

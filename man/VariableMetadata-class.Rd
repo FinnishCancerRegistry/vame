@@ -1141,10 +1141,10 @@ A \code{maker} of type \code{function} must have as arguments the invididual
 required variables. Currently this is not checked in any way.
 A \code{maker} of type \code{list} can be of two kinds. The first kind has named
 elements \code{maker} of class \code{call} and
-\code{dep_var_nms} of class \code{character}, e.g.
-\code{list(maker = quote(make(x, y)), dep_var_nms = c("x", "y"))}.
+\code{dep_var_nm_set} of class \code{character}, e.g.
+\code{list(maker = quote(make(x, y)), dep_var_nm_set = c("x", "y"))}.
 The second kind is otherwise the same, but \code{maker} must be string
-\code{"var_aggregate"}, and \code{dep_var_nms} must be of length one. This second
+\code{"var_aggregate"}, and \code{dep_var_nm_set} must be of length one. This second
 kind is a shorthand for cases where one variable can be created simply
 by aggregating another with \code{vm@var_aggregate}.
 The recommended approach to writing a \code{maker} for a variable set is to
@@ -1180,7 +1180,7 @@ my_vame <- vame::VariableMetadata(
     maker = list(
       dg_y = list(
         maker = quote(make_dg_y(dg_date = dg_date)),
-        dep_var_nms = "dg_date"
+        dep_var_nm_set = "dg_date"
       ),
       dg_date = NULL,
       area = NULL,
@@ -1191,18 +1191,18 @@ my_vame <- vame::VariableMetadata(
           vm <- vame::self()
           dt <- data.table::setDT(list(
             x = vm@var_aggregate(
-              get(dep_var_nms),
-              from_var_nm = dep_var_nms,
+              get(dep_var_nm_set),
+              from_var_nm = dep_var_nm_set,
               to_var_nm = var_nms
             )
           ))
           data.table::setnames(dt, "x", var_nms)
           dt[]
         \}),
-        dep_var_nms = "area_02"
+        dep_var_nm_set = "area_02"
       ),
       # This example uses the shorthand var_aggregate approach.
-      area_02 = list(maker = "var_aggregate", dep_var_nms = "area_03")
+      area_02 = list(maker = "var_aggregate", dep_var_nm_set = "area_03")
     ),
     value_space = list(
       dg_y = list(set = 1953:2024),
@@ -2100,7 +2100,7 @@ my_vame <- vame::VariableMetadata(
     maker = list(
       dg_y = list(
         maker = quote(make_dg_y(dg_date = dg_date)),
-        dep_var_nms = "dg_date"
+        dep_var_nm_set = "dg_date"
       ),
       dg_date = NULL,
       area = NULL,
@@ -2111,18 +2111,18 @@ my_vame <- vame::VariableMetadata(
           vm <- vame::self()
           dt <- data.table::setDT(list(
             x = vm@var_aggregate(
-              get(dep_var_nms),
-              from_var_nm = dep_var_nms,
+              get(dep_var_nm_set),
+              from_var_nm = dep_var_nm_set,
               to_var_nm = var_nms
             )
           ))
           data.table::setnames(dt, "x", var_nms)
           dt[]
         }),
-        dep_var_nms = "area_02"
+        dep_var_nm_set = "area_02"
       ),
       # This example uses the shorthand var_aggregate approach.
-      area_02 = list(maker = "var_aggregate", dep_var_nms = "area_03")
+      area_02 = list(maker = "var_aggregate", dep_var_nm_set = "area_03")
     ),
     value_space = list(
       dg_y = list(set = 1953:2024),
