@@ -173,8 +173,8 @@ assert_is_var_dt <- function(
       do.call(
         fun_nm,
         list(
-          x = x[["labeler"]][[i]],
-          x_nm = sprintf("%s[[\"labeler\"]][[%i]]", x_nm, i),
+          x = x[[col_nm]][[i]],
+          x_nm = sprintf("%s[[\"%s\"]][[%i]]", x_nm, col_nm, i),
           call = call,
           assertion_type = assertion_type
         ),
