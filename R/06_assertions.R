@@ -225,54 +225,28 @@ assert_is_var_set_dt <- function(
       assertion_type = assertion_type
     )
   }
-  if ("value_space" %in% names(x)) {
+  assert_col_nm_set <- c("value_space", "sampler", "maker")
+  lapply(intersect(assert_col_nm_set, names(x)), function(col_nm) {
     dbc::assert_is_list(
-      x = x[["value_space"]],
-      x_nm = paste0(x_nm, "$value_space"),
+      x = x[[col_nm]],
+      x_nm = paste0(x_nm, "$", col_nm),
       call = call,
       assertion_type = assertion_type
     )
-    for (i in seq_along(x[["value_space"]])) {
-      assert_is_value_space(
-        x = x[["value_space"]][[i]],
-        x_nm = paste0(x_nm, "$value_space[[", i, "]]"),
-        call = call,
-        assertion_type = assertion_type
+    lapply(seq_along(x[[col_nm]]), function(i) {
+      assert_fun_nm <- paste0("assert_is_", col_nm)
+      do.call(
+        assert_fun_nm,
+        list(
+          x = x[[col_nm]][[i]],
+          x_nm = sprintf("%s$%s[[%i]]", x_nm, col_nm, i),
+          call = call,
+          assertion_type = assertion_type
+        ),
+        quote = TRUE
       )
-    }
-  }
-  if ("sampler" %in% names(x)) {
-    dbc::assert_is_list(
-      x = x[["sampler"]],
-      x_nm = paste0(x_nm, "$sampler"),
-      call = call,
-      assertion_type = assertion_type
-    )
-    for (i in seq_along(x[["sampler"]])) {
-      assert_is_sampler(
-        x = x[["sampler"]][[i]],
-        x_nm = paste0(x_nm, "$sampler[[", i, "]]"),
-        call = call,
-        assertion_type = assertion_type
-      )
-    }
-  }
-  if ("maker" %in% names(x)) {
-    dbc::assert_is_list(
-      x = x[["maker"]],
-      x_nm = paste0(x_nm, "$maker"),
-      call = call,
-      assertion_type = assertion_type
-    )
-    for (i in seq_along(x[["maker"]])) {
-      assert_is_maker(
-        x = x[["maker"]][[i]],
-        x_nm = paste0(x_nm, "$maker[[", i, "]]"),
-        call = call,
-        assertion_type = assertion_type
-      )
-    }
-  }
+    })
+  })
   return(invisible(NULL))
 }
 
