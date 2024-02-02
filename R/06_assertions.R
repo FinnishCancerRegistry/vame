@@ -167,12 +167,21 @@ assert_is_var_dt <- function(
   # @codedoc_comment_block news("VariableMetadata", "2023-12-01", "0.2.0")
   # `label_dt` was renamed to `labeler`. 
   # @codedoc_comment_block news("VariableMetadata", "2023-12-01", "0.2.0")
-  if ("labeler" %in% names(x)) {
-    lapply(x[["labeler"]], assert_is_labeler,
-           x_nm = x_nm,
-           call = call,
-           assertion_type = assertion_type)
-  }
+  lapply(intersect(c("labeler", "describer"), names(x)), function(col_nm) {
+    lapply(seq_along(x[[col_nm]]), function(i) {
+      fun_nm <- paste0("assert_is_", col_nm)
+      do.call(
+        fun_nm,
+        list(
+          x = x[["labeler"]][[i]],
+          x_nm = sprintf("%s[[\"labeler\"]][[%i]]", x_nm, i),
+          call = call,
+          assertion_type = assertion_type
+        ),
+        quote = TRUE
+      )
+    })
+  })
   if ("type" %in% names(x)) {
     # @codedoc_comment_block specification(var_dt$type)
     # `var_dt$type` must be a character string vector. Missing values are
