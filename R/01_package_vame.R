@@ -1,12 +1,11 @@
 #' @name vame
-#' @docType package
 #' @title vame: Variable Metadata
 #'
 #' @eval c(
 #'   codedoc::codedoc_R_package_description("vame"),
 #'   codedoc::codedoc_news_for_R_package()
 #' )
-NULL
+"_PACKAGE"
 
 # @codedoc_comment_block R_package_description(vame)
 # `vame` makes it simpler to define and make use of metadata pertaining
