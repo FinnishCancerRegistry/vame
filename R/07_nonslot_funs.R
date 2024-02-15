@@ -349,7 +349,11 @@ var_is_aggregateable_to__ <- function(
   stopifnot(
     identical(sort(names(dt)), sort(union(from_var_nm, to_var_nm)))
   )
-  if (from_var_nm == to_var_nm) {
+  # @codedoc_comment_block news("vm@var_aggregate", "2024-02-15", "0.4.0")
+  # `vm@var_aggregate` now always considers it possible to aggregate to
+  # `to_var_nm` if it only has one value.
+  # @codedoc_comment_block news("vm@var_aggregate", "2024-02-15", "0.4.0")
+  if (from_var_nm == to_var_nm || data.table::uniqueN(dt[[to_var_nm]]) == 1L) {
     return(TRUE)
   }
   from_type <- var_meta_get(vm, from_var_nm, "type")

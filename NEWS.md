@@ -8,6 +8,11 @@
 containing values for the variable in question must be named `x`.
 Formerly this was `level`.
 
+### vm@var_aggregate
+
+`vm@var_aggregate` now always considers it possible to aggregate to
+`to_var_nm` if it only has one value.
+
 ### vm@var_describer_get
 
 New function `vm@var_describer_get`.

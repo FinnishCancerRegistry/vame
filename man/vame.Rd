@@ -2,6 +2,7 @@
 % Please edit documentation in R/01_package_vame.R
 \docType{package}
 \name{vame}
+\alias{vame-package}
 \alias{vame}
 \title{vame: Variable Metadata}
 \description{
@@ -166,6 +167,12 @@ my_fun_2 <- function(dg_age) \{
 \code{var_dt$labeler} of class \code{data.table} specs changed: Now column
 containing values for the variable in question must be named \code{x}.
 Formerly this was \code{level}.
+}
+
+\subsection{vm@var_aggregate}{
+
+\code{vm@var_aggregate} now always considers it possible to aggregate to
+\code{to_var_nm} if it only has one value.
 }
 
 \subsection{vm@var_describer_get}{
@@ -549,3 +556,7 @@ First release.
 }
 }
 
+\author{
+\strong{Maintainer}: Joonas Miettinen \email{joonas.miettinen@cancer.fi} (\href{https://orcid.org/0000-0001-8624-6754}{ORCID})
+
+}

@@ -1479,6 +1479,9 @@ The following functions are part of this feature:
 containing values for the variable in question must be named \code{x}.
 Formerly this was \code{level}.
 
+\code{vm@var_aggregate} now always considers it possible to aggregate to
+\code{to_var_nm} if it only has one value.
+
 New function \code{vm@var_describer_get}.
 
 New function \code{vm@var_describer_set}.
