@@ -521,6 +521,10 @@ vame_make <- function(
     env <- parent.frame(1L)
   }
   dt <- dt_independent_frame_dependent_contents__(data)
+  # @codedoc_comment_block doc_slot_fun_arg(ids)
+  # @param ids `[any]` (no default)
+  # One or more values that can be found in `var_set_dt$id`.
+  # @codedoc_comment_block doc_slot_fun_arg(ids)
   lapply(ids, function(id) {
     # this called just in case some make expression makes use of a slot function
     # --- see where the slots are created.
@@ -1793,12 +1797,12 @@ vame_union_append <- function(
   vm_2
 ) {
   assert_is_variablemetadata(vm)
-  # @codedoc_comment_block doc_slot_fun_arg(vm_)2
+  # @codedoc_comment_block doc_slot_fun_arg(vm_2)
   # @param vm_2 `[VariableMetadata]` (no default)
   #
   # `VariableMetadata` object whose metadata will be appended to the current
   # `VariableMetadata` object.
-  # @codedoc_comment_block doc_slot_fun_arg(vm_)2
+  # @codedoc_comment_block doc_slot_fun_arg(vm_2)
   assert_is_variablemetadata(vm_2)
 
   # @codedoc_comment_block vm@vame_union_append

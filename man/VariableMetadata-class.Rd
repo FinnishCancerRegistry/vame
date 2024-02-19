@@ -296,7 +296,9 @@ Call multiple \code{var_set_dt$maker}s in sequence.
 
 \emph{Arguments}
 
-TODO: document argument ids
+ids \verb{[any]} (no default)
+One or more values that can be found in \code{var_set_dt$id}.
+
 data \verb{[data.frame, data.table, list]} (no default)
 \itemize{
 \item \code{data.frame}/\code{data.table}: Must contain all necessary variables for
@@ -948,7 +950,10 @@ No pre-existing data are overwritten.
 
 \emph{Arguments}
 
-TODO: document argument vm_2}
+vm_2 \verb{[VariableMetadata]} (no default)
+
+\code{VariableMetadata} object whose metadata will be appended to the current
+\code{VariableMetadata} object.}
 
 \item{\code{vame_meta_is_defined}}{\emph{Description}
 
