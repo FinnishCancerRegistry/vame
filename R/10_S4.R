@@ -10,7 +10,7 @@ vame_slot_nms_get__ <- function() {
 }
 
 doc_slot_fun_arg__ <- function(df, arg_nm, with_tag = FALSE) {
-  key <- paste0("param_", arg_nm)
+  key <- sprintf("doc_slot_fun_arg(%s)", arg_nm)
   if (!key %in% df[["key"]]) {
     warning("arg_nm = \"", arg_nm, "\" has not been documented")
     return(paste0("TODO: document argument ", arg_nm))

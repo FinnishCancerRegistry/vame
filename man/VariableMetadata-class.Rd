@@ -948,10 +948,7 @@ No pre-existing data are overwritten.
 
 \emph{Arguments}
 
-vm_2 \verb{[VariableMetadata]} (no default)
-
-\code{VariableMetadata} object whose metadata will be appended to the current
-\code{VariableMetadata} object.}
+TODO: document argument vm_2}
 
 \item{\code{vame_meta_is_defined}}{\emph{Description}
 
