@@ -12,6 +12,7 @@ vame_slot_nms_get__ <- function() {
 doc_slot_fun_arg__ <- function(df, arg_nm, with_tag = FALSE) {
   key <- paste0("param_", arg_nm)
   if (!key %in% df[["key"]]) {
+    warning("arg_nm = \"", arg_nm, "\" has not been documented")
     return(paste0("TODO: document argument ", arg_nm))
   }
   lines <- unlist(df[["comment_block"]][df[["key"]] == key])
@@ -24,10 +25,6 @@ doc_slot_fun_arg__ <- function(df, arg_nm, with_tag = FALSE) {
   }
   if (!with_tag) {
     lines <- gsub("^@param +", "", lines)
-    lines <- gsub(sprintf("(?<!\\w)%s(?!=\\w)", arg_nm),
-                  sprintf("`%s`", arg_nm),
-                  lines,
-                  perl = TRUE)
     lines <- gsub("``", "`", lines)
   }
   if (lines[length(lines)] != "") {
