@@ -37,6 +37,10 @@ New function `vm@var_description_get`.
 
 `vm@var_meta_is_defined` internal problem fixed.
 
+### vm@var_set_make
+
+`vm@var_set_make` argument `data` can now also be a `list` object.
+
 
 ## News for version 0.3.0
 

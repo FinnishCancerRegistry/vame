@@ -417,9 +417,44 @@ var_set_make <- function(
   #   identical(obs[["dg_y"]], exp[["dg_y"]]),
   #   identical(obs[["area_01"]], exp[["area_01"]]),
   #   identical(obs[["area_02"]], exp[["area_02"]])
-  # ) 
+  # )
   # @codedoc_comment_block feature_example(make)
-  dbc::assert_inherits(data, required_class = "data.frame")
+
+  # @codedoc_comment_block param_data
+  # @param data `[data.frame, data.table, list]` (no default)
+  #
+  # - `data.frame`/`data.table`: Must contain all necessary variables for
+  #   the `maker`.
+  # - `list`: Must by fully named. `list` elements are passed as variables as
+  #   they are to the `maker`, except the optional element `data$df` ---
+  #   a `data.frame`/`data.table` --- is first turned into a `list`,
+  #   and `data` (without `data$df`) and `data$df` are combined into one longer
+  #   `list`. This allows you to easily pass a `data.frame`/`data.table` and
+  #   necessary accompanying variables for settings etc.
+  #   E.g.
+  #   `data = list(df = data.frame(my_col_1 = 1, my_col_2 = 2), my_custom_setting = "something")`
+  #   for a `maker` defined as
+  #   `quote(my_fun(my_col_1, my_col_2, my_custom_setting))`.
+  #   Of course you can also pass
+  #   `data = list(my_col_1 = 1, my_col_2 = 2, my_custom_setting = "something")`
+  #   directly if that is more convenient.
+  # @codedoc_comment_block param_data
+  dbc::assert_has_one_of_classes(data, classes = c("data.frame", "list"))
+  non_df_arg_nms <- NULL
+  if (is.data.frame(data)) {
+    arg_list <- as.list(data)
+  } else {
+    # @codedoc_comment_block news("vm@var_set_make", "2024-02-19", "0.4.0")
+    # `vm@var_set_make` argument `data` can now also be a `list` object.
+    # @codedoc_comment_block news("vm@var_set_make", "2024-02-19", "0.4.0")
+    arg_list <- data
+    if ("df" %in% names(data)) {
+      dbc::assert_is_data_frame(data[["df"]])
+      arg_list["df"] <- NULL
+      arg_list[names(data[["df"]])] <- data[["df"]]
+      non_df_arg_nms <- setdiff(names(data), "df")
+    }
+  }
   dbc::assert_has_one_of_classes(env, classes = c("NULL", "environment"))
   if (is.null(env)) {
     env <- parent.frame(1L)
@@ -427,16 +462,13 @@ var_set_make <- function(
   maker <- var_set_maker_get(vm = vm, id = id)
   var_nms <- var_set_var_nm_set_get(vm = vm, id = id)
   if (is.function(maker)) {
-    dbc::assert_has_names(data, required_names = names(formals(maker)))
-    arg_list <- data
     dt <- do.call(maker, arg_list, quote = TRUE)
   } else if (inherits(maker, "list")) {
-    dbc::assert_has_names(data, required_names = maker[["dep_var_nm_set"]])
     make_env <- new.env(parent = env)
     make_env[["var_nms"]] <- var_nms
     make_env[["dep_var_nm_set"]] <- maker[["dep_var_nm_set"]]
-    lapply(names(data), function(obj_nm) {
-      make_env[[obj_nm]] <- data[[obj_nm]]
+    lapply(names(arg_list), function(obj_nm) {
+      make_env[[obj_nm]] <- arg_list[[obj_nm]]
     })
     if (identical(maker[["maker"]], "var_aggregate")) {
       maker_call <- quote({
@@ -459,7 +491,7 @@ var_set_make <- function(
     }
     dt <- eval(maker_call, envir = make_env)
   } else {
-    stop("Internal error: invaild var_set_dt$maker for id = ", deparse1(id))
+    stop("Internal error: invalid var_set_dt$maker for id = ", deparse1(id))
   }
   
   dbc::assert_prod_output_is_data_table(dt)

@@ -205,6 +205,11 @@ New function \code{vm@var_description_get}.
 \code{vm@var_meta_is_defined} internal problem fixed.
 }
 
+\subsection{vm@var_set_make}{
+
+\code{vm@var_set_make} argument \code{data} can now also be a \code{list} object.
+}
+
 }
 
 \subsection{News for version 0.3.0}{
