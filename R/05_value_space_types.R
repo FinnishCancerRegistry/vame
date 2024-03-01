@@ -38,16 +38,12 @@ value_space_type_funs__ <- list(
       fun <- get_var_value_assertion_fun__("set")
       do.call(fun, mget(names(formals(fun))), quote = TRUE)
     },
-    sampler = function(x, var_nms, n) {
+    sampler = function(x, vs, n, var_nms) {
       # @codedoc_comment_block defaults(var_set_dt$sampler)
       #   + `dt`: Sample uniformly rows from `data.table` with replacement.
       # @codedoc_comment_block defaults(var_set_dt$sampler)
-      subset <- sample(nrow(x[["dt"]]), size = n, replace = TRUE)
-      out <- x[["dt"]][
-        i = subset,
-        j = .SD,
-        .SDcols = var_nms
-      ]
+      subset <- sample(nrow(vs[["dt"]]), size = n, replace = TRUE)
+      out <- vs[["dt"]][subset, ]
       return(out[])
     }
   ),
@@ -95,12 +91,14 @@ value_space_type_funs__ <- list(
         set = value_space[["set"]]
       )
     },
-    sampler = function(x, var_nms, n) {
+    sampler = function(x, vs, n, var_nms) {
       # @codedoc_comment_block defaults(var_set_dt$sampler)
       #   + `set`: Sample uniformly from set with replacement.
       # @codedoc_comment_block defaults(var_set_dt$sampler)
-      out <- sample(x[["set"]], size = n, replace = TRUE)
-      return(out)
+      out <- sample(vs[["set"]], size = n, replace = TRUE)
+      out <- data.table::setDT(list("x" = out))
+      data.table::setnames(out, "x", var_nms)
+      return(out[])
     }
   ),
   expr = list(
@@ -209,7 +207,7 @@ value_space_type_funs__ <- list(
         assertion_type = assertion_type
       )
     },
-    sampler = function(x, var_nms, n) {
+    sampler = function(x, vs, id, n) {
       # @codedoc_comment_block defaults(var_set_dt$sampler)
       #   + `unrestricted`: If `class_set = "character"`, sample random strings
       #     of length 16 using character pool `c(letters, LETTERS, 0:9)`. If
@@ -217,7 +215,7 @@ value_space_type_funs__ <- list(
       #     defined for the general case.
       # @codedoc_comment_block defaults(var_set_dt$sampler)
 
-      if (!identical(x[["unrestricted"]][["class_set"]], "character")) {
+      if (!identical(vs[["unrestricted"]][["class_set"]], "character")) {
         stop("No default sampler defined for value_space_type ",
              "\"unrestricted\" unless class_set = \"character\"")
       }
@@ -229,7 +227,9 @@ value_space_type_funs__ <- list(
         },
         character(1L)
       )
-      return(out)
+      out <- data.table::setDT(list("x" = out))
+      data.table::setnames(out, "x", var_nms)
+      return(out[])
     }
   ),
   regex = list(
@@ -274,7 +274,7 @@ value_space_type_funs__ <- list(
         grepl.arg.list = list(pattern = value_space[["regex"]])
       )
     },
-    sampler = function(x, var_nms, n) {
+    sampler = function(x, vs, n, var_nms) {
       # @codedoc_comment_block defaults(var_set_dt$sampler)
       #   + `regex`: Raise error because no sampler defined.
       # @codedoc_comment_block defaults(var_set_dt$sampler)
@@ -368,26 +368,28 @@ value_space_type_funs__ <- list(
         )
       }
     },
-    sampler = function(x, var_nms, n) {
+    sampler = function(x, vs, n, var_nms) {
       # @codedoc_comment_block defaults(var_set_dt$sampler)
       #   + `bounds`: Sample uniformly between `lo` and `hi` --- with
       #     replacement from `lo:hi` if `storage.mode(lo) == "integer"`.
       # @codedoc_comment_block defaults(var_set_dt$sampler)
-      sample_lo <- x[["bounds"]][["lo"]]
-      sample_hi <- x[["bounds"]][["hi"]]
+      sample_lo <- vs[["bounds"]][["lo"]]
+      sample_hi <- vs[["bounds"]][["hi"]]
       out <- rep(sample_lo, n) # to ensure output has correct class
       if (storage.mode(sample_lo) == "integer") {
-        if (!x[["bounds"]][["lo_inclusive"]]) {
+        if (!vs[["bounds"]][["lo_inclusive"]]) {
           sample_lo <- sample_lo + 1L
         }
-        if (!x[["bounds"]][["hi_inclusive"]]) {
+        if (!vs[["bounds"]][["hi_inclusive"]]) {
           sample_hi <- sample_hi - 1L
         }
         out[1:n] <- sample(x = sample_lo:sample_hi, size = n, replace = TRUE)
       } else {
         out[1:n] <- runif(n = n, min = sample_lo, max = sample_hi)
       }
-      return(out)
+      out <- data.table::setDT(list("x" = out))
+      data.table::setnames(out, "x", var_nms)
+      return(out[])
     }
   )
 )

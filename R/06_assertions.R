@@ -259,7 +259,8 @@ assert_is_sampler <- function(
   dbc::handle_args_inplace()
   # @codedoc_comment_block specification(var_set_dt$sampler)
   # @codedoc_comment_block specification(vame_list$sampler)
-  # The `sampler` can be a `function` or a `call` object. A `NULL` `sampler`
+  # The `sampler` can be `NULL`, a `list`, a `function` or a `call` object.
+  # A `NULL` `sampler`
   # object is considered to mean that one has not been defined.
   # @codedoc_comment_block specification(vame_list$sampler)
   # @codedoc_comment_block specification(var_set_dt$sampler)
@@ -267,16 +268,17 @@ assert_is_sampler <- function(
     x = x,
     x_nm = x_nm,
     call = call,
-    classes = c("NULL", "function", "call", "{", "name")
+    classes = c("NULL", "list", "function", "call", "{", "name")
   )
   if (is.null(x)) {
     return(invisible(NULL))
   } else if (is.function(x)) {
     # @codedoc_comment_block specification(var_set_dt$sampler)
     # @codedoc_comment_block specification(vame_list$sampler)
-    # A `sampler` of type `function` must have arguments `x`, `var_nms`, and
-    # `n`. `x` contains input data, `var_nms` are the names of variables for
-    # which to sample data, and `n` the number of samples.
+    # A `sampler` of type `function` must have arguments `x`, `vs`, and
+    # `n`. `x` is the `vame::VariableMetadata` object itself,
+    # `vs` is the pre-evaluated `value_space` for the variable set,
+    # and `n` the number of samples.
     # @codedoc_comment_block specification(vame_list$sampler)
     # @codedoc_comment_block specification(var_set_dt$sampler)
     dbc::assert_is_function_with_required_argument_names(
@@ -284,25 +286,55 @@ assert_is_sampler <- function(
       x_nm = x_nm,
       call = call,
       assertion_type = assertion_type,
-      required_argument_names = c("x", "var_nms", "n")
+      required_argument_names = c("x", "vs", "n")
     )
     x <- body(x)
     x_nm <- paste0("body(", x_nm, ")")
+  } else if (inherits(x, "list")) {
+    # @codedoc_comment_block specification(var_set_dt$sampler)
+    # @codedoc_comment_block specification(vame_list$sampler)
+    # A `sampler` of type `list` must have elements `sampler$dep_var_nm_set` and
+    # `sampler$sampler`. `sampler$dep_var_nm_set` must be a character string
+    # vector: use this to list names of variables needed for conditional
+    # sampling. E.g. sampling `y` conditional on `x` means you should have
+    # `dep_var_nm_set = "x"`. `sampler$sampler` must be a `function` or a
+    # `call` object.
+    # @codedoc_comment_block specification(vame_list$sampler)
+    # @codedoc_comment_block specification(var_set_dt$sampler)
+    dbc::assert_is_uniquely_named_list(
+      x = x,
+      x_nm = x_nm,
+      call = call,
+      assertion_type = assertion_type
+    )
+    dbc::assert_is_of_length(
+      x = x,
+      x_nm = x_nm,
+      call = call,
+      assertion_type = assertion_type,
+      expected_length = 2L
+    )
+    dbc::assert_has_names(
+      x = x,
+      x_nm = x_nm,
+      call = call,
+      assertion_type = assertion_type,
+      required_names = c("sampler", "dep_var_nm_set")
+    )
+    x <- x[["sampler"]]
+    x_nm <- sprintf("%s[[\"sampler\"]]", x_nm)
   }
   # @codedoc_comment_block specification(var_set_dt$sampler)
   # @codedoc_comment_block specification(vame_list$sampler)
-  # A `sampler` of type `call` must contain (mention) variables `x` and `n` ---
+  # A `sampler` of type `call` must contain (mention) variable `n` ---
   # see `?all.vars`.
   # @codedoc_comment_block specification(vame_list$sampler)
   # @codedoc_comment_block specification(var_set_dt$sampler)
   report_df <- dbc::expressions_to_report(
     expressions = list(
-      quote("x" %in% all.vars(x)),
       quote("n" %in% all.vars(x))
     ),
     fail_messages = c(
-      paste0("R expression `", deparse1(x), "` from object/expression `",
-              x_nm , "` must contain variable `x`"),
       paste0("R expression `", deparse1(x), "` from object/expression `",
               x_nm , "` must contain variable `n`")
     ),
@@ -467,5 +499,41 @@ assert_is_describer <- function(
     report_df,
     assertion_type = assertion_type,
     raise_error_call = call
+  )
+}
+
+assert_is_arg_data <- function(
+  x,
+  x_nm = NULL,
+  call = NULL,
+  assertion_type = NULL
+) {
+  dbc::handle_args_inplace()
+  # @codedoc_comment_block doc_slot_fun_arg(data)
+  # @param data `[NULL, data.frame, data.table, list]` (default `NULL`)
+  #
+  # - `NULL`: No data is used.
+  # - `data.frame`/`data.table`: These variables are used as-is.
+  # - `list`: Must by fully named. `list` elements are used as variables
+  #   as-is, except the optional element `data$df` ---
+  #   a `data.frame`/`data.table` --- is first turned into a `list`,
+  #   and `data` (without `data$df`) and `data$df` are combined into one longer
+  #   `list`. This allows you to easily pass a `data.frame`/`data.table` and
+  #   necessary accompanying variables for settings etc.
+  #   E.g.
+  #   `data = list(df = data.frame(my_col_1 = 1, my_col_2 = 2), my_custom_setting = "something")`.
+  #   Of course you can also pass
+  #   `data = list(my_col_1 = 1, my_col_2 = 2, my_custom_setting = "something")`
+  #   directly if that is more convenient.
+  # @codedoc_comment_block doc_slot_fun_arg(data)
+  # @codedoc_comment_block news("vm@var_set_make", "2024-02-19", "0.4.0")
+  # `vm@var_set_make` argument `data` can now also be a `list` object.
+  # @codedoc_comment_block news("vm@var_set_make", "2024-02-19", "0.4.0")
+  dbc::assert_has_one_of_classes(
+    x,
+    classes = c("NULL", "data.frame", "data.table", "list"),
+    x_nm = x_nm,
+    call = call,
+    assertion_type = assertion_type
   )
 }

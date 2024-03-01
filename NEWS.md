@@ -8,6 +8,10 @@
 containing values for the variable in question must be named `x`.
 Formerly this was `level`.
 
+### vm@vame_value_space_sample
+
+`vm@vame_value_space_sample` gains arguments `ids` and `data`.
+
 ### vm@var_aggregate
 
 `vm@var_aggregate` now always considers it possible to aggregate to
@@ -40,6 +44,11 @@ New function `vm@var_description_get`.
 ### vm@var_set_make
 
 `vm@var_set_make` argument `data` can now also be a `list` object.
+
+### vm@var_set_value_space_sample
+
+`vm@var_set_value_space_sample` now has new arg `data`. Pass your data via
+`data` when you have a conditional sampling method.
 
 
 ## News for version 0.3.0

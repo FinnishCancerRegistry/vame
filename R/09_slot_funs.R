@@ -420,45 +420,11 @@ var_set_make <- function(
   # )
   # @codedoc_comment_block feature_example(make)
 
-  # @codedoc_comment_block doc_slot_fun_arg(data)
-  # @param data `[data.frame, data.table, list]` (no default)
-  #
-  # - `data.frame`/`data.table`: Must contain all necessary variables for
-  #   the `maker`.
-  # - `list`: Must by fully named. `list` elements are passed as variables as
-  #   they are to the `maker`, except the optional element `data$df` ---
-  #   a `data.frame`/`data.table` --- is first turned into a `list`,
-  #   and `data` (without `data$df`) and `data$df` are combined into one longer
-  #   `list`. This allows you to easily pass a `data.frame`/`data.table` and
-  #   necessary accompanying variables for settings etc.
-  #   E.g.
-  #   `data = list(df = data.frame(my_col_1 = 1, my_col_2 = 2), my_custom_setting = "something")`
-  #   for a `maker` defined as
-  #   `quote(my_fun(my_col_1, my_col_2, my_custom_setting))`.
-  #   Of course you can also pass
-  #   `data = list(my_col_1 = 1, my_col_2 = 2, my_custom_setting = "something")`
-  #   directly if that is more convenient.
-  # @codedoc_comment_block doc_slot_fun_arg(data)
-  dbc::assert_has_one_of_classes(data, classes = c("data.frame", "list"))
-  non_df_arg_nms <- NULL
-  if (is.data.frame(data)) {
-    arg_list <- as.list(data)
-  } else {
-    # @codedoc_comment_block news("vm@var_set_make", "2024-02-19", "0.4.0")
-    # `vm@var_set_make` argument `data` can now also be a `list` object.
-    # @codedoc_comment_block news("vm@var_set_make", "2024-02-19", "0.4.0")
-    arg_list <- data
-    if ("df" %in% names(data)) {
-      dbc::assert_is_data_frame(data[["df"]])
-      arg_list["df"] <- NULL
-      arg_list[names(data[["df"]])] <- data[["df"]]
-      non_df_arg_nms <- setdiff(names(data), "df")
-    }
-  }
   dbc::assert_has_one_of_classes(env, classes = c("NULL", "environment"))
   if (is.null(env)) {
     env <- parent.frame(1L)
   }
+  arg_list <- handle_arg_data__(data)
   maker <- var_set_maker_get(vm = vm, id = id)
   var_nms <- var_set_var_nm_set_get(vm = vm, id = id)
   if (is.function(maker)) {
@@ -779,21 +745,143 @@ var_set_value_space_sampler_set <- function(
   # New slot function `var_set_value_space_sampler_set`.
   # @codedoc_comment_block news("vm@var_set_value_space_sampler_set", "2023-12-12", "0.2.2")
   assert_is_sampler(value)
+  if (inherits(value, "list")) {
+    value <- list(value)
+  }
   var_set_meta_set(vm, id = id, meta_nm = "sampler", value = value)
 }
 
 var_set_value_space_sample <- function(
   vm,
   id,
+  n = 1L,
+  data = NULL,
   var_nms = NULL,
-  env = NULL,
-  n = 1L
-) {  
+  env = NULL
+) {
   # @codedoc_comment_block vm@var_set_value_space_sample
-  # Returns `n` samples from the value space of `id`. 
+  # Take `n` random samples from the value space of `id`.
   #
   # @codedoc_insert_comment_block feature_process(random sampling)
   # @codedoc_comment_block vm@var_set_value_space_sample
+
+  # @codedoc_comment_block feature_example(random sampling)
+  # # random sampling
+  # c_lo <- as.Date("2001-01-01")
+  # c_hi <- as.Date("2020-12-31")
+  # ## see what default samplers does with bounds
+  # storage.mode(c_lo) <- storage.mode(c_hi) <- "integer"
+  # vm <- vame::VariableMetadata(
+  #   var_dt = data.table::data.table(
+  #     var_nm = c("a", "d", "b", "c"),
+  #     type = c("categorical", "categorical", "categorical", "my_type")
+  #   ),
+  #   var_set_dt = data.table::data.table(
+  #     id = c("ad", "b", "c", "e"),
+  #     var_nm_set = list(ad = c("a", "d"), b = "b", c = "c", e = "e"),
+  #     value_space = list(
+  #       ad = list(dt = data.table::CJ(a = 1:2, d = 3:4)),
+  #       b = list(set = 3:4),
+  #       c = list(bounds = list(
+  #         lo = c_lo,
+  #         hi = c_hi,
+  #         lo_inclusive = TRUE,
+  #         hi_inclusive = TRUE
+  #       )),
+  #       e = list(set = 1:2)
+  #     ),
+  #     sampler = list(
+  #       ad = NULL,
+  #       b = quote({
+  #         p <- c(0.25, 0.75)
+  #         out <- sample(vs[["set"]], size = n, replace = TRUE, p = p)
+  #         out <- data.table::setDT(list(b = out))
+  #         return(out[])
+  #       }),
+  #       c = NULL,
+  #       e = quote({
+  #         stopifnot(
+  #           inherits(data, "list"),
+  #           "e_cond" %in% names(data),
+  #           length(data[["e_cond"]]) == n
+  #         )
+  #         dist <- data.table::data.table(
+  #           e_cond = c(1L, 1L, 2L, 2L),
+  #           e = c(1:2, 1:2),
+  #           p_cond = c(0.25, 0.75, 0.40, 0.60)
+  #         )
+  #         join_dt <- data.table::setDT(list(e_cond = data[["e_cond"]]))
+  #         out <- dist[
+  #           i = join_dt,
+  #           j = list(
+  #             e = sample(.SD[["e"]], replace = TRUE, prob = .SD[["p_cond"]])
+  #           ),
+  #           by = .EACHI
+  #         ]
+  #         data.table::set(out, j = setdiff(names(out), "e"), value = NULL)
+  #         return(out[])
+  #       })
+  #     )
+  #   )
+  # )
+  # vm@var_set_value_space_sampler_set(
+  #   id = "c",
+  #   value = quote({
+  #     pool <- vs[["bounds"]][["lo"]]:vs[["bounds"]][["hi"]]
+  #     p <- dnorm(x = pool, mean = mean(pool), sd = 10)
+  #     class(pool) <- class(vs[["bounds"]][["lo"]])
+  #     out <- pool[sample(length(pool), size = n, replace = FALSE, prob = p)]
+  #     out <- data.table::setDT(list(c = out))
+  #     return(out[])
+  #   })
+  # )
+  # 
+  # ad_sample <- vm@var_set_value_space_sample(id = "ad", n = 4L)
+  # b_sample <- vm@var_set_value_space_sample(id = "b", n = 4L)
+  # c_sample <- vm@var_set_value_space_sample(id = "c", n = 4L)
+  # stopifnot(
+  #   inherits(ad_sample, "data.table"),
+  #   nrow(ad_sample) == 4,
+  #   inherits(b_sample, "data.table"),
+  #   nrow(b_sample) == 4,
+  #   inherits(c_sample, "data.table"),
+  #   storage.mode(c_sample$c) == "integer",
+  #   nrow(c_sample) == 4
+  # )
+  #
+  # vame_sample <- vm@vame_value_space_sample(
+  #   ids = c("ad", "b", "c"),
+  #   n = 10L
+  # )
+  # stopifnot(
+  #   inherits(vame_sample, "data.table"),
+  #   identical(c("a", "d", "b", "c"), names(vame_sample)),
+  #   nrow(vame_sample) == 10
+  # )
+  #
+  # # conditional sampling
+  # vm@var_set_value_space_sampler_set(
+  #   id = "c",
+  #   value = list(
+  #     dep_var_nm_set = "a",
+  #     sampler = quote({
+  #       a <- data[["a"]]
+  #       out <- data.table::data.table(c = runif(n = n, min = a - 1, max = a))
+  #       return(out[])
+  #     })
+  #   )
+  # )
+  # vame_sample <- vm@vame_value_space_sample(
+  #   ids = c("ad", "b", "c"),
+  #   n = 10L
+  # )
+  # stopifnot(
+  #   inherits(vame_sample, "data.table"),
+  #   identical(c("a", "d", "b", "c"), names(vame_sample)),
+  #   nrow(vame_sample) == 10,
+  #   vame_sample[["c"]] < vame_sample[["a"]]
+  # )
+  # @codedoc_comment_block feature_example(random sampling)
 
   # @codedoc_comment_block news("vm@var_set_value_space_sample", "2023-12-11", "0.2.2")
   # New slot function `var_set_value_space_sample`.
@@ -814,30 +902,29 @@ var_set_value_space_sample <- function(
   # @codedoc_comment_block feature(random sampling)
 
   assert_is_var_set_id(vm, id)
-  dbc::assert_is_one_of(
+  dbc::assert_has_one_of_classes(
     var_nms,
-    funs = list(dbc::report_is_NULL,
-                dbc::report_is_character_nonNA_vector)
+    classes = c("character", "NULL")
   )
-  allowed_var_nms <- var_set_meta_get(vm, id = id, meta_nm = "var_nm_set")
-  dbc::assert_vector_elems_are_in_set(
-    var_nms,
-    set = allowed_var_nms
-  )
+  allowed_var_nms <- var_set_var_nm_set_get(vm = vm, id = id)
   if (is.null(var_nms)) {
     var_nms <- allowed_var_nms
+  } else {
+    dbc::assert_vector_elems_are_in_set(
+      var_nms,
+      set = allowed_var_nms
+    )
   }
-  dbc::assert_is_one_of(
+  dbc::assert_has_one_of_classes(
     env,
-    funs = list(dbc::report_is_NULL,
-                dbc::report_is_environment)
+    classes = c("NULL", "environment")
   )
   if (is.null(env)) {
     env <- parent.frame(1L)
   }
   # @codedoc_comment_block doc_slot_fun_arg(n)
   # @param n `[integer]` (default `1L`)
-  # 
+  #
   # Number of random samples to take.
   # @codedoc_comment_block doc_slot_fun_arg(n)
   dbc::assert_is_integer_nonNA_gtzero_atom(n)
@@ -850,8 +937,8 @@ var_set_value_space_sample <- function(
   vs <- var_set_value_space_eval(
     vm = vm,
     id = id,
-    var_nms = var_nms,
-    env = env
+    env = env,
+    var_nms = var_nms
   )
   assert_is_value_space(
     x = vs,
@@ -859,8 +946,9 @@ var_set_value_space_sample <- function(
   )
 
   # @codedoc_comment_block feature_process(random sampling)
-  # - The appropriate sampler is retrieved --- this is either the corresponding
-  #   sampler stored in `var_set_dt$sampler`, or no sampler exists there,
+  # - The appropriate `sampler` is retrieved --- this is either the
+  #   corresponding
+  #   sampler stored in `var_set_dt$sampler`, or if no sampler exists there,
   #   one of the defaults depending on the type of the value space:
   # @codedoc_insert_comment_block defaults(var_set_dt$sampler)
   # @codedoc_comment_block feature_process(random sampling)
@@ -876,21 +964,67 @@ var_set_value_space_sample <- function(
   # @codedoc_comment_block feature_process(random sampling)
   # - The `sampler` is called or evaluated, which results in the random samples,
   #   and these are returned. If the `sampler` is a function it is called via
-  #   `sampler(x = vs, var_nms = var_nms, n = n)`, where `vs` is the evaluated
-  #   value space. If it is an expression, it is evaluated in a new environment
-  #   that contains `x`, `arg_nms`, and `n`. This new environment's parent is
-  #   `env`.
+  #   `sampler(x = vm, n = n)`, where `vm` is the
+  #   `VariableMetadata` object itself.
+  #   The function may also have the optional arguments `vs`
+  #   (the evaluated value space for `id`), `data` (see argument `data`
+  #   of `vm@var_set_value_space_sample`), `dep_var_nm_set` (this will be
+  #   `sampler$dep_var_nm_set` if `sampler` was a list), `id`
+  #   (see argument `id` of `vm@var_set_value_space_sample`), and
+  #   `var_nms` (see argument `var_nms` of `vm@var_set_value_space_sample`).
+  #   If `sampler` is an expression, it is evaluated in a new
+  #   environment that contains the arguments mentioned above as objects.
+  #   This new environment's parent is `env`.
+  #   For conditional sampling you must use `sampler` of type `list` and make
+  #   use of `data` (and optionally `dep_var_nm_set`) in `sampler$sampler`.
   # @codedoc_comment_block feature_process(random sampling)
-  if (is.function(sampler)) {
-    sample <- sampler(x = vs, var_nms = var_nms, n = n)
-  } else if (is.call(sampler)) {
-    call_eval_env <- new.env(parent = env)
-    call_eval_env[["var_nms"]] <- var_nms
-    call_eval_env[["n"]] <- n
-    call_eval_env[["x"]] <- vs
-    sample <- eval(sampler, envir = call_eval_env)
+  # @codedoc_comment_block news("vm@var_set_value_space_sample", "2024-02-23", "0.4.0")
+  # `vm@var_set_value_space_sample` now has new arg `data`. Pass your data via
+  # `data` when you have a conditional sampling method.
+  # @codedoc_comment_block news("vm@var_set_value_space_sample", "2024-02-23", "0.4.0")
+  arg_list <- list(
+    n = n,
+    x = vm,
+    vs = vs,
+    data = handle_arg_data__(data),
+    id = id,
+    var_nms = var_nms
+  )
+  if (inherits(sampler, "list")) {
+    miss_dep_var_nm_set <- setdiff(sampler[["dep_var_nm_set"]], names(data))
+    if (length(miss_dep_var_nm_set) > 0) {
+      stop("`sampler` requires variables ",
+           deparse1(sampler[["dep_var_nm_set"]]),
+           " but these were not included via `data`: ",
+           deparse1(miss_dep_var_nm_set))
+    }
+    arg_list[["dep_var_nm_set"]] <- sampler[["dep_var_nm_set"]]
+    sampler <- sampler[["sampler"]]
   }
-
+  if (is.function(sampler)) {
+    arg_list <- arg_list[intersect(names(formals(sampler)), names(arg_list))]
+    sample <- do.call(sampler, arg_list)
+  } else if (is.call(sampler)) {
+    call_eval_env <- as.environment(arg_list)
+    parent.env(call_eval_env) <- env
+    sample <- eval(sampler, envir = call_eval_env)
+  } else {
+    stop("Internal error: no handling defined for sampler with class vector ",
+         deparse1(class(sampler)), "; if your sampler object can be set with ",
+         "vm@var_set_value_space_sampler_set, this function is broken ",
+         "and you should contact the maintainer ",
+         as.character(utils::maintainer(pkg = "vame")))
+  }
+  
+  # @codedoc_comment_block vm@var_set_value_space_sample
+  # `vm@var_set_value_space_sample` always returns a `data.table` with
+  # `n` rows.
+  # @codedoc_comment_block vm@var_set_value_space_sample
+  dbc::assert_prod_output_is_data_table(sample)
+  dbc::assert_prod_output_is_identical(
+    x = nrow(sample),
+    y = n
+  )
   return(sample)
 }
 
@@ -1033,7 +1167,7 @@ var_value_space_eval <- function(
     vsd[["id"]][pos_set],
     function(id) {
       var_set_value_space_eval(
-        vm,
+        vm  =vm,
         id = id,
         var_nms = var_nm,
         env = env
@@ -1332,13 +1466,18 @@ var_rename <- function(
             "id = ", id, " yourself"
           )
         }
-        var_set_value_space_set(vm, id = id, value_space = vs)   
+        var_set_value_space_set(vm, id = id, value_space = vs)
         var_nm_set <- var_set_meta_get(vm, id = id, meta_nm = "var_nm_set")
-        var_nm_set[var_nm_set == old_var_nm] <- new_var_nm      
+        var_nm_set[var_nm_set == old_var_nm] <- new_var_nm
         # @codedoc_comment_block vm@var_rename
         # - `var_set_dt$var_nm_set`
         # @codedoc_comment_block vm@var_rename
-        var_set_meta_set(vm, id = id, meta_nm = "var_nm_set", value = var_nm_set) 
+        var_set_meta_set(
+          vm,
+          id = id,
+          meta_nm = "var_nm_set",
+          value = var_nm_set
+        )
       })
     }
   })
@@ -1713,8 +1852,8 @@ var_value_space_sample <- function(
   n = 1L
 ) {
   # @codedoc_comment_block vm@var_value_space_sample
-  # Calls `vm@var_set_value_space_sample` with `var_nms = var_nm`.
-  # Output is always a vector.
+  # Wrapper for `vm@var_set_value_space_sample` for when you want a random
+  # sample for only one variable.
   # @codedoc_comment_block vm@var_value_space_sample
 
   # @codedoc_comment_block news("vm@var_value_space_sample", "2023-12-12", "0.2.2")
@@ -1728,12 +1867,16 @@ var_value_space_sample <- function(
   out <- var_set_value_space_sample(
     vm = vm,
     id = id,
-    var_nms = var_nm,
     n = n
   )
   if (inherits(out, "data.table")) {
-    out <- out[[1]]
+    out <- out[[var_nm]]
   }
+  # @codedoc_comment_block vm@vame_value_space_sample
+  # `vm@var_value_space_sample` always returns a vector of length `n`.
+  # @codedoc_comment_block vm@vame_value_space_sample
+  dbc::assert_prod_output_is_vector(out)
+  dbc::assert_prod_output_is_of_length(out, expected_length = n)
   return(out)
 }
 
@@ -1961,9 +2104,11 @@ vame_value_space_sampler_set <- function(
 }
 vame_value_space_sample <- function(
   vm,
+  ids,
+  n = 1L,
+  data = NULL,
   var_nms = NULL,
-  env = NULL,
-  n = 1L
+  env = NULL
 ) {
   # @codedoc_comment_block news("vm@vame_value_space_sample", "2023-12-12", "0.2.2")
   # New function `vm@var_set_meta_is_defined`.
@@ -1972,79 +2117,94 @@ vame_value_space_sample <- function(
   # @codedoc_comment_block feature_funs(random sampling)
   # - `vm@vame_value_space_sample`
   # @codedoc_comment_block feature_funs(random sampling)
-  dbc::assert_is_one_of(
-    var_nms,
-    funs = list(dbc::report_is_NULL,
-                dbc::report_is_character_nonNA_vector)
-  )
-  if (is.null(var_nms)) {
-    var_nms <- var_meta_get_all(vm = vm, meta_nm = "var_nm")
+  
+  # @codedoc_comment_block news("vm@vame_value_space_sample", "2024-02-27", "0.4.0")
+  # `vm@vame_value_space_sample` gains arguments `ids` and `data`.
+  # @codedoc_comment_block news("vm@vame_value_space_sample", "2024-02-27", "0.4.0")
+  for (id in ids) {
+    assert_is_var_set_id(
+      vm = vm,
+      id = id
+    )
   }
-  dbc::assert_is_one_of(
+  rm(list = "id")
+  dbc::assert_has_one_of_classes(
+    var_nms,
+    classes = c("NULL", "character")
+  )
+  if (!is.null(var_nms)) {
+    dbc::assert_vector_elems_are_in_set(
+      var_nms,
+      set = unlist(lapply(ids, function(id) {
+        var_set_var_nm_set_get(vm = vm, id = id)
+      }))
+    )
+  }
+  dbc::assert_has_one_of_classes(
     env,
-    funs = list(dbc::report_is_NULL,
-                dbc::report_is_environment)
+    classes = c("NULL", "environment")
   )
   if (is.null(env)) {
     env <- parent.frame(1L)
   }
   dbc::assert_is_integer_nonNA_gtzero_atom(n)
-  if (vame_meta_is_defined(vm = vm, meta_nm = "sampler")) {
-  # @codedoc_comment_block vm@vame_value_space_sample
-  # Take `n` random samples of the value spaces of `var_nms`.
-  #
-  # If `vame_list$sampler` exists and is a function, it is called via
-  # `vame_list$sampler(x = vm, var_nms = var_nms, n = n)`, where
-  # `vm` is the pertinent `VariableMetadata` object itself.
-  # @codedoc_comment_block vm@vame_value_space_sample
-    sampler <- vame_value_space_sampler_get(vm = vm)
-    if (is.function(sampler)) {
-      sample <- sampler(x = vm, var_nms = var_nms, n = n)
-    } else if (is.call(sampler)) {
-      # @codedoc_comment_block vm@vame_value_space_sample
-      # If `vame_list$sampler` is a `call` object, it is evaluated in a new
-      # environment whose parent is `env`.
-      # @codedoc_comment_block vm@vame_value_space_sample
-      call_eval_env <- new.env(parent = env)
-      call_eval_env[["x"]] <- vm
-      call_eval_env[["var_nms"]] <- var_nms
-      call_eval_env[["n"]] <- n
-      sample <- eval(sampler, envir = call_eval_env)
-    }
-  } else {
-    # @codedoc_comment_block vm@vame_value_space_sample
-    # If `vame_list$sampler` has not been set, `vm@vame_value_space_sample`
-    # calls `vm@vame_value_space_sample_default`.
-    # @codedoc_comment_block vm@vame_value_space_sample
-    sample <- vame_value_space_sample_default(
-      vm = vm,
-      var_nms = var_nms,
-      env = env,
-      n = n
-    )
-  }
-  # @codedoc_comment_block vm@vame_value_space_sample
-  # `vm@vame_value_space_sample` always returns a `data.table` with `n` rows
-  # and columns `var_nms`.
-  # @codedoc_comment_block vm@vame_value_space_sample
-  dbc::assert_prod_output_is_data_table_with_required_names(
-    x = sample,
-    required_names = var_nms
+  arg_list <- list(
+    x = vm,
+    ids = ids,
+    n = n,
+    data = handle_arg_data__(data),
+    var_nms = var_nms,
+    vm = vm
   )
+  # @codedoc_comment_block vm@vame_value_space_sample
+  # If `vame_list$sampler` has not been set, `vm@vame_value_space_sample`
+  # calls `vm@vame_value_space_sample_default`.
+  # @codedoc_comment_block vm@vame_value_space_sample
+  sampler <- vame_value_space_sample_default
+  if (vame_meta_is_defined(vm = vm, meta_nm = "sampler")) {
+    # @codedoc_comment_block vm@vame_value_space_sample
+    # Take `n` random samples of the value spaces of `ids`.
+    #
+    # If `vame_list$sampler` exists and is a function, it is called via
+    # `vame_list$sampler(x = vm, ids = ids, n = n, data = data, var_nms = var_nms)`,
+    # where `vm` is the pertinent `VariableMetadata` object itself.
+    # @codedoc_comment_block vm@vame_value_space_sample
+    sampler <- vame_value_space_sampler_get(vm = vm)
+  }
+  if (is.function(sampler)) {
+    arg_list <- arg_list[intersect(names(arg_list), names(formals(sampler)))]
+    sample <- do.call(sampler, arg_list, quote = TRUE)
+  } else if (is.call(sampler)) {
+    # @codedoc_comment_block vm@vame_value_space_sample
+    # If `vame_list$sampler` is a `call` object, it is evaluated in a new
+    # environment whose parent is `env`. This new environment contains the
+    # same objects that would be passed as arguments when calling
+    # `vame_list$sampler` as a `function`.
+    # @codedoc_comment_block vm@vame_value_space_sample
+    call_eval_env <- as.environment(arg_list)
+    parent.env(call_eval_env) <- env
+    sample <- eval(sampler, envir = call_eval_env)
+  }
+  data.table::setDT(sample)
+  # @codedoc_comment_block vm@vame_value_space_sample
+  # `vm@vame_value_space_sample` always returns a `data.table` with `n` rows.
+  # @codedoc_comment_block vm@vame_value_space_sample
+  dbc::assert_prod_output_is_data_table(sample)
   dbc::assert_prod_output_is_identical(
     x = nrow(sample),
     y = n
   )
-  data.table::setcolorder(sample, var_nms)
   return(sample[])
 }
 
 vame_value_space_sample_default <- function(
   vm,
-  var_nms = NULL,
+  ids,
   env = NULL,
+  var_nms = NULL,
+  data = NULL,
   n = 1L
-) {  
+) {
   # @codedoc_comment_block news("vm@vame_value_space_sample_default", "2023-12-12", "0.2.2")
   # New function `vm@vame_value_space_sample_default`.
   # @codedoc_comment_block news("vm@vame_value_space_sample_default", "2023-12-12", "0.2.2")
@@ -2052,68 +2212,80 @@ vame_value_space_sample_default <- function(
   # @codedoc_comment_block feature_funs(random sampling)
   # - `vm@vame_value_space_sample_default`
   # @codedoc_comment_block feature_funs(random sampling)
-  dbc::assert_is_one_of(
-    var_nms,
-    funs = list(dbc::report_is_NULL,
-                dbc::report_is_character_nonNA_vector)
-  )
-  if (is.null(var_nms)) {
-    var_nms <- var_meta_get_all(vm = vm, meta_nm = "var_nm")
+
+  # @codedoc_comment_block news("vm@vame_value_space_sample", "2024-02-27", "0.4.0")
+  # `vm@vame_value_space_sample` gains arguments `ids` and `data`.
+  # @codedoc_comment_block news("vm@vame_value_space_sample", "2024-02-27", "0.4.0")
+  for (id in ids) {
+    assert_is_var_set_id(
+      vm = vm,
+      id = id
+    )
   }
-  dbc::assert_is_one_of(
+  dbc::assert_has_one_of_classes(
+    var_nms,
+    classes = c("NULL", "character")
+  )
+  if (!is.null(var_nms)) {
+    dbc::assert_vector_elems_are_in_set(
+      var_nms,
+      set = unlist(lapply(ids, function(id) {
+        var_set_var_nm_set_get(vm = vm, id = id)
+      }))
+    )
+  }
+  data <- handle_arg_data__(data)
+  dbc::assert_has_one_of_classes(
     env,
-    funs = list(dbc::report_is_NULL,
-                dbc::report_is_environment)
+    classes = c("NULL", "environment")
   )
   if (is.null(env)) {
     env <- parent.frame(1L)
   }
   dbc::assert_is_integer_nonNA_gtzero_atom(n)
 
-  id_by_var_nm <- unlist(lapply(
-    var_nms,
-    var_to_var_set_id,
-    vm = vm,
-    style = "smallest_set"
-  ))
   # @codedoc_comment_block vm@vame_value_space_sample_default
   # `vm@vame_value_space_sample_default`
   # calls `vm@var_set_value_space_sample` for every pertinent variable set
   # and combines the results into one large `data.table`.
   # @codedoc_comment_block vm@vame_value_space_sample_default
-  sample <- lapply(unique(id_by_var_nm), function(id) {
-    var_nms_i <- intersect(var_nms, var_set_var_nm_set_get(vm = vm, id = id))
-    dt <- var_set_value_space_sample(
-      vm = vm,
-      id = id,
-      var_nms = var_nms_i,
-      env = env,
-      n = n
-    )
-    if (length(var_nms_i) == 1 && !data.table::is.data.table(dt)) {
-      dt <- data.table::data.table(x = dt)
-      data.table::setnames(dt, var_nms_i)
+  sample_dt <- local({
+    if (is.null(data)) {
+      data <- list()
     }
-    dt[]
+    sample_dt <- NULL
+    for (id in ids) {
+      data[names(sample_dt)] <- sample_dt
+      var_nms_id <- intersect(
+        var_set_var_nm_set_get(vm = vm, id = id),
+        var_nms
+      )
+      sample_dt <- cbind(sample_dt, var_set_value_space_sample(
+        vm = vm,
+        id = id,
+        env = env,
+        n = n,
+        var_nms = var_nms_id,
+        data = data
+      ))
+    }
+    data.table::setDT(sample_dt)
+    sample_dt[]
   })
-  sample <- do.call(cbind, sample, quote = TRUE)
+  
   # @codedoc_comment_block vm@vame_value_space_sample_default
   # `vm@vame_value_space_sample_default` always returns a `data.table` with `n`
-  # rows and columns `var_nms`.
+  # rows.
   # @codedoc_comment_block vm@vame_value_space_sample_default
-  dbc::assert_prod_output_is_data_table_with_required_names(
-    x = sample,
-    required_names = var_nms
-  )
+  dbc::assert_prod_output_is_data_table(sample_dt)
   dbc::assert_prod_output_is_identical(
-    x = nrow(sample),
+    x = nrow(sample_dt),
     y = n
   )
-  data.table::setcolorder(sample, var_nms)
-  return(sample[])
+  return(sample_dt[])
 }
 
-vame_list_copy <- function(vm) {  
+vame_list_copy <- function(vm) {
   # @codedoc_comment_block vm@vame_list_copy
   # Get a deep copy of `meta_list`.
   # @codedoc_comment_block vm@vame_list_copy

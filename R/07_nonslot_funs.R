@@ -417,6 +417,7 @@ vame_subset_expr <- function(
   return(invisible(NULL))
 }
 
+
 # user_utils -------------------------------------------------------------------
 #' @title Utilities for User-Defined Functions and Expressions
 #' @description

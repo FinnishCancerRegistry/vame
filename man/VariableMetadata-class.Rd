@@ -259,20 +259,18 @@ id \verb{[any]} (no default)
 ID, or "name", of a variable set. The class of \code{id} is defined when you
 create the \code{VariableMetadata} object and it can be pretty much anything.
 
-data \verb{[data.frame, data.table, list]} (no default)
+data \verb{[NULL, data.frame, data.table, list]} (default \code{NULL})
 \itemize{
-\item \code{data.frame}/\code{data.table}: Must contain all necessary variables for
-the \code{maker}.
-\item \code{list}: Must by fully named. \code{list} elements are passed as variables as
-they are to the \code{maker}, except the optional element \code{data$df} ---
+\item \code{NULL}: No data is used.
+\item \code{data.frame}/\code{data.table}: These variables are used as-is.
+\item \code{list}: Must by fully named. \code{list} elements are used as variables
+as-is, except the optional element \code{data$df} ---
 a \code{data.frame}/\code{data.table} --- is first turned into a \code{list},
 and \code{data} (without \code{data$df}) and \code{data$df} are combined into one longer
 \code{list}. This allows you to easily pass a \code{data.frame}/\code{data.table} and
 necessary accompanying variables for settings etc.
 E.g.
-\code{data = list(df = data.frame(my_col_1 = 1, my_col_2 = 2), my_custom_setting = "something")}
-for a \code{maker} defined as
-\code{quote(my_fun(my_col_1, my_col_2, my_custom_setting))}.
+\code{data = list(df = data.frame(my_col_1 = 1, my_col_2 = 2), my_custom_setting = "something")}.
 Of course you can also pass
 \code{data = list(my_col_1 = 1, my_col_2 = 2, my_custom_setting = "something")}
 directly if that is more convenient.
@@ -299,20 +297,18 @@ Call multiple \code{var_set_dt$maker}s in sequence.
 ids \verb{[any]} (no default)
 One or more values that can be found in \code{var_set_dt$id}.
 
-data \verb{[data.frame, data.table, list]} (no default)
+data \verb{[NULL, data.frame, data.table, list]} (default \code{NULL})
 \itemize{
-\item \code{data.frame}/\code{data.table}: Must contain all necessary variables for
-the \code{maker}.
-\item \code{list}: Must by fully named. \code{list} elements are passed as variables as
-they are to the \code{maker}, except the optional element \code{data$df} ---
+\item \code{NULL}: No data is used.
+\item \code{data.frame}/\code{data.table}: These variables are used as-is.
+\item \code{list}: Must by fully named. \code{list} elements are used as variables
+as-is, except the optional element \code{data$df} ---
 a \code{data.frame}/\code{data.table} --- is first turned into a \code{list},
 and \code{data} (without \code{data$df}) and \code{data$df} are combined into one longer
 \code{list}. This allows you to easily pass a \code{data.frame}/\code{data.table} and
 necessary accompanying variables for settings etc.
 E.g.
-\code{data = list(df = data.frame(my_col_1 = 1, my_col_2 = 2), my_custom_setting = "something")}
-for a \code{maker} defined as
-\code{quote(my_fun(my_col_1, my_col_2, my_custom_setting))}.
+\code{data = list(df = data.frame(my_col_1 = 1, my_col_2 = 2), my_custom_setting = "something")}.
 Of course you can also pass
 \code{data = list(my_col_1 = 1, my_col_2 = 2, my_custom_setting = "something")}
 directly if that is more convenient.
@@ -428,12 +424,20 @@ create the \code{VariableMetadata} object and it can be pretty much anything.}
 
 Assign value space sampler for given \code{id} in \code{var_set_dt$sampler}.
 
-The \code{sampler} can be a \code{function} or a \code{call} object. A \code{NULL} \code{sampler}
+The \code{sampler} can be \code{NULL}, a \code{list}, a \code{function} or a \code{call} object.
+A \code{NULL} \code{sampler}
 object is considered to mean that one has not been defined.
-A \code{sampler} of type \code{function} must have arguments \code{x}, \code{var_nms}, and
-\code{n}. \code{x} contains input data, \code{var_nms} are the names of variables for
-which to sample data, and \code{n} the number of samples.
-A \code{sampler} of type \code{call} must contain (mention) variables \code{x} and \code{n} ---
+A \code{sampler} of type \code{function} must have arguments \code{x}, \code{vs}, and
+\code{n}. \code{x} is the \code{vame::VariableMetadata} object itself,
+\code{vs} is the pre-evaluated \code{value_space} for the variable set,
+and \code{n} the number of samples.
+A \code{sampler} of type \code{list} must have elements \code{sampler$dep_var_nm_set} and
+\code{sampler$sampler}. \code{sampler$dep_var_nm_set} must be a character string
+vector: use this to list names of variables needed for conditional
+sampling. E.g. sampling \code{y} conditional on \code{x} means you should have
+\code{dep_var_nm_set = "x"}. \code{sampler$sampler} must be a \code{function} or a
+\code{call} object.
+A \code{sampler} of type \code{call} must contain (mention) variable \code{n} ---
 see \code{?all.vars}.
 
 See the documentation for \code{var_set_value_space_sample} to understand how
@@ -456,13 +460,14 @@ In \verb{_set} functions the value to set for the specified metadata.}
 
 \item{\code{var_set_value_space_sample}}{\emph{Description}
 
-Returns \code{n} samples from the value space of \code{id}.
+Take \code{n} random samples from the value space of \code{id}.
 
 Random sampling is performed as follows:
 \itemize{
 \item \code{vm@var_set_value_space_eval} is called for the appropriate value space
-\item The appropriate sampler is retrieved --- this is either the corresponding
-sampler stored in \code{var_set_dt$sampler}, or no sampler exists there,
+\item The appropriate \code{sampler} is retrieved --- this is either the
+corresponding
+sampler stored in \code{var_set_dt$sampler}, or if no sampler exists there,
 one of the defaults depending on the type of the value space:
 \itemize{
 \item \code{dt}: Sample uniformly rows from \code{data.table} with replacement.
@@ -479,15 +484,26 @@ replacement from \code{lo:hi} if \code{storage.mode(lo) == "integer"}.
 }
 \item The \code{sampler} is called or evaluated, which results in the random samples,
 and these are returned. If the \code{sampler} is a function it is called via
-\code{sampler(x = vs, var_nms = var_nms, n = n)}, where \code{vs} is the evaluated
-value space. If it is an expression, it is evaluated in a new environment
-that contains \code{x}, \code{arg_nms}, and \code{n}. This new environment's parent is
-\code{env}.
+\code{sampler(x = vm, n = n)}, where \code{vm} is the
+\code{VariableMetadata} object itself.
+The function may also have the optional arguments \code{vs}
+(the evaluated value space for \code{id}), \code{data} (see argument \code{data}
+of \code{vm@var_set_value_space_sample}), \code{dep_var_nm_set} (this will be
+\code{sampler$dep_var_nm_set} if \code{sampler} was a list), \code{id}
+(see argument \code{id} of \code{vm@var_set_value_space_sample}), and
+\code{var_nms} (see argument \code{var_nms} of \code{vm@var_set_value_space_sample}).
+If \code{sampler} is an expression, it is evaluated in a new
+environment that contains the arguments mentioned above as objects.
+This new environment's parent is \code{env}.
+For conditional sampling you must use \code{sampler} of type \code{list} and make
+use of \code{data} (and optionally \code{dep_var_nm_set}) in \code{sampler$sampler}.
+\code{vm@var_set_value_space_sample} always returns a \code{data.table} with
+\code{n} rows.
 }
 
 \emph{Usage}
 
-\code{vm@var_set_value_space_sample(id, var_nms, env, n)}
+\code{vm@var_set_value_space_sample(id, n, data, var_nms, env)}
 
 \emph{Arguments}
 
@@ -495,6 +511,27 @@ id \verb{[any]} (no default)
 
 ID, or "name", of a variable set. The class of \code{id} is defined when you
 create the \code{VariableMetadata} object and it can be pretty much anything.
+
+n \verb{[integer]} (default \code{1L})
+
+Number of random samples to take.
+
+data \verb{[NULL, data.frame, data.table, list]} (default \code{NULL})
+\itemize{
+\item \code{NULL}: No data is used.
+\item \code{data.frame}/\code{data.table}: These variables are used as-is.
+\item \code{list}: Must by fully named. \code{list} elements are used as variables
+as-is, except the optional element \code{data$df} ---
+a \code{data.frame}/\code{data.table} --- is first turned into a \code{list},
+and \code{data} (without \code{data$df}) and \code{data$df} are combined into one longer
+\code{list}. This allows you to easily pass a \code{data.frame}/\code{data.table} and
+necessary accompanying variables for settings etc.
+E.g.
+\code{data = list(df = data.frame(my_col_1 = 1, my_col_2 = 2), my_custom_setting = "something")}.
+Of course you can also pass
+\code{data = list(my_col_1 = 1, my_col_2 = 2, my_custom_setting = "something")}
+directly if that is more convenient.
+}
 
 var_nms \verb{[NULL, character]} (default \code{NULL})
 \itemize{
@@ -508,11 +545,7 @@ Environment where a value space will be evaluated, if applicable.
 \itemize{
 \item \code{NULL}: Use the environment where the function was called.
 \item \code{environment}: Use this environment.
-}
-
-n \verb{[integer]} (default \code{1L})
-
-Number of random samples to take.}
+}}
 
 \item{\code{var_is_aggregateable_to}}{\emph{Description}
 
@@ -883,8 +916,8 @@ Environment where \code{describer} of class \code{call} is evaluated.
 
 \item{\code{var_value_space_sample}}{\emph{Description}
 
-Calls \code{vm@var_set_value_space_sample} with \code{var_nms = var_nm}.
-Output is always a vector.
+Wrapper for \code{vm@var_set_value_space_sample} for when you want a random
+sample for only one variable.
 
 \emph{Usage}
 
@@ -1016,12 +1049,20 @@ Retrieve \code{meta_list$sampler}.
 
 Assign \code{meta_list$sampler}.
 
-The \code{sampler} can be a \code{function} or a \code{call} object. A \code{NULL} \code{sampler}
+The \code{sampler} can be \code{NULL}, a \code{list}, a \code{function} or a \code{call} object.
+A \code{NULL} \code{sampler}
 object is considered to mean that one has not been defined.
-A \code{sampler} of type \code{function} must have arguments \code{x}, \code{var_nms}, and
-\code{n}. \code{x} contains input data, \code{var_nms} are the names of variables for
-which to sample data, and \code{n} the number of samples.
-A \code{sampler} of type \code{call} must contain (mention) variables \code{x} and \code{n} ---
+A \code{sampler} of type \code{function} must have arguments \code{x}, \code{vs}, and
+\code{n}. \code{x} is the \code{vame::VariableMetadata} object itself,
+\code{vs} is the pre-evaluated \code{value_space} for the variable set,
+and \code{n} the number of samples.
+A \code{sampler} of type \code{list} must have elements \code{sampler$dep_var_nm_set} and
+\code{sampler$sampler}. \code{sampler$dep_var_nm_set} must be a character string
+vector: use this to list names of variables needed for conditional
+sampling. E.g. sampling \code{y} conditional on \code{x} means you should have
+\code{dep_var_nm_set = "x"}. \code{sampler$sampler} must be a \code{function} or a
+\code{call} object.
+A \code{sampler} of type \code{call} must contain (mention) variable \code{n} ---
 see \code{?all.vars}.
 
 See the documentation for \code{vame_value_space_sample} to understand how
@@ -1039,23 +1080,49 @@ In \verb{_set} functions the value to set for the specified metadata.}
 
 \item{\code{vame_value_space_sample}}{\emph{Description}
 
-Take \code{n} random samples of the value spaces of \code{var_nms}.
-
-If \code{vame_list$sampler} exists and is a function, it is called via
-\code{vame_list$sampler(x = vm, var_nms = var_nms, n = n)}, where
-\code{vm} is the pertinent \code{VariableMetadata} object itself.
-If \code{vame_list$sampler} is a \code{call} object, it is evaluated in a new
-environment whose parent is \code{env}.
+\code{vm@var_value_space_sample} always returns a vector of length \code{n}.
 If \code{vame_list$sampler} has not been set, \code{vm@vame_value_space_sample}
 calls \code{vm@vame_value_space_sample_default}.
-\code{vm@vame_value_space_sample} always returns a \code{data.table} with \code{n} rows
-and columns \code{var_nms}.
+Take \code{n} random samples of the value spaces of \code{ids}.
+
+If \code{vame_list$sampler} exists and is a function, it is called via
+\code{vame_list$sampler(x = vm, ids = ids, n = n, data = data, var_nms = var_nms)},
+where \code{vm} is the pertinent \code{VariableMetadata} object itself.
+If \code{vame_list$sampler} is a \code{call} object, it is evaluated in a new
+environment whose parent is \code{env}. This new environment contains the
+same objects that would be passed as arguments when calling
+\code{vame_list$sampler} as a \code{function}.
+\code{vm@vame_value_space_sample} always returns a \code{data.table} with \code{n} rows.
 
 \emph{Usage}
 
-\code{vm@vame_value_space_sample(var_nms, env, n)}
+\code{vm@vame_value_space_sample(ids, n, data, var_nms, env)}
 
 \emph{Arguments}
+
+ids \verb{[any]} (no default)
+One or more values that can be found in \code{var_set_dt$id}.
+
+n \verb{[integer]} (default \code{1L})
+
+Number of random samples to take.
+
+data \verb{[NULL, data.frame, data.table, list]} (default \code{NULL})
+\itemize{
+\item \code{NULL}: No data is used.
+\item \code{data.frame}/\code{data.table}: These variables are used as-is.
+\item \code{list}: Must by fully named. \code{list} elements are used as variables
+as-is, except the optional element \code{data$df} ---
+a \code{data.frame}/\code{data.table} --- is first turned into a \code{list},
+and \code{data} (without \code{data$df}) and \code{data$df} are combined into one longer
+\code{list}. This allows you to easily pass a \code{data.frame}/\code{data.table} and
+necessary accompanying variables for settings etc.
+E.g.
+\code{data = list(df = data.frame(my_col_1 = 1, my_col_2 = 2), my_custom_setting = "something")}.
+Of course you can also pass
+\code{data = list(my_col_1 = 1, my_col_2 = 2, my_custom_setting = "something")}
+directly if that is more convenient.
+}
 
 var_nms \verb{[NULL, character]} (default \code{NULL})
 \itemize{
@@ -1069,11 +1136,7 @@ Environment where a value space will be evaluated, if applicable.
 \itemize{
 \item \code{NULL}: Use the environment where the function was called.
 \item \code{environment}: Use this environment.
-}
-
-n \verb{[integer]} (default \code{1L})
-
-Number of random samples to take.}
+}}
 
 \item{\code{vame_value_space_sample_default}}{\emph{Description}
 
@@ -1081,19 +1144,16 @@ Number of random samples to take.}
 calls \code{vm@var_set_value_space_sample} for every pertinent variable set
 and combines the results into one large \code{data.table}.
 \code{vm@vame_value_space_sample_default} always returns a \code{data.table} with \code{n}
-rows and columns \code{var_nms}.
+rows.
 
 \emph{Usage}
 
-\code{vm@vame_value_space_sample_default(var_nms, env, n)}
+\code{vm@vame_value_space_sample_default(ids, env, var_nms, data, n)}
 
 \emph{Arguments}
 
-var_nms \verb{[NULL, character]} (default \code{NULL})
-\itemize{
-\item \code{NULL}: Get the value space for all variables in the set.
-\item \code{character}: Get the value spaces for only these variables.
-}
+ids \verb{[any]} (no default)
+One or more values that can be found in \code{var_set_dt$id}.
 
 env \verb{[NULL, environment]} (default \code{NULL})
 
@@ -1101,6 +1161,29 @@ Environment where a value space will be evaluated, if applicable.
 \itemize{
 \item \code{NULL}: Use the environment where the function was called.
 \item \code{environment}: Use this environment.
+}
+
+var_nms \verb{[NULL, character]} (default \code{NULL})
+\itemize{
+\item \code{NULL}: Get the value space for all variables in the set.
+\item \code{character}: Get the value spaces for only these variables.
+}
+
+data \verb{[NULL, data.frame, data.table, list]} (default \code{NULL})
+\itemize{
+\item \code{NULL}: No data is used.
+\item \code{data.frame}/\code{data.table}: These variables are used as-is.
+\item \code{list}: Must by fully named. \code{list} elements are used as variables
+as-is, except the optional element \code{data$df} ---
+a \code{data.frame}/\code{data.table} --- is first turned into a \code{list},
+and \code{data} (without \code{data$df}) and \code{data$df} are combined into one longer
+\code{list}. This allows you to easily pass a \code{data.frame}/\code{data.table} and
+necessary accompanying variables for settings etc.
+E.g.
+\code{data = list(df = data.frame(my_col_1 = 1, my_col_2 = 2), my_custom_setting = "something")}.
+Of course you can also pass
+\code{data = list(my_col_1 = 1, my_col_2 = 2, my_custom_setting = "something")}
+directly if that is more convenient.
 }
 
 n \verb{[integer]} (default \code{1L})
@@ -1390,8 +1473,9 @@ is available.
 Random sampling is performed as follows:
 \itemize{
 \item \code{vm@var_set_value_space_eval} is called for the appropriate value space
-\item The appropriate sampler is retrieved --- this is either the corresponding
-sampler stored in \code{var_set_dt$sampler}, or no sampler exists there,
+\item The appropriate \code{sampler} is retrieved --- this is either the
+corresponding
+sampler stored in \code{var_set_dt$sampler}, or if no sampler exists there,
 one of the defaults depending on the type of the value space:
 \itemize{
 \item \code{dt}: Sample uniformly rows from \code{data.table} with replacement.
@@ -1408,10 +1492,19 @@ replacement from \code{lo:hi} if \code{storage.mode(lo) == "integer"}.
 }
 \item The \code{sampler} is called or evaluated, which results in the random samples,
 and these are returned. If the \code{sampler} is a function it is called via
-\code{sampler(x = vs, var_nms = var_nms, n = n)}, where \code{vs} is the evaluated
-value space. If it is an expression, it is evaluated in a new environment
-that contains \code{x}, \code{arg_nms}, and \code{n}. This new environment's parent is
-\code{env}.
+\code{sampler(x = vm, n = n)}, where \code{vm} is the
+\code{VariableMetadata} object itself.
+The function may also have the optional arguments \code{vs}
+(the evaluated value space for \code{id}), \code{data} (see argument \code{data}
+of \code{vm@var_set_value_space_sample}), \code{dep_var_nm_set} (this will be
+\code{sampler$dep_var_nm_set} if \code{sampler} was a list), \code{id}
+(see argument \code{id} of \code{vm@var_set_value_space_sample}), and
+\code{var_nms} (see argument \code{var_nms} of \code{vm@var_set_value_space_sample}).
+If \code{sampler} is an expression, it is evaluated in a new
+environment that contains the arguments mentioned above as objects.
+This new environment's parent is \code{env}.
+For conditional sampling you must use \code{sampler} of type \code{list} and make
+use of \code{data} (and optionally \code{dep_var_nm_set}) in \code{sampler$sampler}.
 }
 
 The following functions are related to this feature:
@@ -1517,6 +1610,8 @@ The following functions are part of this feature:
 containing values for the variable in question must be named \code{x}.
 Formerly this was \code{level}.
 
+\code{vm@vame_value_space_sample} gains arguments \code{ids} and \code{data}.
+
 \code{vm@var_aggregate} now always considers it possible to aggregate to
 \code{to_var_nm} if it only has one value.
 
@@ -1533,6 +1628,9 @@ New function \code{vm@var_description_get}.
 \code{vm@var_meta_is_defined} internal problem fixed.
 
 \code{vm@var_set_make} argument \code{data} can now also be a \code{list} object.
+
+\code{vm@var_set_value_space_sample} now has new arg \code{data}. Pass your data via
+\code{data} when you have a conditional sampling method.
 }
 
 \section{News for version 0.3.0}{
@@ -2017,107 +2115,6 @@ stopifnot(
   "dd" \%in\% vm_2@var_meta_get_all("var_nm")
 )
 
-# random sampling
-c_lo <- as.Date("2001-01-01")
-c_hi <- as.Date("2020-12-31")
-## see what default samplers does with bounds
-storage.mode(c_lo) <- storage.mode(c_hi) <- "integer"
-vm <- vame::VariableMetadata(
-  var_dt = data.table::data.table(
-    var_nm = c("a", "d", "b", "c"),
-    type = c("categorical", "categorical", "categorical", "my_type")
-  ),
-  var_set_dt = data.table::data.table(
-    id = c("ad", "b", "c"),
-    var_nm_set = list(ad = c("a", "d"), b = "b", c = "c"),
-    value_space = list(
-      ad = list(dt = data.table::CJ(a = 1:2, d = 3:4)),
-      b = list(set = 3:4),
-      c = list(bounds = list(
-        lo = c_lo,
-        hi = c_hi,
-        lo_inclusive = TRUE,
-        hi_inclusive = TRUE
-      ))
-    ),
-    sampler = list(
-      ad = NULL,
-      b = quote({
-        p <- c(0.25, 0.75)
-        sample(x[["set"]], size = n, replace = TRUE, p = p)
-      }),
-      c = NULL
-    )
-  )
-)
-vm@var_set_value_space_sampler_set(
-  id = "c",
-  value = quote({
-    pool <- x[["bounds"]][["lo"]]:x[["bounds"]][["hi"]]
-    p <- dnorm(x = pool, mean = mean(pool), sd = 10)
-    class(pool) <- class(x[["bounds"]][["lo"]])
-    pool[sample(length(pool), size = n, replace = FALSE, prob = p)]
-  })
-)
-
-ad_sample <- vm@var_set_value_space_sample(id = "ad", n = 4L)
-a_sample <- vm@var_set_value_space_sample(id = "ad", var_nms = "a", n = 4L)
-b_sample <- vm@var_set_value_space_sample(id = "b", n = 4L)
-c_sample <- vm@var_set_value_space_sample(id = "c", n = 4L)
-stopifnot(
-  inherits(ad_sample, "data.table"),
-  nrow(ad_sample) == 4,
-  inherits(a_sample, "data.table"),
-  nrow(a_sample) == 4,
-  is.integer(b_sample),
-  length(b_sample) == 4,
-  inherits(c_sample, "Date"),
-  storage.mode(c_sample) == "integer",
-  length(c_sample) == 4
-)
-
-a_sample <- vm@var_value_space_sample(var_nm = "a", n = 4L)
-stopifnot(
-  is.integer(a_sample),
-  length(a_sample) == 4
-)
-
-vame_sample <- vm@vame_value_space_sample(
-  var_nms = c("a", "b", "c", "d"),
-  n = 10L
-)
-stopifnot(
-  inherits(vame_sample, "data.table"),
-  identical(c("a", "b", "c", "d"), names(vame_sample)),
-  nrow(vame_sample) == 10
-)
-
-vm@vame_value_space_sampler_set(quote({
-  # see vame_value_space_sampler_set in ?vame::VariableMetadata
-  stopifnot(
-    "VariableMetadata" \%in\% class(x),
-    is.character(var_nms),
-    is.integer(n),
-    n > 0
-  )
-  # in this example we take the default sample and modify it a bit.
-  dt <- x@vame_value_space_sample_default(var_nms = var_nms, n = n)
-  if ("c" \%in\% var_nms) {
-    dt[j = "c" := runif(min = 0.0, max = .SD[["a"]], n = n)]
-  }
-  dt[]
-}))
-vame_sample <- vm@vame_value_space_sample(
-  var_nms = c("a", "b", "c", "d"),
-  n = 10L
-)
-stopifnot(
-  inherits(vame_sample, "data.table"),
-  identical(c("a", "b", "c", "d"), names(vame_sample)),
-  nrow(vame_sample) == 10,
-  vame_sample[["c"]] < vame_sample[["a"]]
-)
-
 # Example of make feature
 make_dg_y <- function(
   dg_date
@@ -2236,6 +2233,121 @@ stopifnot(
   identical(obs[["dg_y"]], exp[["dg_y"]]),
   identical(obs[["area_01"]], exp[["area_01"]]),
   identical(obs[["area_02"]], exp[["area_02"]])
+)
+# random sampling
+c_lo <- as.Date("2001-01-01")
+c_hi <- as.Date("2020-12-31")
+## see what default samplers does with bounds
+storage.mode(c_lo) <- storage.mode(c_hi) <- "integer"
+vm <- vame::VariableMetadata(
+  var_dt = data.table::data.table(
+    var_nm = c("a", "d", "b", "c"),
+    type = c("categorical", "categorical", "categorical", "my_type")
+  ),
+  var_set_dt = data.table::data.table(
+    id = c("ad", "b", "c", "e"),
+    var_nm_set = list(ad = c("a", "d"), b = "b", c = "c", e = "e"),
+    value_space = list(
+      ad = list(dt = data.table::CJ(a = 1:2, d = 3:4)),
+      b = list(set = 3:4),
+      c = list(bounds = list(
+        lo = c_lo,
+        hi = c_hi,
+        lo_inclusive = TRUE,
+        hi_inclusive = TRUE
+      )),
+      e = list(set = 1:2)
+    ),
+    sampler = list(
+      ad = NULL,
+      b = quote({
+        p <- c(0.25, 0.75)
+        out <- sample(vs[["set"]], size = n, replace = TRUE, p = p)
+        out <- data.table::setDT(list(b = out))
+        return(out[])
+      }),
+      c = NULL,
+      e = quote({
+        stopifnot(
+          inherits(data, "list"),
+          "e_cond" \%in\% names(data),
+          length(data[["e_cond"]]) == n
+        )
+        dist <- data.table::data.table(
+          e_cond = c(1L, 1L, 2L, 2L),
+          e = c(1:2, 1:2),
+          p_cond = c(0.25, 0.75, 0.40, 0.60)
+        )
+        join_dt <- data.table::setDT(list(e_cond = data[["e_cond"]]))
+        out <- dist[
+          i = join_dt,
+          j = list(
+            e = sample(.SD[["e"]], replace = TRUE, prob = .SD[["p_cond"]])
+          ),
+          by = .EACHI
+        ]
+        data.table::set(out, j = setdiff(names(out), "e"), value = NULL)
+        return(out[])
+      })
+    )
+  )
+)
+vm@var_set_value_space_sampler_set(
+  id = "c",
+  value = quote({
+    pool <- vs[["bounds"]][["lo"]]:vs[["bounds"]][["hi"]]
+    p <- dnorm(x = pool, mean = mean(pool), sd = 10)
+    class(pool) <- class(vs[["bounds"]][["lo"]])
+    out <- pool[sample(length(pool), size = n, replace = FALSE, prob = p)]
+    out <- data.table::setDT(list(c = out))
+    return(out[])
+  })
+)
+
+ad_sample <- vm@var_set_value_space_sample(id = "ad", n = 4L)
+b_sample <- vm@var_set_value_space_sample(id = "b", n = 4L)
+c_sample <- vm@var_set_value_space_sample(id = "c", n = 4L)
+stopifnot(
+  inherits(ad_sample, "data.table"),
+  nrow(ad_sample) == 4,
+  inherits(b_sample, "data.table"),
+  nrow(b_sample) == 4,
+  inherits(c_sample, "data.table"),
+  storage.mode(c_sample$c) == "integer",
+  nrow(c_sample) == 4
+)
+
+vame_sample <- vm@vame_value_space_sample(
+  ids = c("ad", "b", "c"),
+  n = 10L
+)
+stopifnot(
+  inherits(vame_sample, "data.table"),
+  identical(c("a", "d", "b", "c"), names(vame_sample)),
+  nrow(vame_sample) == 10
+)
+
+# conditional sampling
+vm@var_set_value_space_sampler_set(
+  id = "c",
+  value = list(
+    dep_var_nm_set = "a",
+    sampler = quote({
+      a <- data[["a"]]
+      out <- data.table::data.table(c = runif(n = n, min = a - 1, max = a))
+      return(out[])
+    })
+  )
+)
+vame_sample <- vm@vame_value_space_sample(
+  ids = c("ad", "b", "c"),
+  n = 10L
+)
+stopifnot(
+  inherits(vame_sample, "data.table"),
+  identical(c("a", "d", "b", "c"), names(vame_sample)),
+  nrow(vame_sample) == 10,
+  vame_sample[["c"]] < vame_sample[["a"]]
 )
 
 # Example of describing feature

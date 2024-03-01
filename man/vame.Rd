@@ -169,6 +169,11 @@ containing values for the variable in question must be named \code{x}.
 Formerly this was \code{level}.
 }
 
+\subsection{vm@vame_value_space_sample}{
+
+\code{vm@vame_value_space_sample} gains arguments \code{ids} and \code{data}.
+}
+
 \subsection{vm@var_aggregate}{
 
 \code{vm@var_aggregate} now always considers it possible to aggregate to
@@ -208,6 +213,12 @@ New function \code{vm@var_description_get}.
 \subsection{vm@var_set_make}{
 
 \code{vm@var_set_make} argument \code{data} can now also be a \code{list} object.
+}
+
+\subsection{vm@var_set_value_space_sample}{
+
+\code{vm@var_set_value_space_sample} now has new arg \code{data}. Pass your data via
+\code{data} when you have a conditional sampling method.
 }
 
 }
