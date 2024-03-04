@@ -487,10 +487,6 @@ vame_make <- function(
     env <- parent.frame(1L)
   }
   dt <- dt_independent_frame_dependent_contents__(data)
-  # @codedoc_comment_block doc_slot_fun_arg(ids)
-  # @param ids `[any]` (no default)
-  # One or more values that can be found in `var_set_dt$id`.
-  # @codedoc_comment_block doc_slot_fun_arg(ids)
   lapply(ids, function(id) {
     # this called just in case some make expression makes use of a slot function
     # --- see where the slots are created.
@@ -552,21 +548,9 @@ var_set_value_space_eval <- function(
 
   dbc::assert_inherits(vm, required_class = "VariableMetadata")
 
-  assert_is_var_set_id(vm, id = id)
+  assert_is_var_set_id(vm, id)
   assert_var_set_value_space_is_defined(vm)
-  # @codedoc_comment_block doc_slot_fun_arg(var_nms)
-  # @param var_nms `[NULL, character]` (default `NULL`)
-  # 
-  # - `NULL`: Get the value space for all variables in the set.
-  # - `character`: Get the value spaces for only these variables.
-  # @codedoc_comment_block doc_slot_fun_arg(var_nms)
-  dbc::assert_is_one_of(
-    var_nms,
-    funs = list(
-      dbc::report_is_NULL,
-      dbc::report_is_character_nonNA_vector
-    )
-  )
+  assert_is_arg_var_nms(var_nms)
   value_space_var_nms <- var_set_meta_get(vm, id = id, meta_nm = "var_nm_set")
   if (is.null(var_nms)) {
     var_nms <- value_space_var_nms
@@ -871,11 +855,21 @@ var_set_value_space_sample <- function(
   #     })
   #   )
   # )
+  # c_sample_data <- list(a = 1:2)
+  # c_sample <- vm@var_set_value_space_sample(
+  #   id = "c",
+  #   data = c_sample_data,
+  #   n = 2L
+  # )
   # vame_sample <- vm@vame_value_space_sample(
   #   ids = c("ad", "b", "c"),
   #   n = 10L
   # )
   # stopifnot(
+  #   inherits(c_sample, "data.table"),
+  #   identical("c", names(c_sample)),
+  #   nrow(c_sample) == 2,
+  #   c_sample[["c"]] < c_sample_data[["a"]],
   #   inherits(vame_sample, "data.table"),
   #   identical(c("a", "d", "b", "c"), names(vame_sample)),
   #   nrow(vame_sample) == 10,
@@ -1329,7 +1323,7 @@ var_meta_is_defined <- function(
   # @codedoc_comment_block news("vm@var_meta_is_defined", "2024-01-24", "0.4.0")
   # `vm@var_meta_is_defined` internal problem fixed.
   # @codedoc_comment_block news("vm@var_meta_is_defined", "2024-01-24", "0.4.0")
-  assert_is_var_nm(vm, var_nm = var_nm)
+  assert_is_var_nm(vm, var_nm)
   vd <- vd_get(vm)
   pos <- data.table::chmatch(var_nm, vd[["var_nm"]])
   if (!meta_nm %in% names(vd)) {
@@ -2121,25 +2115,7 @@ vame_value_space_sample <- function(
   # @codedoc_comment_block news("vm@vame_value_space_sample", "2024-02-27", "0.4.0")
   # `vm@vame_value_space_sample` gains arguments `ids` and `data`.
   # @codedoc_comment_block news("vm@vame_value_space_sample", "2024-02-27", "0.4.0")
-  for (id in ids) {
-    assert_is_var_set_id(
-      vm = vm,
-      id = id
-    )
-  }
-  rm(list = "id")
-  dbc::assert_has_one_of_classes(
-    var_nms,
-    classes = c("NULL", "character")
-  )
-  if (!is.null(var_nms)) {
-    dbc::assert_vector_elems_are_in_set(
-      var_nms,
-      set = unlist(lapply(ids, function(id) {
-        var_set_var_nm_set_get(vm = vm, id = id)
-      }))
-    )
-  }
+  handle_arg_ids_et_var_nms_inplace__(vm)
   dbc::assert_has_one_of_classes(
     env,
     classes = c("NULL", "environment")
@@ -2216,24 +2192,7 @@ vame_value_space_sample_default <- function(
   # @codedoc_comment_block news("vm@vame_value_space_sample", "2024-02-27", "0.4.0")
   # `vm@vame_value_space_sample` gains arguments `ids` and `data`.
   # @codedoc_comment_block news("vm@vame_value_space_sample", "2024-02-27", "0.4.0")
-  for (id in ids) {
-    assert_is_var_set_id(
-      vm = vm,
-      id = id
-    )
-  }
-  dbc::assert_has_one_of_classes(
-    var_nms,
-    classes = c("NULL", "character")
-  )
-  if (!is.null(var_nms)) {
-    dbc::assert_vector_elems_are_in_set(
-      var_nms,
-      set = unlist(lapply(ids, function(id) {
-        var_set_var_nm_set_get(vm = vm, id = id)
-      }))
-    )
-  }
+  handle_arg_ids_et_var_nms_inplace__(vm)
   data <- handle_arg_data__(data)
   dbc::assert_has_one_of_classes(
     env,

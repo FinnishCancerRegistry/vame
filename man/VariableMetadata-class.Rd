@@ -294,8 +294,13 @@ Call multiple \code{var_set_dt$maker}s in sequence.
 
 \emph{Arguments}
 
-ids \verb{[any]} (no default)
-One or more values that can be found in \code{var_set_dt$id}.
+ids \verb{[NULL, vector]} (default \code{NULL})
+\itemize{
+\item \code{NULL}: Behaviour varies. An error is raised if this cannot be inferred.
+If the function has the argument \code{var_nms}, that will be used
+to infer \code{ids}.
+\item \code{vector}: One or more values that can be found in \code{var_set_dt$id}.
+}
 
 data \verb{[NULL, data.frame, data.table, list]} (default \code{NULL})
 \itemize{
@@ -339,8 +344,9 @@ create the \code{VariableMetadata} object and it can be pretty much anything.
 
 var_nms \verb{[NULL, character]} (default \code{NULL})
 \itemize{
-\item \code{NULL}: Get the value space for all variables in the set.
-\item \code{character}: Get the value spaces for only these variables.
+\item \code{NULL}: Behaviour varies. If the function has the argument \code{ids} or \code{id},
+uses all variable names in those variable sets.
+\item \code{character}: Use these variable names.
 }
 
 env \verb{[NULL, environment]} (default \code{NULL})
@@ -535,8 +541,9 @@ directly if that is more convenient.
 
 var_nms \verb{[NULL, character]} (default \code{NULL})
 \itemize{
-\item \code{NULL}: Get the value space for all variables in the set.
-\item \code{character}: Get the value spaces for only these variables.
+\item \code{NULL}: Behaviour varies. If the function has the argument \code{ids} or \code{id},
+uses all variable names in those variable sets.
+\item \code{character}: Use these variable names.
 }
 
 env \verb{[NULL, environment]} (default \code{NULL})
@@ -1100,8 +1107,13 @@ same objects that would be passed as arguments when calling
 
 \emph{Arguments}
 
-ids \verb{[any]} (no default)
-One or more values that can be found in \code{var_set_dt$id}.
+ids \verb{[NULL, vector]} (default \code{NULL})
+\itemize{
+\item \code{NULL}: Behaviour varies. An error is raised if this cannot be inferred.
+If the function has the argument \code{var_nms}, that will be used
+to infer \code{ids}.
+\item \code{vector}: One or more values that can be found in \code{var_set_dt$id}.
+}
 
 n \verb{[integer]} (default \code{1L})
 
@@ -1126,8 +1138,9 @@ directly if that is more convenient.
 
 var_nms \verb{[NULL, character]} (default \code{NULL})
 \itemize{
-\item \code{NULL}: Get the value space for all variables in the set.
-\item \code{character}: Get the value spaces for only these variables.
+\item \code{NULL}: Behaviour varies. If the function has the argument \code{ids} or \code{id},
+uses all variable names in those variable sets.
+\item \code{character}: Use these variable names.
 }
 
 env \verb{[NULL, environment]} (default \code{NULL})
@@ -1152,8 +1165,13 @@ rows.
 
 \emph{Arguments}
 
-ids \verb{[any]} (no default)
-One or more values that can be found in \code{var_set_dt$id}.
+ids \verb{[NULL, vector]} (default \code{NULL})
+\itemize{
+\item \code{NULL}: Behaviour varies. An error is raised if this cannot be inferred.
+If the function has the argument \code{var_nms}, that will be used
+to infer \code{ids}.
+\item \code{vector}: One or more values that can be found in \code{var_set_dt$id}.
+}
 
 env \verb{[NULL, environment]} (default \code{NULL})
 
@@ -1165,8 +1183,9 @@ Environment where a value space will be evaluated, if applicable.
 
 var_nms \verb{[NULL, character]} (default \code{NULL})
 \itemize{
-\item \code{NULL}: Get the value space for all variables in the set.
-\item \code{character}: Get the value spaces for only these variables.
+\item \code{NULL}: Behaviour varies. If the function has the argument \code{ids} or \code{id},
+uses all variable names in those variable sets.
+\item \code{character}: Use these variable names.
 }
 
 data \verb{[NULL, data.frame, data.table, list]} (default \code{NULL})
@@ -1210,8 +1229,9 @@ Get list of category space \code{data.table} objects.
 
 var_nms \verb{[NULL, character]} (default \code{NULL})
 \itemize{
-\item \code{NULL}: Get the value space for all variables in the set.
-\item \code{character}: Get the value spaces for only these variables.
+\item \code{NULL}: Behaviour varies. If the function has the argument \code{ids} or \code{id},
+uses all variable names in those variable sets.
+\item \code{character}: Use these variable names.
 }
 
 env \verb{[NULL, environment]} (default \code{NULL})
@@ -1234,8 +1254,9 @@ Get a category space \code{data.table}.
 
 var_nms \verb{[NULL, character]} (default \code{NULL})
 \itemize{
-\item \code{NULL}: Get the value space for all variables in the set.
-\item \code{character}: Get the value spaces for only these variables.
+\item \code{NULL}: Behaviour varies. If the function has the argument \code{ids} or \code{id},
+uses all variable names in those variable sets.
+\item \code{character}: Use these variable names.
 }
 
 env \verb{[NULL, environment]} (default \code{NULL})
@@ -2339,11 +2360,21 @@ vm@var_set_value_space_sampler_set(
     })
   )
 )
+c_sample_data <- list(a = 1:2)
+c_sample <- vm@var_set_value_space_sample(
+  id = "c",
+  data = c_sample_data,
+  n = 2L
+)
 vame_sample <- vm@vame_value_space_sample(
   ids = c("ad", "b", "c"),
   n = 10L
 )
 stopifnot(
+  inherits(c_sample, "data.table"),
+  identical("c", names(c_sample)),
+  nrow(c_sample) == 2,
+  c_sample[["c"]] < c_sample_data[["a"]],
   inherits(vame_sample, "data.table"),
   identical(c("a", "d", "b", "c"), names(vame_sample)),
   nrow(vame_sample) == 10,

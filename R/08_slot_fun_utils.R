@@ -47,3 +47,55 @@ handle_arg_data__ <- function(data) {
 
   return(arg_list)
 }
+
+handle_arg_ids_et_var_nms_inplace__ <- function(vm) {
+  calling_env <- parent.frame(1L)
+  dbc::assert_prod_interim_is(
+    quote(c("ids", "var_nms") %in% ls(envir = calling_env))
+  )
+  ids <- calling_env[["ids"]]
+  var_nms <- calling_env[["var_nms"]]
+  # @codedoc_comment_block doc_slot_fun_arg(ids)
+  # @param ids `[NULL, vector]` (default `NULL`)
+  #
+  # - `NULL`: Behaviour varies. An error is raised if this cannot be inferred.
+  #   If the function has the argument `var_nms`, that will be used
+  #   to infer `ids`.
+  # - `vector`: One or more values that can be found in `var_set_dt$id`.
+  # @codedoc_comment_block doc_slot_fun_arg(ids)
+  assert_is_arg_ids(vm = vm, x = ids)
+  # @codedoc_comment_block doc_slot_fun_arg(var_nms)
+  # @param var_nms `[NULL, character]` (default `NULL`)
+  #
+  # - `NULL`: Behaviour varies. If the function has the argument `ids` or `id`,
+  #   uses all variable names in those variable sets.
+  # - `character`: Use these variable names.
+  # @codedoc_comment_block doc_slot_fun_arg(var_nms)
+  assert_is_arg_var_nms(var_nms)
+  all_var_nm_sets <- var_set_var_nm_set_get_all(vm = vm)
+  all_ids <- var_set_meta_get_all(vm = vm, meta_nm = "id")
+  if (is.null(ids) && is.null(var_nms)) {
+    stop("Both `ids` and `var_nms` cannot be `NULL`")
+  } else if (!is.null(var_nms) && is.null(ids)) {
+    ids <- all_ids[vapply(
+      seq_along(all_ids),
+      function(i) {
+        any(all_var_nm_sets[[i]] %in% var_nms)
+      },
+      logical(1L)
+    )]
+  } else if (is.null(var_nms) && !is.null(ids)) {
+    var_nms <- unlist(all_var_nm_sets[match(ids, all_ids)])
+  } else {
+    inferred_var_nms <- unlist(all_var_nm_sets[match(ids, all_ids)])
+    extra_var_nms <- setdiff(var_nms, inferred_var_nms)
+    if (length(extra_var_nms) > 0) {
+      stop("Arguments `ids` and `var_nms` are incongruent: `var_nms` contains ",
+           "these variable names not found in any of the variable name sets ",
+           "for the supplied `ids`: ", deparse1(extra_var_nms))
+    }
+  }
+  calling_env[["ids"]] <- ids
+  calling_env[["var_nms"]] <- var_nms
+  return(invisible(NULL))
+}
