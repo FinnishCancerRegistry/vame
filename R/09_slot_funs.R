@@ -2098,7 +2098,7 @@ vame_value_space_sampler_set <- function(
 }
 vame_value_space_sample <- function(
   vm,
-  ids,
+  ids = NULL,
   n = 1L,
   data = NULL,
   var_nms = NULL,
@@ -2175,7 +2175,7 @@ vame_value_space_sample <- function(
 
 vame_value_space_sample_default <- function(
   vm,
-  ids,
+  ids = NULL,
   env = NULL,
   var_nms = NULL,
   data = NULL,
