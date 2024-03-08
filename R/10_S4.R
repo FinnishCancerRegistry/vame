@@ -102,6 +102,18 @@ doc_variablemetadata_news__ <- function() {
     detect_allowed_keys = "(vm@)|(vame::VariableMetadata)"
   )
 }
+doc_variablemetadata_details__ <- function(df = NULL) {
+  if (is.null(df)) {
+    df <- codedoc::extract_keyed_comment_blocks()
+  }
+  belongs_in_details <- grepl("^recommendation[(]", df[["key"]])
+  lines <- unlist(df[["comment_block"]][belongs_in_details])
+  lines <- c(
+    "@details",
+    lines
+  )
+  return(lines)
+}
 doc_variablemetadata_examples__ <- function(df = NULL) {
   if (is.null(df)) {
     df <- codedoc::extract_keyed_comment_blocks()
@@ -429,8 +441,9 @@ methods::setClass(
 #' @eval local({
 #'   df <- codedoc::extract_keyed_comment_blocks()
 #'   c(
-#'     doc_variablemetadata_features__(df = df),
 #'     doc_slot_funs__(df = df),
+#'     doc_variablemetadata_details__(df = df),
+#'     doc_variablemetadata_features__(df = df),
 #'     doc_variablemetadata_news__(),
 #'     doc_variablemetadata_examples__(df = df)
 #'   )
@@ -447,6 +460,8 @@ VariableMetadata <- function(
   #'
   #' Contains information for individual variables. Must contain at a minimum
   #' column `var_nm`.
+  #'
+  #' See **Details** and **Features** for more information.
   assert_is_var_dt(var_dt)
   #' @param var_set_dt `[data.table]`
   #'
@@ -457,6 +472,45 @@ VariableMetadata <- function(
   #'   `c("my_set_01", "my_set_02")` or `1:2`.
   #' - `var_nm_set` `[list]`: Each list element contains a character string
   #'   vector of variable names. e.g. `list(c("a", "b"))`.
+  #'
+  #' See **Details** and **Features** for more information.
+  # @codedoc_comment_block news("vame::VariableMetadata", "2024-03-07", "0.4.0")
+  # Added recommendations for constructing `vame::VariableMetadata` objects into
+  # documentation.
+  # @codedoc_comment_block news("vame::VariableMetadata", "2024-03-07", "0.4.0")
+  # @codedoc_comment_block recommendation(var_set_dt)
+  # `var_set_dt`:
+  #
+  # It is recommended that `var_set_dt` contains as small variable sets as
+  # possible. This includes even hierarchical variables such as area variables.
+  # The guideline should be to have separate variable sets unless
+  # variables in a set MUST be defined together. A `var_set_dt`
+  # that contains only, or almost only, variable sets with one variable in
+  # each is a good `var_set_dt`. This has the following benefits:
+  #
+  # + It is a clear rule.
+  # + It promotes writing smaller wholes of code, e.g. smaller functions.
+  # + No chance of regret when you realise that you defined something too large.
+  #   The opposite kind of regret is more rare. So the total probability of
+  #   regret is minimised.
+  #   If there really comes a case where formerly separate definitions belong
+  #   together (e.g. combining two `value_space`s), that is safer than
+  #   splitting: Imagine you have used `vm@var_set_value_space_eval` in your
+  #   code. If the variable set is split, your code may break. If it enlarges,
+  #   it less likely breaks.
+  #
+  # The downside is that your `vame::VariableMetadata` object is more complex,
+  # but we hide the complexity anyway by making the data only accessible with
+  # the slot functions.
+  #
+  # Variables that depend on each other can be visualised as a DAG where an
+  # arrow points from a parent variable to its child, i.e. a variable that is
+  # created using its parent. For instance, in `exit_date -> exit_year`,
+  # `exit_year` is defined using `exit_date`. It can be helpful to think of
+  # a the `var_set_dt` as an implementation of such a graph --- and we want the
+  # graph to show all the dependencies as arrows, not to hide dependencies
+  # inside nodes.
+  # @codedoc_comment_block recommendation(var_set_dt)
   assert_is_var_set_dt(var_set_dt)
   # @codedoc_comment_block news("vame::VariableMetadata", "2023-12-12", "0.2.2")
   # `vame::VariableMetadata` gains arg `vame_list`.
@@ -469,17 +523,18 @@ VariableMetadata <- function(
   assert_is_vame_list(vame_list)
   vame_list <- as.list(vame_list)
   pkg_env <- environment(VariableMetadata)
-#' @description
-#' Create and make use of a `VariableMetadata` object. It contains
-#' - `var_dt`: A `data.table` containing metadata for variables,
-#' - `var_set_dt`: Metadata for variable sets,
-#' - `vame_list`: A list of metadata for the `VariableMetadata` object itself,
-#' - A number of functions in S4 slots for making use of the metadata via e.g.
-#'   `vm@var_assert` where `vm` is the `VariableMetadata` object.
-#' 
-#' A `VariableMetadata` object is created via calling the
-#' `vame::VariableMetadata` function.
-#' See section **Features** for what you can do with `VariableMetadata` objects.
+  #' @description
+  #' Create and make use of a `VariableMetadata` object. It contains
+  #' - `var_dt`: A `data.table` containing metadata for variables,
+  #' - `var_set_dt`: Metadata for variable sets,
+  #' - `vame_list`: A list of metadata for the `VariableMetadata` object itself,
+  #' - A number of functions in S4 slots for making use of the metadata via e.g.
+  #'   `vm@var_assert` where `vm` is the `VariableMetadata` object.
+  #' 
+  #' A `VariableMetadata` object is created via calling the
+  #' `vame::VariableMetadata` function.
+  #' See section **Features** for what you can do with `VariableMetadata`
+  #' objects.
   funs <- new.env(parent = pkg_env)
   funs$data <- new.env(parent = emptyenv())
   funs$data$var_dt <- var_dt

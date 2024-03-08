@@ -169,6 +169,12 @@ containing values for the variable in question must be named \code{x}.
 Formerly this was \code{level}.
 }
 
+\subsection{vame::VariableMetadata}{
+
+Added recommendations for constructing \code{vame::VariableMetadata} objects into
+documentation.
+}
+
 \subsection{vm@vame_value_space_sample}{
 
 \code{vm@vame_value_space_sample} gains arguments \code{ids} and \code{data}.

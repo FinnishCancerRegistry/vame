@@ -8,6 +8,11 @@
 containing values for the variable in question must be named `x`.
 Formerly this was `level`.
 
+### vame::VariableMetadata
+
+Added recommendations for constructing `vame::VariableMetadata` objects into
+documentation.
+
 ### vm@vame_value_space_sample
 
 `vm@vame_value_space_sample` gains arguments `ids` and `data`.

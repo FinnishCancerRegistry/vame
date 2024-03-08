@@ -12,7 +12,9 @@ VariableMetadata(var_dt, var_set_dt, vame_list = NULL)
 \item{var_dt}{\verb{[data.table]}
 
 Contains information for individual variables. Must contain at a minimum
-column \code{var_nm}.}
+column \code{var_nm}.
+
+See \strong{Details} and \strong{Features} for more information.}
 
 \item{var_set_dt}{\verb{[data.table]}
 
@@ -23,7 +25,9 @@ Must contain at a minimum columns
 \code{c("my_set_01", "my_set_02")} or \code{1:2}.
 \item \code{var_nm_set} \verb{[list]}: Each list element contains a character string
 vector of variable names. e.g. \code{list(c("a", "b"))}.
-}}
+}
+
+See \strong{Details} and \strong{Features} for more information.}
 
 \item{vame_list}{\verb{[NULL, list]} (default \code{NULL})
 
@@ -43,7 +47,42 @@ Create and make use of a \code{VariableMetadata} object. It contains
 
 A \code{VariableMetadata} object is created via calling the
 \code{vame::VariableMetadata} function.
-See section \strong{Features} for what you can do with \code{VariableMetadata} objects.
+See section \strong{Features} for what you can do with \code{VariableMetadata}
+objects.
+}
+\details{
+\code{var_set_dt}:
+
+It is recommended that \code{var_set_dt} contains as small variable sets as
+possible. This includes even hierarchical variables such as area variables.
+The guideline should be to have separate variable sets unless
+variables in a set MUST be defined together. A \code{var_set_dt}
+that contains only, or almost only, variable sets with one variable in
+each is a good \code{var_set_dt}. This has the following benefits:
+\itemize{
+\item It is a clear rule.
+\item It promotes writing smaller wholes of code, e.g. smaller functions.
+\item No chance of regret when you realise that you defined something too large.
+The opposite kind of regret is more rare. So the total probability of
+regret is minimised.
+If there really comes a case where formerly separate definitions belong
+together (e.g. combining two \code{value_space}s), that is safer than
+splitting: Imagine you have used \code{vm@var_set_value_space_eval} in your
+code. If the variable set is split, your code may break. If it enlarges,
+it less likely breaks.
+}
+
+The downside is that your \code{vame::VariableMetadata} object is more complex,
+but we hide the complexity anyway by making the data only accessible with
+the slot functions.
+
+Variables that depend on each other can be visualised as a DAG where an
+arrow points from a parent variable to its child, i.e. a variable that is
+created using its parent. For instance, in \code{exit_date -> exit_year},
+\code{exit_year} is defined using \code{exit_date}. It can be helpful to think of
+a the \code{var_set_dt} as an implementation of such a graph --- and we want the
+graph to show all the dependencies as arrows, not to hide dependencies
+inside nodes.
 }
 \section{Slots}{
 
@@ -1630,6 +1669,9 @@ The following functions are part of this feature:
 \code{var_dt$labeler} of class \code{data.table} specs changed: Now column
 containing values for the variable in question must be named \code{x}.
 Formerly this was \code{level}.
+
+Added recommendations for constructing \code{vame::VariableMetadata} objects into
+documentation.
 
 \code{vm@vame_value_space_sample} gains arguments \code{ids} and \code{data}.
 
