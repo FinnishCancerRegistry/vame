@@ -2138,16 +2138,16 @@ vame_value_space_sample <- function(
   # @codedoc_comment_block vm@vame_value_space_sample
   sampler <- vame_value_space_sample_default
   if (vame_meta_is_defined(vm = vm, meta_nm = "sampler")) {
-    # @codedoc_comment_block vm@vame_value_space_sample
-    # Take `n` random samples of the value spaces of `ids`.
-    #
-    # If `vame_list$sampler` exists and is a function, it is called via
-    # `vame_list$sampler(x = vm, ids = ids, n = n, data = data, var_nms = var_nms)`,
-    # where `vm` is the pertinent `VariableMetadata` object itself.
-    # @codedoc_comment_block vm@vame_value_space_sample
     sampler <- vame_value_space_sampler_get(vm = vm)
   }
   if (is.function(sampler)) {
+    # @codedoc_comment_block vm@vame_value_space_sample
+    # Take `n` random samples of the value spaces of `ids`.
+    #
+    # If `vame_list$sampler` is a function, it is called via
+    # `vame_list$sampler(x = vm, ids = ids, n = n, data = data, var_nms = var_nms)`,
+    # where `vm` is the pertinent `VariableMetadata` object itself.
+    # @codedoc_comment_block vm@vame_value_space_sample
     arg_list <- arg_list[intersect(names(arg_list), names(formals(sampler)))]
     sample <- do.call(sampler, arg_list, quote = TRUE)
   } else if (is.call(sampler)) {
@@ -2239,6 +2239,8 @@ vame_value_space_sample_default <- function(
     data.table::setDT(sample_dt)
     sample_dt[]
   })
+  data.table::setDT(sample_dt)
+  data.table::setcolorder(sample_dt, var_nms)
   
   # @codedoc_comment_block vm@vame_value_space_sample_default
   # `vm@vame_value_space_sample_default` always returns a `data.table` with `n`
