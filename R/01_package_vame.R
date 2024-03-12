@@ -1,9 +1,81 @@
+doc_dev_todo__ <- function(df = NULL) {
+  if (is.null(df)) {
+    df <- codedoc::extract_keyed_comment_blocks()
+  }
+  df <- df[grepl("^dev_todo[(]", df[["key"]]), ]
+  priority_type_topic <- gsub(
+    "(^dev_todo[(])|([)]$)",
+    "",
+    df[["key"]]
+  )
+  priority_type_topic <- strsplit(
+    priority_type_topic,
+    split = "[ ]*,[ ]*"
+  )
+  priority_type_topic <- do.call(
+    rbind,
+    lapply(priority_type_topic, function(ptt) {
+      data.frame(
+        todo_priority = ptt[1],
+        todo_type = ptt[2],
+        todo_topic = ptt[3]
+      )
+    })
+  )
+  df[, c("todo_priority", "todo_type", "todo_topic")] <- priority_type_topic
+  df <- df[
+    order(df[["todo_priority"]], df[["todo_type"]], df[["todo_topic"]]),
+  ]
+  todo_priority_set <- unique(df[["todo_priority"]])
+  lines <- unlist(lapply(todo_priority_set, function(priority) {
+    idx_set <- which(df[["todo_priority"]] == priority)
+    todo_type_set <- unique(df[["todo_type"]][idx_set])
+    lines <- unlist(lapply(todo_type_set, function(type) {
+      idx_set <- intersect(
+        idx_set,
+        which(df[["todo_type"]] == type)
+      )
+      todo_topic_set <- unique(df[["todo_topic"]][idx_set])
+      lines <- unlist(lapply(todo_topic_set, function(todo_topic) {
+        idx_set <- intersect(
+          idx_set,
+          which(df[["todo_topic"]] == todo_topic)
+        )
+        c(
+          paste0("##### ", todo_topic),
+          "",
+          unlist(df[["comment_block"]][idx_set])
+        )
+      }))
+      lines <- c(
+        paste0("#### ", type),
+        "",
+        lines
+      )
+      return(lines)
+    }))
+    lines <- c(
+      paste0("### ", priority),
+      "",
+      lines
+    )
+    return(lines)
+  }))
+  lines <- c(
+    "## TODO",
+    "",
+    lines
+  )
+  return(lines)
+}
+
 #' @name vame
 #' @title vame: Variable Metadata
 #'
 #' @eval c(
 #'   codedoc::codedoc_R_package_description("vame"),
-#'   codedoc::codedoc_news_for_R_package()
+#'   codedoc::codedoc_news_for_R_package(),
+#'   doc_dev_todo__()
 #' )
 "_PACKAGE"
 
