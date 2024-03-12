@@ -207,7 +207,7 @@ value_space_type_funs__ <- list(
         assertion_type = assertion_type
       )
     },
-    sampler = function(x, vs, id, n) {
+    sampler = function(x, vs, n, var_nms) {
       # @codedoc_comment_block defaults(var_set_dt$sampler)
       #   + `unrestricted`: If `class_set = "character"`, sample random strings
       #     of length 16 using character pool `c(letters, LETTERS, 0:9)`. If
