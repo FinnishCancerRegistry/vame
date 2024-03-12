@@ -158,6 +158,24 @@ my_fun_2 <- function(dg_age) \{
 \}
 }\if{html}{\out{</div>}}
 \subsection{TODO}{
+\subsection{Priority: high}{
+\subsection{Type: feat}{
+
+\code{vm@vame_category_space_dt}:
+
+\code{vm@var_set_make} can be used in place of \code{vm@var_set_value_space_eval}
+in the case of categorical variables when
+multiple columns are requested AND the necessary data is available from
+other value spaces. Currently in v0.3.0.16 it is necessary to have ALL
+dependent variables in one \code{value_space} to show the dependency in the
+output of at least \code{vm@vame_category_space_dt}.
+
+Maybe there needs to be a smart system, or user-inputted system, of knowing
+which variable sets depend on what other variable sets.
+}
+
+}
+
 \subsection{Priority: low}{
 \subsection{Type: feat}{
 

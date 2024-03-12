@@ -2268,6 +2268,7 @@ vame_category_space_dt_list <- function(
   # @codedoc_comment_block feature_funs(category spaces)
   # - `vm@vame_category_space_dt_list`
   # @codedoc_comment_block feature_funs(category spaces)
+
   dbc::assert_is_one_of(
     env,
     funs = list(dbc::report_is_NULL,
@@ -2299,6 +2300,21 @@ vame_category_space_dt <- function(
   # @codedoc_comment_block vm@vame_category_space_dt
   # Get a category space `data.table`.
   # @codedoc_comment_block vm@vame_category_space_dt
+
+  # @codedoc_comment_block dev_todo(high, feat, vm@vame_category_space_dt)
+  # `vm@var_set_make` can be used in place of `vm@var_set_value_space_eval`
+  # (or maybe `vm@var_set_value_space_eval` can call `vm@var_set_make`)
+  # in the case of categorical variables when
+  # multiple columns are requested AND the necessary data is available from
+  # other value spaces. Currently in v0.3.0.16 it is necessary to have ALL
+  # dependent variables in one `value_space` to show the dependency in the
+  # output of at least `vm@vame_category_space_dt`. The downside is the
+  # potential slowdown.
+  #
+  # Maybe there needs to be a smart system, or user-input-based system, of
+  # knowing which variable sets depend on what other variable sets. For instance
+  # the user can include column `var_set_dt$dep_id_set`.
+  # @codedoc_comment_block dev_todo(high, feat, vm@vame_category_space_dt)
   
   # @codedoc_comment_block feature(category spaces)
   # The category spaces feature becomes available when the value spaces feature
