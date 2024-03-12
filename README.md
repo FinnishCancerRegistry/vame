@@ -161,4 +161,24 @@ my_fun_2 <- function(dg_age) {
 }
 ```
 
+## TODO
+
+### Priority: low
+
+#### Type: feat
+
+`vm@var_set_value_space_sample`:
+
+The issue of dependent variables
+appears in both `sampler` and `maker` objects. It could be argued that
+they should be required to have the same set of dependent variables. This
+would mean improving the corresponding assertion functions. Alternatively,
+a new column `var_set_dt$dep_var_nm_set` or even `var_set_dt$dep_id_set`
+could be implemented --- but currently `sampler` objects can also sample
+independently, so implmenting e.g. `var_set_dt$dep_id_set` would require
+that independent samplers can still work. Currently in 0.3.0.15 using
+`dep_var_nm_set` in `sampler` causes `data` to be asserted to contain
+such variables. Maybe an independent `sampler` would need to be marked
+in a special way so that the `data` assertion is not performed.
+
 

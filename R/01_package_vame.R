@@ -1,8 +1,11 @@
 doc_dev_todo__ <- function(df = NULL) {
   if (is.null(df)) {
-    df <- codedoc::extract_keyed_comment_blocks()
-  }
-  df <- df[grepl("^dev_todo[(]", df[["key"]]), ]
+    df <- codedoc::extract_keyed_comment_blocks(
+      detect_allowed_keys = "^dev_todo[(]"
+    )
+  } else {
+    df <- df[grepl("^dev_todo[(]", df[["key"]]), ]
+  }  
   priority_type_topic <- gsub(
     "(^dev_todo[(])|([)]$)",
     "",
@@ -42,20 +45,20 @@ doc_dev_todo__ <- function(df = NULL) {
           which(df[["todo_topic"]] == todo_topic)
         )
         c(
-          paste0("##### ", todo_topic),
+          paste0("`", todo_topic, "`:"),
           "",
           unlist(df[["comment_block"]][idx_set])
         )
       }))
       lines <- c(
-        paste0("#### ", type),
+        paste0("#### Type: ", type),
         "",
         lines
       )
       return(lines)
     }))
     lines <- c(
-      paste0("### ", priority),
+      paste0("### Priority: ", priority),
       "",
       lines
     )
@@ -74,8 +77,7 @@ doc_dev_todo__ <- function(df = NULL) {
 #'
 #' @eval c(
 #'   codedoc::codedoc_R_package_description("vame"),
-#'   codedoc::codedoc_news_for_R_package(),
-#'   doc_dev_todo__()
+#'   codedoc::codedoc_news_for_R_package()
 #' )
 "_PACKAGE"
 
@@ -236,4 +238,6 @@ doc_dev_todo__ <- function(df = NULL) {
 #   vardef@dbc@assert_is_var(dg_age, var_nm = "dg_age")
 # }
 # ```
+#
+# ${paste0(vame:::doc_dev_todo__(), collapse = "\n")}
 # @codedoc_comment_block R_package_description(vame)

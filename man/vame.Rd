@@ -157,6 +157,28 @@ my_fun_2 <- function(dg_age) \{
   vardef@dbc@assert_is_var(dg_age, var_nm = "dg_age")
 \}
 }\if{html}{\out{</div>}}
+\subsection{TODO}{
+\subsection{Priority: low}{
+\subsection{Type: feat}{
+
+\code{vm@var_set_value_space_sample}:
+
+The issue of dependent variables
+appears in both \code{sampler} and \code{maker} objects. It could be argued that
+they should be required to have the same set of dependent variables. This
+would mean improving the corresponding assertion functions. Alternatively,
+a new column \code{var_set_dt$dep_var_nm_set} or even \code{var_set_dt$dep_id_set}
+could be implemented --- but currently \code{sampler} objects can also sample
+independently, so implmenting e.g. \code{var_set_dt$dep_id_set} would require
+that independent samplers can still work. Currently in 0.3.0.15 using
+\code{dep_var_nm_set} in \code{sampler} causes \code{data} to be asserted to contain
+such variables. Maybe an independent \code{sampler} would need to be marked
+in a special way so that the \code{data} assertion is not performed.
+}
+
+}
+
+}
 }
 
 \section{News}{
@@ -573,32 +595,6 @@ New slot \code{vm@var_value_space_eval}.
 \subsection{vame::VariableMetadata}{
 
 First release.
-}
-
-}
-
-\subsection{TODO}{
-\subsection{low}{
-\subsection{feat}{
-\subsection{var_set_dt$sampler}{
-
-\code{var_set_dt$sampler} and \code{vame_list$sampler}:
-
-The issue of dependent variables
-appears in both \code{sampler} and \code{maker} objects. It could be argued that
-they should be required to have the same set of dependent variables. This
-would mean improving the corresponding assertion functions. Alternatively,
-a new column \code{var_set_dt$dep_var_nm_set} or even \code{var_set_dt$dep_id_set}
-could be implemented --- but currently \code{sampler} objects can also sample
-independently, so implmenting e.g. \code{var_set_dt$dep_id_set} would require
-that independent samplers can still work. Currently in 0.3.0.15 using
-\code{dep_var_nm_set} in \code{sampler} causes \code{data} to be asserted to contain
-such variables. Maybe an independent \code{sampler} would need to be marked
-in a special way so that the \code{data} assertion is not performed.
-}
-
-}
-
 }
 
 }

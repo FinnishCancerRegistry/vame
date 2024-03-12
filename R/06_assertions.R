@@ -264,9 +264,7 @@ assert_is_sampler <- function(
   # object is considered to mean that one has not been defined.
   # @codedoc_comment_block specification(vame_list$sampler)
   # @codedoc_comment_block specification(var_set_dt$sampler)
-  # @codedoc_comment_block dev_todo(low, feat, var_set_dt$sampler)
-  # `var_set_dt$sampler` and `vame_list$sampler`:
-  #
+  # @codedoc_comment_block dev_todo(low, feat, vm@var_set_value_space_sample)
   # The issue of dependent variables
   # appears in both `sampler` and `maker` objects. It could be argued that
   # they should be required to have the same set of dependent variables. This
@@ -278,7 +276,7 @@ assert_is_sampler <- function(
   # `dep_var_nm_set` in `sampler` causes `data` to be asserted to contain
   # such variables. Maybe an independent `sampler` would need to be marked
   # in a special way so that the `data` assertion is not performed.
-  # @codedoc_comment_block dev_todo(low, feat, var_set_dt$sampler)
+  # @codedoc_comment_block dev_todo(low, feat, vm@var_set_value_space_sample)
   dbc::assert_has_one_of_classes(
     x = x,
     x_nm = x_nm,
