@@ -2161,8 +2161,6 @@ vame_value_space_sample <- function(
     parent.env(call_eval_env) <- env
     sample <- eval(sampler, envir = call_eval_env)
   }
-  data.table::setDT(sample)
-  data.table::setcolorder(sample, var_nms)
   # @codedoc_comment_block vm@vame_value_space_sample
   # `vm@vame_value_space_sample` always returns a `data.table` with `n` rows.
   # If `var_nms` was supplied, only those columns are in the output in the
@@ -2170,6 +2168,7 @@ vame_value_space_sample <- function(
   # Else all columns for each variable set identified by `ids` are present.
   # @codedoc_comment_block vm@vame_value_space_sample
   dbc::assert_prod_output_is_data_table(sample)
+  data.table::setcolorder(sample, var_nms)
   dbc::assert_prod_output_is_identical(
     x = names(sample),
     y = var_nms
@@ -2239,14 +2238,17 @@ vame_value_space_sample_default <- function(
     data.table::setDT(sample_dt)
     sample_dt[]
   })
-  data.table::setDT(sample_dt)
-  data.table::setcolorder(sample_dt, var_nms)
   
   # @codedoc_comment_block vm@vame_value_space_sample_default
   # `vm@vame_value_space_sample_default` always returns a `data.table` with `n`
   # rows.
   # @codedoc_comment_block vm@vame_value_space_sample_default
   dbc::assert_prod_output_is_data_table(sample_dt)
+  data.table::setcolorder(sample_dt, var_nms)
+  dbc::assert_prod_output_is_identical(
+    x = names(sample_dt),
+    y = var_nms
+  )
   dbc::assert_prod_output_is_identical(
     x = nrow(sample_dt),
     y = n
