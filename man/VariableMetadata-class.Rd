@@ -1131,7 +1131,7 @@ If \code{vame_list$sampler} has not been set, \code{vm@vame_value_space_sample}
 calls \code{vm@vame_value_space_sample_default}.
 Take \code{n} random samples of the value spaces of \code{ids}.
 
-If \code{vame_list$sampler} exists and is a function, it is called via
+If \code{vame_list$sampler} is a function, it is called via
 \code{vame_list$sampler(x = vm, ids = ids, n = n, data = data, var_nms = var_nms)},
 where \code{vm} is the pertinent \code{VariableMetadata} object itself.
 If \code{vame_list$sampler} is a \code{call} object, it is evaluated in a new
@@ -1139,6 +1139,9 @@ environment whose parent is \code{env}. This new environment contains the
 same objects that would be passed as arguments when calling
 \code{vame_list$sampler} as a \code{function}.
 \code{vm@vame_value_space_sample} always returns a \code{data.table} with \code{n} rows.
+If \code{var_nms} was supplied, only those columns are in the output in the
+given order.
+Else all columns for each variable set identified by \code{ids} are present.
 
 \emph{Usage}
 
