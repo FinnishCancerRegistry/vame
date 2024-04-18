@@ -1666,6 +1666,18 @@ The following functions are part of this feature:
 }
 }
 
+\section{News for version 0.5.0}{
+
+
+\code{vame::VariableMetadata} now automatically sets \code{var_dt$type} to
+\code{"categorical"} where the variable's \code{value_space} is of type
+\code{dt} or \code{set} or when \code{var_dt$labeler} has been defined. Remember that
+this only occurs when \code{vame::VariableMetadata} is called and any
+additional variables you add later will not be treated automatically.
+Also, if \code{var_dt$type} was already something other than \code{NA} for a
+variable, the automatic determination is not attempted.
+}
+
 \section{News for version 0.4.1}{
 
 

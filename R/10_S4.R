@@ -463,6 +463,7 @@ VariableMetadata <- function(
   #'
   #' See **Details** and **Features** for more information.
   assert_is_var_dt(var_dt)
+
   #' @param var_set_dt `[data.table]`
   #'
   #' Contains information for sets of variables --- e.g. a common value space.
@@ -579,7 +580,7 @@ VariableMetadata <- function(
     funs[[slot_fun_nm]] <- eval(parse(text = lines))
     environment(funs[[slot_fun_nm]]) <- funs
     return(NULL)
-  })  
+  })
   slots <- lapply(slot_fun_nms, function(fun_nm) {
     funs[[fun_nm]]
   })
@@ -592,6 +593,41 @@ VariableMetadata <- function(
     stop("vame::VariableMetadata call resulted in no variables being defined. ",
          "do var_dt and var_set_dt use the same variable names?")
   }
+
+  test_indices <- seq_len(nrow(funs$data$var_dt))
+  if ("type" %in% names(funs$data$var_dt)) {
+    test_indices <- which(is.na(funs$data$var_dt[["type"]]))
+  }
+  categorical_var_indices <- which(vapply(
+    funs$data$var_dt[["var_nm"]][test_indices],
+    function(var_nm) {
+      vs <- tryCatch(
+        out@var_value_space_eval(var_nm),
+        error = function(e) list()
+      )
+      # @codedoc_comment_block news("vame::VariableMetadata", "2024-04-18", "0.5.0")
+      # `vame::VariableMetadata` now automatically sets `var_dt$type` to
+      # `"categorical"` where the variable's `value_space` is of type
+      # `dt` or `set` or when `var_dt$labeler` has been defined. Remember that
+      # this only occurs when `vame::VariableMetadata` is called and any
+      # additional variables you add later will not be treated automatically.
+      # Also, if `var_dt$type` was already something other than `NA` for a
+      # variable, the automatic determination is not attempted.
+      # @codedoc_comment_block news("vame::VariableMetadata", "2024-04-18", "0.5.0")
+      return(
+        any(c("set", "dt") %in% names(vs)) ||
+          out@var_meta_is_defined(var_nm = var_nm, meta_nm = "labeler")
+      )
+    },
+    logical(1L)
+  ))
+  data.table::set(
+    var_dt,
+    i = categorical_var_indices,
+    j = "type",
+    value = "categorical"
+  )
+
   return(out)
 }
 
