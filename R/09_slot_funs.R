@@ -6,7 +6,10 @@ var_set_dt_copy <- function(vm) {
   # @codedoc_comment_block news("vm@var_set_dt_copy", "2023-12-13", "0.2.2")
   # New function `vm@var_set_dt_copy`.
   # @codedoc_comment_block news("vm@var_set_dt_copy", "2023-12-13", "0.2.2")
-  data.table::copy(data_obj_get(vm, "var_dt"))
+  # @codedoc_comment_block news("vm@var_set_dt_copy", "2023-12-13", "0.4.1")
+  # `vm@var_set_dt_copy` now actually returns `var_set_dt` instead of `var_dt`.
+  # @codedoc_comment_block news("vm@var_set_dt_copy", "2023-12-13", "0.4.1")
+  data.table::copy(data_obj_get(vm, "var_set_dt"))
 }
 
 var_set_meta_is_defined <- function(
@@ -1306,7 +1309,10 @@ var_dt_copy <- function(vm) {
   # @codedoc_comment_block news("vm@var_dt_copy", "2023-12-13", "0.2.2")
   # New function `vm@var_dt_copy`.
   # @codedoc_comment_block news("vm@var_dt_copy", "2023-12-13", "0.2.2")
-  data.table::copy(data_obj_get(vm, "var_set_dt"))
+  # @codedoc_comment_block news("vm@var_dt_copy", "2023-12-13", "0.4.1")
+  # `vm@var_dt_copy` now actually returns `var_dt` instead of `var_set_dt`.
+  # @codedoc_comment_block news("vm@var_dt_copy", "2023-12-13", "0.4.1")
+  data.table::copy(data_obj_get(vm, "var_dt"))
 }
 
 var_meta_is_defined <- function(

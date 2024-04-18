@@ -1666,6 +1666,14 @@ The following functions are part of this feature:
 }
 }
 
+\section{News for version 0.4.1}{
+
+
+\code{vm@var_dt_copy} now actually returns \code{var_dt} instead of \code{var_set_dt}.
+
+\code{vm@var_set_dt_copy} now actually returns \code{var_set_dt} instead of \code{var_dt}.
+}
+
 \section{News for version 0.4.0}{
 
 

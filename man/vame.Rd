@@ -74,6 +74,19 @@ in a special way so that the \code{data} assertion is not performed.
 
 \section{News}{
 
+\subsection{News for version 0.4.1}{
+\subsection{vm@var_dt_copy}{
+
+\code{vm@var_dt_copy} now actually returns \code{var_dt} instead of \code{var_set_dt}.
+}
+
+\subsection{vm@var_set_dt_copy}{
+
+\code{vm@var_set_dt_copy} now actually returns \code{var_set_dt} instead of \code{var_dt}.
+}
+
+}
+
 \subsection{News for version 0.4.0}{
 \subsection{vame::VariableMetadata}{
 
