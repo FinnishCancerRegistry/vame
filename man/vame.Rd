@@ -74,6 +74,14 @@ in a special way so that the \code{data} assertion is not performed.
 
 \section{News}{
 
+\subsection{News for version 0.5.1}{
+\subsection{vame::vame_value_space_sample_default}{
+
+Fixed a utility function used by \code{vame::vame_value_space_sample_default}.
+}
+
+}
+
 \subsection{News for version 0.5.0}{
 \subsection{vame::VariableMetadata}{
 

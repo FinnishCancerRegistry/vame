@@ -85,6 +85,9 @@ handle_arg_ids_et_var_nms_inplace__ <- function(vm) {
       logical(1L)
     )]
   } else if (is.null(var_nms) && !is.null(ids)) {
+    # @codedoc_comment_block news("vame::vame_value_space_sample_default", "2024-05-10", "0.5.1")
+    # Fixed a utility function used by `vame::vame_value_space_sample_default`.
+    # @codedoc_comment_block news("vame::vame_value_space_sample_default", "2024-05-10", "0.5.1")
     var_nms <- unname(unlist(all_var_nm_sets[match(ids, all_ids)]))
   } else {
     inferred_var_nms <- unlist(all_var_nm_sets[match(ids, all_ids)])
