@@ -85,7 +85,7 @@ handle_arg_ids_et_var_nms_inplace__ <- function(vm) {
       logical(1L)
     )]
   } else if (is.null(var_nms) && !is.null(ids)) {
-    var_nms <- unlist(all_var_nm_sets[match(ids, all_ids)])
+    var_nms <- unname(unlist(all_var_nm_sets[match(ids, all_ids)]))
   } else {
     inferred_var_nms <- unlist(all_var_nm_sets[match(ids, all_ids)])
     extra_var_nms <- setdiff(var_nms, inferred_var_nms)
