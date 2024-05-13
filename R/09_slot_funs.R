@@ -427,7 +427,7 @@ var_set_make <- function(
   if (is.null(env)) {
     env <- parent.frame(1L)
   }
-  arg_list <- handle_arg_data__(data)
+  arg_list <- handle_arg_data__(data, output_type = "arg_list")
   maker <- var_set_maker_get(vm = vm, id = id)
   var_nms <- var_set_var_nm_set_get(vm = vm, id = id)
   if (is.function(maker)) {
@@ -462,7 +462,7 @@ var_set_make <- function(
   } else {
     stop("Internal error: invalid var_set_dt$maker for id = ", deparse1(id))
   }
-  
+
   dbc::assert_prod_output_is_data_table(dt)
   dbc::assert_prod_output_has_names(dt, required_names = var_nms)
   return(dt[])
@@ -470,8 +470,8 @@ var_set_make <- function(
 
 vame_make <- function(
   vm,
-  ids,
   data,
+  ids = NULL,
   env = NULL
 ) {
   # @codedoc_comment_block vm@vame_make
@@ -484,26 +484,32 @@ vame_make <- function(
   # New function `vm@vame_make`.
   # @codedoc_comment_block news("vm@vame_make", "2024-01-19", "0.3.0")
 
-  dbc::assert_inherits(data, required_class = "data.frame")
+  # @codedoc_comment_block vame::vame_make::data
+  # @codedoc_insert_comment_block specs(vame:::handle_arg_data__, "df_list")
+  # @codedoc_comment_block vame::vame_make::data
+  data <- handle_arg_data__(data, output_type = "df_list")
+  data[["df"]] <- dt_independent_frame_dependent_contents__(data[["df"]])
+  df_start_col_nms <- data.table::copy(names(data[["df"]]))
+  handle_arg_ids_et_var_nms_inplace__(vm = vm)
   dbc::assert_has_one_of_classes(env, classes = c("NULL", "environment"))
   if (is.null(env)) {
     env <- parent.frame(1L)
   }
-  dt <- dt_independent_frame_dependent_contents__(data)
+
   lapply(ids, function(id) {
     # this called just in case some make expression makes use of a slot function
     # --- see where the slots are created.
     self_set__(vm = vm)
-    out <- var_set_make(vm = vm, id = id, data = dt, env = env)
+    out <- var_set_make(vm = vm, id = id, data = data, env = env)
     data.table::set(
-      x = dt,
+      x = data[["df"]],
       j = names(out),
       value = out
     )
     NULL
   })
-  data.table::set(dt, j = names(data), value = NULL)
-  return(dt[])
+  data.table::set(data[["df"]], j = df_start_col_nms, value = NULL)
+  return(data[["df"]][])
 }
 
 # var_set_value_space funs -----------------------------------------------------

@@ -329,9 +329,16 @@ Call multiple \code{var_set_dt$maker}s in sequence.
 
 \emph{Usage}
 
-\code{vm@vame_make(ids, data, env)}
+\code{vm@vame_make(data, ids, var_nms, env)}
 
 \emph{Arguments}
+
+data \verb{[data.frame, data.table, list]} (no default)
+\itemize{
+\item \code{data.frame}/\code{data.table}: Columns contain necessary data.
+\item \code{list}: Must have (at least) element \code{data$df}, a \code{data.frame}/
+\code{data.table} whose columns contain necessary data.
+}
 
 ids \verb{[NULL, vector]} (default \code{NULL})
 \itemize{
@@ -341,21 +348,11 @@ to infer \code{ids}.
 \item \code{vector}: One or more values that can be found in \code{var_set_dt$id}.
 }
 
-data \verb{[NULL, data.frame, data.table, list]} (default \code{NULL})
+var_nms \verb{[NULL, character]} (default \code{NULL})
 \itemize{
-\item \code{NULL}: No data is used.
-\item \code{data.frame}/\code{data.table}: These variables are used as-is.
-\item \code{list}: Must by fully named. \code{list} elements are used as variables
-as-is, except the optional element \code{data$df} ---
-a \code{data.frame}/\code{data.table} --- is first turned into a \code{list},
-and \code{data} (without \code{data$df}) and \code{data$df} are combined into one longer
-\code{list}. This allows you to easily pass a \code{data.frame}/\code{data.table} and
-necessary accompanying variables for settings etc.
-E.g.
-\code{data = list(df = data.frame(my_col_1 = 1, my_col_2 = 2), my_custom_setting = "something")}.
-Of course you can also pass
-\code{data = list(my_col_1 = 1, my_col_2 = 2, my_custom_setting = "something")}
-directly if that is more convenient.
+\item \code{NULL}: Behaviour varies. If the function has the argument \code{ids} or \code{id},
+uses all variable names in those variable sets.
+\item \code{character}: Use these variable names.
 }
 
 env \verb{[NULL, environment]} (default \code{NULL})

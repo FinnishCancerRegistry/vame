@@ -9,16 +9,16 @@ vame_slot_nms_get__ <- function() {
   return(.__VAME_SLOT_FUN_NMS__)
 }
 
-doc_slot_fun_arg__ <- function(df, arg_nm, with_tag = FALSE) {
-  key <- sprintf("doc_slot_fun_arg(%s)", arg_nm)
-  if (!key %in% df[["key"]]) {
-    warning("arg_nm = \"", arg_nm, "\" has not been documented")
-    return(paste0("TODO: document argument ", arg_nm))
-  }
+doc_slot_fun_arg__ <- function(df, fun_nm, arg_nm, with_tag = FALSE) {
+  key_options <- c(
+    sprintf("vame::%s::%s", fun_nm, arg_nm),
+    sprintf("doc_slot_fun_arg(%s)", arg_nm)
+  )
+  key <- intersect(key_options, df[["key"]])[1]
   lines <- unlist(df[["comment_block"]][df[["key"]] == key])
   if (length(lines) == 0) {
     warning("arg_nm = \"", arg_nm, "\" has not been documented")
-    return(lines)
+    return(paste0("TODO: document argument ", arg_nm))
   }
   while (lines[1] == "") {
     lines <- lines[-1]
@@ -58,7 +58,10 @@ doc_slot_fun__ <- function(df, fun_nm) {
       lines,
       "*Arguments*",
       "",
-      unlist(lapply(slot_fun_arg_nms, doc_slot_fun_arg__, df = df))
+      unlist(lapply(
+        slot_fun_arg_nms, doc_slot_fun_arg__,
+        fun_nm = fun_nm, df = df
+      ))
     )
   }
   return(lines)

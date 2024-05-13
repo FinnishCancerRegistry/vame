@@ -22,30 +22,68 @@ call_slot_fun_alias_in_slot_fun__ <- function(
 }
 
 # handle_arg_* funs ------------------------------------------------------------
-handle_arg_data__ <- function(data) {
+handle_arg_data__ <- function(
+  data,
+  output_type = c("arg_list", "df_list")[1]
+) {
+  parent_call <- eval(quote(match.call()), parent.frame())
   assert_is_arg_data(
     x = data,
     x_nm = "data",
-    call = eval(quote(match.call()), parent.frame()),
+    call = parent_call,
     assertion_type = "user_input"
   )
-
   if (is.data.frame(data)) {
-    arg_list <- as.list(data)
-  } else {
-    arg_list <- data
+    out <- switch(
+      output_type,
+      arg_list = as.list(data),
+      # @codedoc_comment_block specs(vame:::handle_arg_data__, "df_list")
+      # @param data `[data.frame, data.table, list]` (no default)
+      #
+      # - `data.frame`/`data.table`: Columns contain necessary data.
+      # @codedoc_comment_block specs(vame:::handle_arg_data__, "df_list")
+      df_list = list(df = data)
+    )
+  } else if (inherits(data, "list")) {
+    out <- data
     if ("df" %in% names(data)) {
       if (!is.data.frame(data[["df"]])) {
-        stop("Arg `data` was of class `list`, and had element `data$df`, but ",
-             "`data$df` was not a `data.frame`/`data.table` object. Instead ",
-             "it had class vector ", deparse1(class(data[["df"]])))
+        stop(simpleError(
+          message = paste0(
+            "Arg `data` was of class `list`, and had element `data$df`, but ",
+            "`data$df` was not a `data.frame`/`data.table` object. Instead ",
+            "it had class vector ", deparse1(class(data[["df"]]))
+          ),
+          call = parent_call
+        ))
       }
-      arg_list["df"] <- NULL
-      arg_list[names(data[["df"]])] <- data[["df"]]
+      out["df"] <- NULL
+      out[names(data[["df"]])] <- data[["df"]]
+    } else if (!"df" %in% names(data) && output_type == "df_list") {
+      # @codedoc_comment_block specs(vame:::handle_arg_data__, "df_list")
+      # - `list`: Must have (at least) element `data$df`, a `data.frame`/
+      #   `data.table` whose columns contain necessary data.
+      # @codedoc_comment_block specs(vame:::handle_arg_data__, "df_list")
+      stop(simpleError(
+        message = paste0(
+          "Arg `data` was of class `list`, but it did not have element named ",
+          "`df`."
+        ),
+        call = parent_call
+      ))
     }
+  } else if (is.null(data)) {
+    out <- switch(
+      output_type,
+      arg_list = NULL,
+      df_list = stop(simpleError(
+        "Argument `data` cannot be `NULL`.",
+        call = parent_call
+      ))
+    )
   }
 
-  return(arg_list)
+  return(out)
 }
 
 handle_arg_ids_et_var_nms_inplace__ <- function(vm) {
