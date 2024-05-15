@@ -1,10 +1,17 @@
 dt_independent_frame_dependent_contents__ <- function(dt, col_nms = NULL) {
-  dbc::assert_is_data_frame(dt)
+  dbc::assert_is_data_frame(
+    dt,
+    assertion_type = "prod_input"
+  )
   if (is.null(col_nms)) {
     col_nms <- names(dt)
   } else {
-    dbc::assert_has_names(dt, required_names = col_nms)
-  }  
+    dbc::assert_has_names(
+      dt,
+      required_names = col_nms,
+      assertion_type = "prod_input"
+    )
+  }
   out <- data.table::setDT(lapply(col_nms, function(col_nm) dt[[col_nm]]))
   data.table::setnames(out, col_nms)
   return(out[])
