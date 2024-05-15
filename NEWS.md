@@ -7,6 +7,13 @@
 `vm@vame_make` gains argument `var_nms`. You can now pass either `ids` or
 `var_nms` or both.
 
+### vm@vame_make
+
+`vm@vame_make` automatically determines the appropriate order of `ids`
+(whether user-supplied or inferred) in which their `maker`s should be
+called. For instance if `maker` for `ids[1]` requires the variables
+created by the `maker` for `ids[2]`, then the latter is called first.
+
 ### vm@var_set_make
 
 `vm@var_set_make` gains argument `var_nms`. You can now pass either `id` or

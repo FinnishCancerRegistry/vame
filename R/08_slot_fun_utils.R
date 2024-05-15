@@ -178,3 +178,18 @@ handle_arg_ids_et_var_nms_inplace__ <- function(
   calling_env[["var_nms"]] <- var_nms
   return(invisible(NULL))
 }
+
+var_set_maker_req_obj_nm_set__ <- function(vm, id = NULL, maker = NULL) {
+  if (is.null(maker)) {
+    maker <- var_set_maker_get(vm = vm, id = id)
+  }
+  assert_is_maker(maker, assertion_type = "prod_input")
+  if (inherits(maker, "list")) {
+    return(maker[["dep_var_nm_set"]])
+  } else if (is.function(maker)) {
+    return(names(formals(maker)))
+  } else {
+    stop("Internal error: could not determine required object names for a ",
+         "`maker` --- it was neither a list nor a function.")
+  }
+}

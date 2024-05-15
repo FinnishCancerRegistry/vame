@@ -332,7 +332,15 @@ Environment where a value space will be evaluated, if applicable.
 
 \item{\code{vame_make}}{\emph{Description}
 
-Call multiple \code{var_set_dt$maker}s in sequence.
+Call multiple \code{var_set_dt$maker}s in sequence. Performs these steps:
+\itemize{
+\item Infers \code{ids} to use if user give \code{var_nms} but not \code{ids}.
+\item Determines order in which the \code{maker}s of \code{ids} should be called.
+For instance if \code{maker} for \code{ids[1]} requires the variables
+created by the \code{maker} for \code{ids[2]}, then the latter is called first.
+\item Calls the \code{maker} for each \code{ids} element in the correct order.
+\item Returns a \code{data.table} containing the columns created by the \code{maker}s.
+}
 
 \emph{Usage}
 
@@ -1694,6 +1702,11 @@ The following functions are part of this feature:
 
 \code{vm@vame_make} gains argument \code{var_nms}. You can now pass either \code{ids} or
 \code{var_nms} or both.
+
+\code{vm@vame_make} automatically determines the appropriate order of \code{ids}
+(whether user-supplied or inferred) in which their \code{maker}s should be
+called. For instance if \code{maker} for \code{ids[1]} requires the variables
+created by the \code{maker} for \code{ids[2]}, then the latter is called first.
 
 \code{vm@var_set_make} gains argument \code{var_nms}. You can now pass either \code{id} or
 \code{var_nms} or both.

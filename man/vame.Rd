@@ -81,6 +81,14 @@ in a special way so that the \code{data} assertion is not performed.
 \code{var_nms} or both.
 }
 
+\subsection{vm@vame_make}{
+
+\code{vm@vame_make} automatically determines the appropriate order of \code{ids}
+(whether user-supplied or inferred) in which their \code{maker}s should be
+called. For instance if \code{maker} for \code{ids[1]} requires the variables
+created by the \code{maker} for \code{ids[2]}, then the latter is called first.
+}
+
 \subsection{vm@var_set_make}{
 
 \code{vm@var_set_make} gains argument \code{var_nms}. You can now pass either \code{id} or

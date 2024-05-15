@@ -520,9 +520,6 @@ vame_make <- function(
   var_nms = NULL,
   env = NULL
 ) {
-  # @codedoc_comment_block vm@vame_make
-  # Call multiple `var_set_dt$maker`s in sequence.
-  # @codedoc_comment_block vm@vame_make
   # @codedoc_comment_block feature_funs(make)
   # - `vm@vame_make`
   # @codedoc_comment_block feature_funs(make)
@@ -540,12 +537,78 @@ vame_make <- function(
   # `vm@vame_make` gains argument `var_nms`. You can now pass either `ids` or
   # `var_nms` or both.
   # @codedoc_comment_block news("vm@vame_make", "2024-05-13", "0.5.2")
+  # @codedoc_comment_block vm@vame_make
+  # Call multiple `var_set_dt$maker`s in sequence. Performs these steps:
+  #
+  # - Infers `ids` to use if user give `var_nms` but not `ids`.
+  # @codedoc_comment_block vm@vame_make
   handle_arg_ids_et_var_nms_inplace__(vm = vm, required_meta_nm = "maker")
   dbc::assert_has_one_of_classes(env, classes = c("NULL", "environment"))
   if (is.null(env)) {
     env <- parent.frame(1L)
   }
 
+  # @codedoc_comment_block news("vm@vame_make", "2024-05-13", "0.5.2")
+  # `vm@vame_make` automatically determines the appropriate order of `ids`
+  # (whether user-supplied or inferred) in which their `maker`s should be
+  # called. For instance if `maker` for `ids[1]` requires the variables
+  # created by the `maker` for `ids[2]`, then the latter is called first.
+  # @codedoc_comment_block news("vm@vame_make", "2024-05-13", "0.5.2")
+  # @codedoc_comment_block vm@vame_make
+  # - Determines order in which the `maker`s of `ids` should be called.
+  #   For instance if `maker` for `ids[1]` requires the variables
+  #   created by the `maker` for `ids[2]`, then the latter is called first.
+  # @codedoc_comment_block vm@vame_make
+  ids <- local({
+    meta_df <- data.frame(id = ids)
+    meta_df[["req_obj_nm_set"]] <- lapply(meta_df[["id"]], function(id) {
+      var_set_maker_req_obj_nm_set__(vm = vm, id = id)
+    })
+    meta_df[["output_var_nm_set"]] <- lapply(meta_df[["id"]], function(id) {
+      var_set_meta_get(vm = vm, id = id, meta_nm = "var_nm_set")
+    })
+    order_of_ids <- rep(NA_integer_, length(ids))
+    data_obj_nm_set <- union(
+      names(data[["df"]]),
+      setdiff(names(data), "df")
+    )
+    usable_obj_nm_set <- data_obj_nm_set
+    for (i in seq_along(order_of_ids)) {
+      candidate_ids <- setdiff(ids, ids[order_of_ids])
+      makeable_ids <- candidate_ids[vapply(
+        candidate_ids,
+        function(id) {
+          idx <- which(meta_df[["id"]] == id)
+          all(meta_df[["req_obj_nm_set"]][[idx]] %in% usable_obj_nm_set)
+        },
+        logical(1L)
+      )]
+      if (length(makeable_ids) == 0) {
+        print(meta_df[setdiff(seq_len(nrow(meta_df)), order_of_ids), ])
+        stop(
+          "Could not determine order in which to call `maker`s: One or more ",
+          "variable sets in set of ids `", deparse1(ids), "` has `maker` ",
+          "dependencies not satisfied by what was passed via `data` and what ",
+          "other `maker`s can produce. Either pass more variable via `data` ",
+          "or fix one or more of the `maker`s. See the printed table above ",
+          "for more information. Argument `data` contains objects with names `",
+          deparse1(data_obj_nm_set), "`"
+        )
+      }
+      order_of_ids[i] <- match(makeable_ids, ids)[1L]
+      usable_obj_nm_set <- union(
+        usable_obj_nm_set,
+        meta_df[["output_var_nm_set"]][[
+          which(meta_df[["id"]] == ids[order_of_ids[i]])
+        ]]
+      )
+    }
+    ids[order_of_ids]
+  })
+
+  # @codedoc_comment_block vm@vame_make
+  # - Calls the `maker` for each `ids` element in the correct order.
+  # @codedoc_comment_block vm@vame_make
   lapply(ids, function(id) {
     # this called just in case some make expression makes use of a slot function
     # --- see where the slots are created.
@@ -569,9 +632,12 @@ vame_make <- function(
       j = names(made_dt),
       value = made_dt
     )
-    NULL
   })
   data.table::set(data[["df"]], j = df_start_col_nms, value = NULL)
+
+  # @codedoc_comment_block vm@vame_make
+  # - Returns a `data.table` containing the columns created by the `maker`s.
+  # @codedoc_comment_block vm@vame_make
   return(data[["df"]][])
 }
 
