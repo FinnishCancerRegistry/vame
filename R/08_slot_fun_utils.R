@@ -57,8 +57,14 @@ handle_arg_data__ <- function(
           call = parent_call
         ))
       }
-      out["df"] <- NULL
-      out[names(data[["df"]])] <- data[["df"]]
+      out <- switch(
+        output_type,
+        "df_list" = out,
+        "arg_list" = local({
+          out["df"] <- NULL
+          out[names(data[["df"]])] <- data[["df"]]
+        })
+      )
     } else if (!"df" %in% names(data) && output_type == "df_list") {
       # @codedoc_comment_block specs(vame:::handle_arg_data__, "df_list")
       # - `list`: Must have (at least) element `data$df`, a `data.frame`/
