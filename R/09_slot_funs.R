@@ -460,6 +460,31 @@ var_set_make <- function(
   }
   arg_list <- handle_arg_data__(data, output_type = "arg_list")
   maker <- var_set_maker_get(vm = vm, id = id)
+  local({
+    # @codedoc_comment_block news("vm@var_set_make", "2024-05-13", "0.5.2")
+    # `vm@var_set_make` now raises an informative error if `data` did not
+    # contain something the `maker` needs.
+    # @codedoc_comment_block news("vm@var_set_make", "2024-05-13", "0.5.2")
+    req_obj_nm_set <- var_set_maker_req_obj_nm_set__(
+      vm = vm,
+      id = id,
+      maker = maker
+    )
+    data_obj_nm_set <- setdiff(names(data), "df")
+    if ("df" %in% names(data)) {
+      data_obj_nm_set <- union(data_obj_nm_set, names(data[["df"]]))
+    }
+    miss_req_obj_nm_set <- setdiff(
+      req_obj_nm_set,
+      data_obj_nm_set
+    )
+    if (length(miss_req_obj_nm_set) > 0) {
+      stop(
+        "Argument `data` did not contain the following required objects: `",
+        deparse1(miss_req_obj_nm_set), "`"
+      )
+    }
+  })
   var_nms <- var_set_var_nm_set_get(vm = vm, id = id)
   if (is.function(maker)) {
     dt <- do.call(maker, arg_list, quote = TRUE)
@@ -467,20 +492,6 @@ var_set_make <- function(
     make_env <- new.env(parent = env)
     make_env[["var_nms"]] <- var_nms
     make_env[["dep_var_nm_set"]] <- maker[["dep_var_nm_set"]]
-    miss_dep_var_nm_set <- setdiff(
-      maker[["dep_var_nm_set"]],
-      names(arg_list)
-    )
-    # @codedoc_comment_block news("vm@var_set_make", "2024-05-13", "0.5.2")
-    # `vm@var_set_make` now raises an informative error if `data` did not
-    # contain something the `maker` needs.
-    # @codedoc_comment_block news("vm@var_set_make", "2024-05-13", "0.5.2")
-    if (length(miss_dep_var_nm_set) > 0) {
-      stop(
-        "Argument `data` did not contain the following necessary variables: `",
-        deparse1(miss_dep_var_nm_set), "`"
-      )
-    }
     lapply(names(arg_list), function(obj_nm) {
       make_env[[obj_nm]] <- arg_list[[obj_nm]]
     })
