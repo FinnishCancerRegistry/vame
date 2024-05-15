@@ -436,6 +436,20 @@ var_set_make <- function(
     make_env <- new.env(parent = env)
     make_env[["var_nms"]] <- var_nms
     make_env[["dep_var_nm_set"]] <- maker[["dep_var_nm_set"]]
+    miss_dep_var_nm_set <- setdiff(
+      maker[["dep_var_nm_set"]],
+      names(arg_list)
+    )
+    # @codedoc_comment_block news("vm@var_set_make", "2024-05-13", "0.5.2")
+    # `vm@var_set_make` now raises an informative error if `data` did not
+    # contain something the `maker` needs.
+    # @codedoc_comment_block news("vm@var_set_make", "2024-05-13", "0.5.2")
+    if (length(miss_dep_var_nm_set) > 0) {
+      stop(
+        "Argument `data` did not contain the following necessary variables: `",
+        deparse1(miss_dep_var_nm_set), "`"
+      )
+    }
     lapply(names(arg_list), function(obj_nm) {
       make_env[[obj_nm]] <- arg_list[[obj_nm]]
     })

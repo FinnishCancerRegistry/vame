@@ -74,6 +74,16 @@ in a special way so that the \code{data} assertion is not performed.
 
 \section{News}{
 
+\subsection{News for version 0.5.2}{
+
+\subsection{vm@var_set_make}{
+
+\code{vm@var_set_make} now raises an informative error if \code{data} did not
+contain something the \code{maker} needs.
+}
+
+}
+
 \subsection{News for version 0.5.1}{
 \subsection{vame::vame_value_space_sample_default}{
 
