@@ -263,8 +263,9 @@ var_set_maker_set <- function(
 
 var_set_make <- function(
   vm,
-  id,
   data,
+  id = NULL,
+  var_nms = NULL,
   env = NULL
 ) {
   # @codedoc_comment_block vm@var_set_make
@@ -393,7 +394,7 @@ var_set_make <- function(
   # )
   # exp <- data.table::data.table(area_02 = c(11L,21L))
   # stopifnot(identical(obs[["area_02"]], exp[["area_02"]]))
-
+  #
   # obs <- my_vame@vame_make(
   #   ids = c("dg_y", "area_02", "area_01"),
   #   data = data.table::data.table(
@@ -421,11 +422,41 @@ var_set_make <- function(
   #   identical(obs[["area_01"]], exp[["area_01"]]),
   #   identical(obs[["area_02"]], exp[["area_02"]])
   # )
+  #
+  # obs_2 <- my_vame@vame_make(
+  #   var_nms = c("dg_y", "area_02", "area_01"),
+  #   data = data.table::data.table(
+  #     dg_date = as.Date("2001-01-01"),
+  #     area_03 = c(111L,121L,122L,211L,212L,221L)
+  #   )
+  # )
+  # obs_3 <- my_vame@vame_make(
+  #   var_nms = c("dg_y", "area_02", "area_01"),
+  #   data = list(df = data.table::data.table(
+  #     dg_date = as.Date("2001-01-01"),
+  #     area_03 = c(111L,121L,122L,211L,212L,221L)
+  #   ))
+  # )
+  # stopifnot(
+  #   all.equal(obs, obs_2),
+  #   all.equal(obs, obs_3)
+  # )
   # @codedoc_comment_block feature_example(make)
 
   dbc::assert_has_one_of_classes(env, classes = c("NULL", "environment"))
   if (is.null(env)) {
     env <- parent.frame(1L)
+  }
+  # @codedoc_comment_block news("vm@var_set_make", "2024-05-13", "0.5.2")
+  # `vm@var_set_make` gains argument `var_nms`. You can now pass either `id` or
+  # `var_nms` or both.
+  # @codedoc_comment_block news("vm@var_set_make", "2024-05-13", "0.5.2")
+  ids <- id
+  handle_arg_ids_et_var_nms_inplace__(vm = vm, required_meta_nm = "maker")
+  id <- ids
+  if (length(id) != 1L) {
+    stop("`id` must be of length one but inferred `id` was `",
+         deparse1(ids), "`. Consider passing `id` explicitly.")
   }
   arg_list <- handle_arg_data__(data, output_type = "arg_list")
   maker <- var_set_maker_get(vm = vm, id = id)
@@ -486,6 +517,7 @@ vame_make <- function(
   vm,
   data,
   ids = NULL,
+  var_nms = NULL,
   env = NULL
 ) {
   # @codedoc_comment_block vm@vame_make
@@ -504,7 +536,11 @@ vame_make <- function(
   data <- handle_arg_data__(data, output_type = "df_list")
   data[["df"]] <- dt_independent_frame_dependent_contents__(data[["df"]])
   df_start_col_nms <- data.table::copy(names(data[["df"]]))
-  handle_arg_ids_et_var_nms_inplace__(vm = vm)
+  # @codedoc_comment_block news("vm@vame_make", "2024-05-13", "0.5.2")
+  # `vm@vame_make` gains argument `var_nms`. You can now pass either `ids` or
+  # `var_nms` or both.
+  # @codedoc_comment_block news("vm@vame_make", "2024-05-13", "0.5.2")
+  handle_arg_ids_et_var_nms_inplace__(vm = vm, required_meta_nm = "maker")
   dbc::assert_has_one_of_classes(env, classes = c("NULL", "environment"))
   if (is.null(env)) {
     env <- parent.frame(1L)
@@ -514,11 +550,24 @@ vame_make <- function(
     # this called just in case some make expression makes use of a slot function
     # --- see where the slots are created.
     self_set__(vm = vm)
-    out <- var_set_make(vm = vm, id = id, data = data, env = env)
+    var_nms_of_id <- NULL
+    if (!is.null(var_nms)) {
+      var_nms_of_id <- intersect(
+        var_set_var_nm_set_get(vm = vm, id = id),
+        var_nms
+      )
+    }
+    made_dt <- var_set_make(
+      vm = vm,
+      id = id,
+      var_nms = var_nms_of_id,
+      data = data,
+      env = env
+    )
     data.table::set(
       x = data[["df"]],
-      j = names(out),
-      value = out
+      j = names(made_dt),
+      value = made_dt
     )
     NULL
   })
@@ -2225,7 +2274,7 @@ vame_value_space_sample_default <- function(
   # @codedoc_comment_block news("vm@vame_value_space_sample", "2024-02-27", "0.4.0")
   # `vm@vame_value_space_sample` gains arguments `ids` and `data`.
   # @codedoc_comment_block news("vm@vame_value_space_sample", "2024-02-27", "0.4.0")
-  handle_arg_ids_et_var_nms_inplace__(vm)
+  handle_arg_ids_et_var_nms_inplace__(vm, required_meta_nm = "maker")
   data <- handle_arg_data__(data)
   dbc::assert_has_one_of_classes(
     env,

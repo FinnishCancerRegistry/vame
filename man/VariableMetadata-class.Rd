@@ -289,14 +289,9 @@ Call specific \code{var_set_dt$maker}.
 
 \emph{Usage}
 
-\code{vm@var_set_make(id, data, env)}
+\code{vm@var_set_make(data, id, var_nms, env)}
 
 \emph{Arguments}
-
-id \verb{[any]} (no default)
-
-ID, or "name", of a variable set. The class of \code{id} is defined when you
-create the \code{VariableMetadata} object and it can be pretty much anything.
 
 data \verb{[NULL, data.frame, data.table, list]} (default \code{NULL})
 \itemize{
@@ -313,6 +308,18 @@ E.g.
 Of course you can also pass
 \code{data = list(my_col_1 = 1, my_col_2 = 2, my_custom_setting = "something")}
 directly if that is more convenient.
+}
+
+id \verb{[any]} (no default)
+
+ID, or "name", of a variable set. The class of \code{id} is defined when you
+create the \code{VariableMetadata} object and it can be pretty much anything.
+
+var_nms \verb{[NULL, character]} (default \code{NULL})
+\itemize{
+\item \code{NULL}: Behaviour varies. If the function has the argument \code{ids} or \code{id},
+uses all variable names in those variable sets.
+\item \code{character}: Use these variable names.
 }
 
 env \verb{[NULL, environment]} (default \code{NULL})
@@ -1451,6 +1458,25 @@ stopifnot(
   identical(obs[["area_01"]], exp[["area_01"]]),
   identical(obs[["area_02"]], exp[["area_02"]])
 )
+
+obs_2 <- my_vame@vame_make(
+  var_nms = c("dg_y", "area_02", "area_01"),
+  data = data.table::data.table(
+    dg_date = as.Date("2001-01-01"),
+    area_03 = c(111L,121L,122L,211L,212L,221L)
+  )
+)
+obs_3 <- my_vame@vame_make(
+  var_nms = c("dg_y", "area_02", "area_01"),
+  data = list(df = data.table::data.table(
+    dg_date = as.Date("2001-01-01"),
+    area_03 = c(111L,121L,122L,211L,212L,221L)
+  ))
+)
+stopifnot(
+  all.equal(obs, obs_2),
+  all.equal(obs, obs_3)
+)
 }\if{html}{\out{</div>}}
 
 The following functions are related to this feature:
@@ -1661,6 +1687,19 @@ The following functions are part of this feature:
 \item \code{vm@vame_category_space_dt_list}
 \item \code{vm@vame_category_space_dt}
 }
+}
+
+\section{News for version 0.5.2}{
+
+
+\code{vm@vame_make} gains argument \code{var_nms}. You can now pass either \code{ids} or
+\code{var_nms} or both.
+
+\code{vm@var_set_make} gains argument \code{var_nms}. You can now pass either \code{id} or
+\code{var_nms} or both.
+
+\code{vm@var_set_make} now raises an informative error if \code{data} did not
+contain something the \code{maker} needs.
 }
 
 \section{News for version 0.5.0}{
@@ -2316,6 +2355,25 @@ stopifnot(
   identical(obs[["dg_y"]], exp[["dg_y"]]),
   identical(obs[["area_01"]], exp[["area_01"]]),
   identical(obs[["area_02"]], exp[["area_02"]])
+)
+
+obs_2 <- my_vame@vame_make(
+  var_nms = c("dg_y", "area_02", "area_01"),
+  data = data.table::data.table(
+    dg_date = as.Date("2001-01-01"),
+    area_03 = c(111L,121L,122L,211L,212L,221L)
+  )
+)
+obs_3 <- my_vame@vame_make(
+  var_nms = c("dg_y", "area_02", "area_01"),
+  data = list(df = data.table::data.table(
+    dg_date = as.Date("2001-01-01"),
+    area_03 = c(111L,121L,122L,211L,212L,221L)
+  ))
+)
+stopifnot(
+  all.equal(obs, obs_2),
+  all.equal(obs, obs_3)
 )
 # random sampling
 c_lo <- as.Date("2001-01-01")

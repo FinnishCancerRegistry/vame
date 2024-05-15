@@ -86,10 +86,17 @@ handle_arg_data__ <- function(
   return(out)
 }
 
-handle_arg_ids_et_var_nms_inplace__ <- function(vm) {
+handle_arg_ids_et_var_nms_inplace__ <- function(
+  vm,
+  required_meta_nm = NULL
+) {
   calling_env <- parent.frame(1L)
   dbc::assert_prod_interim_is(
     quote(c("ids", "var_nms") %in% ls(envir = calling_env))
+  )
+  dbc::assert_prod_input_has_one_of_classes(
+    required_meta_nm,
+    classes = c("NULL", "character")
   )
   ids <- calling_env[["ids"]]
   var_nms <- calling_env[["var_nms"]]
@@ -122,6 +129,31 @@ handle_arg_ids_et_var_nms_inplace__ <- function(vm) {
       },
       logical(1L)
     )]
+    if (is.null(required_meta_nm)) {
+      condition <- rep(TRUE, length(ids))
+    } else {
+      condition <- vapply(ids, function(id) {
+        var_set_meta_is_defined(vm = vm, id = id, meta_nm = required_meta_nm)
+      }, logical(1L))
+    }
+    ids <- ids[condition]
+    miss_var_nms <- setdiff(var_nms, unlist(all_var_nm_sets[ids]))
+    if (length(miss_var_nms) > 0) {
+      msg <- paste0(
+        "`ids` was `NULL` and `var_nms` was used to infer the `ids`. ",
+        "However, a variable set was not possible to detect for the ",
+        "following `var_nms`: ", deparse1(miss_var_nms), ".",
+      )
+      if (!is.null(required_meta_nm)) {
+        msg <- paste0(
+          msg,
+          " This problem has likely occurred because no `var_set_dt$",
+          required_meta_nm, "` was defined for the variable set(s) which ",
+          "contain the variable names listed above."
+        )
+      }
+      stop(msg)
+    }
   } else if (is.null(var_nms) && !is.null(ids)) {
     # @codedoc_comment_block news("vame::vame_value_space_sample_default", "2024-05-10", "0.5.1")
     # Fixed a utility function used by `vame::vame_value_space_sample_default`.

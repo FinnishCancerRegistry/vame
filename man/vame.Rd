@@ -75,6 +75,17 @@ in a special way so that the \code{data} assertion is not performed.
 \section{News}{
 
 \subsection{News for version 0.5.2}{
+\subsection{vm@vame_make}{
+
+\code{vm@vame_make} gains argument \code{var_nms}. You can now pass either \code{ids} or
+\code{var_nms} or both.
+}
+
+\subsection{vm@var_set_make}{
+
+\code{vm@var_set_make} gains argument \code{var_nms}. You can now pass either \code{id} or
+\code{var_nms} or both.
+}
 
 \subsection{vm@var_set_make}{
 

@@ -2,6 +2,16 @@
 
 ## News for version 0.5.2
 
+### vm@vame_make
+
+`vm@vame_make` gains argument `var_nms`. You can now pass either `ids` or
+`var_nms` or both.
+
+### vm@var_set_make
+
+`vm@var_set_make` gains argument `var_nms`. You can now pass either `id` or
+`var_nms` or both.
+
 ### vm@var_set_make
 
 `vm@var_set_make` now raises an informative error if `data` did not
