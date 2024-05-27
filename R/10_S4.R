@@ -466,6 +466,12 @@ VariableMetadata <- function(
   #'
   #' See **Details** and **Features** for more information.
   assert_is_var_dt(var_dt)
+  # @codedoc_comment_block recommendation(var_dt)
+  # `var_dt`:
+  #
+  # `var_dt` is recommended to contain at least some sort of description for
+  # each variable. See the describing feature.
+  # @codedoc_comment_block recommendation(var_dt)
 
   #' @param var_set_dt `[data.table]`
   #'
@@ -529,12 +535,13 @@ VariableMetadata <- function(
   pkg_env <- environment(VariableMetadata)
   #' @description
   #' Create and make use of a `VariableMetadata` object. It contains
-  #' - `var_dt`: A `data.table` containing metadata for variables,
-  #' - `var_set_dt`: Metadata for variable sets,
-  #' - `vame_list`: A list of metadata for the `VariableMetadata` object itself,
-  #' - A number of functions in S4 slots for making use of the metadata via e.g.
-  #'   `vm@var_assert` where `vm` is the `VariableMetadata` object.
-  #' 
+  #' - `var_dt`: A hidden `data.table` containing metadata for variables,
+  #' - `var_set_dt`: Hidden metadata for variable sets,
+  #' - `vame_list`: A hidden list of metadata for the `VariableMetadata` object
+  #'   itself,
+  #' - A number of functions in S4 slots for making use of the hidden metadata
+  #'   via e.g. `vm@var_assert` where `vm` is the `VariableMetadata` object.
+  #'
   #' A `VariableMetadata` object is created via calling the
   #' `vame::VariableMetadata` function.
   #' See section **Features** for what you can do with `VariableMetadata`

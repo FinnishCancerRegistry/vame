@@ -38,11 +38,12 @@ E.g. \code{vame_list = list(dataset_version = "1.0.0")}.}
 \description{
 Create and make use of a \code{VariableMetadata} object. It contains
 \itemize{
-\item \code{var_dt}: A \code{data.table} containing metadata for variables,
-\item \code{var_set_dt}: Metadata for variable sets,
-\item \code{vame_list}: A list of metadata for the \code{VariableMetadata} object itself,
-\item A number of functions in S4 slots for making use of the metadata via e.g.
-\code{vm@var_assert} where \code{vm} is the \code{VariableMetadata} object.
+\item \code{var_dt}: A hidden \code{data.table} containing metadata for variables,
+\item \code{var_set_dt}: Hidden metadata for variable sets,
+\item \code{vame_list}: A hidden list of metadata for the \code{VariableMetadata} object
+itself,
+\item A number of functions in S4 slots for making use of the hidden metadata
+via e.g. \code{vm@var_assert} where \code{vm} is the \code{VariableMetadata} object.
 }
 
 A \code{VariableMetadata} object is created via calling the
@@ -51,6 +52,10 @@ See section \strong{Features} for what you can do with \code{VariableMetadata}
 objects.
 }
 \details{
+\code{var_dt}:
+
+\code{var_dt} is recommended to contain at least some sort of description for
+each variable. See the describing feature.
 \code{var_set_dt}:
 
 It is recommended that \code{var_set_dt} contains as small variable sets as
