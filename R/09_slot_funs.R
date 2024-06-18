@@ -451,6 +451,11 @@ var_set_make <- function(
   # `vm@var_set_make` gains argument `var_nms`. You can now pass either `id` or
   # `var_nms` or both.
   # @codedoc_comment_block news("vm@var_set_make", "2024-05-13", "0.5.2")
+  # @codedoc_comment_block vm@var_set_make
+  # `vm@var_set_make` performs the following steps:
+  #
+  # - Figures out `id` if missing but `var_nms` given and vice versa.
+  # @codedoc_comment_block vm@var_set_make
   ids <- id
   handle_arg_ids_et_var_nms_inplace__(vm = vm, required_meta_nm = "maker")
   id <- ids
@@ -487,8 +492,20 @@ var_set_make <- function(
   })
   var_nms <- var_set_var_nm_set_get(vm = vm, id = id)
   if (is.function(maker)) {
+    # @codedoc_comment_block vm@var_set_make
+    # - If `maker` is a `function`, it is called with the arguments passed via
+    #   `data`.
+    # @codedoc_comment_block vm@var_set_make
     dt <- do.call(maker, arg_list, quote = TRUE)
   } else if (inherits(maker, "list")) {
+    # @codedoc_comment_block vm@var_set_make
+    # - If `maker` is a `list`, an evaluation env is created with `env` as its
+    #   parent. This evaluation environment is populated by objects passed via
+    #   `data` and additionally `var_nms` and `dep_var_nm_set`.
+    #   If `maker[["maker"]] == "aggregate"`, it is replaced with an
+    #   expression that calls `vm@var_aggregate`.
+    #   Then `maker[["maker"]]` is evaluated in this environment.
+    # @codedoc_comment_block vm@var_set_make
     make_env <- new.env(parent = env)
     make_env[["var_nms"]] <- var_nms
     make_env[["dep_var_nm_set"]] <- maker[["dep_var_nm_set"]]
@@ -519,6 +536,9 @@ var_set_make <- function(
     stop("Internal error: invalid var_set_dt$maker for id = ", deparse1(id))
   }
 
+  # @codedoc_comment_block vm@var_set_make
+  # - The resulting `data.table` is returned as-is.
+  # @codedoc_comment_block vm@var_set_make
   dbc::assert_prod_output_is_data_table(dt)
   dbc::assert_prod_output_has_names(dt, required_names = var_nms)
   return(dt[])
@@ -551,7 +571,7 @@ vame_make <- function(
   # @codedoc_comment_block vm@vame_make
   # Call multiple `var_set_dt$maker`s in sequence. Performs these steps:
   #
-  # - Infers `ids` to use if user give `var_nms` but not `ids`.
+  # - Infers `ids` to use if user gave `var_nms` but not `ids` and vice versa.
   # @codedoc_comment_block vm@vame_make
   handle_arg_ids_et_var_nms_inplace__(vm = vm, required_meta_nm = "maker")
   dbc::assert_has_one_of_classes(env, classes = c("NULL", "environment"))
@@ -618,7 +638,8 @@ vame_make <- function(
   })
 
   # @codedoc_comment_block vm@vame_make
-  # - Calls the `maker` for each `ids` element in the correct order.
+  # - Calls the corresponding `vm@var_set_make` of each `ids` element in the
+  #   correct order.
   # @codedoc_comment_block vm@vame_make
   lapply(ids, function(id) {
     # this called just in case some make expression makes use of a slot function

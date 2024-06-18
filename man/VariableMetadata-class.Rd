@@ -291,6 +291,19 @@ In \verb{_set} functions the value to set for the specified metadata.}
 \item{\code{var_set_make}}{\emph{Description}
 
 Call specific \code{var_set_dt$maker}.
+\code{vm@var_set_make} performs the following steps:
+\itemize{
+\item Figures out \code{id} if missing but \code{var_nms} given and vice versa.
+\item If \code{maker} is a \code{function}, it is called with the arguments passed via
+\code{data}.
+\item If \code{maker} is a \code{list}, an evaluation env is created with \code{env} as its
+parent. This evaluation environment is populated by objects passed via
+\code{data} and additionally \code{var_nms} and \code{dep_var_nm_set}.
+If \code{maker[["maker"]] == "aggregate"}, it is replaced with an
+expression that calls \code{vm@var_aggregate}.
+Then \code{maker[["maker"]]} is evaluated in this environment.
+\item The resulting \code{data.table} is returned as-is.
+}
 
 \emph{Usage}
 
@@ -339,11 +352,12 @@ Environment where a value space will be evaluated, if applicable.
 
 Call multiple \code{var_set_dt$maker}s in sequence. Performs these steps:
 \itemize{
-\item Infers \code{ids} to use if user give \code{var_nms} but not \code{ids}.
+\item Infers \code{ids} to use if user gave \code{var_nms} but not \code{ids} and vice versa.
 \item Determines order in which the \code{maker}s of \code{ids} should be called.
 For instance if \code{maker} for \code{ids[1]} requires the variables
 created by the \code{maker} for \code{ids[2]}, then the latter is called first.
-\item Calls the \code{maker} for each \code{ids} element in the correct order.
+\item Calls the corresponding \code{vm@var_set_make} of each \code{ids} element in the
+correct order.
 \item Returns a \code{data.table} containing the columns created by the \code{maker}s.
 }
 
