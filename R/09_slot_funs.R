@@ -460,7 +460,7 @@ var_set_make <- function(
     vm = vm,
     required_meta_nm = "maker",
     ids_arg_nm = "id",
-    var_nms_arg_nm = "var_nm"
+    var_nms_arg_nm = "var_nms"
   )
   if (length(id) != 1L) {
     stop("`id` must be of length one but inferred `id` was `",
