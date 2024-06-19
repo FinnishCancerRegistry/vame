@@ -294,8 +294,14 @@ Call specific \code{var_set_dt$maker}.
 \code{vm@var_set_make} performs the following steps:
 \itemize{
 \item Figures out \code{id} if missing but \code{var_nms} given and vice versa.
-\item If \code{maker} is a \code{function}, it is called with the arguments passed via
-\code{data}.
+\item If \code{maker} is a \code{function}, \code{data} is turned into a list of function
+arguments and \code{maker} is called with it. The additional variables
+\code{var_nms} and \code{dep_var_nm_set} are also included into the argument list.
+See the argument \code{var_nms} of this function for what \code{var_nms} is.
+\code{dep_var_nm_set} is the set of dependency variable names.
+However, those elements of the argument list ignored which do not have a
+corresponding identically named argument in the \code{maker} function
+definition.
 \item If \code{maker} is a \code{list}, an evaluation env is created with \code{env} as its
 parent. This evaluation environment is populated by objects passed via
 \code{data} and additionally \code{var_nms} and \code{dep_var_nm_set}.
@@ -1353,7 +1359,8 @@ when one or more \code{var_set_dt$maker} objects have been defined:
 The \code{maker} can be \code{NULL}, a \code{function}, or a \code{list}. A \code{NULL} \code{maker}
 object is considered to mean that one has not been defined.
 A \code{maker} of type \code{function} must have as arguments the invididual
-required variables. Currently this is not checked in any way.
+required variables. Using \code{...} is not allowed to enable proper checks
+on inputs when the \code{maker} is called.
 A \code{maker} of type \code{list} can be of two kinds. The first kind has named
 elements \code{maker} of class \code{call} and
 \code{dep_var_nm_set} of class \code{character}, e.g.
@@ -1714,6 +1721,13 @@ The following functions are part of this feature:
 \item \code{vm@vame_category_space_dt_list}
 \item \code{vm@vame_category_space_dt}
 }
+}
+
+\section{News for version 0.6.4}{
+
+
+\code{maker} objects of type \code{function} can no longer have \code{...} in their
+definition to enable proper checks on inputs when the \code{maker} is called.
 }
 
 \section{News for version 0.5.2}{

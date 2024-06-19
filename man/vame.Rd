@@ -74,6 +74,15 @@ in a special way so that the \code{data} assertion is not performed.
 
 \section{News}{
 
+\subsection{News for version 0.6.4}{
+\subsection{vm@var_set_maker_set}{
+
+\code{maker} objects of type \code{function} can no longer have \code{...} in their
+definition to enable proper checks on inputs when the \code{maker} is called.
+}
+
+}
+
 \subsection{News for version 0.5.3}{
 \subsection{vame}{
 

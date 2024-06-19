@@ -402,8 +402,19 @@ assert_is_maker <- function(
   } else if (is.function(x)) {
     # @codedoc_comment_block specification(var_set_dt$maker)
     # A `maker` of type `function` must have as arguments the invididual
-    # required variables. Currently this is not checked in any way.
+    # required variables. Using `...` is not allowed to enable proper checks
+    # on inputs when the `maker` is called.
     # @codedoc_comment_block specification(var_set_dt$maker)
+    # @codedoc_comment_block news("vm@var_set_maker_set", "2024-06-19", "0.6.4")
+    # `maker` objects of type `function` can no longer have `...` in their
+    # definition to enable proper checks on inputs when the `maker` is called.
+    # @codedoc_comment_block news("vm@var_set_maker_set", "2024-06-19", "0.6.4")
+    dbc::assert(
+      !"..." %in% names(formals(x)),
+      x_nm = x_nm,
+      call = call,
+      assertion_type = assertion_type
+    )
     return(invisible(NULL))
   }
   # @codedoc_comment_block specification(var_set_dt$maker)
