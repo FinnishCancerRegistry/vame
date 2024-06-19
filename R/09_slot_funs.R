@@ -456,12 +456,15 @@ var_set_make <- function(
   #
   # - Figures out `id` if missing but `var_nms` given and vice versa.
   # @codedoc_comment_block vm@var_set_make
-  ids <- id
-  handle_arg_ids_et_var_nms_inplace__(vm = vm, required_meta_nm = "maker")
-  id <- ids
+  handle_arg_ids_et_var_nms_inplace__(
+    vm = vm,
+    required_meta_nm = "maker",
+    ids_arg_nm = "id",
+    var_nms_arg_nm = "var_nm"
+  )
   if (length(id) != 1L) {
     stop("`id` must be of length one but inferred `id` was `",
-         deparse1(ids), "`. Consider passing `id` explicitly.")
+         deparse1(id), "`. Consider passing `id` explicitly.")
   }
   arg_list <- handle_arg_data__(data, output_type = "arg_list")
   maker <- var_set_maker_get(vm = vm, id = id)

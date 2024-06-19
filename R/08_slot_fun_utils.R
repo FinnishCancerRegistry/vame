@@ -94,18 +94,20 @@ handle_arg_data__ <- function(
 
 handle_arg_ids_et_var_nms_inplace__ <- function(
   vm,
-  required_meta_nm = NULL
+  required_meta_nm = NULL,
+  ids_arg_nm = "ids",
+  var_nms_arg_nm = "var_nms"
 ) {
   calling_env <- parent.frame(1L)
   dbc::assert_prod_interim_is(
-    quote(c("ids", "var_nms") %in% ls(envir = calling_env))
+    quote(c(ids_arg_nm, var_nms_arg_nm) %in% ls(envir = calling_env))
   )
   dbc::assert_prod_input_has_one_of_classes(
     required_meta_nm,
     classes = c("NULL", "character")
   )
-  ids <- calling_env[["ids"]]
-  var_nms <- calling_env[["var_nms"]]
+  ids <- calling_env[[ids_arg_nm]]
+  var_nms <- calling_env[[var_nms_arg_nm]]
   # @codedoc_comment_block doc_slot_fun_arg(ids)
   # @param ids `[NULL, vector]` (default `NULL`)
   #
@@ -179,8 +181,8 @@ handle_arg_ids_et_var_nms_inplace__ <- function(
            "for the supplied `ids`: ", deparse1(extra_var_nms))
     }
   }
-  calling_env[["ids"]] <- ids
-  calling_env[["var_nms"]] <- var_nms
+  calling_env[[ids_arg_nm]] <- ids
+  calling_env[[var_nms_arg_nm]] <- var_nms
   return(invisible(NULL))
 }
 
