@@ -515,6 +515,12 @@ var_set_make <- function(
     #   corresponding identically named argument in the `maker` function
     #   definition.
     # @codedoc_comment_block vm@var_set_make
+    # @codedoc_comment_block news("vm@var_set_maker_set", "2024-06-19", "0.6.4")
+    # `vm@var_set_maker_set` now ignores arguments passed via `data` to a
+    # `maker` of type `function` that do not correspond to any argument name.
+    # @codedoc_comment_block news("vm@var_set_maker_set", "2024-06-19", "0.6.4")
+    maker_fun_arg_nms <- names(formals(maker))
+    arg_list <- arg_list[intersect(maker_fun_arg_nms, names(arg_list))]
     dt <- do.call(maker, arg_list, quote = TRUE)
   } else if (inherits(maker, "list")) {
     # @codedoc_comment_block vm@var_set_make

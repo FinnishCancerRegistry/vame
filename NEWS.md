@@ -13,6 +13,11 @@
 `maker` objects of type `function` can no longer have `...` in their
 definition to enable proper checks on inputs when the `maker` is called.
 
+### vm@var_set_maker_set
+
+`vm@var_set_maker_set` now ignores arguments passed via `data` to a
+`maker` of type `function` that do not correspond to any argument name.
+
 
 ## News for version 0.5.3
 

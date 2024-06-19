@@ -1732,6 +1732,9 @@ The following functions are part of this feature:
 
 \code{maker} objects of type \code{function} can no longer have \code{...} in their
 definition to enable proper checks on inputs when the \code{maker} is called.
+
+\code{vm@var_set_maker_set} now ignores arguments passed via \code{data} to a
+\code{maker} of type \code{function} that do not correspond to any argument name.
 }
 
 \section{News for version 0.5.2}{

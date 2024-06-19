@@ -88,6 +88,12 @@ in a special way so that the \code{data} assertion is not performed.
 definition to enable proper checks on inputs when the \code{maker} is called.
 }
 
+\subsection{vm@var_set_maker_set}{
+
+\code{vm@var_set_maker_set} now ignores arguments passed via \code{data} to a
+\code{maker} of type \code{function} that do not correspond to any argument name.
+}
+
 }
 
 \subsection{News for version 0.5.3}{
