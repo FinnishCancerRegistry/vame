@@ -145,10 +145,15 @@ handle_arg_ids_et_var_nms_inplace__ <- function(
     ids <- ids[condition]
     miss_var_nms <- setdiff(var_nms, unlist(all_var_nm_sets[ids]))
     if (length(miss_var_nms) > 0) {
+      # @codedoc_comment_block news("vame", "2024-06-19", "0.5.3")
+      # Fixed an extra comma in a function call when
+      # `ids` was `NULL` and `var_nms` was used to infer the `ids`
+      # (e.g. `vm@var_set_make`).
+      # @codedoc_comment_block news("vame", "2024-06-19", "0.5.3")
       msg <- paste0(
         "`ids` was `NULL` and `var_nms` was used to infer the `ids`. ",
         "However, a variable set was not possible to detect for the ",
-        "following `var_nms`: ", deparse1(miss_var_nms), ".",
+        "following `var_nms`: ", deparse1(miss_var_nms), "."
       )
       if (!is.null(required_meta_nm)) {
         msg <- paste0(
