@@ -2,6 +2,12 @@
 
 ## News for version 0.6.4
 
+### vm@var_set_make
+
+`vm@var_set_make` passing `var_nms` fixed. It used to pass the
+`var_nm_set` for the corresponding variable set, now it passes arg
+`var_nms` (whether inferred or user-given) as intended.
+
 ### vm@var_set_maker_set
 
 `maker` objects of type `function` can no longer have `...` in their

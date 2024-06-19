@@ -75,6 +75,13 @@ in a special way so that the \code{data} assertion is not performed.
 \section{News}{
 
 \subsection{News for version 0.6.4}{
+\subsection{vm@var_set_make}{
+
+\code{vm@var_set_make} passing \code{var_nms} fixed. It used to pass the
+\code{var_nm_set} for the corresponding variable set, now it passes arg
+\code{var_nms} (whether inferred or user-given) as intended.
+}
+
 \subsection{vm@var_set_maker_set}{
 
 \code{maker} objects of type \code{function} can no longer have \code{...} in their

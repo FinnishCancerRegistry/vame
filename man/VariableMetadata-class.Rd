@@ -1726,6 +1726,10 @@ The following functions are part of this feature:
 \section{News for version 0.6.4}{
 
 
+\code{vm@var_set_make} passing \code{var_nms} fixed. It used to pass the
+\code{var_nm_set} for the corresponding variable set, now it passes arg
+\code{var_nms} (whether inferred or user-given) as intended.
+
 \code{maker} objects of type \code{function} can no longer have \code{...} in their
 definition to enable proper checks on inputs when the \code{maker} is called.
 }

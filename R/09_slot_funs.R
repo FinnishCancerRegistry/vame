@@ -467,8 +467,17 @@ var_set_make <- function(
          deparse1(id), "`. Consider passing `id` explicitly.")
   }
   arg_list <- handle_arg_data__(data, output_type = "arg_list")
+  # @codedoc_comment_block news("vm@var_set_make", "2024-06-19", "0.6.4")
+  # `vm@var_set_make` passing `var_nms` fixed. It used to pass the
+  # `var_nm_set` for the corresponding variable set, now it passes arg
+  # `var_nms` (whether inferred or user-given) as intended.
+  # @codedoc_comment_block news("vm@var_set_make", "2024-06-19", "0.6.4")
+  arg_list[c("var_nms", "dep_var_nm_set")] <- list(
+    var_nms,
+    NULL
+  )
   maker <- var_set_maker_get(vm = vm, id = id)
-  local({
+  arg_list <- local({
     # @codedoc_comment_block news("vm@var_set_make", "2024-05-13", "0.5.2")
     # `vm@var_set_make` now raises an informative error if `data` did not
     # contain something the `maker` needs.
@@ -492,12 +501,19 @@ var_set_make <- function(
         deparse1(miss_req_obj_nm_set), "`"
       )
     }
+    arg_list[["dep_var_nm_set"]] <- req_obj_nm_set
+    return(arg_list)
   })
-  var_nms <- var_set_var_nm_set_get(vm = vm, id = id)
   if (is.function(maker)) {
     # @codedoc_comment_block vm@var_set_make
-    # - If `maker` is a `function`, it is called with the arguments passed via
-    #   `data`.
+    # - If `maker` is a `function`, `data` is turned into a list of function
+    #   arguments and `maker` is called with it. The additional variables
+    #   `var_nms` and `dep_var_nm_set` are also included into the argument list.
+    #   See the argument `var_nms` of this function for what `var_nms` is.
+    #   `dep_var_nm_set` is the set of dependency variable names.
+    #   However, those elements of the argument list ignored which do not have a
+    #   corresponding identically named argument in the `maker` function
+    #   definition.
     # @codedoc_comment_block vm@var_set_make
     dt <- do.call(maker, arg_list, quote = TRUE)
   } else if (inherits(maker, "list")) {
@@ -510,8 +526,6 @@ var_set_make <- function(
     #   Then `maker[["maker"]]` is evaluated in this environment.
     # @codedoc_comment_block vm@var_set_make
     make_env <- new.env(parent = env)
-    make_env[["var_nms"]] <- var_nms
-    make_env[["dep_var_nm_set"]] <- maker[["dep_var_nm_set"]]
     lapply(names(arg_list), function(obj_nm) {
       make_env[[obj_nm]] <- arg_list[[obj_nm]]
     })
