@@ -33,60 +33,74 @@ handle_arg_data__ <- function(
     call = parent_call,
     assertion_type = "user_input"
   )
-  if (is.data.frame(data)) {
-    out <- switch(
-      output_type,
-      arg_list = as.list(data),
+  if (output_type == "arg_list") {
+    if (is.data.frame(data)) {
       # @codedoc_comment_block specs(vame:::handle_arg_data__, "df_list")
       # @param data `[data.frame, data.table, list]` (no default)
       #
       # - `data.frame`/`data.table`: Columns contain necessary data.
       # @codedoc_comment_block specs(vame:::handle_arg_data__, "df_list")
-      df_list = list(df = data)
-    )
-  } else if (inherits(data, "list")) {
-    out <- data
-    if ("df" %in% names(data)) {
-      if (!is.data.frame(data[["df"]])) {
-        stop(simpleError(
-          message = paste0(
-            "Arg `data` was of class `list`, and had element `data$df`, but ",
-            "`data$df` was not a `data.frame`/`data.table` object. Instead ",
-            "it had class vector ", deparse1(class(data[["df"]]))
-          ),
-          call = parent_call
-        ))
-      }
-      out <- switch(
-        output_type,
-        "df_list" = out,
-        "arg_list" = local({
-          out["df"] <- NULL
-          out[names(data[["df"]])] <- data[["df"]]
-        })
-      )
-    } else if (!"df" %in% names(data) && output_type == "df_list") {
+      out <- as.list(data)
+    } else if (inherits(data, "list")) {
       # @codedoc_comment_block specs(vame:::handle_arg_data__, "df_list")
-      # - `list`: Must have (at least) element `data$df`, a `data.frame`/
+      # - `list`: Element `data$df` can be a `data.frame`/
       #   `data.table` whose columns contain necessary data.
+      #   Alternatively the list elements can contain necessary data directly,
+      #   or a combination of the two.
       # @codedoc_comment_block specs(vame:::handle_arg_data__, "df_list")
+      out <- data
+      if ("df" %in% names(out)) {
+        if (!is.data.frame(out[["df"]])) {
+          stop(simpleError(
+            message = paste0(
+              "Arg `data` was of class `list`, and had element `data$df`, but ",
+              "`data$df` was not a `data.frame`/`data.table` object. Instead ",
+              "it had class vector ", deparse1(class(data[["df"]]))
+            ),
+            call = parent_call
+          ))
+        }
+        df <- out[["df"]]
+        out["df"] <- NULL
+        out[names(df)] <- as.list(df)
+      }
+    } else if (is.null(data)) {
+      out <- data
+    } else {
       stop(simpleError(
         message = paste0(
-          "Arg `data` was of class `list`, but it did not have element named ",
-          "`df`."
+          "Internal error: no handling defined for `data` of class(es) ",
+          deparse1(class(data))
         ),
         call = parent_call
       ))
     }
-  } else if (is.null(data)) {
-    out <- switch(
-      output_type,
-      arg_list = NULL,
-      df_list = stop(simpleError(
-        "Argument `data` cannot be `NULL`.",
+  } else if (output_type == "df_list") {
+    if (is.data.frame(data)) {
+      out <- list(df = data)
+    } else if (inherits(data, "list")) {
+      out <- data
+      if (!"df" %in% names(data) || !is.data.frame(data[["df"]])) {
+        stop(
+          "`data` was a list but `data$df` was not included or was not ",
+          "a `data.frame`/`data.table`. Either supply `data` with `data$df` ",
+          "or `data` as a `data.frame`/`data.table` directly."
+        )
+      }
+    } else if (is.null(data)) {
+      stop(simpleError(
+        message = "This function does not permit `data` to be `NULL`.",
         call = parent_call
       ))
-    )
+    } else {
+      stop(simpleError(
+        message = paste0(
+          "Internal error: no handling defined for `data` of class(es) ",
+          deparse1(class(data))
+        ),
+        call = parent_call
+      ))
+    }
   }
 
   return(out)

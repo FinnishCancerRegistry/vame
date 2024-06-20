@@ -376,8 +376,10 @@ correct order.
 data \verb{[data.frame, data.table, list]} (no default)
 \itemize{
 \item \code{data.frame}/\code{data.table}: Columns contain necessary data.
-\item \code{list}: Must have (at least) element \code{data$df}, a \code{data.frame}/
+\item \code{list}: Element \code{data$df} can be a \code{data.frame}/
 \code{data.table} whose columns contain necessary data.
+Alternatively the list elements can contain necessary data directly,
+or a combination of the two.
 }
 
 ids \verb{[NULL, vector]} (default \code{NULL})
