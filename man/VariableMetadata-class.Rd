@@ -2433,7 +2433,7 @@ stopifnot(
 # random sampling
 c_lo <- as.Date("2001-01-01")
 c_hi <- as.Date("2020-12-31")
-## see what default samplers does with bounds
+## see what default samplers do with bounds
 storage.mode(c_lo) <- storage.mode(c_hi) <- "integer"
 vm <- vame::VariableMetadata(
   var_dt = data.table::data.table(
