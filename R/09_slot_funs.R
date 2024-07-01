@@ -458,7 +458,7 @@ var_set_make <- function(
   # @codedoc_comment_block vm@var_set_make
   handle_arg_ids_et_var_nms_inplace__(
     vm = vm,
-    required_meta_nm = "maker",
+    required_meta_nms = "maker",
     ids_arg_nm = "id",
     var_nms_arg_nm = "var_nms"
   )
@@ -596,7 +596,7 @@ vame_make <- function(
   #
   # - Infers `ids` to use if user gave `var_nms` but not `ids` and vice versa.
   # @codedoc_comment_block vm@vame_make
-  handle_arg_ids_et_var_nms_inplace__(vm = vm, required_meta_nm = "maker")
+  handle_arg_ids_et_var_nms_inplace__(vm = vm, required_meta_nms = "maker")
   dbc::assert_has_one_of_classes(env, classes = c("NULL", "environment"))
   if (is.null(env)) {
     env <- parent.frame(1L)

@@ -108,17 +108,22 @@ handle_arg_data__ <- function(
 
 handle_arg_ids_et_var_nms_inplace__ <- function(
   vm,
-  required_meta_nm = NULL,
   ids_arg_nm = "ids",
-  var_nms_arg_nm = "var_nms"
+  var_nms_arg_nm = "var_nms",
+  required_meta_nms = NULL,
+  require_meta_style = "and"
 ) {
   calling_env <- parent.frame(1L)
   dbc::assert_prod_interim_is(
     quote(c(ids_arg_nm, var_nms_arg_nm) %in% ls(envir = calling_env))
   )
   dbc::assert_prod_input_has_one_of_classes(
-    required_meta_nm,
+    required_meta_nms,
     classes = c("NULL", "character")
+  )
+  dbc::assert_prod_input_atom_is_in_set(
+    require_meta_style,
+    set = c("or", "and")
   )
   ids <- calling_env[[ids_arg_nm]]
   var_nms <- calling_env[[var_nms_arg_nm]]
@@ -151,11 +156,23 @@ handle_arg_ids_et_var_nms_inplace__ <- function(
       },
       logical(1L)
     )]
-    if (is.null(required_meta_nm)) {
+    if (is.null(required_meta_nms)) {
       condition <- rep(TRUE, length(ids))
     } else {
       condition <- vapply(ids, function(id) {
-        var_set_meta_is_defined(vm = vm, id = id, meta_nm = required_meta_nm)
+        test_results <- vapply(
+          required_meta_nms,
+          function(rmn) {
+            var_set_meta_is_defined(vm = vm, id = id, meta_nm = rmn)
+          },
+          logical(1L)
+        )
+        if (require_meta_style == "or") {
+          out <- any(test_results)
+        } else {
+          out <- all(test_results)
+        }
+        return(out)
       }, logical(1L))
     }
     ids <- ids[condition]
@@ -171,11 +188,11 @@ handle_arg_ids_et_var_nms_inplace__ <- function(
         "However, a variable set was not possible to detect for the ",
         "following `var_nms`: ", deparse1(miss_var_nms), "."
       )
-      if (!is.null(required_meta_nm)) {
+      if (!is.null(required_meta_nms)) {
         msg <- paste0(
           msg,
           " This problem has likely occurred because no `var_set_dt$",
-          required_meta_nm, "` was defined for the variable set(s) which ",
+          required_meta_nms, "` was defined for the variable set(s) which ",
           "contain the variable names listed above."
         )
       }
