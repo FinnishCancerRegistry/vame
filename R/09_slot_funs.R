@@ -2392,10 +2392,12 @@ vame_value_space_sample_default <- function(
   # - `vm@vame_value_space_sample_default`
   # @codedoc_comment_block feature_funs(random sampling)
 
-  # @codedoc_comment_block news("vm@vame_value_space_sample", "2024-02-27", "0.4.0")
-  # `vm@vame_value_space_sample` gains arguments `ids` and `data`.
-  # @codedoc_comment_block news("vm@vame_value_space_sample", "2024-02-27", "0.4.0")
-  handle_arg_ids_et_var_nms_inplace__(vm, required_meta_nm = "maker")
+  # @codedoc_comment_block news("vm@vame_value_space_sample_default", "2024-02-27", "0.4.0")
+  # `vm@vame_value_space_sample_default` gains arguments `ids` and `data`.
+  # @codedoc_comment_block news("vm@vame_value_space_sample_default", "2024-02-27", "0.4.0")
+  handle_arg_ids_et_var_nms_inplace__(
+    vm = vm
+  )
   data <- handle_arg_data__(data)
   dbc::assert_has_one_of_classes(
     env,
