@@ -74,7 +74,14 @@ in a special way so that the \code{data} assertion is not performed.
 
 \section{News}{
 
-\subsection{News for version 0.6.4}{
+\subsection{News for version 0.5.3}{
+\subsection{vame}{
+
+Fixed an extra comma in a function call when
+\code{ids} was \code{NULL} and \code{var_nms} was used to infer the \code{ids}
+(e.g. \code{vm@var_set_make}).
+}
+
 \subsection{vm@var_set_make}{
 
 \code{vm@var_set_make} passing \code{var_nms} fixed. It used to pass the
@@ -92,16 +99,6 @@ definition to enable proper checks on inputs when the \code{maker} is called.
 
 \code{vm@var_set_maker_set} now ignores arguments passed via \code{data} to a
 \code{maker} of type \code{function} that do not correspond to any argument name.
-}
-
-}
-
-\subsection{News for version 0.5.3}{
-\subsection{vame}{
-
-Fixed an extra comma in a function call when
-\code{ids} was \code{NULL} and \code{var_nms} was used to infer the \code{ids}
-(e.g. \code{vm@var_set_make}).
 }
 
 \subsection{vm@var_set_value_space_sample}{

@@ -405,10 +405,10 @@ assert_is_maker <- function(
     # required variables. Using `...` is not allowed to enable proper checks
     # on inputs when the `maker` is called.
     # @codedoc_comment_block specification(var_set_dt$maker)
-    # @codedoc_comment_block news("vm@var_set_maker_set", "2024-06-19", "0.6.4")
+    # @codedoc_comment_block news("vm@var_set_maker_set", "2024-06-19", "0.5.3")
     # `maker` objects of type `function` can no longer have `...` in their
     # definition to enable proper checks on inputs when the `maker` is called.
-    # @codedoc_comment_block news("vm@var_set_maker_set", "2024-06-19", "0.6.4")
+    # @codedoc_comment_block news("vm@var_set_maker_set", "2024-06-19", "0.5.3")
     dbc::assert(
       !"..." %in% names(formals(x)),
       x_nm = x_nm,

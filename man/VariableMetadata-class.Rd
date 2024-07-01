@@ -1725,7 +1725,7 @@ The following functions are part of this feature:
 }
 }
 
-\section{News for version 0.6.4}{
+\section{News for version 0.5.3}{
 
 
 \code{vm@var_set_make} passing \code{var_nms} fixed. It used to pass the
@@ -1737,10 +1737,6 @@ definition to enable proper checks on inputs when the \code{maker} is called.
 
 \code{vm@var_set_maker_set} now ignores arguments passed via \code{data} to a
 \code{maker} of type \code{function} that do not correspond to any argument name.
-}
-
-\section{News for version 0.5.3}{
-
 
 \code{vm@var_set_value_space_sample} arg \code{id} now \code{NULL} by default.
 You can supply either \code{id} or \code{var_nms} and the other one is inferred,
