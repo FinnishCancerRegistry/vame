@@ -2415,26 +2415,36 @@ vame_value_space_sample_default <- function(
     if (is.null(data)) {
       data <- list()
     }
-    sample_dt <- NULL
+    idx_col_nm <- "INDEX_______________________________________________________"
+    sample_dt <- data.table::data.table(
+      idx = seq_len(n)
+    )
+    data.table::setnames(sample_dt, "idx", idx_col_nm)
     for (id in ids) {
       data[names(sample_dt)] <- sample_dt
+      data[idx_col_nm] <- NULL
       var_nms_id <- intersect(
         var_set_var_nm_set_get(vm = vm, id = id),
         var_nms
       )
-      sample_dt <- cbind(sample_dt, var_set_value_space_sample(
+      sampled <- var_set_value_space_sample(
         vm = vm,
         id = id,
         env = env,
         n = n,
         var_nms = var_nms_id,
         data = data
-      ))
+      )
+      data.table::set(
+        sample_dt,
+        j = names(sampled),
+        value = sampled
+      )
     }
-    data.table::setDT(sample_dt)
+    data.table::set(sample_dt, j = idx_col_nm, value = NULL)
     sample_dt[]
   })
-  
+
   # @codedoc_comment_block vm@vame_value_space_sample_default
   # `vm@vame_value_space_sample_default` always returns a `data.table` with `n`
   # rows.
