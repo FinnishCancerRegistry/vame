@@ -27,6 +27,12 @@ Fixed an extra comma in a function call when
 `ids` was `NULL` and `var_nms` was used to infer the `ids`
 (e.g. `vm@var_set_make`).
 
+### vm@var_set_value_space_sample
+
+`vm@var_set_value_space_sample` arg `id` now `NULL` by default.
+You can supply either `id` or `var_nms` and the other one is inferred,
+if `NULL`.
+
 
 ## News for version 0.5.2
 
@@ -100,6 +106,10 @@ documentation.
 ### vm@vame_value_space_sample
 
 `vm@vame_value_space_sample` gains arguments `ids` and `data`.
+
+### vm@vame_value_space_sample_default
+
+`vm@vame_value_space_sample_default` gains arguments `ids` and `data`.
 
 ### vm@var_aggregate
 

@@ -587,7 +587,7 @@ use of \code{data} (and optionally \code{dep_var_nm_set}) in \code{sampler$sampl
 
 \emph{Usage}
 
-\code{vm@var_set_value_space_sample(id, n, data, var_nms, env)}
+\code{vm@var_set_value_space_sample(id, var_nms, n, data, env)}
 
 \emph{Arguments}
 
@@ -595,6 +595,13 @@ id \verb{[any]} (no default)
 
 ID, or "name", of a variable set. The class of \code{id} is defined when you
 create the \code{VariableMetadata} object and it can be pretty much anything.
+
+var_nms \verb{[NULL, character]} (default \code{NULL})
+\itemize{
+\item \code{NULL}: Behaviour varies. If the function has the argument \code{ids} or \code{id},
+uses all variable names in those variable sets.
+\item \code{character}: Use these variable names.
+}
 
 n \verb{[integer]} (default \code{1L})
 
@@ -615,13 +622,6 @@ E.g.
 Of course you can also pass
 \code{data = list(my_col_1 = 1, my_col_2 = 2, my_custom_setting = "something")}
 directly if that is more convenient.
-}
-
-var_nms \verb{[NULL, character]} (default \code{NULL})
-\itemize{
-\item \code{NULL}: Behaviour varies. If the function has the argument \code{ids} or \code{id},
-uses all variable names in those variable sets.
-\item \code{character}: Use these variable names.
 }
 
 env \verb{[NULL, environment]} (default \code{NULL})
@@ -1739,6 +1739,14 @@ definition to enable proper checks on inputs when the \code{maker} is called.
 \code{maker} of type \code{function} that do not correspond to any argument name.
 }
 
+\section{News for version 0.5.3}{
+
+
+\code{vm@var_set_value_space_sample} arg \code{id} now \code{NULL} by default.
+You can supply either \code{id} or \code{var_nms} and the other one is inferred,
+if \code{NULL}.
+}
+
 \section{News for version 0.5.2}{
 
 
@@ -1788,6 +1796,8 @@ Added recommendations for constructing \code{vame::VariableMetadata} objects int
 documentation.
 
 \code{vm@vame_value_space_sample} gains arguments \code{ids} and \code{data}.
+
+\code{vm@vame_value_space_sample_default} gains arguments \code{ids} and \code{data}.
 
 \code{vm@var_aggregate} now always considers it possible to aggregate to
 \code{to_var_nm} if it only has one value.

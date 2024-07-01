@@ -104,6 +104,13 @@ Fixed an extra comma in a function call when
 (e.g. \code{vm@var_set_make}).
 }
 
+\subsection{vm@var_set_value_space_sample}{
+
+\code{vm@var_set_value_space_sample} arg \code{id} now \code{NULL} by default.
+You can supply either \code{id} or \code{var_nms} and the other one is inferred,
+if \code{NULL}.
+}
+
 }
 
 \subsection{News for version 0.5.2}{
@@ -187,6 +194,11 @@ documentation.
 \subsection{vm@vame_value_space_sample}{
 
 \code{vm@vame_value_space_sample} gains arguments \code{ids} and \code{data}.
+}
+
+\subsection{vm@vame_value_space_sample_default}{
+
+\code{vm@vame_value_space_sample_default} gains arguments \code{ids} and \code{data}.
 }
 
 \subsection{vm@var_aggregate}{
