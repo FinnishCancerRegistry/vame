@@ -930,10 +930,10 @@ var_set_value_space_sampler_set <- function(
 
 var_set_value_space_sample <- function(
   vm,
-  id,
+  id = NULL,
+  var_nms = NULL,
   n = 1L,
   data = NULL,
-  var_nms = NULL,
   env = NULL
 ) {
   # @codedoc_comment_block vm@var_set_value_space_sample
@@ -1081,27 +1081,25 @@ var_set_value_space_sample <- function(
   # @codedoc_comment_block feature(random sampling)
   # The random sampling feature is available when the value spaces feature
   # is available.
-  # 
+  #
   # @codedoc_insert_comment_block feature_process(random sampling)
   #
   # The following functions are related to this feature:
   # @codedoc_insert_comment_block feature_funs(random sampling)
   # @codedoc_comment_block feature(random sampling)
 
-  assert_is_var_set_id(vm, id)
-  dbc::assert_has_one_of_classes(
-    var_nms,
-    classes = c("character", "NULL")
+  # @codedoc_comment_block news("vm@var_set_value_space_sample", "2024-07-01", "0.5.3")
+  # `vm@var_set_value_space_sample` arg `id` now `NULL` by default.
+  # You can supply either `id` or `var_nms` and the other one is inferred,
+  # if `NULL`.
+  # @codedoc_comment_block news("vm@var_set_value_space_sample", "2024-07-01", "0.5.3")
+  handle_arg_ids_et_var_nms_inplace__(
+    required_meta_nms = c("value_space", "sampler"),
+    require_meta_style = "or",
+    ids_arg_nm = "id",
+    var_nms_arg_nm = "var_nms",
+    vm = vm
   )
-  allowed_var_nms <- var_set_var_nm_set_get(vm = vm, id = id)
-  if (is.null(var_nms)) {
-    var_nms <- allowed_var_nms
-  } else {
-    dbc::assert_vector_elems_are_in_set(
-      var_nms,
-      set = allowed_var_nms
-    )
-  }
   dbc::assert_has_one_of_classes(
     env,
     classes = c("NULL", "environment")
@@ -1126,10 +1124,6 @@ var_set_value_space_sample <- function(
     id = id,
     env = env,
     var_nms = var_nms
-  )
-  assert_is_value_space(
-    x = vs,
-    assertion_type = "prod_interim"
   )
 
   # @codedoc_comment_block feature_process(random sampling)
