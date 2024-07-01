@@ -361,10 +361,10 @@ self <- function() {
   # New function `vame::self`.
   # @codedoc_comment_block news("vame::self", "2023-12-27", "0.3.0")
   if (!"self" %in% ls(.__SELF_ENV)) {
-    stop("No VariableMetadata object could be retrieved --- this function is ",
+    stop("No VariableMetadata object could be retrieved --- vame::self() is ",
          "intended to be called only within functions and expressions stored ",
          "into a VariableMetadata object and does not work elsewhere. If ",
-         "this function was in fact used in the correct context, contact ",
+         "vame::self() was in fact used in the correct context, contact ",
          "the package maintainer.")
   }
   return(.__SELF_ENV[["self"]])
