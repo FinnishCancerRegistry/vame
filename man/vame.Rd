@@ -74,6 +74,14 @@ in a special way so that the \code{data} assertion is not performed.
 
 \section{News}{
 
+\subsection{News for version 0.5.5}{
+\subsection{vm@vame_copy}{
+
+\code{vm@vame_copy} now also copies \code{vame_list}.
+}
+
+}
+
 \subsection{News for version 0.5.4}{
 \subsection{vm@vame_subset}{
 

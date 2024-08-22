@@ -1032,7 +1032,28 @@ Take a deep copy of a VariableMetadata object. See \code{?data.table::copy}.
 
 \emph{Usage}
 
-\code{vm@vame_copy()}}
+\code{vm@vame_copy()}
+
+\emph{Examples}
+
+\if{html}{\out{<div class="sourceCode">}}\preformatted{vm@vame_copy
+vm_1 <- vame::VariableMetadata(
+  var_dt = data.table::data.table(var_nm = "a"),
+  var_set_dt = data.table::data.table(id = "a", var_nm_set = list("a")),
+  vame_list = list(hello = "there")
+)
+vm_2 <- vm_1@vame_copy()
+stopifnot(
+  all.equal(vm_1@var_dt_copy(), vm_2@var_dt_copy()),
+  all.equal(vm_1@var_set_dt_copy(), vm_2@var_set_dt_copy())
+)
+vm_2@var_rename("a", "b")
+stopifnot(
+  identical(unname(vm_1@var_meta_get_all(meta_nm = "var_nm")), "a"),
+  identical(unname(vm_2@var_meta_get_all(meta_nm = "var_nm")), "b"),
+  identical(vm_1@vame_list_copy(), vm_2@vame_list_copy())
+)
+}\if{html}{\out{</div>}}}
 
 \item{\code{vame_subset}}{\emph{Description}
 
@@ -1747,6 +1768,12 @@ The following functions are part of this feature:
 \item \code{vm@vame_category_space_dt_list}
 \item \code{vm@vame_category_space_dt}
 }
+}
+
+\section{News for version 0.5.5}{
+
+
+\code{vm@vame_copy} now also copies \code{vame_list}.
 }
 
 \section{News for version 0.5.4}{
@@ -2633,6 +2660,23 @@ stopifnot(
     ),
     "Syntymapaivamaara."
   )
+)
+vm@vame_copy
+vm_1 <- vame::VariableMetadata(
+  var_dt = data.table::data.table(var_nm = "a"),
+  var_set_dt = data.table::data.table(id = "a", var_nm_set = list("a")),
+  vame_list = list(hello = "there")
+)
+vm_2 <- vm_1@vame_copy()
+stopifnot(
+  all.equal(vm_1@var_dt_copy(), vm_2@var_dt_copy()),
+  all.equal(vm_1@var_set_dt_copy(), vm_2@var_set_dt_copy())
+)
+vm_2@var_rename("a", "b")
+stopifnot(
+  identical(unname(vm_1@var_meta_get_all(meta_nm = "var_nm")), "a"),
+  identical(unname(vm_2@var_meta_get_all(meta_nm = "var_nm")), "b"),
+  identical(vm_1@vame_list_copy(), vm_2@vame_list_copy())
 )
 # vm@vame_subset
 vm <- vame::VariableMetadata(

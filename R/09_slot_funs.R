@@ -2073,9 +2073,35 @@ vame_copy <- function(vm) {
   # @codedoc_comment_block news("vm@vame_copy", "2023-08-10", "0.1.8")
   # New slot fun `vm@vame_copy` + new exported fun `vame::vame_copy`.
   # @codedoc_comment_block news("vm@vame_copy", "2023-08-10", "0.1.8")
-  vd <- data.table::copy(vd_get(vm))
-  vsd <- data.table::copy(vsd_get(vm))
-  out <- vame::VariableMetadata(var_dt = vd, var_set_dt = vsd)
+
+  # @codedoc_comment_block function_example(vm@vame_copy)
+  # vm@vame_copy
+  # vm_1 <- vame::VariableMetadata(
+  #   var_dt = data.table::data.table(var_nm = "a"),
+  #   var_set_dt = data.table::data.table(id = "a", var_nm_set = list("a")),
+  #   vame_list = list(hello = "there")
+  # )
+  # vm_2 <- vm_1@vame_copy()
+  # stopifnot(
+  #   all.equal(vm_1@var_dt_copy(), vm_2@var_dt_copy()),
+  #   all.equal(vm_1@var_set_dt_copy(), vm_2@var_set_dt_copy())
+  # )
+  # vm_2@var_rename("a", "b")
+  # stopifnot(
+  #   identical(unname(vm_1@var_meta_get_all(meta_nm = "var_nm")), "a"),
+  #   identical(unname(vm_2@var_meta_get_all(meta_nm = "var_nm")), "b"),
+  #   identical(vm_1@vame_list_copy(), vm_2@vame_list_copy())
+  # )
+  # @codedoc_comment_block function_example(vm@vame_copy)
+
+  # @codedoc_comment_block news("vm@vame_copy", "2023-08-22", "0.5.5")
+  # `vm@vame_copy` now also copies `vame_list`.
+  # @codedoc_comment_block news("vm@vame_copy", "2023-08-22", "0.5.5")
+  out <- vame::VariableMetadata(
+    var_dt = var_dt_copy(vm = vm),
+    var_set_dt = var_set_dt_copy(vm = vm),
+    vame_list = vame_list_copy(vm = vm)
+  )
   return(out)
 }
 
