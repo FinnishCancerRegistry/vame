@@ -64,6 +64,21 @@ doc_slot_fun__ <- function(df, fun_nm) {
       ))
     )
   }
+  example_lines <- unlist(
+    df[["comment_block"]][df[["key"]] == paste0("function_example(", key, ")")]
+  )
+  if (length(example_lines) > 0) {
+    lines <- c(
+      lines,
+      "",
+      "*Examples*",
+      "",
+      "```",
+      example_lines,
+      "```",
+      ""
+    )
+  }
   return(lines)
 }
 doc_slot_funs__ <- function(df = NULL, fun_nms = NULL) {
@@ -98,7 +113,7 @@ doc_variablemetadata_features__ <- function(df = NULL) {
       )
       c(paste0("**", feat_nm, "**"), "", lines, "")
     }))
-  ) 
+  )
 }
 doc_variablemetadata_news__ <- function() {
   codedoc::codedoc_roxygen_news_by_version(
@@ -121,7 +136,10 @@ doc_variablemetadata_examples__ <- function(df = NULL) {
   if (is.null(df)) {
     df <- codedoc::extract_keyed_comment_blocks()
   }
-  is_example <- grepl("^feature_example[(]", df[["key"]])
+  is_example <- grepl(
+    "(^feature_example[(])|(^general_example$)|(^function_example[(])",
+    df[["key"]]
+  )
   lines <- unlist(df[["comment_block"]][is_example])
   lines <- c(
     "@examples",
@@ -144,7 +162,7 @@ methods::setClass(
 #' @aliases VariableMetadata
 #' @examples
 #' # vame::VariableMetadata ----------------------------------------------------
-#' 
+#'
 #' # basic example of different kinds of variables
 #' value_space_d <- function() 1:3 * 100L
 #' vm <- vame::VariableMetadata(
@@ -192,7 +210,7 @@ methods::setClass(
 #'   e_values + 1
 #' }
 #' my_fun(0.0)
-#' 
+#'
 #' # assignment after creating a VariableMetadata object
 #' vm@var_meta_set(var_nm = "f", meta_nm = "type", value = "my_date")
 #' stopifnot(
@@ -202,7 +220,7 @@ methods::setClass(
 #' stopifnot(
 #'   identical(vm@var_set_value_space_get(id = "c"), list(set = c("x", "z")))
 #' )
-#' 
+#'
 #' # renaming, removing variables
 #' vm <- vame::VariableMetadata(
 #'   var_dt = data.table::data.table(
@@ -218,30 +236,30 @@ methods::setClass(
 #'     )))
 #'   )
 #' )
-#' 
+#'
 #' vm@var_rename("a", "A")
 #' stopifnot(
 #'   identical(vm@var_meta_get("A", "flavour"), "tasty"),
 #'   identical(names(vm@var_set_value_space_get("set_01")[["dt"]]), c("A", "b")),
 #'   identical(vm@var_set_meta_get("set_01", "var_nm_set"), c("A", "b"))
 #' )
-#' 
+#'
 #' vm@var_set_rename("set_01", "Ab")
 #' stopifnot(
 #'   identical(vm@var_set_meta_get_all("id"), c("Ab" = "Ab"))
 #' )
-#' 
+#'
 #' vm@var_remove("b")
 #' stopifnot(
 #'   identical(names(vm@var_set_value_space_get("Ab")[["dt"]]), "A"),
 #'   identical(vm@var_set_meta_get("Ab", "var_nm_set"), "A")
 #' )
-#' 
+#'
 #' vm@var_set_remove("Ab")
 #' stopifnot(
 #'   identical(length(vm@var_set_meta_get_all("var_nm_set")), 0L)
 #' )
-#' 
+#'
 #' # retrieving category space data.tables
 #' dt_01 <- data.table::CJ(a = 1:3, b = 3:1, c = 1:3)
 #' dt_02 <- data.table::CJ(d = 1:2, e = 2:1)
@@ -273,7 +291,7 @@ methods::setClass(
 #'     )
 #'   )
 #' )
-#' 
+#'
 #' stopifnot(
 #'   all.equal(
 #'     vm@vame_category_space_dt(c("a", "b")),
@@ -295,7 +313,7 @@ methods::setClass(
 #'     check.attributes = FALSE
 #'   )
 #' )
-#' 
+#'
 #' # getting category space data.tables --- here a variable appears in
 #' # two different value spaces. this can be handy for defining joint value
 #' # spaces and also conversions & aggregations.
@@ -317,7 +335,7 @@ methods::setClass(
 #'     )
 #'   )
 #' )
-#' 
+#'
 #' obs <- vm@vame_category_space_dt(c("a", "b", "e"))
 #' exp <- data.table::data.table(
 #'   a = c(0L, 0L, 1L, 1L, 1L, 1L, 1L, 1L, 2L, 2L, 2L, 3L, 3L, 3L),
@@ -329,12 +347,12 @@ methods::setClass(
 #' stopifnot(
 #'   all.equal(obs, exp, check.attributes = FALSE)
 #' )
-#' 
+#'
 #' stopifnot(
 #'   vm@var_is_aggregateable_to("a", "a_2"),
 #'   identical(vm@var_aggregate(0:1, "a", "a_2"), c(1L,1L))
 #' )
-#' 
+#'
 #' # getting labels for variable levels
 #' dt_01 <- data.table::CJ(a = 1:3, b = 3:1, c = 4:5)
 #' vm <- vame::VariableMetadata(
@@ -364,13 +382,13 @@ methods::setClass(
 #'     )
 #'   )
 #' )
-#' 
+#'
 #' obs <- vm@var_labels_get(x = 1:4, var_nm = "a", label_nm = "en")
 #' exp <- c(paste0("a_level_", 1:3), NA)
 #' stopifnot(
 #'   identical(obs, exp)
 #' )
-#' 
+#'
 #' obs <- tryCatch(
 #'   vm@var_labels_get(
 #'     x = 1:4,
@@ -386,7 +404,7 @@ methods::setClass(
 #' stopifnot(
 #'   grepl(exp, obs)
 #' )
-#' 
+#'
 #' obs <- tryCatch(
 #'   vm@var_labels_get(
 #'     x = 1:4,
@@ -399,7 +417,7 @@ methods::setClass(
 #' stopifnot(
 #'   grepl(exp, obs)
 #' )
-#' 
+#'
 #' # adding data to a pre-existing VariableMetadata object
 #' vm_1 <- vame::VariableMetadata(
 #'   var_dt = data.table::data.table(
@@ -430,7 +448,7 @@ methods::setClass(
 #' stopifnot(
 #'   c("ab", "cd") %in% vm_1@var_set_meta_get_all("id")
 #' )
-#' 
+#'
 #' # taking a copy of a VariableMetadata object
 #' vm_3 <- vm_2@vame_copy()
 #' vm_2@var_rename("d", "dd")
@@ -439,7 +457,7 @@ methods::setClass(
 #'   !"d" %in% vm_2@var_meta_get_all("var_nm"),
 #'   "dd" %in% vm_2@var_meta_get_all("var_nm")
 #' )
-#' 
+#'
 #' @export
 #' @eval local({
 #'   df <- codedoc::extract_keyed_comment_blocks()
@@ -526,7 +544,7 @@ VariableMetadata <- function(
   # `vame::VariableMetadata` gains arg `vame_list`.
   # @codedoc_comment_block news("vame::VariableMetadata", "2023-12-12", "0.2.2")
   #' @param vame_list `[NULL, list]` (default `NULL`)
-  #' 
+  #'
   #' A list of metadata concerning the whole `VariableMetadata` object.
   #' Its elements can be anything you want.
   #' E.g. `vame_list = list(dataset_version = "1.0.0")`.
@@ -581,7 +599,7 @@ VariableMetadata <- function(
       ")"
     )
     lines <- c(
-      sprintf("%s <- function(", slot_fun_nm), 
+      sprintf("%s <- function(", slot_fun_nm),
       paste0("  ", arg_lines),
       ") {",
       paste0("  ", body_lines),

@@ -74,6 +74,15 @@ in a special way so that the \code{data} assertion is not performed.
 
 \section{News}{
 
+\subsection{News for version 0.5.4}{
+\subsection{vm@vame_subset}{
+
+Fix use of \code{substitute} in turning args \code{var_dt_expr} + \code{var_set_dt_expr}
+into a quoted expression.
+}
+
+}
+
 \subsection{News for version 0.5.3}{
 \subsection{vame}{
 

@@ -2091,6 +2091,29 @@ vame_subset <- function(
   # both `var_dt` and `var_set_dt`.
   # @codedoc_comment_block vm@vame_subset
 
+  # @codedoc_comment_block function_example(vm@vame_subset)
+  # # vm@vame_subset
+  # vm <- vame::VariableMetadata(
+  # var_dt = data.table::data.table(
+  #     var_nm = c("a", "b", "c"),
+  #     flavour = c("tasty", "rancid", "bitter")
+  #   ),
+  #   var_set_dt = data.table::data.table(
+  #     id = "set_01",
+  #     var_nm_set = list(c("a", "b")),
+  #     value_space = list(list(dt = data.table::data.table(
+  #       a = 1:2,
+  #       b = 3:4
+  #     )))
+  #   )
+  # )
+  # vm@vame_subset(var_dt_expr = var_nm == "a")
+  # stopifnot(
+  #   identical(unname(vm@var_meta_get_all(meta_nm = "var_nm")), "a"),
+  #   identical(names(vm@var_set_value_space_eval("set_01")[["dt"]]), "a")
+  # )
+  # @codedoc_comment_block function_example(vm@vame_subset)
+
   # @codedoc_comment_block news("vm@vame_subset", "2023-12-01", "0.2.0")
   # Rename `expr` to `var_dt_expr`. Add arg `var_set_dt_expr`.
   # @codedoc_comment_block news("vm@vame_subset", "2023-12-01", "0.2.0")
@@ -2101,7 +2124,11 @@ vame_subset <- function(
   # An R expression that should evaluate into `NULL`, `logical`, or `integer`.
   # The latter two are used to subset `var_dt`. `NULL` implies no subset.
   # @codedoc_comment_block doc_slot_fun_arg(var_dt_expr)
-  var_dt_expr <- substitute(var_dt_expr)
+  # @codedoc_comment_block news("vm@vame_subset", "2024-08-22", "0.5.4")
+  # Fix use of `substitute` in turning args `var_dt_expr` + `var_set_dt_expr`
+  # into a quoted expression.
+  # @codedoc_comment_block news("vm@vame_subset", "2024-08-22", "0.5.4")
+  var_dt_expr <- substitute(var_dt_expr, env = parent.frame(1L))
   # @codedoc_comment_block doc_slot_fun_arg(var_set_dt_expr)
   # @param var_set_dt_expr `[NULL, logical, integer]` (default `NULL`)
   #
@@ -2109,7 +2136,7 @@ vame_subset <- function(
   # The latter two are used to subset `var_set_dt_expr`. `NULL` implies no
   # subset.
   # @codedoc_comment_block doc_slot_fun_arg(var_set_dt_expr)
-  var_set_dt_expr <- substitute(var_set_dt_expr)
+  var_set_dt_expr <- substitute(var_set_dt_expr, env = parent.frame(1L))
   vame_subset_expr(
     vm = vm,
     var_dt_expr = var_dt_expr,

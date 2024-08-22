@@ -1055,7 +1055,31 @@ var_set_dt_expr \verb{[NULL, logical, integer]} (default \code{NULL})
 
 An R expression that should evaluate into \code{NULL}, \code{logical}, or \code{integer}.
 The latter two are used to subset \code{var_set_dt_expr}. \code{NULL} implies no
-subset.}
+subset.
+
+\emph{Examples}
+
+\if{html}{\out{<div class="sourceCode">}}\preformatted{# vm@vame_subset
+vm <- vame::VariableMetadata(
+var_dt = data.table::data.table(
+    var_nm = c("a", "b", "c"),
+    flavour = c("tasty", "rancid", "bitter")
+  ),
+  var_set_dt = data.table::data.table(
+    id = "set_01",
+    var_nm_set = list(c("a", "b")),
+    value_space = list(list(dt = data.table::data.table(
+      a = 1:2,
+      b = 3:4
+    )))
+  )
+)
+vm@vame_subset(var_dt_expr = var_nm == "a")
+stopifnot(
+  identical(unname(vm@var_meta_get_all(meta_nm = "var_nm")), "a"),
+  identical(names(vm@var_set_value_space_eval("set_01")[["dt"]]), "a")
+)
+}\if{html}{\out{</div>}}}
 
 \item{\code{vame_union_append}}{\emph{Description}
 
@@ -1723,6 +1747,13 @@ The following functions are part of this feature:
 \item \code{vm@vame_category_space_dt_list}
 \item \code{vm@vame_category_space_dt}
 }
+}
+
+\section{News for version 0.5.4}{
+
+
+Fix use of \code{substitute} in turning args \code{var_dt_expr} + \code{var_set_dt_expr}
+into a quoted expression.
 }
 
 \section{News for version 0.5.3}{
@@ -2602,5 +2633,25 @@ stopifnot(
     ),
     "Syntymapaivamaara."
   )
+)
+# vm@vame_subset
+vm <- vame::VariableMetadata(
+var_dt = data.table::data.table(
+    var_nm = c("a", "b", "c"),
+    flavour = c("tasty", "rancid", "bitter")
+  ),
+  var_set_dt = data.table::data.table(
+    id = "set_01",
+    var_nm_set = list(c("a", "b")),
+    value_space = list(list(dt = data.table::data.table(
+      a = 1:2,
+      b = 3:4
+    )))
+  )
+)
+vm@vame_subset(var_dt_expr = var_nm == "a")
+stopifnot(
+  identical(unname(vm@var_meta_get_all(meta_nm = "var_nm")), "a"),
+  identical(names(vm@var_set_value_space_eval("set_01")[["dt"]]), "a")
 )
 }
