@@ -1740,7 +1740,7 @@ A \code{describer} of type \code{call} must contain (mention) variable
 
 The following functions are related to this feature:
 \itemize{
-\item \code{vm@var_describer_getr}
+\item \code{vm@var_describer_get}
 \item \code{vm@var_describer_set}
 \item \code{vm@var_description_get}
 }

@@ -1847,7 +1847,7 @@ var_describer_get <- function(
   # Get the describer for a variable.
   # @codedoc_comment_block vm@var_describer_get
   # @codedoc_comment_block feature_funs(describing)
-  # - `vm@var_describer_getr`
+  # - `vm@var_describer_get`
   # @codedoc_comment_block feature_funs(describing)
   # @codedoc_comment_block news("vm@var_describer_get", "2024-01-22", "0.4.0")
   # New function `vm@var_describer_get`.
