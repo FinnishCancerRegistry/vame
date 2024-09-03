@@ -74,6 +74,30 @@ in a special way so that the \code{data} assertion is not performed.
 
 \section{News}{
 
+\subsection{News for version 0.5.6}{
+\subsection{vm@vame_meta_set}{
+
+\code{vm@vame_meta_set} now checks \code{value} for validity for "officially"
+defined metadata such as \code{sampler}. Formerly this was done only by
+the corresponding wrapper such as \code{vm@vame_value_space_sampler_set}.
+}
+
+\subsection{vm@var_meta_set}{
+
+\code{vm@var_meta_set} now checks \code{value} for validity for "officially" defined
+metadata such as \code{describer}. Formerly this was done only by
+the corresponding wrapper such as \code{vm@var_describer_set}.
+}
+
+\subsection{vm@var_set_meta_set}{
+
+\code{vm@var_set_meta_set} now checks \code{value} for validity for "officially"
+defined metadata such as \code{value_space}. Formerly this was done only by
+the corresponding wrapper such as \code{vm@var_set_value_space_set}.
+}
+
+}
+
 \subsection{News for version 0.5.5}{
 \subsection{vm@vame_copy}{
 

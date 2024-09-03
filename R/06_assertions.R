@@ -14,7 +14,7 @@ assert_is_variablemetadata <- function(
   )
 }
 
-assert_is_labeler <- function(  
+assert_is_labeler <- function(
   x,
   x_nm = NULL,
   call = NULL,
@@ -85,9 +85,9 @@ assert_is_labeler <- function(
       ),
       fail_messages = c(
         paste0("R expression `", deparse1(x), "` from object/expression `",
-               x_nm , "` must contain variable `x`"),
+               x_nm, "` must contain variable `x`"),
         paste0("R expression `", deparse1(x), "` from object/expression `",
-               x_nm , "` must contain variable `label_nm`")
+               x_nm, "` must contain variable `label_nm`")
       ),
       call = call,
       env = environment()
@@ -250,7 +250,7 @@ assert_is_var_set_dt <- function(
   return(invisible(NULL))
 }
 
-assert_is_sampler <- function(
+assert_is_sampler <- assert_is_value_space_sampler <- function(
   x,
   x_nm = NULL,
   call = NULL,
@@ -568,8 +568,10 @@ assert_is_var_nm <- function(
   x,
   x_nm = NULL,
   call = NULL,
-  assertion_type = NULL
+  assertion_type = NULL,
+  must_exist = TRUE
 ) {
+  dbc::handle_args_inplace()
   assert_is_variablemetadata(vm, assertion_type = "prod_input")
   dbc::assert_is_character_nonNA_atom(
     x,
@@ -577,14 +579,44 @@ assert_is_var_nm <- function(
     call = call,
     assertion_type = assertion_type
   )
-  dbc::assert_atom_is_in_set(
+  if (must_exist) {
+    dbc::assert_atom_is_in_set(
+      x,
+      x_nm = x_nm,
+      call = call,
+      assertion_type = assertion_type,
+      set = var_meta_get_all(vm, "var_nm")
+    )
+  }
+}
+
+assert_is_id <- function(
+  vm,
+  x,
+  x_nm = NULL,
+  call = NULL,
+  assertion_type = NULL,
+  must_exist = TRUE
+) {
+  dbc::handle_args_inplace()
+  assert_is_variablemetadata(vm, assertion_type = "prod_input")
+  dbc::assert_is_atom(
     x,
     x_nm = x_nm,
     call = call,
-    assertion_type = assertion_type,
-    set = var_meta_get_all(vm, "var_nm")
+    assertion_type = assertion_type
   )
+  if (must_exist) {
+    dbc::assert_atom_is_in_set(
+      x,
+      x_nm = x_nm,
+      call = call,
+      assertion_type = assertion_type,
+      set = var_set_meta_get_all(vm, "id")
+    )
+  }
 }
+
 
 assert_is_var_meta_nm <- function(
   vm,
@@ -593,6 +625,7 @@ assert_is_var_meta_nm <- function(
   call = NULL,
   assertion_type = NULL
 ) {
+  dbc::handle_args_inplace()
   assert_is_variablemetadata(
     vm,
     call = call,
@@ -650,6 +683,7 @@ assert_is_var_set_meta_nm <- function(
   call = NULL,
   assertion_type = NULL
 ) {
+  dbc::handle_args_inplace()
   assert_is_variablemetadata(vm, assertion_type = "prod_input")
   dbc::assert_is_character_nonNA_atom(
     x,
@@ -718,4 +752,25 @@ assert_is_arg_var_nms <- function(
     funs = list(dbc::report_is_NULL,
                 dbc::report_is_character_nonNA_vector)
   )
+}
+
+assert_meta <- function(
+  x,
+  x_nm = NULL,
+  call = NULL,
+  assertion_type = NULL,
+  must_exist = TRUE,
+  vm,
+  meta_nm
+) {
+  dbc::handle_args_inplace()
+  assert_fun_nm <- paste0("assert_is_", meta_nm)
+  if (assert_fun_nm %in% ls(getNamespace("vame"))) {
+    assert_fun <- getNamespace("vame")[[assert_fun_nm]]
+    assert_fun_arg_list <- mget(ls())
+    assert_fun_arg_list <- assert_fun_arg_list[
+      intersect(names(assert_fun_arg_list), names(formals(assert_fun)))
+    ]
+    do.call(assert_fun, assert_fun_arg_list, quote = TRUE)
+  }
 }

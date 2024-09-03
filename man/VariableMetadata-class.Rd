@@ -1770,6 +1770,22 @@ The following functions are part of this feature:
 }
 }
 
+\section{News for version 0.5.6}{
+
+
+\code{vm@vame_meta_set} now checks \code{value} for validity for "officially"
+defined metadata such as \code{sampler}. Formerly this was done only by
+the corresponding wrapper such as \code{vm@vame_value_space_sampler_set}.
+
+\code{vm@var_meta_set} now checks \code{value} for validity for "officially" defined
+metadata such as \code{describer}. Formerly this was done only by
+the corresponding wrapper such as \code{vm@var_describer_set}.
+
+\code{vm@var_set_meta_set} now checks \code{value} for validity for "officially"
+defined metadata such as \code{value_space}. Formerly this was done only by
+the corresponding wrapper such as \code{vm@var_set_value_space_set}.
+}
+
 \section{News for version 0.5.5}{
 
 

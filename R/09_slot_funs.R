@@ -71,30 +71,41 @@ var_set_meta_set <- function(
   # @codedoc_comment_block vm@var_set_meta_set
   # Set metadata for a specific variable set.
   # @codedoc_comment_block vm@var_set_meta_set
-  
+
   assert_is_variablemetadata(vm)
-  
+
   # @codedoc_comment_block doc_slot_fun_arg(id)
   # @param id `[any]` (no default)
-  # 
+  #
   # ID, or "name", of a variable set. The class of `id` is defined when you
   # create the `VariableMetadata` object and it can be pretty much anything.
   # @codedoc_comment_block doc_slot_fun_arg(id)
   assert_is_var_set_id(vm, id)
-      
+
   # @codedoc_comment_block doc_slot_fun_arg(value)
   # @param value `[any]` (no default)
-  # 
+  #
   # In `_set` functions the value to set for the specified metadata.
   # @codedoc_comment_block doc_slot_fun_arg(value)
-  vsd <- vsd_get(vm)
+
+  # @codedoc_comment_block news("vm@var_set_meta_set", "2024-09-02", "0.5.6")
+  # `vm@var_set_meta_set` now checks `value` for validity for "officially"
+  # defined metadata such as `value_space`. Formerly this was done only by
+  # the corresponding wrapper such as `vm@var_set_value_space_set`.
+  # @codedoc_comment_block news("vm@var_set_meta_set", "2024-09-02", "0.5.6")
+  assert_meta(vm = vm, x = value, meta_nm = meta_nm, must_exist = FALSE)
+
   # @codedoc_comment_block news("vm@var_set_meta_set", "2023-12-12", "0.2.2")
   # `vm@var_set_meta_set` now wraps `value` into a list if it isn't a list
   # and if the target column is a list.
   # @codedoc_comment_block news("vm@var_set_meta_set", "2023-12-12", "0.2.2")
-  if (is.atomic(value) && meta_nm %in% names(vsd) && is.list(vsd[[meta_nm]])) {
+  vsd <- vsd_get(vm)
+  if (meta_nm %in% names(vsd) && is.list(vsd[[meta_nm]])) {
     value <- list(value)
+    names(value) <- id
   }
+  value <- list(value)
+  names(value) <- meta_nm
   data.table::set(
     vsd,
     i = var_set_id_to_pos(vm, id),
@@ -257,8 +268,12 @@ var_set_maker_set <- function(
   # @codedoc_comment_block news("vm@var_set_maker_set", "2024-01-19", "0.3.0")
   # New function `vm@var_set_maker_set`.
   # @codedoc_comment_block news("vm@var_set_maker_set", "2024-01-19", "0.3.0")
-  assert_is_maker(value)
-  var_set_meta_set(vm = vm, id = id, meta_nm = "maker", value = value)
+  var_set_meta_set(
+    vm = vm,
+    id = id,
+    meta_nm = "maker",
+    value = value
+  )
 }
 
 var_set_make <- function(
@@ -844,22 +859,18 @@ var_set_value_space_set <- function(
   # @codedoc_comment_block feature_funs(value spaces)
   # - `vm@var_set_value_space_set`
   # @codedoc_comment_block feature_funs(value spaces)
-  assert_var_set_value_space_is_defined(vm)
-  vsd <- vsd_get(vm)
-  pos <- var_set_id_to_pos(vm, id)
+
   # @codedoc_comment_block doc_slot_fun_arg(value_space)
   # @param value_space `[list]` (no default)
-  # 
+  #
   # A value space to assign for the specified variable set.
   # @codedoc_comment_block doc_slot_fun_arg(value_space)
-  data.table::set(
-    vsd,
-    i = pos,
-    j = "value_space",
-    # to ensure value_space remains a list
-    value = list(list(value_space))
+  var_set_meta_set(
+    vm = vm,
+    id = id,
+    meta_nm = "value_space",
+    value = value_space
   )
-  vsd_set(vm, vsd)
 }
 
 
@@ -911,7 +922,7 @@ var_set_value_space_sampler_set <- function(
   # Assign value space sampler for given `id` in `var_set_dt$sampler`.
   #
   # @codedoc_insert_comment_block specification(var_set_dt$sampler)
-  # 
+  #
   # See the documentation for `var_set_value_space_sample` to understand how
   # the `sampler` object is used.
   # @codedoc_comment_block vm@var_set_value_space_sampler_set
@@ -921,11 +932,12 @@ var_set_value_space_sampler_set <- function(
   # @codedoc_comment_block news("vm@var_set_value_space_sampler_set", "2023-12-12", "0.2.2")
   # New slot function `var_set_value_space_sampler_set`.
   # @codedoc_comment_block news("vm@var_set_value_space_sampler_set", "2023-12-12", "0.2.2")
-  assert_is_sampler(value)
-  if (inherits(value, "list")) {
-    value <- list(value)
-  }
-  var_set_meta_set(vm, id = id, meta_nm = "sampler", value = value)
+  var_set_meta_set(
+    vm = vm,
+    id = id,
+    meta_nm = "sampler",
+    value = value
+  )
 }
 
 var_set_value_space_sample <- function(
@@ -1135,7 +1147,7 @@ var_set_value_space_sample <- function(
   # @codedoc_comment_block feature_process(random sampling)
   if (var_set_meta_is_defined(vm, id = id, meta_nm = "sampler")) {
     sampler <- var_set_value_space_sampler_get(vm, id = id)
-    assert_is_sampler(sampler, assertion_type = "general")
+    assert_is_value_space_sampler(sampler, assertion_type = "general")
   } else {
     sampler <- get_value_space_type_fun__(
       value_space_type = names(vs),
@@ -1553,14 +1565,24 @@ var_meta_set <- function(
   # Set metadata for a variable.
   # @codedoc_comment_block vm@var_meta_set
   assert_is_var_nm(vm, var_nm)
-  vd <- vd_get(vm)
+  # @codedoc_comment_block news("vm@var_meta_set", "2024-09-02", "0.5.6")
+  # `vm@var_meta_set` now checks `value` for validity for "officially" defined
+  # metadata such as `describer`. Formerly this was done only by
+  # the corresponding wrapper such as `vm@var_describer_set`.
+  # @codedoc_comment_block news("vm@var_meta_set", "2024-09-02", "0.5.6")
+  assert_meta(vm = vm, x = value, meta_nm = meta_nm, must_exist = FALSE)
+
   # @codedoc_comment_block news("vm@var_meta_set", "2023-12-12", "0.2.2")
   # `vm@var_meta_set` now wraps `value` into a list if it isn't a list
   # and if the target column is a list.
   # @codedoc_comment_block news("vm@var_meta_set", "2023-12-12", "0.2.2")
-  if (is.atomic(value) && meta_nm %in% names(vd) && is.list(vd[[meta_nm]])) {
+  vd <- vd_get(vm)
+  if (meta_nm %in% names(vd) && is.list(vd[[meta_nm]])) {
     value <- list(value)
+    names(value) <- var_nm
   }
+  value <- list(value)
+  names(value) <- meta_nm
   data.table::set(
     vd,
     i = data.table::chmatch(var_nm, vd[["var_nm"]]),
@@ -1578,7 +1600,7 @@ var_meta_get_all <- function(
   # @codedoc_comment_block vm@var_meta_get_all
   # Get metadata for all variables.
   # @codedoc_comment_block vm@var_meta_get_all
-  
+
   assert_is_var_meta_nm(vm, meta_nm)
   vd <- vd_get(vm)
   # @codedoc_comment_block news("vm@var_meta_get_all", "2023-12-04", "0.2.0")
@@ -1715,8 +1737,6 @@ var_labeler_set <- function(
   # @codedoc_comment_block feature_funs(labeling)
   # - `vm@var_labeler_set`
   # @codedoc_comment_block feature_funs(labeling)
-  assert_is_var_nm(vm, var_nm)
-  assert_is_labeler(value)
   var_meta_set(vm, var_nm, "labeler", value)
 }
 
@@ -1874,8 +1894,6 @@ var_describer_set <- function(
   # @codedoc_comment_block news("vm@var_describer_set", "2024-01-22", "0.4.0")
   # New function `vm@var_describer_set`.
   # @codedoc_comment_block news("vm@var_describer_set", "2024-01-22", "0.4.0")
-  assert_is_var_nm(vm, var_nm)
-  assert_is_describer(value)
   var_meta_set(vm, var_nm, "describer", value)
 }
 
@@ -2293,6 +2311,12 @@ vame_meta_set <- function(
   # New function `vm@vame_meta_set`.
   # @codedoc_comment_block news("vm@vame_meta_set", "2023-12-12", "0.2.2")
   dbc::assert_is_character_nonNA_vector(meta_nm)
+  # @codedoc_comment_block news("vm@vame_meta_set", "2024-09-02", "0.5.6")
+  # `vm@vame_meta_set` now checks `value` for validity for "officially"
+  # defined metadata such as `sampler`. Formerly this was done only by
+  # the corresponding wrapper such as `vm@vame_value_space_sampler_set`.
+  # @codedoc_comment_block news("vm@vame_meta_set", "2024-09-02", "0.5.6")
+  assert_meta(vm = vm, x = value, meta_nm = meta_nm, must_exist = FALSE)
   vl <- vame_list_get(vm = vm)
   vl[[meta_nm]] <- value
   vame_list_set(vm = vm, value = vl)
@@ -2313,7 +2337,7 @@ vame_value_space_sampler_get <- function(
   # - `vm@vame_value_space_sampler_get`
   # @codedoc_comment_block feature_funs(random sampling)
   out <- vame_meta_get(vm = vm, meta_nm = "sampler")
-  assert_is_sampler(out, assertion_type = "prod_output")
+  assert_is_value_space_sampler(out, assertion_type = "prod_output")
   return(out)
 }
 vame_value_space_sampler_set <- function(
@@ -2324,7 +2348,7 @@ vame_value_space_sampler_set <- function(
   # Assign `meta_list$sampler`.
   #
   # @codedoc_insert_comment_block specification(vame_list$sampler)
-  # 
+  #
   # See the documentation for `vame_value_space_sample` to understand how
   # the `sampler` object is used.
   # @codedoc_comment_block vm@vame_value_space_sampler_set
@@ -2336,7 +2360,6 @@ vame_value_space_sampler_set <- function(
   # @codedoc_comment_block feature_funs(random sampling)
   # - `vm@vame_value_space_sampler_set`
   # @codedoc_comment_block feature_funs(random sampling)
-  assert_is_sampler(value, assertion_type = "input")
   vame_meta_set(vm = vm, meta_nm = "sampler", value = value)
 }
 vame_value_space_sample <- function(
