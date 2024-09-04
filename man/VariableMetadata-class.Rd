@@ -143,6 +143,9 @@ of a \code{VariableMetadata} object.}
 \item{\code{var_set_meta_set}}{\emph{Description}
 
 Set metadata for a specific variable set.
+\code{value} is wrapped inside a \code{list} if \code{var_set_dt[[meta_nm]]} is a \code{list}
+or if \code{meta_nm \%in\% c("value_space", "maker")}. This is necessary for
+correct assignment into a \code{list}-valued column.
 
 \emph{Usage}
 
@@ -162,7 +165,29 @@ of a \code{VariableMetadata} object.
 
 value \verb{[any]} (no default)
 
-In \verb{_set} functions the value to set for the specified metadata.}
+In \verb{_set} functions the value to set for the specified metadata.
+
+\emph{Examples}
+
+\if{html}{\out{<div class="sourceCode">}}\preformatted{vm <- vame::VariableMetadata(
+  var_dt = data.table::data.table(
+    var_nm = "a"
+  ),
+  var_set_dt = data.table::data.table(
+    id = "A",
+    var_nm_set = list("a")
+  )
+)
+a_value_space <- list(set = 1:3)
+vm@var_set_meta_set(
+  id = "A",
+  meta_nm = "value_space",
+  value = a_value_space
+)
+stopifnot(
+  identical(vm@var_set_value_space_get(id = "A"), a_value_space)
+)
+}\if{html}{\out{</div>}}}
 
 \item{\code{var_set_meta_get_all}}{\emph{Description}
 
@@ -794,6 +819,9 @@ of a \code{VariableMetadata} object.}
 \item{\code{var_meta_set}}{\emph{Description}
 
 Set metadata for a variable.
+\code{value} is wrapped inside a \code{list} if \code{var_dt[[meta_nm]]} is a \code{list}
+or if \code{meta_nm \%in\% c("describer", "labeler")}. This is necessary for
+correct assignment into a \code{list}-valued column.
 
 \emph{Usage}
 
@@ -812,7 +840,42 @@ of a \code{VariableMetadata} object.
 
 value \verb{[any]} (no default)
 
-In \verb{_set} functions the value to set for the specified metadata.}
+In \verb{_set} functions the value to set for the specified metadata.
+
+\emph{Examples}
+
+\if{html}{\out{<div class="sourceCode">}}\preformatted{vm <- vame::VariableMetadata(
+  var_dt = data.table::data.table(
+    var_nm = "a"
+  ),
+  var_set_dt = data.table::data.table(
+    id = "A",
+    var_nm_set = list("a")
+  )
+)
+a_type <- "this is type for a"
+vm@var_meta_set(
+  var_nm = "a",
+  meta_nm = "type",
+  value = a_type
+)
+a_describer <- list(descr = "this is description for a")
+vm@var_meta_set(
+  var_nm = "a",
+  meta_nm = "describer",
+  value = a_describer
+)
+stopifnot(
+  identical(
+    vm@var_meta_get(var_nm = "a", meta_nm = "type"),
+    a_type
+  ),
+  identical(
+    vm@var_meta_get(var_nm = "a", meta_nm = "describer"),
+    a_describer
+  )
+)
+}\if{html}{\out{</div>}}}
 
 \item{\code{var_meta_get_all}}{\emph{Description}
 
@@ -1770,6 +1833,18 @@ The following functions are part of this feature:
 }
 }
 
+\section{News for version 0.5.7}{
+
+
+\code{vm@var_meta_set} now always wraps \code{value} into a list before adding
+it into \code{vm} when \code{meta_nm \%in\% c("describer", "labeler")} --- those are
+known \code{list} columns.
+
+\code{vm@var_set_meta_set} now always wraps \code{value} into a list before adding
+it into \code{vm} when \code{meta_nm \%in\% c("value_space", "maker")} --- those are
+known \code{list} columns.
+}
+
 \section{News for version 0.5.6}{
 
 
@@ -2372,6 +2447,24 @@ stopifnot(
   "dd" \%in\% vm_2@var_meta_get_all("var_nm")
 )
 
+vm <- vame::VariableMetadata(
+  var_dt = data.table::data.table(
+    var_nm = "a"
+  ),
+  var_set_dt = data.table::data.table(
+    id = "A",
+    var_nm_set = list("a")
+  )
+)
+a_value_space <- list(set = 1:3)
+vm@var_set_meta_set(
+  id = "A",
+  meta_nm = "value_space",
+  value = a_value_space
+)
+stopifnot(
+  identical(vm@var_set_value_space_get(id = "A"), a_value_space)
+)
 # Example of make feature
 make_dg_y <- function(
   dg_date
@@ -2634,6 +2727,37 @@ stopifnot(
   identical(c("a", "d", "b", "c"), names(vame_sample)),
   nrow(vame_sample) == 10,
   vame_sample[["c"]] < vame_sample[["a"]]
+)
+vm <- vame::VariableMetadata(
+  var_dt = data.table::data.table(
+    var_nm = "a"
+  ),
+  var_set_dt = data.table::data.table(
+    id = "A",
+    var_nm_set = list("a")
+  )
+)
+a_type <- "this is type for a"
+vm@var_meta_set(
+  var_nm = "a",
+  meta_nm = "type",
+  value = a_type
+)
+a_describer <- list(descr = "this is description for a")
+vm@var_meta_set(
+  var_nm = "a",
+  meta_nm = "describer",
+  value = a_describer
+)
+stopifnot(
+  identical(
+    vm@var_meta_get(var_nm = "a", meta_nm = "type"),
+    a_type
+  ),
+  identical(
+    vm@var_meta_get(var_nm = "a", meta_nm = "describer"),
+    a_describer
+  )
 )
 
 # Example of describing feature

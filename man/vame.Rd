@@ -74,6 +74,23 @@ in a special way so that the \code{data} assertion is not performed.
 
 \section{News}{
 
+\subsection{News for version 0.5.7}{
+\subsection{vm@var_meta_set}{
+
+\code{vm@var_meta_set} now always wraps \code{value} into a list before adding
+it into \code{vm} when \code{meta_nm \%in\% c("describer", "labeler")} --- those are
+known \code{list} columns.
+}
+
+\subsection{vm@var_set_meta_set}{
+
+\code{vm@var_set_meta_set} now always wraps \code{value} into a list before adding
+it into \code{vm} when \code{meta_nm \%in\% c("value_space", "maker")} --- those are
+known \code{list} columns.
+}
+
+}
+
 \subsection{News for version 0.5.6}{
 \subsection{vm@vame_meta_set}{
 

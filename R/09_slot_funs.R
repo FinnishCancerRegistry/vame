@@ -88,6 +88,27 @@ var_set_meta_set <- function(
   # In `_set` functions the value to set for the specified metadata.
   # @codedoc_comment_block doc_slot_fun_arg(value)
 
+  # @codedoc_comment_block function_example(vm@var_set_meta_set)
+  # vm <- vame::VariableMetadata(
+  #   var_dt = data.table::data.table(
+  #     var_nm = "a"
+  #   ),
+  #   var_set_dt = data.table::data.table(
+  #     id = "A",
+  #     var_nm_set = list("a")
+  #   )
+  # )
+  # a_value_space <- list(set = 1:3)
+  # vm@var_set_meta_set(
+  #   id = "A",
+  #   meta_nm = "value_space",
+  #   value = a_value_space
+  # )
+  # stopifnot(
+  #   identical(vm@var_set_value_space_get(id = "A"), a_value_space)
+  # )
+  # @codedoc_comment_block function_example(vm@var_set_meta_set)
+
   # @codedoc_comment_block news("vm@var_set_meta_set", "2024-09-02", "0.5.6")
   # `vm@var_set_meta_set` now checks `value` for validity for "officially"
   # defined metadata such as `value_space`. Formerly this was done only by
@@ -99,8 +120,21 @@ var_set_meta_set <- function(
   # `vm@var_set_meta_set` now wraps `value` into a list if it isn't a list
   # and if the target column is a list.
   # @codedoc_comment_block news("vm@var_set_meta_set", "2023-12-12", "0.2.2")
+  # @codedoc_comment_block news("vm@var_set_meta_set", "2024-09-04", "0.5.7")
+  # `vm@var_set_meta_set` now always wraps `value` into a list before adding
+  # it into `vm` when `meta_nm %in% c("value_space", "maker")` --- those are
+  # known `list` columns.
+  # @codedoc_comment_block news("vm@var_set_meta_set", "2024-09-04", "0.5.7")
+  # @codedoc_comment_block vm@var_set_meta_set
+  # `value` is wrapped inside a `list` if `var_set_dt[[meta_nm]]` is a `list`
+  # or if `meta_nm %in% c("value_space", "maker")`. This is necessary for
+  # correct assignment into a `list`-valued column.
+  # @codedoc_comment_block vm@var_set_meta_set
   vsd <- vsd_get(vm)
-  if (meta_nm %in% names(vsd) && is.list(vsd[[meta_nm]])) {
+  if (
+    meta_nm %in% names(vsd) && is.list(vsd[[meta_nm]]) ||
+      meta_nm %in% c("value_space", "maker")
+  ) {
     value <- list(value)
     names(value) <- id
   }
@@ -865,6 +899,7 @@ var_set_value_space_set <- function(
   #
   # A value space to assign for the specified variable set.
   # @codedoc_comment_block doc_slot_fun_arg(value_space)
+
   var_set_meta_set(
     vm = vm,
     id = id,
@@ -1564,7 +1599,7 @@ var_meta_set <- function(
   # @codedoc_comment_block vm@var_meta_set
   # Set metadata for a variable.
   # @codedoc_comment_block vm@var_meta_set
-  assert_is_var_nm(vm, var_nm)
+  assert_is_var_nm(vm, var_nm, must_exist = TRUE)
   # @codedoc_comment_block news("vm@var_meta_set", "2024-09-02", "0.5.6")
   # `vm@var_meta_set` now checks `value` for validity for "officially" defined
   # metadata such as `describer`. Formerly this was done only by
@@ -1572,12 +1607,59 @@ var_meta_set <- function(
   # @codedoc_comment_block news("vm@var_meta_set", "2024-09-02", "0.5.6")
   assert_meta(vm = vm, x = value, meta_nm = meta_nm, must_exist = FALSE)
 
+  # @codedoc_comment_block function_example(vm@var_meta_set)
+  # vm <- vame::VariableMetadata(
+  #   var_dt = data.table::data.table(
+  #     var_nm = "a"
+  #   ),
+  #   var_set_dt = data.table::data.table(
+  #     id = "A",
+  #     var_nm_set = list("a")
+  #   )
+  # )
+  # a_type <- "this is type for a"
+  # vm@var_meta_set(
+  #   var_nm = "a",
+  #   meta_nm = "type",
+  #   value = a_type
+  # )
+  # a_describer <- list(descr = "this is description for a")
+  # vm@var_meta_set(
+  #   var_nm = "a",
+  #   meta_nm = "describer",
+  #   value = a_describer
+  # )
+  # stopifnot(
+  #   identical(
+  #     vm@var_meta_get(var_nm = "a", meta_nm = "type"),
+  #     a_type
+  #   ),
+  #   identical(
+  #     vm@var_meta_get(var_nm = "a", meta_nm = "describer"),
+  #     a_describer
+  #   )
+  # )
+  # @codedoc_comment_block function_example(vm@var_meta_set)
+
   # @codedoc_comment_block news("vm@var_meta_set", "2023-12-12", "0.2.2")
   # `vm@var_meta_set` now wraps `value` into a list if it isn't a list
   # and if the target column is a list.
   # @codedoc_comment_block news("vm@var_meta_set", "2023-12-12", "0.2.2")
+  # @codedoc_comment_block news("vm@var_meta_set", "2024-09-04", "0.5.7")
+  # `vm@var_meta_set` now always wraps `value` into a list before adding
+  # it into `vm` when `meta_nm %in% c("describer", "labeler")` --- those are
+  # known `list` columns.
+  # @codedoc_comment_block news("vm@var_meta_set", "2024-09-04", "0.5.7")
+  # @codedoc_comment_block vm@var_meta_set
+  # `value` is wrapped inside a `list` if `var_dt[[meta_nm]]` is a `list`
+  # or if `meta_nm %in% c("describer", "labeler")`. This is necessary for
+  # correct assignment into a `list`-valued column.
+  # @codedoc_comment_block vm@var_meta_set
   vd <- vd_get(vm)
-  if (meta_nm %in% names(vd) && is.list(vd[[meta_nm]])) {
+  if (
+    meta_nm %in% names(vd) && is.list(vd[[meta_nm]]) ||
+      meta_nm %in% c("describer", "labeler")
+  ) {
     value <- list(value)
     names(value) <- var_nm
   }
@@ -1589,6 +1671,7 @@ var_meta_set <- function(
     j = meta_nm,
     value = value
   )
+  vd_set(vm = vm, dt = vd)
   return(invisible(NULL))
 }
 
