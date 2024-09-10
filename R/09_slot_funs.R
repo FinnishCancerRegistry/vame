@@ -2000,7 +2000,8 @@ var_description_get <- function(
   # The describing feature becomes available if
   # the `var_dt` of a `VariableMetadata` object has a `describer` column value
   # for a variable. You can include `describer` in `var_dt` when the
-  # `VariableMetadata` object is constructed or use `vm@var_describer_set` later.
+  # `VariableMetadata` object is constructed or use `vm@var_describer_set`
+  # later.
   #
   # @codedoc_insert_comment_block specification(var_dt$describer)
   #
@@ -2008,7 +2009,7 @@ var_description_get <- function(
   # @codedoc_insert_comment_block feature_funs(describing)
   # @codedoc_comment_block feature(describing)
   # @codedoc_comment_block feature_example(describing)
-  # 
+  #
   # # Example of describing feature
   # my_vame <- vame::VariableMetadata(
   #   var_dt = data.table::data.table(
@@ -2030,10 +2031,15 @@ var_description_get <- function(
   #     var_nm_set = list(sex = "sex", birth_date = "birth_date")
   #   )
   # )
+  # new_descr <- list(en = c("Sex ", "at ", "birth."), fi = "Sukupuoli.")
+  # my_vame@var_describer_set(
+  #   var_nm = "sex",
+  #   value = new_descr
+  # )
   # stopifnot(
   #   identical(
-  #     my_vame@var_description_get("sex"),
-  #     "Sex assigned at birth."
+  #     my_vame@var_description_get("sex", descr_nm = "en"),
+  #     new_descr[["en"]]
   #   ),
   #   inherits(
   #     tryCatch(
@@ -2126,7 +2132,7 @@ var_description_get <- function(
     stop("no handling defined for describer of class(es) ",
          deparse1(class(describer)))
   }
-  dbc::assert_prod_output_is_character_nonNA_atom(out)
+  assert_is_description(out, assertion_type = "prod_output")
   return(out)
 }
 

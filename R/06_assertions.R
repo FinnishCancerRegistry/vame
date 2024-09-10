@@ -450,6 +450,33 @@ assert_is_maker <- function(
   )
 }
 
+assert_is_description <- function(
+  x,
+  x_nm = NULL,
+  call = NULL,
+  assertion_type = NULL
+) {
+  dbc::handle_args_inplace()
+  # @codedoc_comment_block news("vame", "2024-09-10", "0.5.8")
+  # An individual description text for a `describer` can now be a `character`
+  # string vector (without `NA`) with more than one element. Formerly
+  # length one was required.
+  # @codedoc_comment_block news("vame", "2024-09-10", "0.5.8")
+  dbc::assert_is_character_nonNA_vector(
+    x = x,
+    x_nm = x_nm,
+    call = call,
+    assertion_type = assertion_type
+  )
+  dbc::assert_is_gte(
+    x = length(x),
+    x_nm = sprintf("length(%s)", x_nm),
+    call = call,
+    assertion_type = assertion_type,
+    lo = 1L
+  )
+}
+
 assert_is_describer <- function(
   x,
   x_nm = NULL,
@@ -474,7 +501,7 @@ assert_is_describer <- function(
   } else if (is.list(x)) {
     # @codedoc_comment_block specification(var_dt$describer)
     # A `describer` of type `list` must be named. Each element must be
-    # a string.
+    # a `character` string vector of length > 0. `NA` values are not allowed.
     # @codedoc_comment_block specification(var_dt$describer)
     dbc::assert_is_uniquely_named(
       x = x,
@@ -483,7 +510,11 @@ assert_is_describer <- function(
       assertion_type = assertion_type
     )
     for (i in seq_along(x)) {
-      dbc::assert_is_character_nonNA_atom(
+      # @codedoc_comment_block news("vame", "2024-09-10", "0.5.8")
+      # The elements of a `describer` of type `list` can now be vectors with
+      # more than one element. Formerly only vectors of length one were allowed.
+      # @codedoc_comment_block news("vame", "2024-09-10", "0.5.8")
+      assert_is_description(
         x = x[[i]],
         x_nm = sprintf("%s[[%i]]", x_nm, i),
         call = call,

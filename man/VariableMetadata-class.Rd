@@ -1790,13 +1790,14 @@ The following functions are related to this feature:
 The describing feature becomes available if
 the \code{var_dt} of a \code{VariableMetadata} object has a \code{describer} column value
 for a variable. You can include \code{describer} in \code{var_dt} when the
-\code{VariableMetadata} object is constructed or use \code{vm@var_describer_set} later.
+\code{VariableMetadata} object is constructed or use \code{vm@var_describer_set}
+later.
 
 The \code{describer} can be \code{NULL}, a \code{list}, a \code{function}, or a \code{call} object.
 A \code{NULL} \code{describer} object is considered to mean that one has not been
 defined.
 A \code{describer} of type \code{list} must be named. Each element must be
-a string.
+a \code{character} string vector of length > 0. \code{NA} values are not allowed.
 A \code{describer} of type \code{function} must have argument \code{descr_nm}.
 A \code{describer} of type \code{call} must contain (mention) variable
 \code{descr_nm}.
@@ -2781,10 +2782,15 @@ my_vame <- vame::VariableMetadata(
     var_nm_set = list(sex = "sex", birth_date = "birth_date")
   )
 )
+new_descr <- list(en = c("Sex ", "at ", "birth."), fi = "Sukupuoli.")
+my_vame@var_describer_set(
+  var_nm = "sex",
+  value = new_descr
+)
 stopifnot(
   identical(
-    my_vame@var_description_get("sex"),
-    "Sex assigned at birth."
+    my_vame@var_description_get("sex", descr_nm = "en"),
+    new_descr[["en"]]
   ),
   inherits(
     tryCatch(

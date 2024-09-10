@@ -74,6 +74,22 @@ in a special way so that the \code{data} assertion is not performed.
 
 \section{News}{
 
+\subsection{News for version 0.5.8}{
+\subsection{vame}{
+
+An individual description text for a \code{describer} can now be a \code{character}
+string vector (without \code{NA}) with more than one element. Formerly
+length one was required.
+}
+
+\subsection{vame}{
+
+The elements of a \code{describer} of type \code{list} can now be vectors with
+more than one element. Formerly only vectors of length one were allowed.
+}
+
+}
+
 \subsection{News for version 0.5.7}{
 \subsection{vm@var_meta_set}{
 
