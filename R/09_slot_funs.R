@@ -621,7 +621,8 @@ vame_make <- function(
   data,
   ids = NULL,
   var_nms = NULL,
-  env = NULL
+  env = NULL,
+  callbacks = NULL
 ) {
   # @codedoc_comment_block feature_funs(make)
   # - `vm@vame_make`
@@ -649,6 +650,26 @@ vame_make <- function(
   dbc::assert_has_one_of_classes(env, classes = c("NULL", "environment"))
   if (is.null(env)) {
     env <- parent.frame(1L)
+  }
+
+  # @codedoc_comment_block news("vm@vame_make", "2024-09-11", "1.0.0")
+  # `vm@vame_make` gains argument `callbacks`.
+  # @codedoc_comment_block news("vm@vame_make", "2024-09-11", "1.0.0")
+  # @codedoc_comment_block vame::vame_make::callbacks
+  # @param callbacks `[NULL, list]` (default `NULL`)
+  #
+  # - `NULL`: Function is called normally.
+  # - `list`: These functions are called during the run. See **Details**.
+  # @codedoc_comment_block vame::vame_make::callbacks
+  dbc::assert_has_one_of_classes(callbacks, classes = c("list", "NULL"))
+  if (inherits(callbacks, "list")) {
+    dbc::assert_is_uniquely_named(callbacks)
+    lapply(seq_along(callbacks), function(i) {
+      dbc::assert_is_function(
+        x = callbacks[[i]],
+        x_nm = sprintf("callbacks[[%i]]", i)
+      )
+    })
   }
 
   # @codedoc_comment_block news("vm@vame_make", "2024-05-13", "0.5.2")
@@ -709,10 +730,6 @@ vame_make <- function(
     ids[order_of_ids]
   })
 
-  # @codedoc_comment_block vm@vame_make
-  # - Calls the corresponding `vm@var_set_make` of each `ids` element in the
-  #   correct order.
-  # @codedoc_comment_block vm@vame_make
   lapply(ids, function(id) {
     # this called just in case some make expression makes use of a slot function
     # --- see where the slots are created.
@@ -724,6 +741,10 @@ vame_make <- function(
         var_nms
       )
     }
+    # @codedoc_comment_block vm@vame_make
+    # - For each `ids` element:
+    #   * Calls `vm@var_set_make`.
+    # @codedoc_comment_block vm@vame_make
     made_dt <- var_set_make(
       vm = vm,
       id = id,
@@ -731,6 +752,18 @@ vame_make <- function(
       data = data,
       env = env
     )
+    # @codedoc_comment_block vm@vame_make
+    #   * Calls `callbacks[["post_var_set_make"]](env = environment())`
+    #     if that is defined. `environment()` is the local environment
+    #     of the anonymous function called by `lapply` with input argument `id`.
+    # @codedoc_comment_block vm@vame_make
+    if ("post_var_set_make" %in% names(callbacks)) {
+      callbacks[["post_var_set_make"]](env = environment())
+    }
+    # @codedoc_comment_block vm@vame_make
+    #   * Adds the created columns into `data[["df"]]`. The same object is used
+    #     in subsequent calls to `vm@var_set_make`.
+    # @codedoc_comment_block vm@vame_make
     data.table::set(
       x = data[["df"]],
       j = names(made_dt),
@@ -740,7 +773,17 @@ vame_make <- function(
   data.table::set(data[["df"]], j = df_start_col_nms, value = NULL)
 
   # @codedoc_comment_block vm@vame_make
-  # - Returns a `data.table` containing the columns created by the `maker`s.
+  # - Calls `on.exit(callbacks[["on_exit"]](env = environment()))`
+  #   if that is defined. `environment()` is the local environment
+  #   of the main function.
+  # @codedoc_comment_block vm@vame_make
+  if ("on_exit" %in% names(callbacks)) {
+    on.exit(callbacks[["on_exit"]](env = environment()))
+  }
+
+  # @codedoc_comment_block vm@vame_make
+  # - Returns a `data.table` containing the columns created by the `maker`s,
+  #   i.e. `data[["df"]]` without the original columns.
   # @codedoc_comment_block vm@vame_make
   return(data[["df"]][])
 }

@@ -74,6 +74,14 @@ in a special way so that the \code{data} assertion is not performed.
 
 \section{News}{
 
+\subsection{News for version 1.0.0}{
+\subsection{vm@vame_make}{
+
+\code{vm@vame_make} gains argument \code{callbacks}.
+}
+
+}
+
 \subsection{News for version 0.5.8}{
 \subsection{vame}{
 

@@ -387,14 +387,25 @@ Call multiple \code{var_set_dt$maker}s in sequence. Performs these steps:
 \item Determines order in which the \code{maker}s of \code{ids} should be called.
 For instance if \code{maker} for \code{ids[1]} requires the variables
 created by the \code{maker} for \code{ids[2]}, then the latter is called first.
-\item Calls the corresponding \code{vm@var_set_make} of each \code{ids} element in the
-correct order.
-\item Returns a \code{data.table} containing the columns created by the \code{maker}s.
+\item For each \code{ids} element:
+\itemize{
+\item Calls \code{vm@var_set_make}.
+\item Calls \code{callbacks[["post_var_set_make"]](env = environment())}
+if that is defined. \code{environment()} is the local environment
+of the anonymous function called by \code{lapply} with input argument \code{id}.
+\item Adds the created columns into \code{data[["df"]]}. The same object is used
+in subsequent calls to \code{vm@var_set_make}.
+}
+\item Calls \code{on.exit(callbacks[["on_exit"]](env = environment()))}
+if that is defined. \code{environment()} is the local environment
+of the main function.
+\item Returns a \code{data.table} containing the columns created by the \code{maker}s,
+i.e. \code{data[["df"]]} without the original columns.
 }
 
 \emph{Usage}
 
-\code{vm@vame_make(data, ids, var_nms, env)}
+\code{vm@vame_make(data, ids, var_nms, env, callbacks)}
 
 \emph{Arguments}
 
@@ -428,6 +439,12 @@ Environment where a value space will be evaluated, if applicable.
 \itemize{
 \item \code{NULL}: Use the environment where the function was called.
 \item \code{environment}: Use this environment.
+}
+
+callbacks \verb{[NULL, list]} (default \code{NULL})
+\itemize{
+\item \code{NULL}: Function is called normally.
+\item \code{list}: These functions are called during the run. See \strong{Details}.
 }}
 
 \item{\code{var_set_value_space_eval}}{\emph{Description}
@@ -1832,6 +1849,12 @@ The following functions are part of this feature:
 \item \code{vm@vame_category_space_dt_list}
 \item \code{vm@vame_category_space_dt}
 }
+}
+
+\section{News for version 1.0.0}{
+
+
+\code{vm@vame_make} gains argument \code{callbacks}.
 }
 
 \section{News for version 0.5.7}{
