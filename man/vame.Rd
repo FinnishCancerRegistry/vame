@@ -74,6 +74,19 @@ in a special way so that the \code{data} assertion is not performed.
 
 \section{News}{
 
+\subsection{News for version 1.0.1}{
+\subsection{vm@vame_make}{
+
+\code{vm@vame_make} gains \code{callbacks} element \code{on_entry}.
+}
+
+\subsection{vm@vame_make}{
+
+\code{vm@vame_make} gains \code{callbacks} element \code{pre_loop}.
+}
+
+}
+
 \subsection{News for version 1.0.0}{
 \subsection{vm@vame_make}{
 

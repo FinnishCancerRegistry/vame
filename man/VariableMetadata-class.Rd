@@ -383,10 +383,14 @@ Environment where a value space will be evaluated, if applicable.
 
 Call multiple \code{var_set_dt$maker}s in sequence. Performs these steps:
 \itemize{
+\item Calls \verb{callbacks[["on_entry"]](env = environment()} if defined.
+\code{environment()} is the local environment of the main function.
 \item Infers \code{ids} to use if user gave \code{var_nms} but not \code{ids} and vice versa.
 \item Determines order in which the \code{maker}s of \code{ids} should be called.
 For instance if \code{maker} for \code{ids[1]} requires the variables
 created by the \code{maker} for \code{ids[2]}, then the latter is called first.
+\item Calls \verb{callbacks[["pre_loop"]](env = environment()} if defined.
+\code{environment()} is the local environment of the main function.
 \item For each \code{ids} element:
 \itemize{
 \item Calls \code{vm@var_set_make}.
@@ -1849,6 +1853,14 @@ The following functions are part of this feature:
 \item \code{vm@vame_category_space_dt_list}
 \item \code{vm@vame_category_space_dt}
 }
+}
+
+\section{News for version 1.0.1}{
+
+
+\code{vm@vame_make} gains \code{callbacks} element \code{on_entry}.
+
+\code{vm@vame_make} gains \code{callbacks} element \code{pre_loop}.
 }
 
 \section{News for version 1.0.0}{

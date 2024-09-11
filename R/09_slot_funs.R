@@ -631,6 +631,19 @@ vame_make <- function(
   # New function `vm@vame_make`.
   # @codedoc_comment_block news("vm@vame_make", "2024-01-19", "0.3.0")
 
+  # @codedoc_comment_block news("vm@vame_make", "2024-09-11", "1.0.1")
+  # `vm@vame_make` gains `callbacks` element `on_entry`.
+  # @codedoc_comment_block news("vm@vame_make", "2024-09-11", "1.0.1")
+  # @codedoc_comment_block vm@vame_make
+  # Call multiple `var_set_dt$maker`s in sequence. Performs these steps:
+  #
+  # - Calls `callbacks[["on_entry"]](env = environment()` if defined.
+  #   `environment()` is the local environment of the main function.
+  # @codedoc_comment_block vm@vame_make
+  if ("on_entry" %in% names(callbacks)) {
+    callbacks[["on_entry"]](env = environment())
+  }
+
   # @codedoc_comment_block vame::vame_make::data
   # @codedoc_insert_comment_block specs(vame:::handle_arg_data__, "df_list")
   # @codedoc_comment_block vame::vame_make::data
@@ -642,8 +655,6 @@ vame_make <- function(
   # `var_nms` or both.
   # @codedoc_comment_block news("vm@vame_make", "2024-05-13", "0.5.2")
   # @codedoc_comment_block vm@vame_make
-  # Call multiple `var_set_dt$maker`s in sequence. Performs these steps:
-  #
   # - Infers `ids` to use if user gave `var_nms` but not `ids` and vice versa.
   # @codedoc_comment_block vm@vame_make
   handle_arg_ids_et_var_nms_inplace__(vm = vm, required_meta_nms = "maker")
@@ -730,6 +741,16 @@ vame_make <- function(
     ids[order_of_ids]
   })
 
+  # @codedoc_comment_block news("vm@vame_make", "2024-09-11", "1.0.1")
+  # `vm@vame_make` gains `callbacks` element `pre_loop`.
+  # @codedoc_comment_block news("vm@vame_make", "2024-09-11", "1.0.1")
+  # @codedoc_comment_block vm@vame_make
+  # - Calls `callbacks[["pre_loop"]](env = environment()` if defined.
+  #   `environment()` is the local environment of the main function.
+  # @codedoc_comment_block vm@vame_make
+  if ("pre_loop" %in% names(callbacks)) {
+    callbacks[["pre_loop"]](env = environment())
+  }
   lapply(ids, function(id) {
     # this called just in case some make expression makes use of a slot function
     # --- see where the slots are created.
