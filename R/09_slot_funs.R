@@ -388,8 +388,7 @@ var_set_make <- function(
   #       area_01 = list(
   #         maker = quote({
   #           # This is an example of re-using data from the `VariableMetadata`
-  #           # object itself. 
-  #           vm <- vame::self()
+  #           # object itself.
   #           dt <- data.table::setDT(list(
   #             x = vm@var_aggregate(
   #               get(dep_var_nm_set),
@@ -551,13 +550,15 @@ var_set_make <- function(
       )
     }
     arg_list[["dep_var_nm_set"]] <- req_obj_nm_set
+    arg_list[["vm"]] <- vm
     return(arg_list)
   })
   if (is.function(maker)) {
     # @codedoc_comment_block vm@var_set_make
     # - If `maker` is a `function`, `data` is turned into a list of function
     #   arguments and `maker` is called with it. The additional variables
-    #   `var_nms` and `dep_var_nm_set` are also included into the argument list.
+    #   `var_nms`, `dep_var_nm_set`, and `vm` are also included into the
+    #   argument list.
     #   See the argument `var_nms` of this function for what `var_nms` is.
     #   `dep_var_nm_set` is the set of dependency variable names.
     #   However, those elements of the argument list ignored which do not have a
@@ -575,10 +576,11 @@ var_set_make <- function(
     # @codedoc_comment_block vm@var_set_make
     # - If `maker` is a `list`, an evaluation env is created with `env` as its
     #   parent. This evaluation environment is populated by objects passed via
-    #   `data` and additionally `var_nms` and `dep_var_nm_set`.
-    #   If `maker[["maker"]] == "aggregate"`, it is replaced with an
-    #   expression that calls `vm@var_aggregate`.
-    #   Then `maker[["maker"]]` is evaluated in this environment.
+    #   `data` and additionally `var_nms`, `dep_var_nm_set`, and `vm`.
+    #   If `maker[["maker"]] == "aggregate"`, we use an internally defined
+    #   expression that uses `vm@var_aggregate`.
+    #   Else `maker[["maker"]]` must be an R expression. In both cases the
+    #   expression is evaluated in the evaluation environment.
     # @codedoc_comment_block vm@var_set_make
     make_env <- new.env(parent = env)
     lapply(names(arg_list), function(obj_nm) {
@@ -586,7 +588,6 @@ var_set_make <- function(
     })
     if (identical(maker[["maker"]], "var_aggregate")) {
       maker_call <- quote({
-        vm <- vame::self()
         dt <- data.table::setDT(list(
           x = vm@var_aggregate(
             get(dep_var_nm_set),
@@ -754,7 +755,6 @@ vame_make <- function(
   lapply(ids, function(id) {
     # this called just in case some make expression makes use of a slot function
     # --- see where the slots are created.
-    self_set__(vm = vm)
     var_nms_of_id <- NULL
     if (!is.null(var_nms)) {
       var_nms_of_id <- intersect(
@@ -894,6 +894,7 @@ var_set_value_space_eval <- function(
   if ("expr" %in% names(value_space)) {
     call_eval_env <- new.env(parent = env)
     call_eval_env[["var_nms"]] <- var_nms
+    call_eval_env[["vm"]] <- vm
     value_space <- list(
       tmp = eval(value_space[["expr"]], envir = call_eval_env)
     )
@@ -1894,10 +1895,6 @@ var_labels_get <- function(
   label_nm = NULL,
   labeler_env = NULL
 ) {
-  # @codedoc_comment_block vm@var_labels_get
-  # Get label for each value in `x` for `var_nm`.
-  # @codedoc_comment_block vm@var_labels_get
-      
   # @codedoc_comment_block feature(labeling)
   # The labeling feature becomes available if
   # the `var_dt` of a `VariableMetadata` object has a `labeler` column value
@@ -1914,10 +1911,10 @@ var_labels_get <- function(
   # @codedoc_comment_block feature_funs(labeling)
   assert_is_var_nm(vm, var_nm)
   labeler <- var_labeler_get(vm, var_nm = var_nm)
-  
+
   # @codedoc_comment_block doc_slot_fun_arg(label_nm)
   # @param label_nm `[NULL, character]` (default `NULL`)
-  # 
+  #
   # Name of a column in the `labeler` that has been assigned for the variable.
   # Labels will be taken from this column.
   #
@@ -1936,7 +1933,7 @@ var_labels_get <- function(
 
   # @codedoc_comment_block doc_slot_fun_arg(labeler_env)
   # @param labeler_env `[NULL, environment]` (default `NULL`)
-  # 
+  #
   # Environment where `labeler` of class `call` is evaluated.
   #
   # - `NULL`: Use the environment where this function is called.
@@ -1950,25 +1947,15 @@ var_labels_get <- function(
   if (is.null(labeler_env)) {
     labeler_env <- parent.frame(1L)
   }
-
-  if (inherits(labeler, "data.table")) {
-    label_nm_set <- setdiff(names(labeler), "x")
-    if (is.null(label_nm)) {
-      label_nm <- label_nm_set[1]
-    } else if (!label_nm %in% label_nm_set) {
-      stop("label_nm = \"", label_nm, "\" not one of the defined ",
-            "label names: ", deparse1(label_nm_set))
-    }
-    dbc::assert_has_class(x = x, required_class = class(labeler[["x"]]))
-    jdt <- data.table::setDT(list(x = x))
-    #' @importFrom data.table .SD
-    out <- labeler[
-      i = jdt,
-      on = "x",
-      j = .SD[[1]],
-      .SDcols = label_nm
-    ]
-  } else if (is.function(labeler)) {
+  # @codedoc_comment_block vm@var_labels_get
+  # Get label for each value in `x` for `var_nm`.
+  #
+  # - A `labeler` of type `function` or `call` has  variables
+  #  `x`, `label_nm`, `var_nm`, and `vm` available. `vm` is the
+  #  `vame::VariableMetadata` object itself.
+  # @codedoc_comment_block vm@var_labels_get
+  arg_list <- list(x = x, label_nm = label_nm, var_nm = var_nm, vm = vm)
+  if (is.function(labeler)) {
     # @codedoc_comment_block news("vm@var_labels_get", "2023-12-01", "0.2.0")
     # `vm@var_labels_get` now can handle `labeler`s of type `function`.
     # @codedoc_comment_block news("vm@var_labels_get", "2023-12-01", "0.2.0")
@@ -1976,12 +1963,28 @@ var_labels_get <- function(
       stop("label_nm = NULL, but labeler is a function so cannot ",
            "determine label_nm automatically.")
     }
-    out <- labeler(x = x, label_nm = label_nm)
+    # @codedoc_comment_block vm@var_labels_get
+    # - A `labeler` of type `function` is called with a subset of the
+    #   the variables listed above which are arguments of the function.
+    #   I.e. your function is allowed to use only some of the variables
+    #   as input arguments such as `x` and `label_nm` only if you want.
+    # @codedoc_comment_block vm@var_labels_get
+    out <- do.call(
+      labeler,
+      arg_list[intersect(names(arg_list), names(formals(labeler)))]
+    )
   } else if (is.call(labeler)) {
     # @codedoc_comment_block news("vm@var_labels_get", "2023-12-01", "0.2.1")
     # `vm@var_labels_get` now can handle `labeler`s of class `call`.
     # Added argument `labeler_env` for this purpose.
     # @codedoc_comment_block news("vm@var_labels_get", "2023-12-01", "0.2.1")
+    # @codedoc_comment_block vm@var_labels_get
+    # - A `labeler` of type `call` is evaluated in a temporary evaluation
+    #   environment that contains the variables listed above. The parent of this
+    #   evaluation environment is set to `labeler_env`.
+    # @codedoc_comment_block vm@var_labels_get
+    eval_env <- as.environment(arg_list)
+    parent.env(eval_env) <- labeler_env
     out <- tryCatch(
       eval(labeler, envir = labeler_env),
       error = function(e) {
@@ -1997,8 +2000,29 @@ var_labels_get <- function(
         "Labeler for var_nm = \"", var_nm, "\" was of class 'call', but ",
         "evaluation did not produce a character string vector. See what ",
         "`str(result)` printed above this error message."
-      )     
+      )
     }
+  } else if (inherits(labeler, "data.table")) {
+    label_nm_set <- setdiff(names(labeler), "x")
+    if (is.null(label_nm)) {
+      label_nm <- label_nm_set[1]
+    } else if (!label_nm %in% label_nm_set) {
+      stop("label_nm = \"", label_nm, "\" not one of the defined ",
+            "label names: ", deparse1(label_nm_set))
+    }
+    dbc::assert_has_class(x = x, required_class = class(labeler[["x"]]))
+    jdt <- data.table::setDT(list(x = x))
+    # @codedoc_comment_block vm@var_labels_get
+    # - If `labeler` is a `data.table`, we get a label for each `x` using a
+    #   left join on the `data.table`.
+    # @codedoc_comment_block vm@var_labels_get
+    #' @importFrom data.table .SD
+    out <- labeler[
+      i = jdt,
+      on = "x",
+      j = .SD[[1]],
+      .SDcols = label_nm
+    ]
   } else {
     stop("no handling defined for labeler of class(es) ",
          deparse1(class(labeler)))
@@ -2050,9 +2074,6 @@ var_description_get <- function(
   descr_nm = NULL,
   describer_env = NULL
 ) {
-  # @codedoc_comment_block vm@var_description_get
-  # Get description for `var_nm`.
-  # @codedoc_comment_block vm@var_description_get
   # @codedoc_comment_block feature_funs(describing)
   # - `vm@var_description_get`
   # @codedoc_comment_block feature_funs(describing)
@@ -2146,7 +2167,8 @@ var_description_get <- function(
   # @codedoc_comment_block doc_slot_fun_arg(describer_env)
   # @param describer_env `[NULL, environment]` (default `NULL`)
   # 
-  # Environment where `describer` of class `call` is evaluated.
+  # Parent environment of evaluation environment where `describer` of class
+  # `call` is evaluated.
   #
   # - `NULL`: Use the environment where this function is called.
   # - `environment`: Use this environment.
@@ -2160,29 +2182,42 @@ var_description_get <- function(
     describer_env <- parent.frame(1L)
   }
 
-  if (inherits(describer, "list")) {
-    descr_nm_set <- names(describer)
-    if (is.null(descr_nm)) {
-      descr_nm <- descr_nm_set[1]
-    } else if (!descr_nm %in% descr_nm_set) {
-      stop("descr_nm = \"", descr_nm,
-           "\" not one of the defined ",
-           "elements: ", deparse1(descr_nm_set))
-    }
-    out <- describer[[descr_nm]]
-  } else if (is.function(describer)) {
+  # @codedoc_comment_block vm@var_description_get
+  # Get description for `var_nm`.
+  #
+  # - A `describer` of type `function` or `call` has  variables
+  #  `var_nm`, `descr_nm`, and `vm` available. `vm` is the
+  #  `vame::VariableMetadata` object itself.
+  # @codedoc_comment_block vm@var_description_get
+  arg_list <- mget(c("var_nm", "descr_nm", "vm"))
+
+  if (is.function(describer)) {
     if (is.null(descr_nm)) {
       stop("descr_nm = NULL, but describer is a function so cannot ",
            "determine descr_nm automatically.")
     }
-    out <- describer(descr_nm = descr_nm)
+    # @codedoc_comment_block vm@var_description_get
+    # - A `describer` of type `function` is called with a subset of the
+    #   the variables listed above which are arguments of the function.
+    #   I.e. your function is allowed to use only some of the variables
+    #   as input arguments such as `descr_nm` only if you want.
+    # @codedoc_comment_block vm@var_description_get
+    out <- do.call(
+      describer,
+      arg_list[intersect(names(arg_list), names(formals(describer)))]
+    )
   } else if (is.call(describer)) {
     if (is.null(descr_nm)) {
       stop("descr_nm = NULL, but describer is a call so cannot ",
            "determine descr_nm automatically.")
     }
-    eval_env <- new.env(parent = describer_env)
-    eval_env[["descr_nm"]] <- descr_nm
+    eval_env <- as.environment(arg_list)
+    parent.env(eval_env) <- describer_env
+    # @codedoc_comment_block vm@var_description_get
+    # - A `describer` of type `call` is evaluated in a temporary evaluation
+    #   environment that has `describer_env` as its parent. The evaluation
+    #   environment is populated by the variables listed above.
+    # @codedoc_comment_block vm@var_description_get
     out <- tryCatch(
       eval(describer, envir = eval_env),
       error = function(e) {
@@ -2192,6 +2227,20 @@ var_description_get <- function(
         )
       }
     )
+  } else if (inherits(describer, "list")) {
+    descr_nm_set <- names(describer)
+    if (is.null(descr_nm)) {
+      descr_nm <- descr_nm_set[1]
+    } else if (!descr_nm %in% descr_nm_set) {
+      stop("descr_nm = \"", descr_nm,
+           "\" not one of the defined ",
+           "elements: ", deparse1(descr_nm_set))
+    }
+    # @codedoc_comment_block vm@var_description_get
+    # - If `describer` is a `list`, we simply take the appropriate element from
+    #   the list.
+    # @codedoc_comment_block vm@var_description_get
+    out <- describer[[descr_nm]]
   } else {
     stop("no handling defined for describer of class(es) ",
          deparse1(class(describer)))

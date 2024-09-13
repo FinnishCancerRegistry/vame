@@ -348,35 +348,33 @@ vame_subset_expr <- function(
 #' @name user_utils
 NULL
 
-.__SELF_ENV <- new.env(parent = environment())
 #' @rdname user_utils
 #' @export
 self <- function() {
-  # @codedoc_comment_block vame::maker_dt
+  # @codedoc_comment_block vame::self
   # `vame::self` gets the `VariableMetadata` object whose slot function was
   # just called. It is intended only for use within functions and expressions
   # stored into a `VariableMetadata` object.
-  # @codedoc_comment_block vame::maker_dt
+  # @codedoc_comment_block vame::self
   # @codedoc_comment_block news("vame::self", "2023-12-27", "0.3.0")
   # New function `vame::self`.
   # @codedoc_comment_block news("vame::self", "2023-12-27", "0.3.0")
-  if (!"self" %in% ls(.__SELF_ENV)) {
-    stop("No VariableMetadata object could be retrieved --- vame::self() is ",
-         "intended to be called only within functions and expressions stored ",
-         "into a VariableMetadata object and does not work elsewhere. If ",
-         "vame::self() was in fact used in the correct context, contact ",
-         "the package maintainer.")
+  # @codedoc_comment_block news("vame::self", "2024-09-13", "1.1.0")
+  # `vame::self()` deprecated. Refer to the `vame::VariableMetadata` itself
+  # using `vm`.
+  # @codedoc_comment_block news("vame::self", "2024-09-13", "1.1.0")
+  msg <- paste0(
+    "Your R expression/function stored into a `vame::VariableMetadata` object ",
+    "called `vame::self()`, which has been deprecated in 1.1.0. ",
+    "It will be deleted in a later release. ",
+    "Use `vm` instead to refer to the `vame::VariableMetadata` itself."
+  )
+  if (utils::packageVersion("vame") >= "1.2.0") {
+    stop(msg)
+  } else {
+    warning(msg)
   }
-  return(.__SELF_ENV[["self"]])
+  return(eval(quote(vm), parent.frame(1L)))
 }
-
-self_set__ <- function(vm) {
-  .__SELF_ENV[["self"]] <- vm
-  return(invisible(NULL))
-}
-
-self_rm__ <- function() {
-  if ("self" %in% ls(.__SELF_ENV)) {
-    rm(list = "self", envir = .__SELF_ENV)
-  }
-}
+self_set__ <- function(vm) NULL
+self_rm__ <- function() NULL

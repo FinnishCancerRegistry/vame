@@ -569,10 +569,6 @@ VariableMetadata <- function(
   funs$data$var_dt <- var_dt
   funs$data$var_set_dt <- var_set_dt
   funs$data$vame_list <- vame_list
-  funs$internal_self <- function() {
-    get("self_obj", envir = get("data"))
-  }
-  environment(funs$internal_self) <- funs
   slot_fun_nms <- vame_slot_nms_get__()
   lapply(slot_fun_nms, function(slot_fun_nm) {
     alias_fun_nm <- paste0("vame:::", slot_fun_nm)
@@ -586,14 +582,12 @@ VariableMetadata <- function(
     arg_lines <- paste0(arg_lines, ",")
     arg_lines[length(arg_lines)] <- sub(",$", "", arg_lines[length(arg_lines)])
     body_arg_lines <- paste0(names(args), " = ", names(args))
-    body_arg_lines[names(args) == "vm"] <- "vm = vame::self()"
-    body_arg_lines <- paste0(body_arg_lines, ",")
-    body_arg_lines[length(body_arg_lines)] <- sub(
-      ",$", "", body_arg_lines[length(body_arg_lines)]
+    body_arg_lines[names(args) == "vm"] <- "vm = self_get()"
+    body_arg_lines <- paste0(
+      body_arg_lines,
+      c(rep(",", length(body_arg_lines) - 1), "")
     )
     body_lines <- c(
-      "vame:::self_set__(vm = internal_self())",
-      "on.exit(vame:::self_rm__())",
       paste0(alias_fun_nm, "("),
       paste0("  ", body_arg_lines),
       ")"
@@ -615,12 +609,19 @@ VariableMetadata <- function(
   names(slots) <- slot_fun_nms
   arg_list <- c(list(Class = "VariableMetadata"), slots)
   out <- do.call(methods::new, arg_list, quote = TRUE)
-  funs$data$self_obj <- out
   vd_vsd_intersect(out)
   if (nrow(vd_get(out)) == 0) {
     stop("vame::VariableMetadata call resulted in no variables being defined. ",
          "do var_dt and var_set_dt use the same variable names?")
   }
+
+  funs <- environment(out@var_meta_get)
+  funs[["self_env"]] <- new.env(parent = emptyenv())
+  funs[["self_env"]][["self_obj"]] <- out
+  funs[["self_get"]] <- function() {
+    get("self_obj", envir = get("self_env"))
+  }
+  environment(funs[["self_get"]]) <- funs
 
   test_indices <- seq_len(nrow(funs$data$var_dt))
   if ("type" %in% names(funs$data$var_dt)) {

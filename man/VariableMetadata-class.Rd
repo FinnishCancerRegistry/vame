@@ -321,7 +321,8 @@ Call specific \code{var_set_dt$maker}.
 \item Figures out \code{id} if missing but \code{var_nms} given and vice versa.
 \item If \code{maker} is a \code{function}, \code{data} is turned into a list of function
 arguments and \code{maker} is called with it. The additional variables
-\code{var_nms} and \code{dep_var_nm_set} are also included into the argument list.
+\code{var_nms}, \code{dep_var_nm_set}, and \code{vm} are also included into the
+argument list.
 See the argument \code{var_nms} of this function for what \code{var_nms} is.
 \code{dep_var_nm_set} is the set of dependency variable names.
 However, those elements of the argument list ignored which do not have a
@@ -329,10 +330,11 @@ corresponding identically named argument in the \code{maker} function
 definition.
 \item If \code{maker} is a \code{list}, an evaluation env is created with \code{env} as its
 parent. This evaluation environment is populated by objects passed via
-\code{data} and additionally \code{var_nms} and \code{dep_var_nm_set}.
-If \code{maker[["maker"]] == "aggregate"}, it is replaced with an
-expression that calls \code{vm@var_aggregate}.
-Then \code{maker[["maker"]]} is evaluated in this environment.
+\code{data} and additionally \code{var_nms}, \code{dep_var_nm_set}, and \code{vm}.
+If \code{maker[["maker"]] == "aggregate"}, we use an internally defined
+expression that uses \code{vm@var_aggregate}.
+Else \code{maker[["maker"]]} must be an R expression. In both cases the
+expression is evaluated in the evaluation environment.
 \item The resulting \code{data.table} is returned as-is.
 }
 
@@ -987,6 +989,20 @@ In \verb{_set} functions the value to set for the specified metadata.}
 \item{\code{var_labels_get}}{\emph{Description}
 
 Get label for each value in \code{x} for \code{var_nm}.
+\itemize{
+\item A \code{labeler} of type \code{function} or \code{call} has  variables
+\code{x}, \code{label_nm}, \code{var_nm}, and \code{vm} available. \code{vm} is the
+\code{vame::VariableMetadata} object itself.
+\item A \code{labeler} of type \code{function} is called with a subset of the
+the variables listed above which are arguments of the function.
+I.e. your function is allowed to use only some of the variables
+as input arguments such as \code{x} and \code{label_nm} only if you want.
+\item A \code{labeler} of type \code{call} is evaluated in a temporary evaluation
+environment that contains the variables listed above. The parent of this
+evaluation environment is set to \code{labeler_env}.
+\item If \code{labeler} is a \code{data.table}, we get a label for each \code{x} using a
+left join on the \code{data.table}.
+}
 
 \emph{Usage}
 
@@ -1054,6 +1070,20 @@ In \verb{_set} functions the value to set for the specified metadata.}
 \item{\code{var_description_get}}{\emph{Description}
 
 Get description for \code{var_nm}.
+\itemize{
+\item A \code{describer} of type \code{function} or \code{call} has  variables
+\code{var_nm}, \code{descr_nm}, and \code{vm} available. \code{vm} is the
+\code{vame::VariableMetadata} object itself.
+\item A \code{describer} of type \code{function} is called with a subset of the
+the variables listed above which are arguments of the function.
+I.e. your function is allowed to use only some of the variables
+as input arguments such as \code{descr_nm} only if you want.
+\item A \code{describer} of type \code{call} is evaluated in a temporary evaluation
+environment that has \code{describer_env} as its parent. The evaluation
+environment is populated by the variables listed above.
+\item If \code{describer} is a \code{list}, we simply take the appropriate element from
+the list.
+}
 
 \emph{Usage}
 
@@ -1077,7 +1107,8 @@ Else raises an error.
 
 describer_env \verb{[NULL, environment]} (default \code{NULL})
 
-Environment where \code{describer} of class \code{call} is evaluated.
+Parent environment of evaluation environment where \code{describer} of class
+\code{call} is evaluated.
 \itemize{
 \item \code{NULL}: Use the environment where this function is called.
 \item \code{environment}: Use this environment.
@@ -1540,8 +1571,7 @@ my_vame <- vame::VariableMetadata(
       area_01 = list(
         maker = quote(\{
           # This is an example of re-using data from the `VariableMetadata`
-          # object itself. 
-          vm <- vame::self()
+          # object itself.
           dt <- data.table::setDT(list(
             x = vm@var_aggregate(
               get(dep_var_nm_set),
@@ -2537,8 +2567,7 @@ my_vame <- vame::VariableMetadata(
       area_01 = list(
         maker = quote({
           # This is an example of re-using data from the `VariableMetadata`
-          # object itself. 
-          vm <- vame::self()
+          # object itself.
           dt <- data.table::setDT(list(
             x = vm@var_aggregate(
               get(dep_var_nm_set),

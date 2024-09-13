@@ -74,6 +74,15 @@ in a special way so that the \code{data} assertion is not performed.
 
 \section{News}{
 
+\subsection{News for version 1.1.0}{
+\subsection{vame::self}{
+
+\code{vame::self()} deprecated. Refer to the \code{vame::VariableMetadata} itself
+using \code{vm}.
+}
+
+}
+
 \subsection{News for version 1.0.1}{
 \subsection{vm@vame_make}{
 
