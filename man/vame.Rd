@@ -74,6 +74,15 @@ in a special way so that the \code{data} assertion is not performed.
 
 \section{News}{
 
+\subsection{News for version 1.1.1}{
+\subsection{vame::self}{
+
+Fixed \code{vame::self()} --- it failed to find the \code{VariableMetadata} object
+in some cases although it is intended to work until deletion.
+}
+
+}
+
 \subsection{News for version 1.1.0}{
 \subsection{vame::self}{
 

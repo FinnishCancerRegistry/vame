@@ -374,7 +374,30 @@ self <- function() {
   } else {
     warning(msg)
   }
-  return(eval(quote(vm), parent.frame(1L)))
+  # @codedoc_comment_block news("vame::self", "2024-09-16", "1.1.1")
+  # Fixed `vame::self()` --- it failed to find the `VariableMetadata` object
+  # in some cases although it is intended to work until deletion.
+  # @codedoc_comment_block news("vame::self", "2024-09-16", "1.1.1")
+  exprs <- list(
+    quote(vm),
+    quote(self_get()),
+    quote(internal_self())
+  )
+  out <- NULL
+  for (i in seq_along(exprs)) {
+    out <- tryCatch(
+      eval(exprs[[i]], parent.frame(1L)),
+      error = function(e) NULL
+    )
+    if (!is.null(out)) {
+      break
+    }
+  }
+  if (is.null(out)) {
+    stop("vame::self failed --- complain to the package maintainer if ",
+         "you see this")
+  }
+  return(out)
 }
 self_set__ <- function(vm) NULL
 self_rm__ <- function() NULL
