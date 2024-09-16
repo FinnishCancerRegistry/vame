@@ -816,9 +816,6 @@ var_set_value_space_eval <- function(
   var_nms = NULL,
   env = NULL
 ) {
-  # @codedoc_comment_block vm@var_set_value_space_eval
-  # Retrieve and evaluate value space for a variable set given its `id`.
-  # @codedoc_comment_block vm@var_set_value_space_eval
   # @codedoc_comment_block feature_funs(value spaces)
   # - `vm@var_set_value_space_eval`
   # @codedoc_comment_block feature_funs(value spaces)
@@ -865,9 +862,9 @@ var_set_value_space_eval <- function(
   }
   # @codedoc_comment_block doc_slot_fun_arg(env)
   # @param env `[NULL, environment]` (default `NULL`)
-  # 
+  #
   # Environment where a value space will be evaluated, if applicable.
-  # 
+  #
   # - `NULL`: Use the environment where the function was called.
   # - `environment`: Use this environment.
   # @codedoc_comment_block doc_slot_fun_arg(env)
@@ -879,6 +876,20 @@ var_set_value_space_eval <- function(
   if (is.null(env)) {
     env <- parent.frame(1L)
   }
+
+  # @codedoc_comment_block news("vm@var_set_value_space_eval", "2024-09-11", "1.1.0")
+  # `vm@var_labels_get` now makes variables `id`, `var_nms`, and `vm`
+  # available for `labeler` types `function` and `call`.
+  # @codedoc_comment_block news("vm@var_set_value_space_eval", "2024-09-11", "1.1.0")
+  # @codedoc_comment_block vm@var_set_value_space_eval
+  # Retrieve and evaluate value space for a variable set given its `id`.
+  #
+  # - The variables `id`, `var_nms`, and `vm` are made available to
+  #   `value_space` objects of type `function` and `call`.
+  #   `vm` is the `vame::VariableMetadata` object itself.
+  # @codedoc_comment_block vm@var_set_value_space_eval
+  arg_list <- mget(c("vm", "id", "var_nms"))
+
   vs_expr <- substitute(
     var_set_meta_get(vm, id = id, meta_nm = "value_space"),
     list(id = id)
@@ -892,14 +903,29 @@ var_set_value_space_eval <- function(
     assertion_type = "general"
   )
   if ("expr" %in% names(value_space)) {
-    call_eval_env <- new.env(parent = env)
+    # @codedoc_comment_block vm@var_set_value_space_eval
+    # - A `value_space` of type `expr` is evaluated in a temporary evaluation
+    #   environment whose parent is set to `env`. The evaluation environment
+    #   is populated by the variables listed above.
+    # @codedoc_comment_block vm@var_set_value_space_eval
+    call_eval_env <- as.environment(arg_list)
+    parent.env(call_eval_env) <- env
     call_eval_env[["var_nms"]] <- var_nms
     call_eval_env[["vm"]] <- vm
     value_space <- list(
       tmp = eval(value_space[["expr"]], envir = call_eval_env)
     )
   } else if ("fun" %in% names(value_space)) {
-    value_space <- list(tmp = value_space[["fun"]](var_nms))
+    # @codedoc_comment_block vm@var_set_value_space_eval
+    # - A `value_space` of type `function` is called with the subset of the
+    #   variables listed above which are named arguments of the `function`.
+    #   E.g. you are allowed to have only the argument `var_nms` if you want.
+    # @codedoc_comment_block vm@var_set_value_space_eval
+    value_space <- do.call(
+      value_space[["fun"]],
+      arg_list[intersect(names(arg_list), names(formals(value_space[["fun"]])))]
+    )
+    value_space <- list(tmp = value_space)
   }
   if ("tmp" %in% names(value_space)) {
     tmp <- value_space[["tmp"]]
@@ -916,6 +942,12 @@ var_set_value_space_eval <- function(
             deparse1(class(tmp)), ".")
     }
   }
+  # @codedoc_comment_block vm@var_set_value_space_eval
+  # - Otherwise the `value_space` is simply collected without modification,
+  #   except a `value_space` of type `data.table` (or if evaluation produced
+  #   a `data.table`) is subset into the requested variables only if
+  #   the `data.table` contains more than the requested variables.
+  # @codedoc_comment_block vm@var_set_value_space_eval
   if ("dt" %in% names(value_space) &&
         ncol(value_space[["dt"]]) > length(var_nms)) {
     #' @importFrom data.table .SD
@@ -1254,30 +1286,26 @@ var_set_value_space_sample <- function(
       fun_nm = "sampler"
     )
   }
-  # @codedoc_comment_block feature_process(random sampling)
-  # - The `sampler` is called or evaluated, which results in the random samples,
-  #   and these are returned. If the `sampler` is a function it is called via
-  #   `sampler(x = vm, n = n)`, where `vm` is the
-  #   `VariableMetadata` object itself.
-  #   The function may also have the optional arguments `vs`
-  #   (the evaluated value space for `id`), `data` (see argument `data`
-  #   of `vm@var_set_value_space_sample`), `dep_var_nm_set` (this will be
-  #   `sampler$dep_var_nm_set` if `sampler` was a list), `id`
-  #   (see argument `id` of `vm@var_set_value_space_sample`), and
-  #   `var_nms` (see argument `var_nms` of `vm@var_set_value_space_sample`).
-  #   If `sampler` is an expression, it is evaluated in a new
-  #   environment that contains the arguments mentioned above as objects.
-  #   This new environment's parent is `env`.
-  #   For conditional sampling you must use `sampler` of type `list` and make
-  #   use of `data` (and optionally `dep_var_nm_set`) in `sampler$sampler`.
-  # @codedoc_comment_block feature_process(random sampling)
   # @codedoc_comment_block news("vm@var_set_value_space_sample", "2024-02-23", "0.4.0")
   # `vm@var_set_value_space_sample` now has new arg `data`. Pass your data via
   # `data` when you have a conditional sampling method.
   # @codedoc_comment_block news("vm@var_set_value_space_sample", "2024-02-23", "0.4.0")
+  # @codedoc_comment_block news("vm@var_set_value_space_sample", "2024-10-16", "1.1.0")
+  # `vm@var_set_value_space_sample` object `x` passed to the `sampler` renamed
+  # to `vm`. It is the `VariableMetadata` object itself.
+  # @codedoc_comment_block news("vm@var_set_value_space_sample", "2024-10-16", "1.1.0")
+  # @codedoc_comment_block feature_process(random sampling)
+  # - The following variables are collected for use by the `sampler`:
+  #   * `n`: The argument
+  #   * `vm`: The `VariableMetadata` object itself
+  #   * `vs`: The evaluated `value_space` object
+  #   * `data`: The argument after handling --- useful for conditional sampling
+  #   * `id`: The argument after handling
+  #   * `var_nms`: The argument after handling
+  # @codedoc_comment_block feature_process(random sampling)
   arg_list <- list(
     n = n,
-    x = vm,
+    vm = vm,
     vs = vs,
     data = handle_arg_data__(data),
     id = id,
@@ -1291,13 +1319,27 @@ var_set_value_space_sample <- function(
            " but these were not included via `data`: ",
            deparse1(miss_dep_var_nm_set))
     }
+    # @codedoc_comment_block feature_process(random sampling)
+    #   * `dep_var_nm_set`: only added if `sampler` is a `list` object and has
+    #     `sampler[["dep_var_nm_set"]]` --- this is useful for conditional
+    #     sampling
+    # @codedoc_comment_block feature_process(random sampling)
     arg_list[["dep_var_nm_set"]] <- sampler[["dep_var_nm_set"]]
     sampler <- sampler[["sampler"]]
   }
   if (is.function(sampler)) {
+    # @codedoc_comment_block feature_process(random sampling)
+    # - If `sampler` is a function, it is called with those objects in the
+    #   above variable list which are also named arguments of the function.
+    # @codedoc_comment_block feature_process(random sampling)
     arg_list <- arg_list[intersect(names(formals(sampler)), names(arg_list))]
     sample <- do.call(sampler, arg_list)
   } else if (is.call(sampler)) {
+    # @codedoc_comment_block feature_process(random sampling)
+    # - If `sampler` is an expression, it is evaluated in a temporary evaluation
+    #   environment which has been populated with the variables of the above
+    #   list.
+    # @codedoc_comment_block feature_process(random sampling)
     call_eval_env <- as.environment(arg_list)
     parent.env(call_eval_env) <- env
     sample <- eval(sampler, envir = call_eval_env)
@@ -1308,11 +1350,10 @@ var_set_value_space_sample <- function(
          "and you should contact the maintainer ",
          as.character(utils::maintainer(pkg = "vame")))
   }
-  
-  # @codedoc_comment_block vm@var_set_value_space_sample
-  # `vm@var_set_value_space_sample` always returns a `data.table` with
-  # `n` rows.
-  # @codedoc_comment_block vm@var_set_value_space_sample
+
+  # @codedoc_comment_block feature_process(random sampling)
+  # - The output of sampling is always a `data.table` with `n` rows.
+  # @codedoc_comment_block feature_process(random sampling)
   dbc::assert_prod_output_is_data_table(sample)
   dbc::assert_prod_output_is_identical(
     x = nrow(sample),
@@ -1947,6 +1988,11 @@ var_labels_get <- function(
   if (is.null(labeler_env)) {
     labeler_env <- parent.frame(1L)
   }
+
+  # @codedoc_comment_block news("vm@var_labels_get", "2024-09-11", "1.1.0")
+  # `vm@var_labels_get` now makes variables `x`, `var_nm`, `label_nm`, and `vm`
+  # available for `labeler` types `function` and `call`.
+  # @codedoc_comment_block news("vm@var_labels_get", "2024-09-11", "1.1.0")
   # @codedoc_comment_block vm@var_labels_get
   # Get label for each value in `x` for `var_nm`.
   #
@@ -2182,6 +2228,10 @@ var_description_get <- function(
     describer_env <- parent.frame(1L)
   }
 
+  # @codedoc_comment_block news("vm@var_description_get", "2024-09-11", "1.1.0")
+  # `vm@var_description_get` now makes variables `var_nm`, `descr_nm`, and `vm`
+  # available for `describer` types `function` and `call`.
+  # @codedoc_comment_block news("vm@var_description_get", "2024-09-11", "1.1.0")
   # @codedoc_comment_block vm@var_description_get
   # Get description for `var_nm`.
   #

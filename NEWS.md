@@ -7,6 +7,26 @@
 `vame::self()` deprecated. Refer to the `vame::VariableMetadata` itself
 using `vm`.
 
+### vm@var_description_get
+
+`vm@var_description_get` now makes variables `var_nm`, `descr_nm`, and `vm`
+available for `describer` types `function` and `call`.
+
+### vm@var_labels_get
+
+`vm@var_labels_get` now makes variables `x`, `var_nm`, `label_nm`, and `vm`
+available for `labeler` types `function` and `call`.
+
+### vm@var_set_value_space_eval
+
+`vm@var_labels_get` now makes variables `id`, `var_nms`, and `vm`
+available for `labeler` types `function` and `call`.
+
+### vm@var_set_value_space_sample
+
+`vm@var_set_value_space_sample` object `x` passed to the `sampler` renamed
+to `vm`. It is the `VariableMetadata` object itself.
+
 
 ## News for version 1.0.1
 

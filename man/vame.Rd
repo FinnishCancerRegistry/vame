@@ -81,6 +81,30 @@ in a special way so that the \code{data} assertion is not performed.
 using \code{vm}.
 }
 
+\subsection{vm@var_description_get}{
+
+\code{vm@var_description_get} now makes variables \code{var_nm}, \code{descr_nm}, and \code{vm}
+available for \code{describer} types \code{function} and \code{call}.
+}
+
+\subsection{vm@var_labels_get}{
+
+\code{vm@var_labels_get} now makes variables \code{x}, \code{var_nm}, \code{label_nm}, and \code{vm}
+available for \code{labeler} types \code{function} and \code{call}.
+}
+
+\subsection{vm@var_set_value_space_eval}{
+
+\code{vm@var_labels_get} now makes variables \code{id}, \code{var_nms}, and \code{vm}
+available for \code{labeler} types \code{function} and \code{call}.
+}
+
+\subsection{vm@var_set_value_space_sample}{
+
+\code{vm@var_set_value_space_sample} object \code{x} passed to the \code{sampler} renamed
+to \code{vm}. It is the \code{VariableMetadata} object itself.
+}
+
 }
 
 \subsection{News for version 1.0.1}{

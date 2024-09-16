@@ -456,6 +456,21 @@ callbacks \verb{[NULL, list]} (default \code{NULL})
 \item{\code{var_set_value_space_eval}}{\emph{Description}
 
 Retrieve and evaluate value space for a variable set given its \code{id}.
+\itemize{
+\item The variables \code{id}, \code{var_nms}, and \code{vm} are made available to
+\code{value_space} objects of type \code{function} and \code{call}.
+\code{vm} is the \code{vame::VariableMetadata} object itself.
+\item A \code{value_space} of type \code{expr} is evaluated in a temporary evaluation
+environment whose parent is set to \code{env}. The evaluation environment
+is populated by the variables listed above.
+\item A \code{value_space} of type \code{function} is called with the subset of the
+variables listed above which are named arguments of the \code{function}.
+E.g. you are allowed to have only the argument \code{var_nms} if you want.
+\item Otherwise the \code{value_space} is simply collected without modification,
+except a \code{value_space} of type \code{data.table} (or if evaluation produced
+a \code{data.table}) is subset into the requested variables only if
+the \code{data.table} contains more than the requested variables.
+}
 
 \emph{Usage}
 
@@ -614,23 +629,24 @@ defined for the general case.
 \item \code{bounds}: Sample uniformly between \code{lo} and \code{hi} --- with
 replacement from \code{lo:hi} if \code{storage.mode(lo) == "integer"}.
 }
-\item The \code{sampler} is called or evaluated, which results in the random samples,
-and these are returned. If the \code{sampler} is a function it is called via
-\code{sampler(x = vm, n = n)}, where \code{vm} is the
-\code{VariableMetadata} object itself.
-The function may also have the optional arguments \code{vs}
-(the evaluated value space for \code{id}), \code{data} (see argument \code{data}
-of \code{vm@var_set_value_space_sample}), \code{dep_var_nm_set} (this will be
-\code{sampler$dep_var_nm_set} if \code{sampler} was a list), \code{id}
-(see argument \code{id} of \code{vm@var_set_value_space_sample}), and
-\code{var_nms} (see argument \code{var_nms} of \code{vm@var_set_value_space_sample}).
-If \code{sampler} is an expression, it is evaluated in a new
-environment that contains the arguments mentioned above as objects.
-This new environment's parent is \code{env}.
-For conditional sampling you must use \code{sampler} of type \code{list} and make
-use of \code{data} (and optionally \code{dep_var_nm_set}) in \code{sampler$sampler}.
-\code{vm@var_set_value_space_sample} always returns a \code{data.table} with
-\code{n} rows.
+\item The following variables are collected for use by the \code{sampler}:
+\itemize{
+\item \code{n}: The argument
+\item \code{vm}: The \code{VariableMetadata} object itself
+\item \code{vs}: The evaluated \code{value_space} object
+\item \code{data}: The argument after handling --- useful for conditional sampling
+\item \code{id}: The argument after handling
+\item \code{var_nms}: The argument after handling
+\item \code{dep_var_nm_set}: only added if \code{sampler} is a \code{list} object and has
+\code{sampler[["dep_var_nm_set"]]} --- this is useful for conditional
+sampling
+}
+\item If \code{sampler} is a function, it is called with those objects in the
+above variable list which are also named arguments of the function.
+\item If \code{sampler} is an expression, it is evaluated in a temporary evaluation
+environment which has been populated with the variables of the above
+list.
+\item The output of sampling is always a \code{data.table} with \code{n} rows.
 }
 
 \emph{Usage}
@@ -1771,21 +1787,24 @@ defined for the general case.
 \item \code{bounds}: Sample uniformly between \code{lo} and \code{hi} --- with
 replacement from \code{lo:hi} if \code{storage.mode(lo) == "integer"}.
 }
-\item The \code{sampler} is called or evaluated, which results in the random samples,
-and these are returned. If the \code{sampler} is a function it is called via
-\code{sampler(x = vm, n = n)}, where \code{vm} is the
-\code{VariableMetadata} object itself.
-The function may also have the optional arguments \code{vs}
-(the evaluated value space for \code{id}), \code{data} (see argument \code{data}
-of \code{vm@var_set_value_space_sample}), \code{dep_var_nm_set} (this will be
-\code{sampler$dep_var_nm_set} if \code{sampler} was a list), \code{id}
-(see argument \code{id} of \code{vm@var_set_value_space_sample}), and
-\code{var_nms} (see argument \code{var_nms} of \code{vm@var_set_value_space_sample}).
-If \code{sampler} is an expression, it is evaluated in a new
-environment that contains the arguments mentioned above as objects.
-This new environment's parent is \code{env}.
-For conditional sampling you must use \code{sampler} of type \code{list} and make
-use of \code{data} (and optionally \code{dep_var_nm_set}) in \code{sampler$sampler}.
+\item The following variables are collected for use by the \code{sampler}:
+\itemize{
+\item \code{n}: The argument
+\item \code{vm}: The \code{VariableMetadata} object itself
+\item \code{vs}: The evaluated \code{value_space} object
+\item \code{data}: The argument after handling --- useful for conditional sampling
+\item \code{id}: The argument after handling
+\item \code{var_nms}: The argument after handling
+\item \code{dep_var_nm_set}: only added if \code{sampler} is a \code{list} object and has
+\code{sampler[["dep_var_nm_set"]]} --- this is useful for conditional
+sampling
+}
+\item If \code{sampler} is a function, it is called with those objects in the
+above variable list which are also named arguments of the function.
+\item If \code{sampler} is an expression, it is evaluated in a temporary evaluation
+environment which has been populated with the variables of the above
+list.
+\item The output of sampling is always a \code{data.table} with \code{n} rows.
 }
 
 The following functions are related to this feature:
@@ -1883,6 +1902,22 @@ The following functions are part of this feature:
 \item \code{vm@vame_category_space_dt_list}
 \item \code{vm@vame_category_space_dt}
 }
+}
+
+\section{News for version 1.1.0}{
+
+
+\code{vm@var_description_get} now makes variables \code{var_nm}, \code{descr_nm}, and \code{vm}
+available for \code{describer} types \code{function} and \code{call}.
+
+\code{vm@var_labels_get} now makes variables \code{x}, \code{var_nm}, \code{label_nm}, and \code{vm}
+available for \code{labeler} types \code{function} and \code{call}.
+
+\code{vm@var_labels_get} now makes variables \code{id}, \code{var_nms}, and \code{vm}
+available for \code{labeler} types \code{function} and \code{call}.
+
+\code{vm@var_set_value_space_sample} object \code{x} passed to the \code{sampler} renamed
+to \code{vm}. It is the \code{VariableMetadata} object itself.
 }
 
 \section{News for version 1.0.1}{
