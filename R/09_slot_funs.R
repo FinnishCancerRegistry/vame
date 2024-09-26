@@ -720,22 +720,7 @@ vame_make <- function(
   # @codedoc_comment_block news("vm@vame_make", "2024-09-11", "1.0.0")
   # `vm@vame_make` gains argument `callbacks`.
   # @codedoc_comment_block news("vm@vame_make", "2024-09-11", "1.0.0")
-  # @codedoc_comment_block vame::vame_make::callbacks
-  # @param callbacks `[NULL, list]` (default `NULL`)
-  #
-  # - `NULL`: Function is called normally.
-  # - `list`: These functions are called during the run. See **Details**.
-  # @codedoc_comment_block vame::vame_make::callbacks
-  dbc::assert_has_one_of_classes(callbacks, classes = c("list", "NULL"))
-  if (inherits(callbacks, "list")) {
-    dbc::assert_is_uniquely_named(callbacks)
-    lapply(seq_along(callbacks), function(i) {
-      dbc::assert_is_function(
-        x = callbacks[[i]],
-        x_nm = sprintf("callbacks[[%i]]", i)
-      )
-    })
-  }
+  assert_is_callbacks(callbacks)
 
   # @codedoc_comment_block news("vm@vame_make", "2024-05-13", "0.5.2")
   # `vm@vame_make` automatically determines the appropriate order of `ids`

@@ -458,7 +458,8 @@ Environment where a value space will be evaluated, if applicable.
 callbacks \verb{[NULL, list]} (default \code{NULL})
 \itemize{
 \item \code{NULL}: Function is called normally.
-\item \code{list}: These functions are called during the run. See \strong{Details}.
+\item \code{list}: These functions are called during the run. See \strong{Description} /
+\strong{Details}.
 }}
 
 \item{\code{var_set_value_space_eval}}{\emph{Description}

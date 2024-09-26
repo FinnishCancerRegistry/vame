@@ -855,3 +855,43 @@ assert_meta <- function(
     do.call(assert_fun, assert_fun_arg_list, quote = TRUE)
   }
 }
+
+assert_is_callbacks <- function(
+  x,
+  x_nm = NULL,
+  call = NULL,
+  assertion_type = NULL
+) {
+  dbc::handle_args_inplace()
+  # @codedoc_comment_block doc_slot_fun_arg(callbacks)
+  # @param callbacks `[NULL, list]` (default `NULL`)
+  #
+  # - `NULL`: Function is called normally.
+  # - `list`: These functions are called during the run. See **Description** /
+  #   **Details**.
+  # @codedoc_comment_block doc_slot_fun_arg(callbacks)
+  dbc::assert_has_one_of_classes(
+    x = x,
+    x_nm = x_nm,
+    call = call,
+    assertion_type = assertion_type,
+    classes = c("list", "NULL")
+  )
+  if (inherits(x, "list")) {
+    dbc::assert_is_uniquely_named(
+      x = x,
+      x_nm = x_nm,
+      call = call,
+      assertion_type = assertion_type
+    )
+    for (elem_nm in names(x)) {
+      dbc::assert_is_function(
+        x = x[[elem_nm]],
+        x_nm = sprintf("%s[[%s]]", x_nm, elem_nm),
+        call = call,
+        assertion_type = assertion_type
+      )
+    }
+  }
+  return(invisible(NULL))
+}
