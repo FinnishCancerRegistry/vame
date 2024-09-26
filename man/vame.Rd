@@ -75,6 +75,32 @@ in a special way so that the \code{data} assertion is not performed.
 \section{News}{
 
 \subsection{News for version 1.2.0}{
+\subsection{vm@vame_make}{
+
+Rename \code{vm@vame_make} \code{callbacks} element \code{pre_loop} to \code{pre_lapply}.
+}
+
+\subsection{vm@vame_make}{
+
+\code{vm@vame_make} gains \code{callbacks} element \code{lapply_on_entry}.
+}
+
+\subsection{vm@vame_make}{
+
+\code{vm@vame_make} gains \code{callbacks} element \code{lapply_on_exit}.
+}
+
+\subsection{vm@vame_make}{
+
+\code{vm@vame_make} gains \code{callbacks} element \code{lapply_pre_var_set_make}.
+}
+
+\subsection{vm@vame_make}{
+
+Rename \code{vm@vame_make} \code{callbacks} element \code{post_var_set_make} to
+\code{lapply_post_var_set_make}.
+}
+
 \subsection{vm@var_set_make}{
 
 \code{vm@var_set_make} can now handle a \code{maker} of type \code{list} with element

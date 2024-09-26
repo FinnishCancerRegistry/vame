@@ -393,26 +393,30 @@ Environment where a value space will be evaluated, if applicable.
 
 Call multiple \code{var_set_dt$maker}s in sequence. Performs these steps:
 \itemize{
-\item Calls \verb{callbacks[["on_entry"]](env = environment()} if defined.
-\code{environment()} is the local environment of the main function.
+\item Calls \code{callbacks[["on_entry"]](env = main_env)} if defined.
+\code{main_env} is the local environment of the main function.
+\item Calls \code{on.exit(callbacks[["on_exit"]](env = main_env))}
+if that is defined.
 \item Infers \code{ids} to use if user gave \code{var_nms} but not \code{ids} and vice versa.
 \item Determines order in which the \code{maker}s of \code{ids} should be called.
 For instance if \code{maker} for \code{ids[1]} requires the variables
 created by the \code{maker} for \code{ids[2]}, then the latter is called first.
-\item Calls \verb{callbacks[["pre_loop"]](env = environment()} if defined.
-\code{environment()} is the local environment of the main function.
+\item Calls \code{callbacks[["pre_lapply"]](env = main_env)} if defined.
 \item For each \code{ids} element:
 \itemize{
+\item Calls \code{callbacks[["lapply_on_entry"]](env = lapply_fun_env)} if
+defined. \code{lapply_fun_env} is the local environment of the anonymous
+function that \code{lapply} calls.
+\item Calls \code{on.exit(callbacks[["lapply_on_exit"]](env = lapply_fun_env))}
+if defined.
+\item Calls \code{callbacks[["lapply_pre_var_set_make"]](env = lapply_fun_env)}
+if that is defined.
 \item Calls \code{vm@var_set_make}.
-\item Calls \code{callbacks[["post_var_set_make"]](env = environment())}
-if that is defined. \code{environment()} is the local environment
-of the anonymous function called by \code{lapply} with input argument \code{id}.
+\item Calls \code{callbacks[["lapply_post_var_set_make"]](env = lapply_fun_env)}
+if that is defined.
 \item Adds the created columns into \code{data[["df"]]}. The same object is used
 in subsequent calls to \code{vm@var_set_make}.
 }
-\item Calls \code{on.exit(callbacks[["on_exit"]](env = environment()))}
-if that is defined. \code{environment()} is the local environment
-of the main function.
 \item Returns a \code{data.table} containing the columns created by the \code{maker}s,
 i.e. \code{data[["df"]]} without the original columns.
 }
@@ -1949,6 +1953,17 @@ The following functions are part of this feature:
 
 \section{News for version 1.2.0}{
 
+
+Rename \code{vm@vame_make} \code{callbacks} element \code{pre_loop} to \code{pre_lapply}.
+
+\code{vm@vame_make} gains \code{callbacks} element \code{lapply_on_entry}.
+
+\code{vm@vame_make} gains \code{callbacks} element \code{lapply_on_exit}.
+
+\code{vm@vame_make} gains \code{callbacks} element \code{lapply_pre_var_set_make}.
+
+Rename \code{vm@vame_make} \code{callbacks} element \code{post_var_set_make} to
+\code{lapply_post_var_set_make}.
 
 \code{vm@var_set_make} can now handle a \code{maker} of type \code{list} with element
 \code{dep_var_nm_sets}.

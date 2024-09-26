@@ -2,6 +2,27 @@
 
 ## News for version 1.2.0
 
+### vm@vame_make
+
+Rename `vm@vame_make` `callbacks` element `pre_loop` to `pre_lapply`.
+
+### vm@vame_make
+
+`vm@vame_make` gains `callbacks` element `lapply_on_entry`.
+
+### vm@vame_make
+
+`vm@vame_make` gains `callbacks` element `lapply_on_exit`.
+
+### vm@vame_make
+
+`vm@vame_make` gains `callbacks` element `lapply_pre_var_set_make`.
+
+### vm@vame_make
+
+Rename `vm@vame_make` `callbacks` element `post_var_set_make` to
+`lapply_post_var_set_make`.
+
 ### vm@var_set_make
 
 `vm@var_set_make` can now handle a `maker` of type `list` with element
