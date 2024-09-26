@@ -379,6 +379,20 @@ assert_is_vame_list <- function(
   )
 }
 
+report_is_maker_var_aggregate <- function(
+  x,
+  x_nm = NULL,
+  call = NULL
+) {
+  dbc::handle_args_inplace()
+  dbc::report_is_identical(
+    x = x,
+    x_nm = x_nm,
+    call = call,
+    y = "var_aggregate",
+    y_nm = NULL
+  )
+}
 assert_is_maker <- function(
   x,
   x_nm = NULL,
@@ -418,36 +432,72 @@ assert_is_maker <- function(
     return(invisible(NULL))
   }
   # @codedoc_comment_block specification(var_set_dt$maker)
-  # A `maker` of type `list` can be of two kinds. The first kind has named
-  #  elements `maker` of class `call` and
-  # `dep_var_nm_set` of class `character`, e.g.
-  # `list(maker = quote(make(x, y)), dep_var_nm_set = c("x", "y"))`.
-  # The second kind is otherwise the same, but `maker` must be string
-  # `"var_aggregate"`, and `dep_var_nm_set` must be of length one. This second
-  # kind is a shorthand for cases where one variable can be created simply
-  # by aggregating another with `vm@var_aggregate`.
+  # A `maker` of type `list` must have element named `maker` and either
+  # `dep_var_nm_set` of class `character` or `dep_var_nm_sets` of class `list`,
+  # e.g.
+  # `list(maker = quote(make(x, y)), dep_var_nm_set = c("x", "y"))`
+  # or
+  # `list(maker = quote(switch(dep_var_nm_set, b = b + 1L, c = c - 1L)), dep_var_nm_sets = list("b", "c"))`
+  # Element `maker` must be either a `call` object or simply the string
+  # `"var_aggregate"`, in which case `dep_var_nm_set` must be of length one.
+  # Using `"var_aggregate"` is a shorthand that causes calling
+  # `vm@var_aggregate`. E.g.
+  # `list(maker = "var_aggregate", dep_var_nm_set = "b")`.
   # @codedoc_comment_block specification(var_set_dt$maker)
   dbc::assert_has_names(
     x = x,
     x_nm = x_nm,
     call = call,
     assertion_type = assertion_type,
-    required_names = c("maker", "dep_var_nm_set")
+    required_names = "maker"
   )
   dbc::assert_is_one_of(
     x = x[["maker"]],
-    x_nm = paste0(x_nm, "$maker"),
+    x_nm = sprintf("%s$maker", x_nm),
     call = call,
     assertion_type = assertion_type,
     funs = list(dbc::report_is_call,
-                dbc::report_is_character_nonNA_atom)
+                report_is_maker_var_aggregate)
   )
-  dbc::assert_is_character_nonNA_vector(
-    x = x[["dep_var_nm_set"]],
-    x_nm = paste0(x_nm, "$dep_var_nm_set"),
-    call = call,
-    assertion_type = assertion_type
-  )
+  if ("dep_var_nm_set" %in% names(x)) {
+    dbc::assert_is_character_nonNA_vector(
+      x = x[["dep_var_nm_set"]],
+      x_nm = sprintf("%s$dep_var_nm_set", x_nm),
+      call = call,
+      assertion_type = assertion_type
+    )
+  } else if ("dep_var_nm_sets" %in% names(x)) {
+    # @codedoc_comment_block news("vm@var_set_maker_set", "2024-10-26", "1.2.0")
+    # A `maker` of type `list` can now have element `dep_var_nm_sets` instead
+    # of `dep_var_nm_set`. `dep_var_nm_sets` must be a `list` of variable name
+    # sets --- different allowed options. If your `maker` only works on one
+    # specific set of dependency variables, it is easier for you to keep using
+    # `dep_var_nm_set`. The possibility of using `dep_var_nm_sets` was added
+    # to enable writing a `maker` such as
+    # `quote(switch(dep_var_nm_set, b = b + 1L, c = c - 1L))`, where the target
+    # variable can be made using either `b` or `c`.
+    # @codedoc_comment_block news("vm@var_set_maker_set", "2024-10-26", "1.2.0")
+    dbc::assert_is_list(
+      x = x[["dep_var_nm_sets"]],
+      x_nm = sprintf("%s$dep_var_nm_sets", x_nm),
+      call = call,
+      assertion_type = assertion_type
+    )
+    for (i in seq_along(x[["dep_var_nm_sets"]])) {
+      dbc::assert_is_character_nonNA_vector(
+        x = x[["dep_var_nm_sets"]][[i]],
+        x_nm = sprintf("%s$dep_var_nm_sets[[%i]]", x_nm, i),
+        call = call,
+        assertion_type = assertion_type
+      )
+    }
+  } else {
+    x_nm <- paste0(x_nm, "$dep_var_nm_sets")
+    stop("`", x_nm, "` must have either ",
+         sprintf("`%s$%s`", x_nm, "dep_var_nm_set"), " or ",
+         sprintf("`%s$%s`", x_nm, "dep_var_nm_sets"), ".")
+  }
+  return(invisible(NULL))
 }
 
 assert_is_description <- function(

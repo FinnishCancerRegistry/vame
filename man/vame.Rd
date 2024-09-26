@@ -74,6 +74,27 @@ in a special way so that the \code{data} assertion is not performed.
 
 \section{News}{
 
+\subsection{News for version 1.2.0}{
+\subsection{vm@var_set_make}{
+
+\code{vm@var_set_make} can now handle a \code{maker} of type \code{list} with element
+\code{dep_var_nm_sets}.
+}
+
+\subsection{vm@var_set_maker_set}{
+
+A \code{maker} of type \code{list} can now have element \code{dep_var_nm_sets} instead
+of \code{dep_var_nm_set}. \code{dep_var_nm_sets} must be a \code{list} of variable name
+sets --- different allowed options. If your \code{maker} only works on one
+specific set of dependency variables, it is easier for you to keep using
+\code{dep_var_nm_set}. The possibility of using \code{dep_var_nm_sets} was added
+to enable writing a \code{maker} such as
+\code{quote(switch(dep_var_nm_set, b = b + 1L, c = c - 1L))}, where the target
+variable can be made using either \code{b} or \code{c}.
+}
+
+}
+
 \subsection{News for version 1.1.1}{
 \subsection{vame::self}{
 

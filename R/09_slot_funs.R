@@ -489,6 +489,37 @@ var_set_make <- function(
   #   all.equal(obs, obs_2),
   #   all.equal(obs, obs_3)
   # )
+  #
+  # # Example with a `maker` which works on multiple different input variable sets
+  # vm <- vame::VariableMetadata(
+  #   var_dt = data.table::data.table(
+  #     var_nm = "a"
+  #   ),
+  #   var_set_dt = data.table::data.table(
+  #     id = "a_set",
+  #     var_nm_set = list(a_set = "a"),
+  #     maker = list(
+  #       a_set = list(
+  #         dep_var_nm_sets = list(
+  #           "b",
+  #           "c"
+  #         ),
+  #         maker = quote({
+  #           if (identical(dep_var_nm_set, "b")) {
+  #             out <- b + 1L
+  #           } else if (identical(dep_var_nm_set, "c")) {
+  #             out <- c - 1L
+  #           }
+  #           return(data.table::data.table(a = out)[])
+  #         })
+  #       )
+  #     )
+  #   )
+  # )
+  # stopifnot(identical(
+  #   vm@var_set_make(var_nms = "a", data = list(b = 0L)),
+  #   vm@var_set_make(var_nms = "a", data = list(c = 2L)),
+  # ))
   # @codedoc_comment_block feature_example(make)
 
   dbc::assert_has_one_of_classes(env, classes = c("NULL", "environment"))
@@ -514,23 +545,25 @@ var_set_make <- function(
     stop("`id` must be of length one but inferred `id` was `",
          deparse1(id), "`. Consider passing `id` explicitly.")
   }
+  # @codedoc_comment_block vame::var_set_make::data
+  # @codedoc_insert_comment_block specs(vame:::handle_arg_data__("arg_list"))
+  # @codedoc_comment_block vame::var_set_make::data
+  # @codedoc_comment_block vm@var_set_make
+  # - `data` is turned into a list of variables, `arg_list`.
+  # @codedoc_insert_comment_block steps(vame:::handle_arg_data__("arg_list"))
+  # @codedoc_comment_block vm@var_set_make
   arg_list <- handle_arg_data__(data, output_type = "arg_list")
-  # @codedoc_comment_block news("vm@var_set_make", "2024-06-19", "0.5.3")
-  # `vm@var_set_make` passing `var_nms` fixed. It used to pass the
-  # `var_nm_set` for the corresponding variable set, now it passes arg
-  # `var_nms` (whether inferred or user-given) as intended.
-  # @codedoc_comment_block news("vm@var_set_make", "2024-06-19", "0.5.3")
-  arg_list[c("var_nms", "dep_var_nm_set")] <- list(
-    var_nms,
-    NULL
-  )
   maker <- var_set_maker_get(vm = vm, id = id)
   arg_list <- local({
     # @codedoc_comment_block news("vm@var_set_make", "2024-05-13", "0.5.2")
     # `vm@var_set_make` now raises an informative error if `data` did not
     # contain something the `maker` needs.
     # @codedoc_comment_block news("vm@var_set_make", "2024-05-13", "0.5.2")
-    req_obj_nm_set <- var_set_maker_req_obj_nm_set__(
+    # @codedoc_comment_block news("vm@var_set_make", "2024-10-26", "1.2.0")
+    # `vm@var_set_make` can now handle a `maker` of type `list` with element
+    # `dep_var_nm_sets`.
+    # @codedoc_comment_block news("vm@var_set_make", "2024-10-26", "1.2.0")
+    req_obj_nm_sets <- var_set_maker_req_obj_nm_sets__(
       vm = vm,
       id = id,
       maker = maker
@@ -539,44 +572,64 @@ var_set_make <- function(
     if ("df" %in% names(data)) {
       data_obj_nm_set <- union(data_obj_nm_set, names(data[["df"]]))
     }
-    miss_req_obj_nm_set <- setdiff(
-      req_obj_nm_set,
-      data_obj_nm_set
+    miss_req_obj_nm_sets <- lapply(
+      X = req_obj_nm_sets,
+      FUN = setdiff,
+      x = data_obj_nm_set
     )
-    if (length(miss_req_obj_nm_set) > 0) {
-      stop(
-        "Argument `data` did not contain the following required objects: `",
-        deparse1(miss_req_obj_nm_set), "`"
-      )
+    is_usable <- vapply(miss_req_obj_nm_sets, length, integer(1L)) == 0L
+    if (!any(is_usable)) {
+      msg <- "Argument `data` did not contain all the required objects. "
+      if (length(is_usable) == 1) {
+        msg <- c(
+          msg,
+          paste0(
+            "These were missing: `", deparse1(miss_req_obj_nm_sets[[1]]), "`."
+          )
+        )
+      } else {
+        msg <- c(
+          msg,
+          "Make sure `data` contains all of the objects of at least one ",
+          "of these sets: ",
+          vapply(req_obj_nm_sets, function(set) {
+            sprintf("\n- `%s`", deparse1(set))
+          }, character(1L))
+        )
+      }
+      stop(msg)
     }
-    arg_list[["dep_var_nm_set"]] <- req_obj_nm_set
+    # @codedoc_comment_block news("vm@var_set_make", "2024-06-19", "0.5.3")
+    # `vm@var_set_make` passing `var_nms` fixed. It used to pass the
+    # `var_nm_set` for the corresponding variable set, now it passes arg
+    # `var_nms` (whether inferred or user-given) as intended.
+    # @codedoc_comment_block news("vm@var_set_make", "2024-06-19", "0.5.3")
+    # @codedoc_comment_block vm@var_set_make
+    # - Arg `var_nms` is added to `arg_list$var_nms`. We also add `arg_list$vm`,
+    #   the `VariableMetadata` object itself, and `dep_var_nm_set`, the set of
+    #   dependency variables names.
+    # @codedoc_comment_block vm@var_set_make
+    arg_list[["var_nms"]] <- var_nms
+    arg_list[["dep_var_nm_set"]] <- req_obj_nm_sets[is_usable][[1]]
     arg_list[["vm"]] <- vm
     return(arg_list)
   })
   if (is.function(maker)) {
     # @codedoc_comment_block vm@var_set_make
-    # - If `maker` is a `function`, `data` is turned into a list of function
-    #   arguments and `maker` is called with it. The additional variables
-    #   `var_nms`, `dep_var_nm_set`, and `vm` are also included into the
-    #   argument list.
-    #   See the argument `var_nms` of this function for what `var_nms` is.
-    #   `dep_var_nm_set` is the set of dependency variable names.
-    #   However, those elements of the argument list ignored which do not have a
-    #   corresponding identically named argument in the `maker` function
-    #   definition.
+    # - If `maker` is a function, it is called with the objects from the above
+    #   list which have a corresponding argument.
     # @codedoc_comment_block vm@var_set_make
     # @codedoc_comment_block news("vm@var_set_maker_set", "2024-06-19", "0.5.3")
     # `vm@var_set_maker_set` now ignores arguments passed via `data` to a
     # `maker` of type `function` that do not correspond to any argument name.
     # @codedoc_comment_block news("vm@var_set_maker_set", "2024-06-19", "0.5.3")
-    maker_fun_arg_nms <- names(formals(maker))
-    arg_list <- arg_list[intersect(maker_fun_arg_nms, names(arg_list))]
+    arg_list <- arg_list[intersect(names(formals(maker)), names(arg_list))]
     dt <- do.call(maker, arg_list, quote = TRUE)
   } else if (inherits(maker, "list")) {
     # @codedoc_comment_block vm@var_set_make
     # - If `maker` is a `list`, an evaluation env is created with `env` as its
-    #   parent. This evaluation environment is populated by objects passed via
-    #   `data` and additionally `var_nms`, `dep_var_nm_set`, and `vm`.
+    #   parent. This evaluation environment is populated by the objects in the
+    #   list detailed above.
     #   If `maker[["maker"]] == "aggregate"`, we use an internally defined
     #   expression that uses `vm@var_aggregate`.
     #   Else `maker[["maker"]]` must be an R expression. In both cases the
@@ -610,7 +663,7 @@ var_set_make <- function(
   }
 
   # @codedoc_comment_block vm@var_set_make
-  # - The resulting `data.table` is returned as-is.
+  # - The `data.table` resulting from the `maker` call is returned as-is.
   # @codedoc_comment_block vm@var_set_make
   dbc::assert_prod_output_is_data_table(dt)
   dbc::assert_prod_output_has_names(dt, required_names = var_nms)
@@ -646,7 +699,7 @@ vame_make <- function(
   }
 
   # @codedoc_comment_block vame::vame_make::data
-  # @codedoc_insert_comment_block specs(vame:::handle_arg_data__, "df_list")
+  # @codedoc_insert_comment_block specs(vame:::handle_arg_data__("df_list"))
   # @codedoc_comment_block vame::vame_make::data
   data <- handle_arg_data__(data, output_type = "df_list")
   data[["df"]] <- dt_independent_frame_dependent_contents__(data[["df"]])
@@ -698,7 +751,7 @@ vame_make <- function(
   ids <- local({
     meta_df <- data.frame(id = ids)
     meta_df[["req_obj_nm_set"]] <- lapply(meta_df[["id"]], function(id) {
-      var_set_maker_req_obj_nm_set__(vm = vm, id = id)
+      var_set_maker_req_obj_nm_sets__(vm = vm, id = id)
     })
     meta_df[["output_var_nm_set"]] <- lapply(meta_df[["id"]], function(id) {
       var_set_meta_get(vm = vm, id = id, meta_nm = "var_nm_set")

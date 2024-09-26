@@ -319,23 +319,28 @@ Call specific \code{var_set_dt$maker}.
 \code{vm@var_set_make} performs the following steps:
 \itemize{
 \item Figures out \code{id} if missing but \code{var_nms} given and vice versa.
-\item If \code{maker} is a \code{function}, \code{data} is turned into a list of function
-arguments and \code{maker} is called with it. The additional variables
-\code{var_nms}, \code{dep_var_nm_set}, and \code{vm} are also included into the
-argument list.
-See the argument \code{var_nms} of this function for what \code{var_nms} is.
-\code{dep_var_nm_set} is the set of dependency variable names.
-However, those elements of the argument list ignored which do not have a
-corresponding identically named argument in the \code{maker} function
-definition.
+\item \code{data} is turned into a list of variables, \code{arg_list}.
+\itemize{
+\item If \code{data} is a \code{data.frame} object, it is turned into a \code{list} via
+\code{as.list(data)} before use.
+\item If \code{data} is a \code{list} object and contains \code{data$df}, the columns
+of \code{data$df} are appended into \code{data} as list elements and
+\code{data$df} is removed before use.
+\item If \code{data} is \code{NULL} object, it is kept as-is.
+}
+\item Arg \code{var_nms} is added to \code{arg_list$var_nms}. We also add \code{arg_list$vm},
+the \code{VariableMetadata} object itself, and \code{dep_var_nm_set}, the set of
+dependency variables names.
+\item If \code{maker} is a function, it is called with the objects from the above
+list which have a corresponding argument.
 \item If \code{maker} is a \code{list}, an evaluation env is created with \code{env} as its
-parent. This evaluation environment is populated by objects passed via
-\code{data} and additionally \code{var_nms}, \code{dep_var_nm_set}, and \code{vm}.
+parent. This evaluation environment is populated by the objects in the
+list detailed above.
 If \code{maker[["maker"]] == "aggregate"}, we use an internally defined
 expression that uses \code{vm@var_aggregate}.
 Else \code{maker[["maker"]]} must be an R expression. In both cases the
 expression is evaluated in the evaluation environment.
-\item The resulting \code{data.table} is returned as-is.
+\item The \code{data.table} resulting from the \code{maker} call is returned as-is.
 }
 
 \emph{Usage}
@@ -344,21 +349,24 @@ expression is evaluated in the evaluation environment.
 
 \emph{Arguments}
 
-data \verb{[NULL, data.frame, data.table, list]} (default \code{NULL})
+data \verb{[data.frame, data.table, list, NULL]}
 \itemize{
-\item \code{NULL}: No data is used.
-\item \code{data.frame}/\code{data.table}: These variables are used as-is.
-\item \code{list}: Must by fully named. \code{list} elements are used as variables
-as-is, except the optional element \code{data$df} ---
-a \code{data.frame}/\code{data.table} --- is first turned into a \code{list},
-and \code{data} (without \code{data$df}) and \code{data$df} are combined into one longer
-\code{list}. This allows you to easily pass a \code{data.frame}/\code{data.table} and
-necessary accompanying variables for settings etc.
-E.g.
-\code{data = list(df = data.frame(my_col_1 = 1, my_col_2 = 2), my_custom_setting = "something")}.
-Of course you can also pass
-\code{data = list(my_col_1 = 1, my_col_2 = 2, my_custom_setting = "something")}
-directly if that is more convenient.
+\item \code{data.frame}/\code{data.table}: Columns contain necessary data.
+\itemize{
+\item If \code{data} is a \code{data.frame} object, it is turned into a \code{list} via
+\code{as.list(data)} before use.
+}
+\item \code{list}: Individual elements and/or \code{data$df} can contain the necessary
+variables.
+\itemize{
+\item If \code{data} is a \code{list} object and contains \code{data$df}, the columns
+of \code{data$df} are appended into \code{data} as list elements and
+\code{data$df} is removed before use.
+}
+\item \code{NULL}: No data is passed.
+\itemize{
+\item If \code{data} is \code{NULL} object, it is kept as-is.
+}
 }
 
 id \verb{[any]} (no default)
@@ -1539,14 +1547,17 @@ object is considered to mean that one has not been defined.
 A \code{maker} of type \code{function} must have as arguments the invididual
 required variables. Using \code{...} is not allowed to enable proper checks
 on inputs when the \code{maker} is called.
-A \code{maker} of type \code{list} can be of two kinds. The first kind has named
-elements \code{maker} of class \code{call} and
-\code{dep_var_nm_set} of class \code{character}, e.g.
-\code{list(maker = quote(make(x, y)), dep_var_nm_set = c("x", "y"))}.
-The second kind is otherwise the same, but \code{maker} must be string
-\code{"var_aggregate"}, and \code{dep_var_nm_set} must be of length one. This second
-kind is a shorthand for cases where one variable can be created simply
-by aggregating another with \code{vm@var_aggregate}.
+A \code{maker} of type \code{list} must have element named \code{maker} and either
+\code{dep_var_nm_set} of class \code{character} or \code{dep_var_nm_sets} of class \code{list},
+e.g.
+\code{list(maker = quote(make(x, y)), dep_var_nm_set = c("x", "y"))}
+or
+\code{list(maker = quote(switch(dep_var_nm_set, b = b + 1L, c = c - 1L)), dep_var_nm_sets = list("b", "c"))}
+Element \code{maker} must be either a \code{call} object or simply the string
+\code{"var_aggregate"}, in which case \code{dep_var_nm_set} must be of length one.
+Using \code{"var_aggregate"} is a shorthand that causes calling
+\code{vm@var_aggregate}. E.g.
+\code{list(maker = "var_aggregate", dep_var_nm_set = "b")}.
 The recommended approach to writing a \code{maker} for a variable set is to
 write a function and store a call to it as the \code{maker}. See the example
 for the \code{make} feature:
@@ -1688,6 +1699,37 @@ stopifnot(
   all.equal(obs, obs_2),
   all.equal(obs, obs_3)
 )
+
+# Example with a `maker` which works on multiple different input variable sets
+vm <- vame::VariableMetadata(
+  var_dt = data.table::data.table(
+    var_nm = "a"
+  ),
+  var_set_dt = data.table::data.table(
+    id = "a_set",
+    var_nm_set = list(a_set = "a"),
+    maker = list(
+      a_set = list(
+        dep_var_nm_sets = list(
+          "b",
+          "c"
+        ),
+        maker = quote(\{
+          if (identical(dep_var_nm_set, "b")) \{
+            out <- b + 1L
+          \} else if (identical(dep_var_nm_set, "c")) \{
+            out <- c - 1L
+          \}
+          return(data.table::data.table(a = out)[])
+        \})
+      )
+    )
+  )
+)
+stopifnot(identical(
+  vm@var_set_make(var_nms = "a", data = list(b = 0L)),
+  vm@var_set_make(var_nms = "a", data = list(c = 2L)),
+))
 }\if{html}{\out{</div>}}
 
 The following functions are related to this feature:
@@ -1902,6 +1944,22 @@ The following functions are part of this feature:
 \item \code{vm@vame_category_space_dt_list}
 \item \code{vm@vame_category_space_dt}
 }
+}
+
+\section{News for version 1.2.0}{
+
+
+\code{vm@var_set_make} can now handle a \code{maker} of type \code{list} with element
+\code{dep_var_nm_sets}.
+
+A \code{maker} of type \code{list} can now have element \code{dep_var_nm_sets} instead
+of \code{dep_var_nm_set}. \code{dep_var_nm_sets} must be a \code{list} of variable name
+sets --- different allowed options. If your \code{maker} only works on one
+specific set of dependency variables, it is easier for you to keep using
+\code{dep_var_nm_set}. The possibility of using \code{dep_var_nm_sets} was added
+to enable writing a \code{maker} such as
+\code{quote(switch(dep_var_nm_set, b = b + 1L, c = c - 1L))}, where the target
+variable can be made using either \code{b} or \code{c}.
 }
 
 \section{News for version 1.1.0}{
@@ -2703,6 +2761,37 @@ stopifnot(
   all.equal(obs, obs_2),
   all.equal(obs, obs_3)
 )
+
+# Example with a `maker` which works on multiple different input variable sets
+vm <- vame::VariableMetadata(
+  var_dt = data.table::data.table(
+    var_nm = "a"
+  ),
+  var_set_dt = data.table::data.table(
+    id = "a_set",
+    var_nm_set = list(a_set = "a"),
+    maker = list(
+      a_set = list(
+        dep_var_nm_sets = list(
+          "b",
+          "c"
+        ),
+        maker = quote({
+          if (identical(dep_var_nm_set, "b")) {
+            out <- b + 1L
+          } else if (identical(dep_var_nm_set, "c")) {
+            out <- c - 1L
+          }
+          return(data.table::data.table(a = out)[])
+        })
+      )
+    )
+  )
+)
+stopifnot(identical(
+  vm@var_set_make(var_nms = "a", data = list(b = 0L)),
+  vm@var_set_make(var_nms = "a", data = list(c = 2L)),
+))
 # random sampling
 c_lo <- as.Date("2001-01-01")
 c_hi <- as.Date("2020-12-31")

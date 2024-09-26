@@ -35,19 +35,26 @@ handle_arg_data__ <- function(
   )
   if (output_type == "arg_list") {
     if (is.data.frame(data)) {
-      # @codedoc_comment_block specs(vame:::handle_arg_data__, "df_list")
-      # @param data `[data.frame, data.table, list]` (no default)
+      # @codedoc_comment_block specs(vame:::handle_arg_data__("arg_list"))
+      # @param data `[data.frame, data.table, list, NULL]`
       #
       # - `data.frame`/`data.table`: Columns contain necessary data.
-      # @codedoc_comment_block specs(vame:::handle_arg_data__, "df_list")
+      # @codedoc_comment_block steps(vame:::handle_arg_data__("arg_list"))
+      #   + If `data` is a `data.frame` object, it is turned into a `list` via
+      #     `as.list(data)` before use.
+      # @codedoc_comment_block steps(vame:::handle_arg_data__("arg_list"))
+      # @codedoc_comment_block specs(vame:::handle_arg_data__("arg_list"))
       out <- as.list(data)
     } else if (inherits(data, "list")) {
-      # @codedoc_comment_block specs(vame:::handle_arg_data__, "df_list")
-      # - `list`: Element `data$df` can be a `data.frame`/
-      #   `data.table` whose columns contain necessary data.
-      #   Alternatively the list elements can contain necessary data directly,
-      #   or a combination of the two.
-      # @codedoc_comment_block specs(vame:::handle_arg_data__, "df_list")
+      # @codedoc_comment_block specs(vame:::handle_arg_data__("arg_list"))
+      # - `list`: Individual elements and/or `data$df` can contain the necessary
+      #   variables.
+      # @codedoc_comment_block steps(vame:::handle_arg_data__("arg_list"))
+      #   + If `data` is a `list` object and contains `data$df`, the columns
+      #     of `data$df` are appended into `data` as list elements and
+      #     `data$df` is removed before use.
+      # @codedoc_comment_block steps(vame:::handle_arg_data__("arg_list"))
+      # @codedoc_comment_block specs(vame:::handle_arg_data__("arg_list"))
       out <- data
       if ("df" %in% names(out)) {
         if (!is.data.frame(out[["df"]])) {
@@ -65,6 +72,12 @@ handle_arg_data__ <- function(
         out[names(df)] <- as.list(df)
       }
     } else if (is.null(data)) {
+      # @codedoc_comment_block specs(vame:::handle_arg_data__("arg_list"))
+      # - `NULL`: No data is passed.
+      # @codedoc_comment_block steps(vame:::handle_arg_data__("arg_list"))
+      #   + If `data` is `NULL` object, it is kept as-is.
+      # @codedoc_comment_block steps(vame:::handle_arg_data__("arg_list"))
+      # @codedoc_comment_block specs(vame:::handle_arg_data__("arg_list"))
       out <- data
     } else {
       stop(simpleError(
@@ -77,8 +90,27 @@ handle_arg_data__ <- function(
     }
   } else if (output_type == "df_list") {
     if (is.data.frame(data)) {
+      # @codedoc_comment_block specs(vame:::handle_arg_data__("df_list"))
+      # @param data `[data.frame, data.table, list]` (no default)
+      #
+      # - `data.frame`/`data.table`: Columns contain necessary data.
+      # @codedoc_comment_block specs(vame:::handle_arg_data__("df_list"))
+      # @codedoc_comment_block steps(vame:::handle_arg_data__("df_list"))
+      #   + If `data` is a `data.frame` object, it is turned into a `list`.
+      #     via `list(df = data)`.
+      # @codedoc_comment_block steps(vame:::handle_arg_data__("df_list"))
       out <- list(df = data)
     } else if (inherits(data, "list")) {
+      # @codedoc_comment_block specs(vame:::handle_arg_data__("df_list"))
+      # - `list`: Element `data$df` can be a `data.frame`/
+      #   `data.table` whose columns contain necessary data.
+      #   Alternatively the list elements can contain necessary data directly,
+      #   or a combination of the two.
+      # @codedoc_comment_block specs(vame:::handle_arg_data__("df_list"))
+      # @codedoc_comment_block steps(vame:::handle_arg_data__("df_list"))
+      #   + If `data` is a `list` object, the existence of `data$df` is checked
+      #     and `data` is used as-is.
+      # @codedoc_comment_block steps(vame:::handle_arg_data__("df_list"))
       out <- data
       if (!"df" %in% names(data) || !is.data.frame(data[["df"]])) {
         stop(
@@ -88,6 +120,9 @@ handle_arg_data__ <- function(
         )
       }
     } else if (is.null(data)) {
+      # @codedoc_comment_block steps(vame:::handle_arg_data__("df_list"))
+      #   + If `data` is `NULL` object, an error is raised.
+      # @codedoc_comment_block steps(vame:::handle_arg_data__("df_list"))
       stop(simpleError(
         message = "This function does not permit `data` to be `NULL`.",
         call = parent_call
@@ -217,17 +252,22 @@ handle_arg_ids_et_var_nms_inplace__ <- function(
   return(invisible(NULL))
 }
 
-var_set_maker_req_obj_nm_set__ <- function(vm, id = NULL, maker = NULL) {
+var_set_maker_req_obj_nm_sets__ <- function(vm, id = NULL, maker = NULL) {
   if (is.null(maker)) {
     maker <- var_set_maker_get(vm = vm, id = id)
   }
   assert_is_maker(maker, assertion_type = "prod_input")
   if (inherits(maker, "list")) {
-    return(maker[["dep_var_nm_set"]])
+    if ("dep_var_nm_set" %in% names(maker)) {
+      out <- list(maker[["dep_var_nm_set"]])
+    } else {
+      out <- maker[["dep_var_nm_sets"]]
+    }
   } else if (is.function(maker)) {
-    return(names(formals(maker)))
+    out <- list(names(formals(maker)))
   } else {
     stop("Internal error: could not determine required object names for a ",
          "`maker` --- it was neither a list nor a function.")
   }
+  return(out)
 }
