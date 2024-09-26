@@ -574,8 +574,12 @@ var_set_make <- function(
     }
     miss_req_obj_nm_sets <- lapply(
       X = req_obj_nm_sets,
-      FUN = setdiff,
-      x = data_obj_nm_set
+      FUN = function(req_obj_nm_set) {
+        setdiff(
+          req_obj_nm_set,
+          data_obj_nm_set
+        )
+      }
     )
     is_usable <- vapply(miss_req_obj_nm_sets, length, integer(1L)) == 0L
     if (!any(is_usable)) {
@@ -722,20 +726,20 @@ vame_make <- function(
   # @codedoc_comment_block news("vm@vame_make", "2024-09-11", "1.0.0")
   assert_is_callbacks(callbacks)
 
-  # @codedoc_comment_block news("vm@vame_make", "2024-05-13", "0.5.2")
-  # `vm@vame_make` automatically determines the appropriate order of `ids`
-  # (whether user-supplied or inferred) in which their `maker`s should be
-  # called. For instance if `maker` for `ids[1]` requires the variables
-  # created by the `maker` for `ids[2]`, then the latter is called first.
-  # @codedoc_comment_block news("vm@vame_make", "2024-05-13", "0.5.2")
-  # @codedoc_comment_block vm@vame_make
-  # - Determines order in which the `maker`s of `ids` should be called.
-  #   For instance if `maker` for `ids[1]` requires the variables
-  #   created by the `maker` for `ids[2]`, then the latter is called first.
-  # @codedoc_comment_block vm@vame_make
   ids <- local({
+    # @codedoc_comment_block news("vm@vame_make", "2024-05-13", "0.5.2")
+    # `vm@vame_make` automatically determines the appropriate order of `ids`
+    # (whether user-supplied or inferred) in which their `maker`s should be
+    # called. For instance if `maker` for `ids[1]` requires the variables
+    # created by the `maker` for `ids[2]`, then the latter is called first.
+    # @codedoc_comment_block news("vm@vame_make", "2024-05-13", "0.5.2")
+    # @codedoc_comment_block vm@vame_make
+    # - Determines order in which the `maker`s of `ids` should be called.
+    #   For instance if `maker` for `ids[1]` requires the variables
+    #   created by the `maker` for `ids[2]`, then the latter is called first.
+    # @codedoc_comment_block vm@vame_make
     meta_df <- data.frame(id = ids)
-    meta_df[["req_obj_nm_set"]] <- lapply(meta_df[["id"]], function(id) {
+    meta_df[["req_obj_nm_set_set"]] <- lapply(meta_df[["id"]], function(id) {
       var_set_maker_req_obj_nm_sets__(vm = vm, id = id)
     })
     meta_df[["output_var_nm_set"]] <- lapply(meta_df[["id"]], function(id) {
@@ -752,8 +756,15 @@ vame_make <- function(
       makeable_ids <- candidate_ids[vapply(
         candidate_ids,
         function(id) {
-          idx <- which(meta_df[["id"]] == id)
-          all(meta_df[["req_obj_nm_set"]][[idx]] %in% usable_obj_nm_set)
+          idx <- match(id, meta_df[["id"]])
+          has_reqs <- vapply(
+            meta_df[["req_obj_nm_set_set"]][[idx]],
+            function(req_obj_nm_set) {
+              all(req_obj_nm_set %in% usable_obj_nm_set)
+            },
+            logical(1L)
+          )
+          any(has_reqs)
         },
         logical(1L)
       )]
@@ -773,7 +784,7 @@ vame_make <- function(
       usable_obj_nm_set <- union(
         usable_obj_nm_set,
         meta_df[["output_var_nm_set"]][[
-          which(meta_df[["id"]] == ids[order_of_ids[i]])
+          match(ids[order_of_ids[i]], meta_df[["id"]])
         ]]
       )
     }
