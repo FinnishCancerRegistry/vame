@@ -516,10 +516,26 @@ var_set_make <- function(
   #     )
   #   )
   # )
-  # stopifnot(identical(
-  #   vm@var_set_make(var_nms = "a", data = list(b = 0L)),
-  #   vm@var_set_make(var_nms = "a", data = list(c = 2L)),
-  # ))
+  # obs_b_1 <- vm@var_set_make(var_nms = "a", data = list(b = 0L))
+  # obs_c <- vm@var_set_make(var_nms = "a", data = list(c = 2L))
+  # obs_b_2 <- vm@vame_make(var_nms = "a", data = data.frame(b = 0L))
+  # stopifnot(
+  #   all.equal(obs_b_1, obs_b_2, check.attributes = FALSE),
+  #   all.equal(obs_b_1, obs_c, check.attributes = FALSE),
+  #   identical(
+  #     attr(obs_b_1, "var_set_make_meta"),
+  #     list(id = "a_set", var_nms = "a", dep_var_nm_set = "b")
+  #   ),
+  #   all.equal(
+  #     attr(obs_b_2, "vame_make_meta"),
+  #     data.table::data.table(
+  #       id = "a_set",
+  #       var_nms = list("a"),
+  #       dep_var_nm_set = list("b")
+  #     ),
+  #     check.attributes = FALSE
+  #   )
+  # )
   # @codedoc_comment_block feature_example(make)
 
   dbc::assert_has_one_of_classes(env, classes = c("NULL", "environment"))
@@ -559,10 +575,10 @@ var_set_make <- function(
     # `vm@var_set_make` now raises an informative error if `data` did not
     # contain something the `maker` needs.
     # @codedoc_comment_block news("vm@var_set_make", "2024-05-13", "0.5.2")
-    # @codedoc_comment_block news("vm@var_set_make", "2024-10-26", "1.2.0")
+    # @codedoc_comment_block news("vm@var_set_make", "2024-09-26", "1.2.0")
     # `vm@var_set_make` can now handle a `maker` of type `list` with element
     # `dep_var_nm_sets`.
-    # @codedoc_comment_block news("vm@var_set_make", "2024-10-26", "1.2.0")
+    # @codedoc_comment_block news("vm@var_set_make", "2024-09-26", "1.2.0")
     req_obj_nm_sets <- var_set_maker_req_obj_nm_sets__(
       vm = vm,
       id = id,
@@ -627,8 +643,11 @@ var_set_make <- function(
     # `vm@var_set_maker_set` now ignores arguments passed via `data` to a
     # `maker` of type `function` that do not correspond to any argument name.
     # @codedoc_comment_block news("vm@var_set_maker_set", "2024-06-19", "0.5.3")
-    arg_list <- arg_list[intersect(names(formals(maker)), names(arg_list))]
-    dt <- do.call(maker, arg_list, quote = TRUE)
+    dt <- do.call(
+      maker,
+      arg_list[intersect(names(formals(maker)), names(arg_list))],
+      quote = TRUE
+    )
   } else if (inherits(maker, "list")) {
     # @codedoc_comment_block vm@var_set_make
     # - If `maker` is a `list`, an evaluation env is created with `env` as its
@@ -666,12 +685,78 @@ var_set_make <- function(
     stop("Internal error: invalid var_set_dt$maker for id = ", deparse1(id))
   }
 
+  dbc::assert_prod_output_has_names(dt, required_names = var_nms)
+  # @codedoc_comment_block news("vm@var_set_make", "2024-10-02", "1.3.0")
+  # `vm@var_set_make` now sets attribute `var_set_make_meta` on its output.
+  # @codedoc_comment_block news("vm@var_set_make", "2024-10-02", "1.3.0")
   # @codedoc_comment_block vm@var_set_make
-  # - The `data.table` resulting from the `maker` call is returned as-is.
+  # - The `data.table` resulting from the `maker` call is returned after
+  #   setting the `var_set_make_meta` attribute as a list containing the
+  #   elements `id`, `var_nms`, and `dep_var_nm_set`.
   # @codedoc_comment_block vm@var_set_make
   dbc::assert_prod_output_is_data_table(dt)
-  dbc::assert_prod_output_has_names(dt, required_names = var_nms)
+  data.table::setattr(
+    dt,
+    "var_set_make_meta",
+    list(
+      id = id,
+      var_nms = arg_list[["var_nms"]],
+      dep_var_nm_set = arg_list[["dep_var_nm_set"]]
+    )
+  )
   return(dt[])
+}
+
+var_set_maker_get_dep_var_nm_sets <- function(
+  vm,
+  id
+) {
+  # @codedoc_comment_block news("vm@var_set_maker_get_dep_var_nm_sets", "2024-10-02", "1.3.0")
+  # New function `vm@var_set_maker_get_dep_var_nm_sets`.
+  # @codedoc_comment_block news("vm@var_set_maker_get_dep_var_nm_sets", "2024-10-02", "1.3.0")
+
+  # @codedoc_comment_block function_example(vm@var_set_maker_get_dep_var_nm_sets)
+  # vm <- vame::VariableMetadata(
+  #   var_dt = data.table::data.table(
+  #     var_nm = c("a", "b")
+  #   ),
+  #   var_set_dt = data.table::data.table(
+  #     id = c("a_set", "b_set"),
+  #     var_nm_set = list(a_set = "a", b_set = "b"),
+  #     maker = list(
+  #       a_set = list(
+  #         dep_var_nm_sets = list(
+  #           "b",
+  #           "c"
+  #         ),
+  #         maker = quote({
+  #           if (identical(dep_var_nm_set, "b")) {
+  #             out <- b + 1L
+  #           } else if (identical(dep_var_nm_set, "c")) {
+  #             out <- c - 1L
+  #           }
+  #           return(data.table::data.table(a = out)[])
+  #         })
+  #       ),
+  #       b_set = list(
+  #         dep_var_nm_set = "b_dep",
+  #         maker = quote({data.table::data.table(b = b_dep + 1L)})
+  #       )
+  #     )
+  #   )
+  # )
+  # stopifnot(
+  #   identical(
+  #     vm@var_set_maker_get_dep_var_nm_sets(id = "a_set"),
+  #     vm@var_set_maker_get(id = "a_set")[["dep_var_nm_sets"]]
+  #   ),
+  #   identical(
+  #     vm@var_set_maker_get_dep_var_nm_sets(id = "b_set"),
+  #     list(vm@var_set_maker_get(id = "b_set")[["dep_var_nm_set"]])
+  #   )
+  # )
+  # @codedoc_comment_block function_example(vm@var_set_maker_get_dep_var_nm_sets)
+  var_set_maker_req_obj_nm_sets__(vm = vm, id = id)
 }
 
 vame_make <- function(
@@ -811,10 +896,10 @@ vame_make <- function(
   if ("pre_lapply" %in% names(callbacks)) {
     callbacks[["pre_lapply"]](env = main_env)
   }
-  lapply(ids, function(id) {
-    # @codedoc_comment_block news("vm@vame_make", "2024-10-26", "1.2.0")
+  vame_make_meta_dt <- data.table::rbindlist(lapply(ids, function(id) {
+    # @codedoc_comment_block news("vm@vame_make", "2024-09-26", "1.2.0")
     # `vm@vame_make` gains `callbacks` element `lapply_on_entry`.
-    # @codedoc_comment_block news("vm@vame_make", "2024-10-26", "1.2.0")
+    # @codedoc_comment_block news("vm@vame_make", "2024-09-26", "1.2.0")
     # @codedoc_comment_block vm@vame_make
     # - For each `ids` element:
     #   * Calls `callbacks[["lapply_on_entry"]](env = lapply_fun_env)` if
@@ -825,9 +910,9 @@ vame_make <- function(
     if ("lapply_on_entry" %in% names(callbacks)) {
       callbacks[["lapply_on_entry"]](env = lapply_fun_env)
     }
-    # @codedoc_comment_block news("vm@vame_make", "2024-10-26", "1.2.0")
+    # @codedoc_comment_block news("vm@vame_make", "2024-09-26", "1.2.0")
     # `vm@vame_make` gains `callbacks` element `lapply_on_exit`.
-    # @codedoc_comment_block news("vm@vame_make", "2024-10-26", "1.2.0")
+    # @codedoc_comment_block news("vm@vame_make", "2024-09-26", "1.2.0")
     # @codedoc_comment_block vm@vame_make
     #   * Calls `on.exit(callbacks[["lapply_on_exit"]](env = lapply_fun_env))`
     #     if defined.
@@ -844,9 +929,9 @@ vame_make <- function(
         var_nms
       )
     }
-    # @codedoc_comment_block news("vm@vame_make", "2024-10-26", "1.2.0")
+    # @codedoc_comment_block news("vm@vame_make", "2024-09-26", "1.2.0")
     # `vm@vame_make` gains `callbacks` element `lapply_pre_var_set_make`.
-    # @codedoc_comment_block news("vm@vame_make", "2024-10-26", "1.2.0")
+    # @codedoc_comment_block news("vm@vame_make", "2024-09-26", "1.2.0")
     # @codedoc_comment_block vm@vame_make
     #   * Calls `callbacks[["lapply_pre_var_set_make"]](env = lapply_fun_env)`
     #     if that is defined.
@@ -884,13 +969,27 @@ vame_make <- function(
       j = names(made_dt),
       value = made_dt
     )
-  })
+    meta <- attr(made_dt, "var_set_make_meta")
+    list_col_nms <- setdiff(names(meta), "id")
+    meta[list_col_nms] <- lapply(meta[list_col_nms], list)
+    return(meta)
+  }))
   data.table::set(data[["df"]], j = df_start_col_nms, value = NULL)
 
+  # @codedoc_comment_block news("vm@vame_make", "2024-10-02", "1.3.0")
+  # `vm@vame_make` now sets the attribute `vame_make_meta` on its output.
+  # @codedoc_comment_block news("vm@vame_make", "2024-10-02", "1.3.0")
   # @codedoc_comment_block vm@vame_make
   # - Returns a `data.table` containing the columns created by the `maker`s,
   #   i.e. `data[["df"]]` without the original columns.
+  #   The `vame_make_meta` attribute is set as a `data.table` containing the
+  #   columns `id`, `var_nms`, and `dep_var_nm_set` in the order of execution.
   # @codedoc_comment_block vm@vame_make
+  data.table::setattr(
+    data[["df"]],
+    "vame_make_meta",
+    vame_make_meta_dt
+  )
   return(data[["df"]][])
 }
 
@@ -1375,10 +1474,10 @@ var_set_value_space_sample <- function(
   # `vm@var_set_value_space_sample` now has new arg `data`. Pass your data via
   # `data` when you have a conditional sampling method.
   # @codedoc_comment_block news("vm@var_set_value_space_sample", "2024-02-23", "0.4.0")
-  # @codedoc_comment_block news("vm@var_set_value_space_sample", "2024-10-16", "1.1.0")
+  # @codedoc_comment_block news("vm@var_set_value_space_sample", "2024-09-16", "1.1.0")
   # `vm@var_set_value_space_sample` object `x` passed to the `sampler` renamed
   # to `vm`. It is the `VariableMetadata` object itself.
-  # @codedoc_comment_block news("vm@var_set_value_space_sample", "2024-10-16", "1.1.0")
+  # @codedoc_comment_block news("vm@var_set_value_space_sample", "2024-09-16", "1.1.0")
   # @codedoc_comment_block feature_process(random sampling)
   # - The following variables are collected for use by the `sampler`:
   #   * `n`: The argument

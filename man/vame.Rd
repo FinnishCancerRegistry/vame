@@ -74,6 +74,24 @@ in a special way so that the \code{data} assertion is not performed.
 
 \section{News}{
 
+\subsection{News for version 1.3.0}{
+\subsection{vm@vame_make}{
+
+\code{vm@vame_make} now sets the attribute \code{vame_make_meta} on its output.
+}
+
+\subsection{vm@var_set_make}{
+
+\code{vm@var_set_make} now sets attribute \code{var_set_make_meta} on its output.
+}
+
+\subsection{vm@var_set_maker_get_dep_var_nm_sets}{
+
+New function \code{vm@var_set_maker_get_dep_var_nm_sets}.
+}
+
+}
+
 \subsection{News for version 1.2.0}{
 \subsection{vm@vame_make}{
 

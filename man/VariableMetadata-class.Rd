@@ -340,7 +340,9 @@ If \code{maker[["maker"]] == "aggregate"}, we use an internally defined
 expression that uses \code{vm@var_aggregate}.
 Else \code{maker[["maker"]]} must be an R expression. In both cases the
 expression is evaluated in the evaluation environment.
-\item The \code{data.table} resulting from the \code{maker} call is returned as-is.
+\item The \code{data.table} resulting from the \code{maker} call is returned after
+setting the \code{var_set_make_meta} attribute as a list containing the
+elements \code{id}, \code{var_nms}, and \code{dep_var_nm_set}.
 }
 
 \emph{Usage}
@@ -389,6 +391,62 @@ Environment where a value space will be evaluated, if applicable.
 \item \code{environment}: Use this environment.
 }}
 
+\item{\code{var_set_maker_get_dep_var_nm_sets}}{\emph{Description}
+
+\emph{Usage}
+
+\code{vm@var_set_maker_get_dep_var_nm_sets(id)}
+
+\emph{Arguments}
+
+id \verb{[any]} (no default)
+
+ID, or "name", of a variable set. The class of \code{id} is defined when you
+create the \code{VariableMetadata} object and it can be pretty much anything.
+
+\emph{Examples}
+
+\if{html}{\out{<div class="sourceCode">}}\preformatted{vm <- vame::VariableMetadata(
+  var_dt = data.table::data.table(
+    var_nm = c("a", "b")
+  ),
+  var_set_dt = data.table::data.table(
+    id = c("a_set", "b_set"),
+    var_nm_set = list(a_set = "a", b_set = "b"),
+    maker = list(
+      a_set = list(
+        dep_var_nm_sets = list(
+          "b",
+          "c"
+        ),
+        maker = quote(\{
+          if (identical(dep_var_nm_set, "b")) \{
+            out <- b + 1L
+          \} else if (identical(dep_var_nm_set, "c")) \{
+            out <- c - 1L
+          \}
+          return(data.table::data.table(a = out)[])
+        \})
+      ),
+      b_set = list(
+        dep_var_nm_set = "b_dep",
+        maker = quote(\{data.table::data.table(b = b_dep + 1L)\})
+      )
+    )
+  )
+)
+stopifnot(
+  identical(
+    vm@var_set_maker_get_dep_var_nm_sets(id = "a_set"),
+    vm@var_set_maker_get(id = "a_set")[["dep_var_nm_sets"]]
+  ),
+  identical(
+    vm@var_set_maker_get_dep_var_nm_sets(id = "b_set"),
+    list(vm@var_set_maker_get(id = "b_set")[["dep_var_nm_set"]])
+  )
+)
+}\if{html}{\out{</div>}}}
+
 \item{\code{vame_make}}{\emph{Description}
 
 Call multiple \code{var_set_dt$maker}s in sequence. Performs these steps:
@@ -419,6 +477,8 @@ in subsequent calls to \code{vm@var_set_make}.
 }
 \item Returns a \code{data.table} containing the columns created by the \code{maker}s,
 i.e. \code{data[["df"]]} without the original columns.
+The \code{vame_make_meta} attribute is set as a \code{data.table} containing the
+columns \code{id}, \code{var_nms}, and \code{dep_var_nm_set} in the order of execution.
 }
 
 \emph{Usage}
@@ -1731,10 +1791,26 @@ vm <- vame::VariableMetadata(
     )
   )
 )
-stopifnot(identical(
-  vm@var_set_make(var_nms = "a", data = list(b = 0L)),
-  vm@var_set_make(var_nms = "a", data = list(c = 2L)),
-))
+obs_b_1 <- vm@var_set_make(var_nms = "a", data = list(b = 0L))
+obs_c <- vm@var_set_make(var_nms = "a", data = list(c = 2L))
+obs_b_2 <- vm@vame_make(var_nms = "a", data = data.frame(b = 0L))
+stopifnot(
+  all.equal(obs_b_1, obs_b_2, check.attributes = FALSE),
+  all.equal(obs_b_1, obs_c, check.attributes = FALSE),
+  identical(
+    attr(obs_b_1, "var_set_make_meta"),
+    list(id = "a_set", var_nms = "a", dep_var_nm_set = "b")
+  ),
+  all.equal(
+    attr(obs_b_2, "vame_make_meta"),
+    data.table::data.table(
+      id = "a_set",
+      var_nms = list("a"),
+      dep_var_nm_set = list("b")
+    ),
+    check.attributes = FALSE
+  )
+)
 }\if{html}{\out{</div>}}
 
 The following functions are related to this feature:
@@ -1949,6 +2025,16 @@ The following functions are part of this feature:
 \item \code{vm@vame_category_space_dt_list}
 \item \code{vm@vame_category_space_dt}
 }
+}
+
+\section{News for version 1.3.0}{
+
+
+\code{vm@vame_make} now sets the attribute \code{vame_make_meta} on its output.
+
+\code{vm@var_set_make} now sets attribute \code{var_set_make_meta} on its output.
+
+New function \code{vm@var_set_maker_get_dep_var_nm_sets}.
 }
 
 \section{News for version 1.2.0}{
@@ -2804,10 +2890,65 @@ vm <- vame::VariableMetadata(
     )
   )
 )
-stopifnot(identical(
-  vm@var_set_make(var_nms = "a", data = list(b = 0L)),
-  vm@var_set_make(var_nms = "a", data = list(c = 2L)),
-))
+obs_b_1 <- vm@var_set_make(var_nms = "a", data = list(b = 0L))
+obs_c <- vm@var_set_make(var_nms = "a", data = list(c = 2L))
+obs_b_2 <- vm@vame_make(var_nms = "a", data = data.frame(b = 0L))
+stopifnot(
+  all.equal(obs_b_1, obs_b_2, check.attributes = FALSE),
+  all.equal(obs_b_1, obs_c, check.attributes = FALSE),
+  identical(
+    attr(obs_b_1, "var_set_make_meta"),
+    list(id = "a_set", var_nms = "a", dep_var_nm_set = "b")
+  ),
+  all.equal(
+    attr(obs_b_2, "vame_make_meta"),
+    data.table::data.table(
+      id = "a_set",
+      var_nms = list("a"),
+      dep_var_nm_set = list("b")
+    ),
+    check.attributes = FALSE
+  )
+)
+vm <- vame::VariableMetadata(
+  var_dt = data.table::data.table(
+    var_nm = c("a", "b")
+  ),
+  var_set_dt = data.table::data.table(
+    id = c("a_set", "b_set"),
+    var_nm_set = list(a_set = "a", b_set = "b"),
+    maker = list(
+      a_set = list(
+        dep_var_nm_sets = list(
+          "b",
+          "c"
+        ),
+        maker = quote({
+          if (identical(dep_var_nm_set, "b")) {
+            out <- b + 1L
+          } else if (identical(dep_var_nm_set, "c")) {
+            out <- c - 1L
+          }
+          return(data.table::data.table(a = out)[])
+        })
+      ),
+      b_set = list(
+        dep_var_nm_set = "b_dep",
+        maker = quote({data.table::data.table(b = b_dep + 1L)})
+      )
+    )
+  )
+)
+stopifnot(
+  identical(
+    vm@var_set_maker_get_dep_var_nm_sets(id = "a_set"),
+    vm@var_set_maker_get(id = "a_set")[["dep_var_nm_sets"]]
+  ),
+  identical(
+    vm@var_set_maker_get_dep_var_nm_sets(id = "b_set"),
+    list(vm@var_set_maker_get(id = "b_set")[["dep_var_nm_set"]])
+  )
+)
 # random sampling
 c_lo <- as.Date("2001-01-01")
 c_hi <- as.Date("2020-12-31")
