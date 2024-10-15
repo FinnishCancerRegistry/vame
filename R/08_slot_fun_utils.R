@@ -146,7 +146,8 @@ handle_arg_ids_et_var_nms_inplace__ <- function(
   ids_arg_nm = "ids",
   var_nms_arg_nm = "var_nms",
   required_meta_nms = NULL,
-  require_meta_style = "and"
+  require_meta_style = "and",
+  n_max_ids = NULL
 ) {
   calling_env <- parent.frame(1L)
   dbc::assert_prod_interim_is(
@@ -158,7 +159,7 @@ handle_arg_ids_et_var_nms_inplace__ <- function(
   )
   dbc::assert_prod_input_atom_is_in_set(
     require_meta_style,
-    set = c("or", "and")
+    set = c("or", "and", "multi_or", "multi_and")
   )
   ids <- calling_env[[ids_arg_nm]]
   var_nms <- calling_env[[var_nms_arg_nm]]
@@ -184,34 +185,90 @@ handle_arg_ids_et_var_nms_inplace__ <- function(
   if (is.null(ids) && is.null(var_nms)) {
     stop("Both `ids` and `var_nms` cannot be `NULL`")
   } else if (!is.null(var_nms) && is.null(ids)) {
-    ids <- all_ids[vapply(
+    is_usable_id <- vapply(
       seq_along(all_ids),
       function(i) {
         any(all_var_nm_sets[[i]] %in% var_nms)
       },
       logical(1L)
-    )]
-    if (is.null(required_meta_nms)) {
-      condition <- rep(TRUE, length(ids))
-    } else {
-      condition <- vapply(ids, function(id) {
-        test_results <- vapply(
+    )
+    ids <- all_ids[is_usable_id]
+    if (!is.null(required_meta_nms)) {
+      found_meta_nms_by_id <- lapply(ids, function(id) {
+        required_meta_nms[vapply(
           required_meta_nms,
           function(rmn) {
             var_set_meta_is_defined(vm = vm, id = id, meta_nm = rmn)
           },
           logical(1L)
-        )
-        if (require_meta_style == "or") {
-          out <- any(test_results)
-        } else {
-          out <- all(test_results)
+        )]
+      })
+      n_found_meta_nms_by_id <- vapply(
+        found_meta_nms_by_id,
+        length,
+        integer(1L)
+      )
+      dt <- data.table::data.table(
+        id = rep(ids, times = n_found_meta_nms_by_id),
+        meta_nm = unlist(found_meta_nms_by_id),
+        var_nm_set_length = rep(vapply(
+          all_var_nm_sets[is_usable_id],
+          length,
+          integer(1L)
+        ), times = n_found_meta_nms_by_id)
+      )
+      if (require_meta_style %in% c("and", "multi_and")) {
+        good_ids <- ids[n_found_meta_nms_by_id == length(required_meta_nms)]
+        dt <- dt[dt[["id"]] %in% good_ids, ]
+        if (nrow(dt) == 0) {
+          stop("Could not determine `ids`: No variable set has all required ",
+               "metadata `", deparse1(required_meta_nms), "`")
         }
-        return(out)
-      }, logical(1L))
+      }
+      if (!is.null(n_max_ids)) {
+        # @codedoc_comment_block news("vame", "2024-10-14", "1.3.1")
+        # All functions that auto-infer `id`/`ids` which require multiple
+        # metadata for the `id` now makes use of the preference defined in the
+        # function. For instance, requiring an `id` to have either `sampler` or
+        # `value_space` now causes the `id` value with `sampler` defined to
+        # be preferred even if a separate one has `value_space`.
+        # @codedoc_comment_block news("vame", "2024-10-14", "1.3.1")
+        data.table::set(
+          dt,
+          j = "meta_preference_order",
+          value = data.table::chmatch(
+            dt[["meta_nm"]],
+            required_meta_nms
+          )
+        )
+        data.table::setkeyv(
+          dt,
+          c("id", "meta_preference_order", "var_nm_set_length")
+        )
+        dt <- dt[
+          i = cumsum(!duplicated(dt[["id"]])) <= n_max_ids,
+          #' @importFrom data.table .SD
+          j = .SD,
+          .SDcols = c("id", "meta_nm", "var_nm_set_length")
+        ]
+      }
+      ids <- switch(
+        require_meta_style,
+        multi_or = dt,
+        multi_and = dt,
+        or = unique(dt[["id"]]),
+        and = unique(dt[["id"]])
+      )
     }
-    ids <- ids[condition]
-    miss_var_nms <- setdiff(var_nms, unlist(all_var_nm_sets[ids]))
+    id_idx <- if (data.table::is.data.table(ids)) {
+      match(ids[["id"]], all_ids)
+    } else {
+      match(ids, all_ids)
+    }
+    miss_var_nms <- setdiff(
+      var_nms,
+      unlist(all_var_nm_sets[id_idx])
+    )
     if (length(miss_var_nms) > 0) {
       # @codedoc_comment_block news("vame", "2024-06-19", "0.5.3")
       # Fixed an extra comma in a function call when
@@ -220,15 +277,15 @@ handle_arg_ids_et_var_nms_inplace__ <- function(
       # @codedoc_comment_block news("vame", "2024-06-19", "0.5.3")
       msg <- paste0(
         "`ids` was `NULL` and `var_nms` was used to infer the `ids`. ",
-        "However, a variable set was not possible to detect for the ",
+        "However, there was no applicable variable set for the ",
         "following `var_nms`: ", deparse1(miss_var_nms), "."
       )
       if (!is.null(required_meta_nms)) {
         msg <- paste0(
           msg,
-          " This problem has likely occurred because no `var_set_dt$",
-          required_meta_nms, "` was defined for the variable set(s) which ",
-          "contain the variable names listed above."
+          " This problem has likely occurred because not all of the metadata `",
+          deparse1(required_meta_nms), "` was defined for the variable set(s) ",
+          "which contain the variable names listed above."
         )
       }
       stop(msg)
@@ -240,11 +297,11 @@ handle_arg_ids_et_var_nms_inplace__ <- function(
     var_nms <- unname(unlist(all_var_nm_sets[match(ids, all_ids)]))
   } else {
     inferred_var_nms <- unlist(all_var_nm_sets[match(ids, all_ids)])
-    extra_var_nms <- setdiff(var_nms, inferred_var_nms)
-    if (length(extra_var_nms) > 0) {
+    idless_var_nms <- setdiff(var_nms, inferred_var_nms)
+    if (length(idless_var_nms) > 0) {
       stop("Arguments `ids` and `var_nms` are incongruent: `var_nms` contains ",
            "these variable names not found in any of the variable name sets ",
-           "for the supplied `ids`: ", deparse1(extra_var_nms))
+           "for the supplied `ids`: ", deparse1(idless_var_nms))
     }
   }
   calling_env[[ids_arg_nm]] <- ids

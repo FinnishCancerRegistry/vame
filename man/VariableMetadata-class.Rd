@@ -684,7 +684,8 @@ Take \code{n} random samples from the value space of \code{id}.
 
 Random sampling is performed as follows:
 \itemize{
-\item \code{vm@var_set_value_space_eval} is called for the appropriate value space
+\item Object \code{vs} is created by calling \code{vm@var_set_value_space_eval},
+if \code{value_space} is defined for the \code{id}. Else \code{vs} will be \code{NULL}.
 \item The appropriate \code{sampler} is retrieved --- this is either the
 corresponding
 sampler stored in \code{var_set_dt$sampler}, or if no sampler exists there,
@@ -706,7 +707,7 @@ replacement from \code{lo:hi} if \code{storage.mode(lo) == "integer"}.
 \itemize{
 \item \code{n}: The argument
 \item \code{vm}: The \code{VariableMetadata} object itself
-\item \code{vs}: The evaluated \code{value_space} object
+\item \code{vs}: The evaluated \code{value_space} object (\code{NULL} if none found)
 \item \code{data}: The argument after handling --- useful for conditional sampling
 \item \code{id}: The argument after handling
 \item \code{var_nms}: The argument after handling
@@ -1892,7 +1893,8 @@ is available.
 
 Random sampling is performed as follows:
 \itemize{
-\item \code{vm@var_set_value_space_eval} is called for the appropriate value space
+\item Object \code{vs} is created by calling \code{vm@var_set_value_space_eval},
+if \code{value_space} is defined for the \code{id}. Else \code{vs} will be \code{NULL}.
 \item The appropriate \code{sampler} is retrieved --- this is either the
 corresponding
 sampler stored in \code{var_set_dt$sampler}, or if no sampler exists there,
@@ -1914,7 +1916,7 @@ replacement from \code{lo:hi} if \code{storage.mode(lo) == "integer"}.
 \itemize{
 \item \code{n}: The argument
 \item \code{vm}: The \code{VariableMetadata} object itself
-\item \code{vs}: The evaluated \code{value_space} object
+\item \code{vs}: The evaluated \code{value_space} object (\code{NULL} if none found)
 \item \code{data}: The argument after handling --- useful for conditional sampling
 \item \code{id}: The argument after handling
 \item \code{var_nms}: The argument after handling
@@ -2025,6 +2027,19 @@ The following functions are part of this feature:
 \item \code{vm@vame_category_space_dt_list}
 \item \code{vm@vame_category_space_dt}
 }
+}
+
+\section{News for version 1.3.1}{
+
+
+\code{vm@vame_value_space_sample} arg \code{ids} auto-inference now only finds
+\code{ids} which have either \code{sampler} or \code{value_space}.
+
+\code{vm@vame_value_space_sample_default} arg \code{ids} auto-inference now only finds
+\code{ids} which have either \code{sampler} or \code{value_space}.
+
+\code{vm@var_set_value_space_sample} arg \code{id} auto-inference now only finds
+one \code{id} which has either \code{sampler} or \code{value_space}.
 }
 
 \section{News for version 1.3.0}{
@@ -3073,6 +3088,64 @@ stopifnot(
   identical(c("a", "d", "b", "c"), names(vame_sample)),
   nrow(vame_sample) == 10,
   vame_sample[["c"]] < vame_sample[["a"]]
+)
+
+# You may sometimes want to write the `sampler` and `value_space` in
+# separate variable sets for the same variable.
+my_vm <- vame::VariableMetadata(
+  var_dt = data.table::data.table(var_nm = c("a", "b")),
+  var_set_dt = data.table::data.table(
+    id = c("a_sampler", "ab_value_space"),
+    var_nm_set = list("a", c("a", "b")),
+    value_space = list(
+      NULL,
+      list(
+        dt = data.table::data.table(a = 0:5)[
+          j = list(b = .SD[["a"]]:5L),
+          .SDcols = "a",
+          keyby = "a"
+        ][]
+      )
+    ),
+    sampler = list(
+      list(
+        dep_var_nm_set = "b",
+        sampler = quote({
+          pdt <- data.table::data.table(
+            a = 0:5,
+            p = 0:5 + 1
+          )
+          n # must be used in expression, in this case not useful
+          out <- vapply(
+            data[["b"]],
+            function(b_value) {
+              pdt[
+                i = pdt[["a"]] <= b_value,
+                j = sample(.SD[["a"]], size = 1L, prob = .SD[["p"]]),
+                .SDcols = c("a", "p")
+              ]
+            },
+            integer(1L)
+          )
+          out <- data.table::setDT(list(a = out))
+          return(out[])
+        })
+      ),
+      NULL
+    )
+  )
+)
+# `sampler` is used, not a default sampler on `value_space`.
+RNGversion("4.0.0")
+set.seed(1337)
+a_sample <- my_vm@var_set_value_space_sample(
+  var_nms = "a",
+  n = 1e6L,
+  data = data.table::data.table(b = rep(5L, 1e6))
+)
+a_sample_distribution <- table(a_sample[["a"]])
+stopifnot(
+  a_sample_distribution[1] < a_sample_distribution[6]
 )
 vm <- vame::VariableMetadata(
   var_dt = data.table::data.table(

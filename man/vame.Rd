@@ -74,6 +74,36 @@ in a special way so that the \code{data} assertion is not performed.
 
 \section{News}{
 
+\subsection{News for version 1.3.1}{
+\subsection{vame}{
+
+All functions that auto-infer \code{id}/\code{ids} which require multiple
+metadata for the \code{id} now makes use of the preference defined in the
+function. For instance, requiring an \code{id} to have either \code{sampler} or
+\code{value_space} now causes the \code{id} value with \code{sampler} defined to
+be preferred even if a separate one has \code{value_space}.
+}
+
+\subsection{vm@vame_value_space_sample}{
+
+\code{vm@vame_value_space_sample} arg \code{ids} auto-inference now only finds
+\code{ids} which have either \code{sampler} or \code{value_space}.
+}
+
+\subsection{vm@vame_value_space_sample_default}{
+
+\code{vm@vame_value_space_sample_default} arg \code{ids} auto-inference now only finds
+\code{ids} which have either \code{sampler} or \code{value_space}.
+}
+
+\subsection{vm@var_set_value_space_sample}{
+
+\code{vm@var_set_value_space_sample} arg \code{id} auto-inference now only finds
+one \code{id} which has either \code{sampler} or \code{value_space}.
+}
+
+}
+
 \subsection{News for version 1.3.0}{
 \subsection{vm@vame_make}{
 

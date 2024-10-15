@@ -808,7 +808,10 @@ vame_make <- function(
   # @codedoc_comment_block vm@vame_make
   # - Infers `ids` to use if user gave `var_nms` but not `ids` and vice versa.
   # @codedoc_comment_block vm@vame_make
-  handle_arg_ids_et_var_nms_inplace__(vm = vm, required_meta_nms = "maker")
+  handle_arg_ids_et_var_nms_inplace__(
+    vm = vm,
+    required_meta_nms = "maker"
+  )
   dbc::assert_has_one_of_classes(env, classes = c("NULL", "environment"))
   if (is.null(env)) {
     env <- parent.frame(1L)
@@ -1396,6 +1399,64 @@ var_set_value_space_sample <- function(
   #   nrow(vame_sample) == 10,
   #   vame_sample[["c"]] < vame_sample[["a"]]
   # )
+  #
+  # # You may sometimes want to write the `sampler` and `value_space` in
+  # # separate variable sets for the same variable.
+  # my_vm <- vame::VariableMetadata(
+  #   var_dt = data.table::data.table(var_nm = c("a", "b")),
+  #   var_set_dt = data.table::data.table(
+  #     id = c("a_sampler", "ab_value_space"),
+  #     var_nm_set = list("a", c("a", "b")),
+  #     value_space = list(
+  #       NULL,
+  #       list(
+  #         dt = data.table::data.table(a = 0:5)[
+  #           j = list(b = .SD[["a"]]:5L),
+  #           .SDcols = "a",
+  #           keyby = "a"
+  #         ][]
+  #       )
+  #     ),
+  #     sampler = list(
+  #       list(
+  #         dep_var_nm_set = "b",
+  #         sampler = quote({
+  #           pdt <- data.table::data.table(
+  #             a = 0:5,
+  #             p = 0:5 + 1
+  #           )
+  #           n # must be used in expression, in this case not useful
+  #           out <- vapply(
+  #             data[["b"]],
+  #             function(b_value) {
+  #               pdt[
+  #                 i = pdt[["a"]] <= b_value,
+  #                 j = sample(.SD[["a"]], size = 1L, prob = .SD[["p"]]),
+  #                 .SDcols = c("a", "p")
+  #               ]
+  #             },
+  #             integer(1L)
+  #           )
+  #           out <- data.table::setDT(list(a = out))
+  #           return(out[])
+  #         })
+  #       ),
+  #       NULL
+  #     )
+  #   )
+  # )
+  # # `sampler` is used, not a default sampler on `value_space`.
+  # RNGversion("4.0.0")
+  # set.seed(1337)
+  # a_sample <- my_vm@var_set_value_space_sample(
+  #   var_nms = "a",
+  #   n = 1e6L,
+  #   data = data.table::data.table(b = rep(5L, 1e6))
+  # )
+  # a_sample_distribution <- table(a_sample[["a"]])
+  # stopifnot(
+  #   a_sample_distribution[1] < a_sample_distribution[6]
+  # )
   # @codedoc_comment_block feature_example(random sampling)
 
   # @codedoc_comment_block news("vm@var_set_value_space_sample", "2023-12-11", "0.2.2")
@@ -1421,12 +1482,17 @@ var_set_value_space_sample <- function(
   # You can supply either `id` or `var_nms` and the other one is inferred,
   # if `NULL`.
   # @codedoc_comment_block news("vm@var_set_value_space_sample", "2024-07-01", "0.5.3")
+  # @codedoc_comment_block news("vm@var_set_value_space_sample", "2024-10-14", "1.3.1")
+  # `vm@var_set_value_space_sample` arg `id` auto-inference now only finds
+  # one `id` which has either `sampler` or `value_space`.
+  # @codedoc_comment_block news("vm@var_set_value_space_sample", "2024-10-14", "1.3.1")
   handle_arg_ids_et_var_nms_inplace__(
-    required_meta_nms = c("value_space", "sampler"),
+    required_meta_nms = c("sampler", "value_space"),
     require_meta_style = "or",
     ids_arg_nm = "id",
     var_nms_arg_nm = "var_nms",
-    vm = vm
+    vm = vm,
+    n_max_ids = 1L
   )
   dbc::assert_has_one_of_classes(
     env,
@@ -1445,14 +1511,18 @@ var_set_value_space_sample <- function(
   # @codedoc_comment_block feature_process(random sampling)
   # Random sampling is performed as follows:
   #
-  # - `vm@var_set_value_space_eval` is called for the appropriate value space
+  # - Object `vs` is created by calling `vm@var_set_value_space_eval`,
+  #   if `value_space` is defined for the `id`. Else `vs` will be `NULL`.
   # @codedoc_comment_block feature_process(random sampling)
-  vs <- var_set_value_space_eval(
-    vm = vm,
-    id = id,
-    env = env,
-    var_nms = var_nms
-  )
+  vs <- NULL
+  if (var_set_meta_is_defined(vm = vm, id = id, meta_nm = "value_space")) {
+    vs <- var_set_value_space_eval(
+      vm = vm,
+      id = id,
+      env = env,
+      var_nms = var_nms
+    )
+  }
 
   # @codedoc_comment_block feature_process(random sampling)
   # - The appropriate `sampler` is retrieved --- this is either the
@@ -1461,9 +1531,12 @@ var_set_value_space_sample <- function(
   #   one of the defaults depending on the type of the value space:
   # @codedoc_insert_comment_block defaults(var_set_dt$sampler)
   # @codedoc_comment_block feature_process(random sampling)
-  if (var_set_meta_is_defined(vm, id = id, meta_nm = "sampler")) {
+  if (var_set_meta_is_defined(vm = vm, id = id, meta_nm = "sampler")) {
     sampler <- var_set_value_space_sampler_get(vm, id = id)
     assert_is_value_space_sampler(sampler, assertion_type = "general")
+  } else if (is.null(vs)) {
+    stop("No `sampler` nor `value_space` defined for `id = ", deparse1(id),
+         "`. At least one of them must be defined for sampling.")
   } else {
     sampler <- get_value_space_type_fun__(
       value_space_type = names(vs),
@@ -1482,7 +1555,7 @@ var_set_value_space_sample <- function(
   # - The following variables are collected for use by the `sampler`:
   #   * `n`: The argument
   #   * `vm`: The `VariableMetadata` object itself
-  #   * `vs`: The evaluated `value_space` object
+  #   * `vs`: The evaluated `value_space` object (`NULL` if none found)
   #   * `data`: The argument after handling --- useful for conditional sampling
   #   * `id`: The argument after handling
   #   * `var_nms`: The argument after handling
@@ -2813,11 +2886,19 @@ vame_value_space_sample <- function(
   # @codedoc_comment_block feature_funs(random sampling)
   # - `vm@vame_value_space_sample`
   # @codedoc_comment_block feature_funs(random sampling)
-  
+
   # @codedoc_comment_block news("vm@vame_value_space_sample", "2024-02-27", "0.4.0")
   # `vm@vame_value_space_sample` gains arguments `ids` and `data`.
   # @codedoc_comment_block news("vm@vame_value_space_sample", "2024-02-27", "0.4.0")
-  handle_arg_ids_et_var_nms_inplace__(vm)
+  # @codedoc_comment_block news("vm@vame_value_space_sample", "2024-10-14", "1.3.1")
+  # `vm@vame_value_space_sample` arg `ids` auto-inference now only finds
+  # `ids` which have either `sampler` or `value_space`.
+  # @codedoc_comment_block news("vm@vame_value_space_sample", "2024-10-14", "1.3.1")
+  handle_arg_ids_et_var_nms_inplace__(
+    vm,
+    required_meta_nms = c("sampler", "value_space"),
+    require_meta_style = "or"
+  )
   dbc::assert_has_one_of_classes(
     env,
     classes = c("NULL", "environment")
@@ -2901,8 +2982,14 @@ vame_value_space_sample_default <- function(
   # @codedoc_comment_block news("vm@vame_value_space_sample_default", "2024-02-27", "0.4.0")
   # `vm@vame_value_space_sample_default` gains arguments `ids` and `data`.
   # @codedoc_comment_block news("vm@vame_value_space_sample_default", "2024-02-27", "0.4.0")
+  # @codedoc_comment_block news("vm@vame_value_space_sample_default", "2024-10-14", "1.3.1")
+  # `vm@vame_value_space_sample_default` arg `ids` auto-inference now only finds
+  # `ids` which have either `sampler` or `value_space`.
+  # @codedoc_comment_block news("vm@vame_value_space_sample_default", "2024-10-14", "1.3.1")
   handle_arg_ids_et_var_nms_inplace__(
-    vm = vm
+    vm = vm,
+    required_meta_nms = c("sampler", "value_space"),
+    require_meta_style = "or"
   )
   data <- handle_arg_data__(data)
   dbc::assert_has_one_of_classes(
