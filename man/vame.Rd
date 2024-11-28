@@ -27,49 +27,6 @@ particular see the examples.
   ref = readline("enter latest tag on github: ")
 )
 }\if{html}{\out{</div>}}
-\subsection{TODO}{
-\subsection{Priority: high}{
-\subsection{Type: feat}{
-
-\code{vm@vame_category_space_dt}:
-
-\code{vm@var_set_make} can be used in place of \code{vm@var_set_value_space_eval}
-(or maybe \code{vm@var_set_value_space_eval} can call \code{vm@var_set_make})
-in the case of categorical variables when
-multiple columns are requested AND the necessary data is available from
-other value spaces. Currently in v0.3.0.16 it is necessary to have ALL
-dependent variables in one \code{value_space} to show the dependency in the
-output of at least \code{vm@vame_category_space_dt}. The downside is the
-potential slowdown.
-
-Maybe there needs to be a smart system, or user-input-based system, of
-knowing which variable sets depend on what other variable sets. For instance
-the user can include column \code{var_set_dt$dep_id_set}.
-}
-
-}
-
-\subsection{Priority: low}{
-\subsection{Type: feat}{
-
-\code{vm@var_set_value_space_sample}:
-
-The issue of dependent variables
-appears in both \code{sampler} and \code{maker} objects. It could be argued that
-they should be required to have the same set of dependent variables. This
-would mean improving the corresponding assertion functions. Alternatively,
-a new column \code{var_set_dt$dep_var_nm_set} or even \code{var_set_dt$dep_id_set}
-could be implemented --- but currently \code{sampler} objects can also sample
-independently, so implmenting e.g. \code{var_set_dt$dep_id_set} would require
-that independent samplers can still work. Currently in 0.3.0.15 using
-\code{dep_var_nm_set} in \code{sampler} causes \code{data} to be asserted to contain
-such variables. Maybe an independent \code{sampler} would need to be marked
-in a special way so that the \code{data} assertion is not performed.
-}
-
-}
-
-}
 }
 
 \section{News}{

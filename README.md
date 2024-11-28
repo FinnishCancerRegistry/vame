@@ -30,42 +30,4 @@ devtools::install_github(
 )
 ```
 
-## TODO
-
-### Priority: high
-
-#### Type: feat
-
-`vm@vame_category_space_dt`:
-
-`vm@var_set_make` can be used in place of `vm@var_set_value_space_eval`
-(or maybe `vm@var_set_value_space_eval` can call `vm@var_set_make`)
-in the case of categorical variables when
-multiple columns are requested AND the necessary data is available from
-other value spaces. Currently in v0.3.0.16 it is necessary to have ALL
-dependent variables in one `value_space` to show the dependency in the
-output of at least `vm@vame_category_space_dt`. The downside is the
-potential slowdown.
-
-Maybe there needs to be a smart system, or user-input-based system, of
-knowing which variable sets depend on what other variable sets. For instance
-the user can include column `var_set_dt$dep_id_set`.
-### Priority: low
-
-#### Type: feat
-
-`vm@var_set_value_space_sample`:
-
-The issue of dependent variables
-appears in both `sampler` and `maker` objects. It could be argued that
-they should be required to have the same set of dependent variables. This
-would mean improving the corresponding assertion functions. Alternatively,
-a new column `var_set_dt$dep_var_nm_set` or even `var_set_dt$dep_id_set`
-could be implemented --- but currently `sampler` objects can also sample
-independently, so implmenting e.g. `var_set_dt$dep_id_set` would require
-that independent samplers can still work. Currently in 0.3.0.15 using
-`dep_var_nm_set` in `sampler` causes `data` to be asserted to contain
-such variables. Maybe an independent `sampler` would need to be marked
-in a special way so that the `data` assertion is not performed.
-
 

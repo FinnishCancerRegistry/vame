@@ -107,6 +107,4 @@ doc_dev_todo__ <- function(df = NULL) {
 #   ref = readline("enter latest tag on github: ")
 # )
 # ```
-#
-# ${paste0(vame:::doc_dev_todo__(), collapse = "\n")}
 # @codedoc_comment_block R_package_description(vame)
