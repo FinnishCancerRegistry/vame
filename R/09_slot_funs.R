@@ -2698,7 +2698,6 @@ vame_subset <- function(
   return(invisible(NULL))
 }
 
-
 vame_union_append <- function(
   vm,
   vm_2
@@ -2712,10 +2711,33 @@ vame_union_append <- function(
   # @codedoc_comment_block doc_slot_fun_arg(vm_2)
   assert_is_variablemetadata(vm_2)
 
-  # @codedoc_comment_block vm@vame_union_append
-  # Append new data into `VariableMetadata` object from another.
-  # No pre-existing data are overwritten.
-  # @codedoc_comment_block vm@vame_union_append
+  # @codedoc_comment_block function_example(vm@vame_union_append)
+  # vm_1 <- vame::VariableMetadata(
+  #   var_dt = data.table::data.table(
+  #     var_nm = c("a", "b"),
+  #     my_meta = c("vm_1_a", "vm_1_b")
+  #   ),
+  #   var_set_dt = data.table::data.table(
+  #     id = "ab",
+  #     var_nm_set = list(c("a", "b"))
+  #   )
+  # )
+  # vm_2 <- vame::VariableMetadata(
+  #   var_dt = data.table::data.table(
+  #     var_nm = c("b", "c"),
+  #     my_meta = c("vm_2_b", "vm_2_c")
+  #   ),
+  #   var_set_dt = data.table::data.table(
+  #     id = "bc",
+  #     var_nm_set = list(c("b", "c"))
+  #   )
+  # )
+  # vm_1@vame_union_append(vm_2)
+  # stopifnot(
+  #   vm_1@var_meta_get(var_nm = "b", meta_nm = "my_meta") == "vm_1_b",
+  #   vm_1@var_meta_get(var_nm = "c", meta_nm = "my_meta") == "vm_2_c"
+  # )
+  # @codedoc_comment_block function_example(vm@vame_union_append)
 
   # @codedoc_comment_block news("vm@vame_union_append", "2023-07-14", "0.1.4")
   # Fixed `vame_union_append` --- used to always raise an error due to
@@ -2733,49 +2755,87 @@ vame_union_append <- function(
   # @codedoc_comment_block news("vm@vame_union_append", "2023-12-01", "0.2.0")
   # Rename `x` to `vm_2`.
   # @codedoc_comment_block news("vm@vame_union_append", "2023-12-01", "0.2.0")
+  # @codedoc_comment_block news("vm@vame_union_append", "2024-11-28", "1.4.0")
+  # `vm@vame_union_append` now adds metadata from `vm_2` into `vm` even for
+  # pre-existing variables where that particular metadata is missing in
+  # `vm`. Previously only new variables were added and pre-existing variables'
+  # metadata were untouched.
+  # @codedoc_comment_block news("vm@vame_union_append", "2024-11-28", "1.4.0")
   vd_1 <- vd_get(vm)
   vsd_1 <- vsd_get(vm)
   vd_2 <- vd_get(vm_2)
   vsd_2 <- vsd_get(vm_2)
-  vd <- data.table::data.table(
-    var_nm = sort(union(vd_1[["var_nm"]], vd_2[["var_nm"]]))
-  )
-  dt_join_assign__(
-    dt = vd,
-    i = vd_2,
-    on = "var_nm",
-    dt_col_nms = setdiff(names(vd_2), "var_nm"),
-    i_col_nms = setdiff(names(vd_2), "var_nm")
-  )
-  dt_join_assign__(
-    dt = vd,
-    i = vd_1,
-    on = "var_nm",
-    dt_col_nms = setdiff(names(vd_1), "var_nm"),
-    i_col_nms = setdiff(names(vd_1), "var_nm")
-  )
-  
-  #' @importFrom data.table .SD
-  vsd <- data.table::data.table(
-    id = union(vsd_1[["id"]], vsd_2[["id"]])
-  )
-  dt_join_assign__(
-    dt = vsd,
-    i = vsd_2,
-    on = "id",
-    dt_col_nms = setdiff(names(vsd_2), "id"),
-    i_col_nms = setdiff(names(vsd_2), "id")
-  )
-  dt_join_assign__(
-    dt = vsd,
-    i = vsd_1,
-    on = "id",
-    dt_col_nms = setdiff(names(vsd_1), "id"),
-    i_col_nms = setdiff(names(vsd_1), "id")
+  # @codedoc_comment_block vm@vame_union_append
+  # Append new data into `VariableMetadata` object from another.
+  # No pre-existing data are overwritten. Performs the following steps:
+  #
+  # - Combine `var_dt` and `var_set_dt` from `vm` and `vm_2` with `rbind`,
+  #   adding only new rows from `vm_2` metadata where `var_dt$var_nm` or
+  #   `var_set_dt$id` does not exist in `vm`.
+  # @codedoc_comment_block vm@vame_union_append
+  vd <- rbind(
+    vd_1,
+    vd_2[!vd_2[["var_nm"]] %in% vd_1[["var_nm"]], ],
+    use.names = TRUE,
+    fill = TRUE
   )
   vd_set(vm, vd)
+  vsd <- rbind(
+    vsd_1,
+    vsd_2[!vsd_2[["id"]] %in% vsd_1[["id"]], ],
+    use.names = TRUE,
+    fill = TRUE
+  )
   vsd_set(vm, vsd)
   vd_vsd_linkage_refresh(vm)
+  # @codedoc_comment_block vm@vame_union_append
+  # - Loop through all metadata in the `var_dt` of `vm_2` and add with
+  #   `vm@var_meta_set` those metadata that are not defined
+  #   (`vm@var_meta_set`).
+  # @codedoc_comment_block vm@vame_union_append
+  for (i in seq_len(nrow(vd_2))) {
+    vd_2_var_nm <- vd_2[["var_nm"]][i]
+    for (vd_2_meta_nm in setdiff(names(vd_2), "var_nm")) {
+      if (
+        vm_2@var_meta_is_defined(
+          var_nm = vd_2_var_nm, meta_nm = vd_2_meta_nm
+        ) &&
+          !vm@var_meta_is_defined(
+            var_nm = vd_2_var_nm, meta_nm = vd_2_meta_nm
+          )
+      ) {
+        vm@var_meta_set(
+          var_nm = vd_2_var_nm,
+          meta_nm = vd_2_meta_nm,
+          value = vd_2[[vd_2_meta_nm]][[i]]
+        )
+      }
+    }
+  }
+  # @codedoc_comment_block vm@vame_union_append
+  # - Perform the same loop with `var_set_dt` metadata.
+  # @codedoc_comment_block vm@vame_union_append
+  for (i in seq_len(nrow(vsd_2))) {
+    vsd_2_id <- vsd_2[["id"]][i]
+    for (vsd_2_meta_nm in setdiff(names(vsd_2), "id")) {
+      if (
+        vm_2@var_set_meta_is_defined(id = vsd_2_id, meta_nm = vsd_2_meta_nm) &&
+          !vm@var_set_meta_is_defined(id = vsd_2_id, meta_nm = vsd_2_meta_nm)
+      ) {
+        vm@var_set_meta_set(
+          id = vsd_2_id,
+          meta_nm = vsd_2_meta_nm,
+          value = vsd_2[[vsd_2_meta_nm]][[i]]
+        )
+      }
+    }
+  }
+  # @codedoc_comment_block vm@vame_union_append
+  # This results in `vm` containing new rows in its metadata tables from
+  # `vm_2` and possibly new metadata even for pre-existing rows.
+  # The function always returns `NULL` invisibly and the modifications are
+  # made into `vm` in-place.
+  # @codedoc_comment_block vm@vame_union_append
   return(invisible(NULL))
 }
 

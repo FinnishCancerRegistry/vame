@@ -1310,7 +1310,20 @@ stopifnot(
 \item{\code{vame_union_append}}{\emph{Description}
 
 Append new data into \code{VariableMetadata} object from another.
-No pre-existing data are overwritten.
+No pre-existing data are overwritten. Performs the following steps:
+\itemize{
+\item Combine \code{var_dt} and \code{var_set_dt} from \code{vm} and \code{vm_2} with \code{rbind},
+adding only new rows from \code{vm_2} metadata where \code{var_dt$var_nm} or
+\code{var_set_dt$id} does not exist in \code{vm}.
+\item Loop through all metadata in the \code{var_dt} of \code{vm_2} and add with
+\code{vm@var_meta_set} those metadata that are not defined
+(\code{vm@var_meta_set}).
+\item Perform the same loop with \code{var_set_dt} metadata.
+This results in \code{vm} containing new rows in its metadata tables from
+\code{vm_2} and possibly new metadata even for pre-existing rows.
+The function always returns \code{NULL} invisibly and the modifications are
+made into \code{vm} in-place.
+}
 
 \emph{Usage}
 
@@ -1321,7 +1334,36 @@ No pre-existing data are overwritten.
 vm_2 \verb{[VariableMetadata]} (no default)
 
 \code{VariableMetadata} object whose metadata will be appended to the current
-\code{VariableMetadata} object.}
+\code{VariableMetadata} object.
+
+\emph{Examples}
+
+\if{html}{\out{<div class="sourceCode">}}\preformatted{vm_1 <- vame::VariableMetadata(
+  var_dt = data.table::data.table(
+    var_nm = c("a", "b"),
+    my_meta = c("vm_1_a", "vm_1_b")
+  ),
+  var_set_dt = data.table::data.table(
+    id = "ab",
+    var_nm_set = list(c("a", "b"))
+  )
+)
+vm_2 <- vame::VariableMetadata(
+  var_dt = data.table::data.table(
+    var_nm = c("b", "c"),
+    my_meta = c("vm_2_b", "vm_2_c")
+  ),
+  var_set_dt = data.table::data.table(
+    id = "bc",
+    var_nm_set = list(c("b", "c"))
+  )
+)
+vm_1@vame_union_append(vm_2)
+stopifnot(
+  vm_1@var_meta_get(var_nm = "b", meta_nm = "my_meta") == "vm_1_b",
+  vm_1@var_meta_get(var_nm = "c", meta_nm = "my_meta") == "vm_2_c"
+)
+}\if{html}{\out{</div>}}}
 
 \item{\code{vame_meta_is_defined}}{\emph{Description}
 
@@ -2027,6 +2069,15 @@ The following functions are part of this feature:
 \item \code{vm@vame_category_space_dt_list}
 \item \code{vm@vame_category_space_dt}
 }
+}
+
+\section{News for version 1.4.0}{
+
+
+\code{vm@vame_union_append} now adds metadata from \code{vm_2} into \code{vm} even for
+pre-existing variables where that particular metadata is missing in
+\code{vm}. Previously only new variables were added and pre-existing variables'
+metadata were untouched.
 }
 
 \section{News for version 1.3.1}{
@@ -3261,5 +3312,30 @@ vm@vame_subset(var_dt_expr = var_nm == "a")
 stopifnot(
   identical(unname(vm@var_meta_get_all(meta_nm = "var_nm")), "a"),
   identical(names(vm@var_set_value_space_eval("set_01")[["dt"]]), "a")
+)
+vm_1 <- vame::VariableMetadata(
+  var_dt = data.table::data.table(
+    var_nm = c("a", "b"),
+    my_meta = c("vm_1_a", "vm_1_b")
+  ),
+  var_set_dt = data.table::data.table(
+    id = "ab",
+    var_nm_set = list(c("a", "b"))
+  )
+)
+vm_2 <- vame::VariableMetadata(
+  var_dt = data.table::data.table(
+    var_nm = c("b", "c"),
+    my_meta = c("vm_2_b", "vm_2_c")
+  ),
+  var_set_dt = data.table::data.table(
+    id = "bc",
+    var_nm_set = list(c("b", "c"))
+  )
+)
+vm_1@vame_union_append(vm_2)
+stopifnot(
+  vm_1@var_meta_get(var_nm = "b", meta_nm = "my_meta") == "vm_1_b",
+  vm_1@var_meta_get(var_nm = "c", meta_nm = "my_meta") == "vm_2_c"
 )
 }

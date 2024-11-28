@@ -74,6 +74,17 @@ in a special way so that the \code{data} assertion is not performed.
 
 \section{News}{
 
+\subsection{News for version 1.4.0}{
+\subsection{vm@vame_union_append}{
+
+\code{vm@vame_union_append} now adds metadata from \code{vm_2} into \code{vm} even for
+pre-existing variables where that particular metadata is missing in
+\code{vm}. Previously only new variables were added and pre-existing variables'
+metadata were untouched.
+}
+
+}
+
 \subsection{News for version 1.3.1}{
 \subsection{vame}{
 
