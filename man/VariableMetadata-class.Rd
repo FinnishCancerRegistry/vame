@@ -1235,6 +1235,37 @@ n \verb{[integer]} (default \code{1L})
 
 Number of random samples to take.}
 
+\item{\code{var_var_set_dt_pos_set_get}}{\emph{Description}
+
+Retrieve positions (indices) of where \code{var_nm} is part of
+\code{var_set_dt$var_nm_set}.
+
+\emph{Usage}
+
+\code{vm@var_var_set_dt_pos_set_get(var_nm)}
+
+\emph{Arguments}
+
+var_nm \verb{[character]} (no default)
+
+Name of a variable.}
+
+\item{\code{var_var_set_dt_id_set_get}}{\emph{Description}
+
+Retrieve \code{var_set_dt$id} values of where \code{var_nm} is part of
+\code{var_set_dt$var_nm_set}.
+
+\emph{Usage}
+
+\code{vm@var_var_set_dt_id_set_get(var_nm)}
+
+\emph{Arguments}
+
+var_nm \verb{[character]} (no default)
+
+Name of a variable.}
+
+
 \item{\code{vame_copy}}{\emph{Description}
 
 Take a deep copy of a VariableMetadata object. See \code{?data.table::copy}.
@@ -2085,6 +2116,10 @@ The following functions are part of this feature:
 \code{vm@var_set_meta_is_defined} now also accepts \code{id = NULL}. Then
 \code{vm@var_set_meta_is_defined} tests whether \code{meta_nm} is a column name of
 \code{var_set_dt}.
+
+New function \code{vm@var_var_set_dt_id_set_get}.
+
+New function \code{vm@var_var_set_dt_pos_set_get}.
 }
 
 \section{News for version 1.4.0}{

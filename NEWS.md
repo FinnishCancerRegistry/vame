@@ -13,6 +13,14 @@
 `vm@var_set_meta_is_defined` tests whether `meta_nm` is a column name of
 `var_set_dt`.
 
+### vm@var_var_set_dt_id_set_get
+
+New function `vm@var_var_set_dt_id_set_get`.
+
+### vm@var_var_set_dt_pos_set_get
+
+New function `vm@var_var_set_dt_pos_set_get`.
+
 
 ## News for version 1.4.0
 

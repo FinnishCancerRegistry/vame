@@ -46,6 +46,16 @@ particular see the examples.
 \code{var_set_dt}.
 }
 
+\subsection{vm@var_var_set_dt_id_set_get}{
+
+New function \code{vm@var_var_set_dt_id_set_get}.
+}
+
+\subsection{vm@var_var_set_dt_pos_set_get}{
+
+New function \code{vm@var_var_set_dt_pos_set_get}.
+}
+
 }
 
 \subsection{News for version 1.4.0}{

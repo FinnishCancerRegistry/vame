@@ -2610,6 +2610,37 @@ var_value_space_sample <- function(
   return(out)
 }
 
+var_var_set_dt_pos_set_get <- function(
+  vm,
+  var_nm
+) {
+  # @codedoc_comment_block vm@var_var_set_dt_pos_set_get
+  # Retrieve positions (indices) of where `var_nm` is part of
+  # `var_set_dt$var_nm_set`.
+  # @codedoc_comment_block vm@var_var_set_dt_pos_set_get
+  # @codedoc_comment_block news("vm@var_var_set_dt_pos_set_get", "2024-12-19", "1.5.0")
+  # New function `vm@var_var_set_dt_pos_set_get`.
+  # @codedoc_comment_block news("vm@var_var_set_dt_pos_set_get", "2024-12-19", "1.5.0")
+  var_meta_get(vm = vm, var_nm = var_nm, meta_nm = "var_set_dt_pos_set")
+}
+
+var_var_set_dt_id_set_get <- function(
+  vm,
+  var_nm
+) {
+  # @codedoc_comment_block vm@var_var_set_dt_id_set_get
+  # Retrieve `var_set_dt$id` values of where `var_nm` is part of
+  # `var_set_dt$var_nm_set`.
+  # @codedoc_comment_block vm@var_var_set_dt_id_set_get
+  # @codedoc_comment_block news("vm@var_var_set_dt_id_set_get", "2024-12-19", "1.5.0")
+  # New function `vm@var_var_set_dt_id_set_get`.
+  # @codedoc_comment_block news("vm@var_var_set_dt_id_set_get", "2024-12-19", "1.5.0")
+  pos_set <- var_var_set_dt_pos_set_get(vm = vm, var_nm = var_nm)
+  id_set <- var_set_meta_get_all(vm = vm, meta_nm = "id")[pos_set]
+  return(id_set)
+}
+
+
 # vame funs --------------------------------------------------------------------
 vame_copy <- function(vm) {
   # @codedoc_comment_block vm@vame_copy
