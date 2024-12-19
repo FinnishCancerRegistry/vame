@@ -102,7 +102,9 @@ Returns a deep copy of \code{var_set_dt_copy}.
 
 \item{\code{var_set_meta_is_defined}}{\emph{Description}
 
-Returns \code{TRUE} if \code{var_set_dt[[meta_nm]]} exists.
+Returns \code{TRUE} if \code{var_set_dt[[meta_nm]]} has a value for a particular
+\code{id}. Unless \code{id = NULL}, then \code{vm@var_set_meta_is_defined}
+checks whether that column exists at all in \code{var_set_dt}.
 
 \emph{Usage}
 
@@ -893,7 +895,9 @@ Returns a deep copy of \code{var_dt}.
 
 \item{\code{var_meta_is_defined}}{\emph{Description}
 
-Returns \code{TRUE} if \code{var_dt[[meta_nm]]} exists.
+Returns \code{TRUE} if \code{var_dt[[meta_nm]]} exists for a particular \code{var_nm}.
+Unless \code{var_nm = NULL}, then \code{vm@var_meta_is_defined} checks whether that
+column exists in \code{var_dt} at all.
 
 \emph{Usage}
 
@@ -2069,6 +2073,18 @@ The following functions are part of this feature:
 \item \code{vm@vame_category_space_dt_list}
 \item \code{vm@vame_category_space_dt}
 }
+}
+
+\section{News for version 1.5.0}{
+
+
+
+\code{vm@var_meta_is_defined} now also allows \code{var_nm = NULL}. Then it returns
+\code{TRUE/FALSE} depending on whether \code{meta_nm} is a column name of \code{var_dt}.
+
+\code{vm@var_set_meta_is_defined} now also accepts \code{id = NULL}. Then
+\code{vm@var_set_meta_is_defined} tests whether \code{meta_nm} is a column name of
+\code{var_set_dt}.
 }
 
 \section{News for version 1.4.0}{

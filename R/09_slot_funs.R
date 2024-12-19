@@ -18,13 +18,23 @@ var_set_meta_is_defined <- function(
   meta_nm
 ) {
   # @codedoc_comment_block vm@var_set_meta_is_defined
-  # Returns `TRUE` if `var_set_dt[[meta_nm]]` exists.
+  # Returns `TRUE` if `var_set_dt[[meta_nm]]` has a value for a particular
+  # `id`. Unless `id = NULL`, then `vm@var_set_meta_is_defined`
+  # checks whether that column exists at all in `var_set_dt`.
   # @codedoc_comment_block vm@var_set_meta_is_defined
   # @codedoc_comment_block news("vm@var_set_meta_is_defined", "2023-12-12", "0.2.2")
   # New function `vm@var_set_meta_is_defined`.
   # @codedoc_comment_block news("vm@var_set_meta_is_defined", "2023-12-12", "0.2.2")
+  # @codedoc_comment_block news("vm@var_set_meta_is_defined", "2024-12-19", "1.5.0")
+  # `vm@var_set_meta_is_defined` now also accepts `id = NULL`. Then
+  # `vm@var_set_meta_is_defined` tests whether `meta_nm` is a column name of
+  # `var_set_dt`.
+  # @codedoc_comment_block news("vm@var_set_meta_is_defined", "2024-12-19", "1.5.0")
   assert_is_variablemetadata(vm)
   vsd <- vsd_get(vm)
+  if (is.null(id)) {
+    return(meta_nm %in% names(vsd))
+  }
   if (!meta_nm %in% names(vsd)) {
     return(FALSE)
   }
@@ -1915,7 +1925,9 @@ var_meta_is_defined <- function(
   meta_nm
 ) {
   # @codedoc_comment_block vm@var_meta_is_defined
-  # Returns `TRUE` if `var_dt[[meta_nm]]` exists.
+  # Returns `TRUE` if `var_dt[[meta_nm]]` exists for a particular `var_nm`.
+  # Unless `var_nm = NULL`, then `vm@var_meta_is_defined` checks whether that
+  # column exists in `var_dt` at all.
   # @codedoc_comment_block vm@var_meta_is_defined
   # @codedoc_comment_block news("vm@var_meta_is_defined", "2023-12-12", "0.2.2")
   # New function `vm@var_meta_is_defined`.
@@ -1923,8 +1935,15 @@ var_meta_is_defined <- function(
   # @codedoc_comment_block news("vm@var_meta_is_defined", "2024-01-24", "0.4.0")
   # `vm@var_meta_is_defined` internal problem fixed.
   # @codedoc_comment_block news("vm@var_meta_is_defined", "2024-01-24", "0.4.0")
-  assert_is_var_nm(vm, var_nm)
+  # @codedoc_comment_block news("vm@var_meta_is_defined", "2024-12-19", "1.5.0")
+  # `vm@var_meta_is_defined` now also allows `var_nm = NULL`. Then it returns
+  # `TRUE/FALSE` depending on whether `meta_nm` is a column name of `var_dt`.
+  # @codedoc_comment_block news("vm@var_meta_is_defined", "2024-12-19", "1.5.0")
   vd <- vd_get(vm)
+  if (is.null(var_nm)) {
+    return(meta_nm %in% names(vd))
+  }
+  assert_is_var_nm(vm, var_nm)
   pos <- data.table::chmatch(var_nm, vd[["var_nm"]])
   if (!meta_nm %in% names(vd)) {
     return(FALSE)

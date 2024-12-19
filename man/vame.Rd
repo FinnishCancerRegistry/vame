@@ -31,6 +31,23 @@ particular see the examples.
 
 \section{News}{
 
+\subsection{News for version 1.5.0}{
+
+\subsection{vm@var_meta_is_defined}{
+
+\code{vm@var_meta_is_defined} now also allows \code{var_nm = NULL}. Then it returns
+\code{TRUE/FALSE} depending on whether \code{meta_nm} is a column name of \code{var_dt}.
+}
+
+\subsection{vm@var_set_meta_is_defined}{
+
+\code{vm@var_set_meta_is_defined} now also accepts \code{id = NULL}. Then
+\code{vm@var_set_meta_is_defined} tests whether \code{meta_nm} is a column name of
+\code{var_set_dt}.
+}
+
+}
+
 \subsection{News for version 1.4.0}{
 \subsection{vm@vame_union_append}{
 
