@@ -32,6 +32,10 @@ particular see the examples.
 \section{News}{
 
 \subsection{News for version 1.5.0}{
+\subsection{vm@vame_harmonise_dt}{
+
+New function \code{vm@vame_harmonise_dt}.
+}
 
 \subsection{vm@var_meta_is_defined}{
 

@@ -1265,6 +1265,154 @@ var_nm \verb{[character]} (no default)
 
 Name of a variable.}
 
+\item{\code{vame_harmonise_dt}}{\emph{Description}
+
+Recode (via \code{maker} calls) and rename columns. Requires
+\code{var_dt$is_harmonised} to be defined. The \code{maker}s of those variables
+which have \code{is_harmonised == TRUE} determine which variables harmonise
+into the harmonised forms. See \strong{Examples}.
+
+\emph{Usage}
+
+\code{vm@vame_harmonise_dt(dt, var_nms, inplace)}
+
+\emph{Arguments}
+
+dt \verb{[data.table]}
+
+\code{data.table} object to harmonise.
+
+var_nms \verb{[NULL, character]} (default \code{NULL})
+\itemize{
+\item \code{NULL}: Try to harmonise all columns of \code{dt}.
+\item \code{character}: Harmonise these only and raise an error this fails.
+A named vector, e.g. \code{c(old = "new")}, forces a specific replacement
+of old with new regardless of \code{var_dt$is_harmonised}. Mandatory in
+(rare) instances where one variable can be harmonised into multiple
+variables that have \code{var_dt$is_harmonised} value \code{TRUE}.
+}
+
+inplace \verb{[logical]} (default \code{FALSE})
+
+If \code{FALSE}, a copy of \code{dt} is taken. If \code{FALSE}, \code{dt} is modified in-place
+without taking a copy.
+
+\emph{Examples}
+
+\if{html}{\out{<div class="sourceCode">}}\preformatted{# example of using vm@vame_harmonise_dt
+vm <- vame::VariableMetadata(
+  var_dt = data.table::data.table(
+    var_nm = c("a1", "a2", "official|A"),
+    is_harmonised = c(FALSE, FALSE, TRUE)
+  ),
+  var_set_dt = data.table::data.table(
+    id = c("a1", "a2", "official|A"),
+    var_nm_set = list("a1", "a2", "official|A"),
+    maker = list(
+      NULL,
+      NULL,
+      list(
+        dep_var_nm_sets = list("a1", "a2"),
+        maker = quote(\{
+          switch(
+            intersect(c("a1", "a2"), ls())[1],
+            a1 = data.table::data.table("official|A" = a1 + 1L),
+            a2 = data.table::data.table("official|A" = a2 + 2L)
+          )
+        \})
+      )
+    )
+  )
+)
+
+my_dt_1 <- data.table::data.table(
+  a1 = 1:2,
+  some_var = runif(2)
+)
+my_dt_1 <- vm@vame_harmonise_dt(dt = my_dt_1)
+my_dt_2 <- data.table::data.table(
+  a2 = 1:2,
+  some_var = runif(2)
+)
+my_dt_2 <- vm@vame_harmonise_dt(dt = my_dt_2)
+my_dt_3 <- data.table::data.table(
+  a1 = 1:2,
+  some_var = runif(2)
+)
+vm@vame_harmonise_dt(dt = my_dt_3, inplace = TRUE)
+
+stopifnot(
+  !"a1" \%in\% names(my_dt_1),
+  identical(names(my_dt_1), c("official|A", "some_var")),
+  my_dt_1[["official|A"]] == 2:3,
+
+  !"a2" \%in\% names(my_dt_2),
+  identical(names(my_dt_2), c("official|A", "some_var")),
+  my_dt_2[["official|A"]] == 3:4,
+
+  !"a1" \%in\% names(my_dt_3),
+  identical(names(my_dt_3), c("official|A", "some_var")),
+  my_dt_3[["official|A"]] == 2:3
+)
+
+# multiple harmonisation candidates
+vm <- vame::VariableMetadata(
+  var_dt = data.table::data.table(
+    var_nm = c("a", "official|A1", "official|A2"),
+    is_harmonised = c(FALSE, TRUE, TRUE)
+  ),
+  var_set_dt = data.table::data.table(
+    id = c("a", "official|A1", "official|A2"),
+    var_nm_set = list("a", "official|A1", "official|A2"),
+    maker = list(
+      NULL,
+      list(
+        dep_var_nm_set = "a",
+        maker = quote(\{
+          data.table::data.table("official|A1" = a + 1L)
+        \})
+      ),
+      list(
+        dep_var_nm_set = "a",
+        maker = quote(\{
+          data.table::data.table("official|A2" = a + 2L)
+        \})
+      )
+    )
+  )
+)
+
+my_dt_1 <- data.table::data.table(
+  a = 1:2,
+  some_var = runif(2)
+)
+# Error because of multiple harmonisation candidates --- cannot automatically
+# know which one to use.
+my_dt_1 <- tryCatch(
+  vm@vame_harmonise_dt(dt = my_dt_1),
+  error = function(e) e
+)
+stopifnot(
+  inherits(my_dt_1, "error")
+)
+my_dt_1 <- data.table::data.table(
+  a = 1:2,
+  some_var = runif(2)
+)
+my_dt_2 <- data.table::copy(my_dt_1)
+my_dt_1 <- vm@vame_harmonise_dt(dt = my_dt_1, var_nms = c("a" = "official|A1"))
+my_dt_2 <- vm@vame_harmonise_dt(dt = my_dt_2, var_nms = c("a" = "official|A2"))
+
+stopifnot(
+  !"a" \%in\% names(my_dt_1),
+  identical(names(my_dt_1), c("official|A1", "some_var")),
+  my_dt_1[["official|A1"]] == 2:3,
+
+  !"a" \%in\% names(my_dt_2),
+  identical(names(my_dt_2), c("official|A2", "some_var")),
+  my_dt_2[["official|A2"]] == 3:4
+)
+}\if{html}{\out{</div>}}}
 
 \item{\code{vame_copy}}{\emph{Description}
 
@@ -1897,6 +2045,7 @@ The following functions are related to this feature:
 \item \code{vm@var_set_maker_set}
 \item \code{vm@var_set_make}
 \item \code{vm@vame_make}
+\item \code{vm@vame_harmonise_dt}
 }
 
 \strong{Value spaces}
@@ -2109,6 +2258,7 @@ The following functions are part of this feature:
 \section{News for version 1.5.0}{
 
 
+New function \code{vm@vame_harmonise_dt}.
 
 \code{vm@var_meta_is_defined} now also allows \code{var_nm = NULL}. Then it returns
 \code{TRUE/FALSE} depending on whether \code{meta_nm} is a column name of \code{var_dt}.
@@ -3326,6 +3476,119 @@ stopifnot(
     ),
     "Syntymapaivamaara."
   )
+)
+# example of using vm@vame_harmonise_dt
+vm <- vame::VariableMetadata(
+  var_dt = data.table::data.table(
+    var_nm = c("a1", "a2", "official|A"),
+    is_harmonised = c(FALSE, FALSE, TRUE)
+  ),
+  var_set_dt = data.table::data.table(
+    id = c("a1", "a2", "official|A"),
+    var_nm_set = list("a1", "a2", "official|A"),
+    maker = list(
+      NULL,
+      NULL,
+      list(
+        dep_var_nm_sets = list("a1", "a2"),
+        maker = quote({
+          switch(
+            intersect(c("a1", "a2"), ls())[1],
+            a1 = data.table::data.table("official|A" = a1 + 1L),
+            a2 = data.table::data.table("official|A" = a2 + 2L)
+          )
+        })
+      )
+    )
+  )
+)
+
+my_dt_1 <- data.table::data.table(
+  a1 = 1:2,
+  some_var = runif(2)
+)
+my_dt_1 <- vm@vame_harmonise_dt(dt = my_dt_1)
+my_dt_2 <- data.table::data.table(
+  a2 = 1:2,
+  some_var = runif(2)
+)
+my_dt_2 <- vm@vame_harmonise_dt(dt = my_dt_2)
+my_dt_3 <- data.table::data.table(
+  a1 = 1:2,
+  some_var = runif(2)
+)
+vm@vame_harmonise_dt(dt = my_dt_3, inplace = TRUE)
+
+stopifnot(
+  !"a1" \%in\% names(my_dt_1),
+  identical(names(my_dt_1), c("official|A", "some_var")),
+  my_dt_1[["official|A"]] == 2:3,
+
+  !"a2" \%in\% names(my_dt_2),
+  identical(names(my_dt_2), c("official|A", "some_var")),
+  my_dt_2[["official|A"]] == 3:4,
+
+  !"a1" \%in\% names(my_dt_3),
+  identical(names(my_dt_3), c("official|A", "some_var")),
+  my_dt_3[["official|A"]] == 2:3
+)
+
+# multiple harmonisation candidates
+vm <- vame::VariableMetadata(
+  var_dt = data.table::data.table(
+    var_nm = c("a", "official|A1", "official|A2"),
+    is_harmonised = c(FALSE, TRUE, TRUE)
+  ),
+  var_set_dt = data.table::data.table(
+    id = c("a", "official|A1", "official|A2"),
+    var_nm_set = list("a", "official|A1", "official|A2"),
+    maker = list(
+      NULL,
+      list(
+        dep_var_nm_set = "a",
+        maker = quote({
+          data.table::data.table("official|A1" = a + 1L)
+        })
+      ),
+      list(
+        dep_var_nm_set = "a",
+        maker = quote({
+          data.table::data.table("official|A2" = a + 2L)
+        })
+      )
+    )
+  )
+)
+
+my_dt_1 <- data.table::data.table(
+  a = 1:2,
+  some_var = runif(2)
+)
+# Error because of multiple harmonisation candidates --- cannot automatically
+# know which one to use.
+my_dt_1 <- tryCatch(
+  vm@vame_harmonise_dt(dt = my_dt_1),
+  error = function(e) e
+)
+stopifnot(
+  inherits(my_dt_1, "error")
+)
+my_dt_1 <- data.table::data.table(
+  a = 1:2,
+  some_var = runif(2)
+)
+my_dt_2 <- data.table::copy(my_dt_1)
+my_dt_1 <- vm@vame_harmonise_dt(dt = my_dt_1, var_nms = c("a" = "official|A1"))
+my_dt_2 <- vm@vame_harmonise_dt(dt = my_dt_2, var_nms = c("a" = "official|A2"))
+
+stopifnot(
+  !"a" \%in\% names(my_dt_1),
+  identical(names(my_dt_1), c("official|A1", "some_var")),
+  my_dt_1[["official|A1"]] == 2:3,
+
+  !"a" \%in\% names(my_dt_2),
+  identical(names(my_dt_2), c("official|A2", "some_var")),
+  my_dt_2[["official|A2"]] == 3:4
 )
 vm@vame_copy
 vm_1 <- vame::VariableMetadata(

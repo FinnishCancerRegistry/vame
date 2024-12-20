@@ -2640,6 +2640,302 @@ var_var_set_dt_id_set_get <- function(
   return(id_set)
 }
 
+vame_harmonise_dt <- function(
+  vm,
+  dt,
+  var_nms = NULL,
+  inplace = TRUE
+) {
+  # @codedoc_comment_block vm@vame_harmonise_dt
+  # Recode (via `maker` calls) and rename columns. Requires
+  # `var_dt$is_harmonised` to be defined. The `maker`s of those variables
+  # which have `is_harmonised == TRUE` determine which variables harmonise
+  # into the harmonised forms. See **Examples**.
+  # @codedoc_comment_block vm@vame_harmonise_dt
+  # @codedoc_comment_block feature_funs(make)
+  # - `vm@vame_harmonise_dt`
+  # @codedoc_comment_block feature_funs(make)
+  # @codedoc_comment_block news("vm@vame_harmonise_dt", "2024-12-19", "1.5.0")
+  # New function `vm@vame_harmonise_dt`.
+  # @codedoc_comment_block news("vm@vame_harmonise_dt", "2024-12-19", "1.5.0")
+
+  # @codedoc_comment_block function_example(vm@vame_harmonise_dt)
+  # # example of using vm@vame_harmonise_dt
+  # vm <- vame::VariableMetadata(
+  #   var_dt = data.table::data.table(
+  #     var_nm = c("a1", "a2", "official|A"),
+  #     is_harmonised = c(FALSE, FALSE, TRUE)
+  #   ),
+  #   var_set_dt = data.table::data.table(
+  #     id = c("a1", "a2", "official|A"),
+  #     var_nm_set = list("a1", "a2", "official|A"),
+  #     maker = list(
+  #       NULL,
+  #       NULL,
+  #       list(
+  #         dep_var_nm_sets = list("a1", "a2"),
+  #         maker = quote({
+  #           switch(
+  #             intersect(c("a1", "a2"), ls())[1],
+  #             a1 = data.table::data.table("official|A" = a1 + 1L),
+  #             a2 = data.table::data.table("official|A" = a2 + 2L)
+  #           )
+  #         })
+  #       )
+  #     )
+  #   )
+  # )
+  #
+  # my_dt_1 <- data.table::data.table(
+  #   a1 = 1:2,
+  #   some_var = runif(2)
+  # )
+  # my_dt_1 <- vm@vame_harmonise_dt(dt = my_dt_1)
+  # my_dt_2 <- data.table::data.table(
+  #   a2 = 1:2,
+  #   some_var = runif(2)
+  # )
+  # my_dt_2 <- vm@vame_harmonise_dt(dt = my_dt_2)
+  # my_dt_3 <- data.table::data.table(
+  #   a1 = 1:2,
+  #   some_var = runif(2)
+  # )
+  # vm@vame_harmonise_dt(dt = my_dt_3, inplace = TRUE)
+  #
+  # stopifnot(
+  #   !"a1" %in% names(my_dt_1),
+  #   identical(names(my_dt_1), c("official|A", "some_var")),
+  #   my_dt_1[["official|A"]] == 2:3,
+  #
+  #   !"a2" %in% names(my_dt_2),
+  #   identical(names(my_dt_2), c("official|A", "some_var")),
+  #   my_dt_2[["official|A"]] == 3:4,
+  #
+  #   !"a1" %in% names(my_dt_3),
+  #   identical(names(my_dt_3), c("official|A", "some_var")),
+  #   my_dt_3[["official|A"]] == 2:3
+  # )
+  #
+  # # multiple harmonisation candidates
+  # vm <- vame::VariableMetadata(
+  #   var_dt = data.table::data.table(
+  #     var_nm = c("a", "official|A1", "official|A2"),
+  #     is_harmonised = c(FALSE, TRUE, TRUE)
+  #   ),
+  #   var_set_dt = data.table::data.table(
+  #     id = c("a", "official|A1", "official|A2"),
+  #     var_nm_set = list("a", "official|A1", "official|A2"),
+  #     maker = list(
+  #       NULL,
+  #       list(
+  #         dep_var_nm_set = "a",
+  #         maker = quote({
+  #           data.table::data.table("official|A1" = a + 1L)
+  #         })
+  #       ),
+  #       list(
+  #         dep_var_nm_set = "a",
+  #         maker = quote({
+  #           data.table::data.table("official|A2" = a + 2L)
+  #         })
+  #       )
+  #     )
+  #   )
+  # )
+  #
+  # my_dt_1 <- data.table::data.table(
+  #   a = 1:2,
+  #   some_var = runif(2)
+  # )
+  # # Error because of multiple harmonisation candidates --- cannot automatically
+  # # know which one to use.
+  # my_dt_1 <- tryCatch(
+  #   vm@vame_harmonise_dt(dt = my_dt_1),
+  #   error = function(e) e
+  # )
+  # stopifnot(
+  #   inherits(my_dt_1, "error")
+  # )
+  # my_dt_1 <- data.table::data.table(
+  #   a = 1:2,
+  #   some_var = runif(2)
+  # )
+  # my_dt_2 <- data.table::copy(my_dt_1)
+  # my_dt_1 <- vm@vame_harmonise_dt(dt = my_dt_1, var_nms = c("a" = "official|A1"))
+  # my_dt_2 <- vm@vame_harmonise_dt(dt = my_dt_2, var_nms = c("a" = "official|A2"))
+  #
+  # stopifnot(
+  #   !"a" %in% names(my_dt_1),
+  #   identical(names(my_dt_1), c("official|A1", "some_var")),
+  #   my_dt_1[["official|A1"]] == 2:3,
+  #
+  #   !"a" %in% names(my_dt_2),
+  #   identical(names(my_dt_2), c("official|A2", "some_var")),
+  #   my_dt_2[["official|A2"]] == 3:4
+  # )
+  # @codedoc_comment_block function_example(vm@vame_harmonise_dt)
+
+  # @codedoc_comment_block vame::vame_harmonise_dt::dt
+  # @param dt `[data.table]`
+  #
+  # `data.table` object to harmonise.
+  # @codedoc_comment_block vame::vame_harmonise_dt::dt
+  dbc::assert_is_data_table(dt)
+
+  # @codedoc_comment_block vame::vame_harmonise_dt::var_nms
+  # @param var_nms `[NULL, character]` (default `NULL`)
+  #
+  # - `NULL`: Try to harmonise all columns of `dt`.
+  # - `character`: Harmonise these only and raise an error this fails.
+  #   A named vector, e.g. `c(old = "new")`, forces a specific replacement
+  #   of old with new regardless of `var_dt$is_harmonised`. Mandatory in
+  #   (rare) instances where one variable can be harmonised into multiple
+  #   variables that have `var_dt$is_harmonised` value `TRUE`.
+  # @codedoc_comment_block vame::vame_harmonise_dt::var_nms
+  assert_is_var_nms(vm = vm, x = var_nms, must_exist = FALSE, allow_null = TRUE)
+  if (!var_meta_is_defined(vm = vm, var_nm = NULL, meta_nm = "is_harmonised")) {
+    stop("Your `vame::VariableMetadata` object does not have ",
+         "`var_dt$is_harmonised` defined. This boolean column is needed to ",
+         "identify what input data are harmonised to.")
+  }
+  original_dt_col_nms <- data.table::copy(names(dt))
+  # @codedoc_comment_block vame::vame_harmonise_dt::inplace
+  # @param inplace `[logical]` (default `FALSE`)
+  #
+  # If `FALSE`, a copy of `dt` is taken. If `FALSE`, `dt` is modified in-place
+  # without taking a copy.
+  # @codedoc_comment_block vame::vame_harmonise_dt::inplace
+  if (!inplace) {
+    dt <- data.table::copy(dt)
+  }
+  meta_dt <- local({
+    if (is.null(var_nms)) {
+      meta_dt <- data.table::data.table(
+        var_nm = names(dt),
+        var_nm_harmonised = NA_character_
+      )
+      forced_harmonisation <- FALSE
+    } else {
+      if (!is.null(names(var_nms))) {
+        meta_dt <- data.table::data.table(
+          var_nm = names(var_nms),
+          var_nm_harmonised = unname(var_nms)
+        )
+        forced_harmonisation <- TRUE
+      } else {
+        meta_dt <- data.table::data.table(
+          var_nm = var_nms,
+          var_nm_harmonised = NA_character_
+        )
+      }
+    }
+    harmonisation_candidate_set <- local({
+      if (forced_harmonisation) {
+        harmonisation_candidate_set <- meta_dt[["var_nm_harmonised"]]
+      } else {
+        all_var_nms <- var_meta_get_all(vm = vm, meta_nm = "var_nm")
+        is_harmonised_idx <- which(var_meta_get_all(
+          vm = vm, meta_nm = "is_harmonised"
+        ))
+        harmonisation_candidate_set <- all_var_nms[is_harmonised_idx]
+      }
+      harmonisation_candidate_set
+    })
+    tgt_meta_dt <- data.table::rbindlist(lapply(
+      harmonisation_candidate_set,
+      function(harmonisation_candidate) {
+        id_set <- var_var_set_dt_id_set_get(
+          vm = vm,
+          var_nm = harmonisation_candidate
+        )
+        data.table::rbindlist(lapply(
+          id_set,
+          function(id) {
+            if (!var_set_meta_is_defined(vm = vm, id = id, meta_nm = "maker")) {
+              return(NULL)
+            }
+            dep_var_nm_sets <- var_set_maker_get_dep_var_nm_sets(
+              vm = vm,
+              id = id
+            )
+            rm <- vapply(dep_var_nm_sets, length, integer(1L)) != 1L
+            dep_var_nm_sets[rm] <- NULL
+            var_nms <- unlist(dep_var_nm_sets)
+            n_rep <- length(var_nms)
+            data.table::data.table(
+              id = rep(id, n_rep),
+              harmonisation_candidate = rep(harmonisation_candidate, n_rep),
+              var_nm = var_nms
+            )
+          }
+        ))
+      }
+    ))
+    if (forced_harmonisation) {
+      tgt_meta_dt <- tgt_meta_dt[
+        i = meta_dt,
+        on = c("var_nm", "harmonisation_candidate" = "var_nm_harmonised"),
+        nomatch = NULL
+      ]
+      miss_var_nms <- setdiff(tgt_meta_dt[["var_nm"]], meta_dt[["var_nm"]])
+      if (length(miss_var_nms) > 0) {
+        stop("The harmonised forms of the following variable(s) had no ",
+             "`var_set_dt$maker`: ",
+             deparse1(miss_var_nms), ". Define ",
+             "`var_set_dt$maker` for variables you want to harmonise to.")
+      }
+    }
+    dup_var_nms <- tgt_meta_dt[["var_nm"]][duplicated(tgt_meta_dt[["var_nm"]])]
+    if (length(dup_var_nms) > 0) {
+      print(tgt_meta_dt)
+      stop("The following variable(s) have more than possible harmonisation ",
+           "candidate: ", deparse1(dup_var_nms), ". It is best to have only ",
+           "one harmonisation candidate per variable. If you want to have ",
+           "multiple anyway, you must use `vm@vame_harmonise_dt` argument ",
+           "`var_nms` to force a specific harmonisation. See the table ",
+           "above for more information.")
+    }
+    dt_join_assign__(
+      dt = meta_dt,
+      i = tgt_meta_dt,
+      on = "var_nm",
+      dt_col_nms = c("id", "var_nm_harmonised"),
+      i_col_nms = c("id", "harmonisation_candidate")
+    )
+    meta_dt[]
+  })
+
+  # At this point, missing `id` implies no harmonisation will be performed
+  # on the `var_nm`
+  lapply(which(!is.na(meta_dt[["id"]])), function(i) {
+    vn_i <- meta_dt[["var_nm"]][i]
+    hc_i <- meta_dt[["var_nm_harmonised"]][i]
+    made_dt <- var_set_make(
+      vm = vm,
+      data = dt,
+      id =  meta_dt[["id"]][i],
+      var_nms = hc_i
+    )
+    data.table::setnames(dt, vn_i, hc_i)
+    data.table::set(
+      dt,
+      j = hc_i,
+      value = made_dt[[hc_i]]
+    )
+  })
+
+  data.table::setattr(
+    dt,
+    "vame_harmonise_dt_meta",
+    list(
+      dt_col_nms = original_dt_col_nms,
+      dt_col_nms_harmonised = names(dt),
+      var_nms = meta_dt[["var_nms"]],
+      var_nms_harmonised = meta_dt[["var_nm_harmonised"]]
+    )
+  )
+  return(dt[])
+}
 
 # vame funs --------------------------------------------------------------------
 vame_copy <- function(vm) {

@@ -2,6 +2,10 @@
 
 ## News for version 1.5.0
 
+### vm@vame_harmonise_dt
+
+New function `vm@vame_harmonise_dt`.
+
 ### vm@var_meta_is_defined
 
 `vm@var_meta_is_defined` now also allows `var_nm = NULL`. Then it returns
@@ -503,7 +507,7 @@ Added argument `labeler_env` for this purpose.
 
 ### VariableMetadata
 
-`label_dt` was renamed to `labeler`. 
+`label_dt` was renamed to `labeler`.
 
 ### vm@vame_subset
 
