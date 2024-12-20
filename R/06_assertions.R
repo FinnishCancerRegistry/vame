@@ -150,6 +150,44 @@ assert_is_value_space <- function(
   )
 }
 
+assert_is_var_dt_column_type <- function(
+  x,
+  x_nm = NULL,
+  call = NULL,
+  assertion_type = NULL
+) {
+  dbc::handle_args_inplace()
+  # @codedoc_comment_block specification(var_dt$type)
+  # `var_dt$type` must be a character string vector. Missing values are
+  # allowed.
+  # @codedoc_comment_block specification(var_dt$type)
+  dbc::assert_is_character_vector(
+    x = x,
+    x_nm = x_nm,
+    call = call,
+    assertion_type = assertion_type
+  )
+}
+
+assert_is_var_dt_column_is_harmonised <- function(
+  x,
+  x_nm = NULL,
+  call = NULL,
+  assertion_type = NULL
+) {
+  dbc::handle_args_inplace()
+  # @codedoc_comment_block specification(var_dt$is_harmonised)
+  # `var_dt$is_harmonised` must be a logical vector. Missing values are
+  # allowed.
+  # @codedoc_comment_block specification(var_dt$is_harmonised)
+  dbc::assert_is_logical_vector(
+    x = x,
+    x_nm = x_nm,
+    call = call,
+    assertion_type = assertion_type
+  )
+}
+
 assert_is_var_dt <- function(
   x,
   x_nm = NULL,
@@ -165,7 +203,7 @@ assert_is_var_dt <- function(
     required_names = c("var_nm")
   )
   # @codedoc_comment_block news("VariableMetadata", "2023-12-01", "0.2.0")
-  # `label_dt` was renamed to `labeler`. 
+  # `label_dt` was renamed to `labeler`.
   # @codedoc_comment_block news("VariableMetadata", "2023-12-01", "0.2.0")
   lapply(intersect(c("labeler", "describer"), names(x)), function(col_nm) {
     lapply(seq_along(x[[col_nm]]), function(i) {
@@ -182,17 +220,25 @@ assert_is_var_dt <- function(
       )
     })
   })
-  if ("type" %in% names(x)) {
-    # @codedoc_comment_block specification(var_dt$type)
-    # `var_dt$type` must be a character string vector. Missing values are
-    # allowed.
-    # @codedoc_comment_block specification(var_dt$type)
-    dbc::assert_is_character_vector(
-      x = x[["type"]],
-      x_nm = paste0(x_nm, "$type"),
-      call = call,
-      assertion_type = assertion_type
-    )
+  fun_nms <- ls(envir = environment(assert_is_var_dt))
+  var_dt_column_assertion_fun_nms <- fun_nms[grepl(
+    "^assert_is_var_dt_column_",
+    fun_nms
+  )]
+  for (afn in var_dt_column_assertion_fun_nms) {
+    var_dt_col_nm <- sub("^assert_is_var_dt_column_", "", afn)
+    if (var_dt_col_nm %in% names(x)) {
+      do.call(
+        afn,
+        list(
+          x = x[[var_dt_col_nm]],
+          x_nm = sprintf("%s$%s", x_nm, var_dt_col_nm),
+          call = call,
+          assertion_type = assertion_type
+        ),
+        quote = TRUE
+      )
+    }
   }
   return(invisible(NULL))
 }
@@ -629,6 +675,45 @@ assert_is_arg_data <- function(
     call = call,
     assertion_type = assertion_type
   )
+}
+
+assert_is_var_nms <- function(
+  vm,
+  x,
+  x_nm = NULL,
+  call = NULL,
+  assertion_type = NULL,
+  must_exist = TRUE,
+  allow_null = TRUE
+) {
+  dbc::handle_args_inplace()
+  assert_is_variablemetadata(vm, assertion_type = "prod_input")
+  if (allow_null) {
+    dbc::assert_is_one_of(
+      x,
+      x_nm = x_nm,
+      call = call,
+      assertion_type = assertion_type,
+      funs = list(dbc::report_is_NULL,
+                  dbc::report_is_character_nonNA_vector)
+    )
+  } else {
+    dbc::assert_is_character_nonNA_vector(
+      x,
+      x_nm = x_nm,
+      call = call,
+      assertion_type = assertion_type
+    )
+  }
+  if (!is.null(x) && must_exist) {
+    dbc::assert_vector_elems_are_in_set(
+      x,
+      x_nm = x_nm,
+      call = call,
+      assertion_type = assertion_type,
+      set = var_meta_get_all(vm, "var_nm")
+    )
+  }
 }
 
 assert_is_var_nm <- function(
