@@ -3,3 +3,5 @@
 ^\.github$
 ^dev$
 ^sandbox[.]R$
+^.*\.Rproj$
+^\.Rproj\.user$
