@@ -1043,6 +1043,23 @@ var_set_value_space_eval <- function(
   #     vm@var_set_value_space_eval(id = "c_set")
   #   )
   # )
+  #
+  # # Since v1.6.0, a `labeler` of calss `data.table` can also be used.
+  # vm <- vame::VariableMetadata(
+  #   var_dt = data.table::data.table(
+  #     var_nm = "a",
+  #     labeler = list(data.table::data.table(x = 1:3, my_label = letters[1:3]))
+  #   ),
+  #   var_set_dt = data.table::data.table(
+  #     id = "a_set",
+  #     var_nm_set = list("a")
+  #   )
+  # )
+  # stopifnot(all.equal(
+  #   vm@var_set_value_space_eval(id = "a_set"),
+  #   list(dt = data.table::data.table(a = 1:3)),
+  #   check.attributes = FALSE
+  # ))
   # @codedoc_comment_block function_example(vm@var_set_value_space_eval)
 
 
@@ -1078,7 +1095,6 @@ var_set_value_space_eval <- function(
   dbc::assert_inherits(vm, required_class = "VariableMetadata")
 
   assert_is_var_set_id(vm, id)
-  assert_var_set_value_space_is_defined(vm)
   assert_is_arg_var_nms(var_nms)
   value_space_var_nms <- var_set_meta_get(vm, id = id, meta_nm = "var_nm_set")
   if (is.null(var_nms)) {

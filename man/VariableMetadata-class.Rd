@@ -617,6 +617,23 @@ stopifnot(
     vm@var_set_value_space_eval(id = "c_set")
   )
 )
+
+# Since v1.6.0, a `labeler` of calss `data.table` can also be used.
+vm <- vame::VariableMetadata(
+  var_dt = data.table::data.table(
+    var_nm = "a",
+    labeler = list(data.table::data.table(x = 1:3, my_label = letters[1:3]))
+  ),
+  var_set_dt = data.table::data.table(
+    id = "a_set",
+    var_nm_set = list("a")
+  )
+)
+stopifnot(all.equal(
+  vm@var_set_value_space_eval(id = "a_set"),
+  list(dt = data.table::data.table(a = 1:3)),
+  check.attributes = FALSE
+))
 }\if{html}{\out{</div>}}}
 
 \item{\code{var_set_value_space_get}}{\emph{Description}
@@ -3300,6 +3317,23 @@ stopifnot(
     vm@var_set_value_space_eval(id = "c_set")
   )
 )
+
+# Since v1.6.0, a `labeler` of calss `data.table` can also be used.
+vm <- vame::VariableMetadata(
+  var_dt = data.table::data.table(
+    var_nm = "a",
+    labeler = list(data.table::data.table(x = 1:3, my_label = letters[1:3]))
+  ),
+  var_set_dt = data.table::data.table(
+    id = "a_set",
+    var_nm_set = list("a")
+  )
+)
+stopifnot(all.equal(
+  vm@var_set_value_space_eval(id = "a_set"),
+  list(dt = data.table::data.table(a = 1:3)),
+  check.attributes = FALSE
+))
 # random sampling
 c_lo <- as.Date("2001-01-01")
 c_hi <- as.Date("2020-12-31")
