@@ -5,3 +5,4 @@
 ^sandbox[.]R$
 ^.*\.Rproj$
 ^\.Rproj\.user$
+^\.radian_history$
