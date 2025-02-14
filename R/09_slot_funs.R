@@ -1075,7 +1075,7 @@ var_set_value_space_eval <- function(
   }
 
   # @codedoc_comment_block news("vm@var_set_value_space_eval", "2024-09-11", "1.1.0")
-  # `vm@var_labels_get` now makes variables `id`, `var_nms`, and `vm`
+  # `vm@var_set_value_space_eval` now makes variables `id`, `var_nms`, and `vm`
   # available for `labeler` types `function` and `call`.
   # @codedoc_comment_block news("vm@var_set_value_space_eval", "2024-09-11", "1.1.0")
   # @codedoc_comment_block vm@var_set_value_space_eval
@@ -1087,16 +1087,43 @@ var_set_value_space_eval <- function(
   # @codedoc_comment_block vm@var_set_value_space_eval
   arg_list <- mget(c("vm", "id", "var_nms"))
 
-  vs_expr <- substitute(
-    var_set_meta_get(vm, id = id, meta_nm = "value_space"),
-    list(id = id)
-  )
-  value_space <- eval(vs_expr)
-  this_call <- match.call()
+  if (!var_set_meta_is_defined(vm = vm, id = id, meta_nm = "value_space")) {
+    # @codedoc_comment_block news("vm@var_set_value_space_eval", "2025-02-13", "1.6.0")
+    # `vm@var_set_value_space_eval` now can make use of a `labeler` of class
+    # `data.table` in cases where no `value_space` is defined for the `id`,
+    # but `var_nms` is of length one, and that variable has such a `labeler`.
+    # @codedoc_comment_block news("vm@var_set_value_space_eval", "2025-02-13", "1.6.0")
+    # @codedoc_comment_block vm@var_set_value_space_eval
+    # - If `id` (whether inferred or supplied) has no `value_space` defined
+    #   an error is usually raised. However, if `var_nms` is of length one,
+    #   and that variable has a `labeler` of class `data.table`, then
+    #   in effect `list(dt = labeler)` is returned (minus the label columns
+    #   themselves, and after renaming `labeler$x` to `labeler[[var_nms]]`).
+    # @codedoc_comment_block vm@var_set_value_space_eval
+    if (
+      length(var_nms) == 1 &&
+        var_meta_is_defined(vm = vm, var_nm = var_nms, meta_nm = "labeler") &&
+        data.table::is.data.table(var_labeler_get(vm = vm, var_nm = var_nms))
+    ) {
+      dt <- var_labeler_get(vm = vm, var_nm = var_nms)
+      #' @importFrom data.table .SD
+      dt <- dt[j  = .SD, .SDcols = "x"]
+      data.table::setnames(dt, var_nms)
+      value_space <- list(dt = dt)
+      assert_is_value_space(
+        x = value_space,
+        assertion_type = "prod_output"
+      )
+      return(value_space)
+    } else {
+      stop(sprintf("No `value_space` defined for `id = %s`"), deparse1(id))
+    }
+  }
+
+  value_space <- var_set_value_space_get(vm, id = id)
   assert_is_value_space(
     x = value_space,
-    x_nm = deparse1(vs_expr),
-    call = this_call,
+    x_nm = sprintf("vm@var_set_value_space_get(id = %s)", deparse1(id)),
     assertion_type = "general"
   )
   if ("expr" %in% names(value_space)) {
@@ -1124,9 +1151,27 @@ var_set_value_space_eval <- function(
     )
     value_space <- list(tmp = value_space)
   }
+  # @codedoc_comment_block vm@var_set_value_space_eval
+  # - The evaluation result a `value_space` of type `fun` or `expr` is inspected
+  #   and attempted to make into a proper `value_space` object.
+  #   It is recommended that the evaluation result is directly a proper
+  #   `value_space` object, e.g. `list(set = 1:3)`, but the following is also
+  #   supported based on the class of the evaluation result (here `tmp`):
+  #   + `data.table` -> `list(dt = tmp)`
+  #   + `vector` and not `list` -> `list(set = tmp)`
+  #   + `list` with element named `lo` -> `list(bounds = tmp)`
+  #   + Otherwise an error is raised.
+  # @codedoc_comment_block vm@var_set_value_space_eval
   if ("tmp" %in% names(value_space)) {
     tmp <- value_space[["tmp"]]
-    if (data.table::is.data.table(tmp)) {
+    if (test_is_value_space(tmp)) {
+      # @codedoc_comment_block news("vm@var_set_value_space_eval", "2025-02-14", "1.6.0")
+      # `vm@var_set_value_space_eval` now also allows the evaluation result of
+      # a `value_space` of type `expr` or `fun` to be a `value_space` object
+      # in itself. In fact that is recommended from now on.
+      # @codedoc_comment_block news("vm@var_set_value_space_eval", "2025-02-14", "1.6.0")
+      value_space <- tmp
+    } else if (data.table::is.data.table(tmp)) {
       names(value_space) <- "dt"
     } else if (is.vector(tmp) && !is.list(tmp)) {
       names(value_space) <- "set"
@@ -1134,13 +1179,18 @@ var_set_value_space_eval <- function(
       names(value_space) <- "bounds"
     } else {
       stop("value space for var_set with id = ", deparse1(id),
-            " was either expr or fun, but did not evaluate into ",
-            "dt, set, nor bounds. output had class(es) ",
-            deparse1(class(tmp)), ".")
+           " was of type expr or fun, but did not evaluate into ",
+           "a proper value_space object nor the contents of value_space types ",
+           "dt, set, nor bounds (data.table, vector, and named list, ",
+           "respectively). Output had class(es) ",
+           deparse1(class(tmp)), ". It is recommended that a value_space ",
+           "of type expr or fun evaluates into a proper value_space object, ",
+           "e.g. into list(set = 1:3).")
     }
   }
   # @codedoc_comment_block vm@var_set_value_space_eval
-  # - Otherwise the `value_space` is simply collected without modification,
+  # - If the `value_space` did not need evaluation, it is simply collected
+  #   without modification,
   #   except a `value_space` of type `data.table` (or if evaluation produced
   #   a `data.table`) is subset into the requested variables only if
   #   the `data.table` contains more than the requested variables.

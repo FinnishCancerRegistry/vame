@@ -535,13 +535,30 @@ Retrieve and evaluate value space for a variable set given its \code{id}.
 \item The variables \code{id}, \code{var_nms}, and \code{vm} are made available to
 \code{value_space} objects of type \code{function} and \code{call}.
 \code{vm} is the \code{vame::VariableMetadata} object itself.
+\item If \code{id} (whether inferred or supplied) has no \code{value_space} defined
+an error is usually raised. However, if \code{var_nms} is of length one,
+and that variable has a \code{labeler} of class \code{data.table}, then
+in effect \code{list(dt = labeler)} is returned (minus the label columns
+themselves, and after renaming \code{labeler$x} to \code{labeler[[var_nms]]}).
 \item A \code{value_space} of type \code{expr} is evaluated in a temporary evaluation
 environment whose parent is set to \code{env}. The evaluation environment
 is populated by the variables listed above.
 \item A \code{value_space} of type \code{function} is called with the subset of the
 variables listed above which are named arguments of the \code{function}.
 E.g. you are allowed to have only the argument \code{var_nms} if you want.
-\item Otherwise the \code{value_space} is simply collected without modification,
+\item The evaluation result a \code{value_space} of type \code{fun} or \code{expr} is inspected
+and attempted to make into a proper \code{value_space} object.
+It is recommended that the evaluation result is directly a proper
+\code{value_space} object, e.g. \code{list(set = 1:3)}, but the following is also
+supported based on the class of the evaluation result (here \code{tmp}):
+\itemize{
+\item \code{data.table} -> \code{list(dt = tmp)}
+\item \code{vector} and not \code{list} -> \code{list(set = tmp)}
+\item \code{list} with element named \code{lo} -> \code{list(bounds = tmp)}
+\item Otherwise an error is raised.
+}
+\item If the \code{value_space} did not need evaluation, it is simply collected
+without modification,
 except a \code{value_space} of type \code{data.table} (or if evaluation produced
 a \code{data.table}) is subset into the requested variables only if
 the \code{data.table} contains more than the requested variables.
@@ -2255,6 +2272,18 @@ The following functions are part of this feature:
 }
 }
 
+\section{News for version 1.6.0}{
+
+
+\code{vm@var_set_value_space_eval} now can make use of a \code{labeler} of class
+\code{data.table} in cases where no \code{value_space} is defined for the \code{id},
+but \code{var_nms} is of length one, and that variable has such a \code{labeler}.
+
+\code{vm@var_set_value_space_eval} now also allows the evaluation result of
+a \code{value_space} of type \code{expr} or \code{fun} to be a \code{value_space} object
+in itself. In fact that is recommended from now on.
+}
+
 \section{News for version 1.5.0}{
 
 
@@ -2340,7 +2369,7 @@ available for \code{describer} types \code{function} and \code{call}.
 \code{vm@var_labels_get} now makes variables \code{x}, \code{var_nm}, \code{label_nm}, and \code{vm}
 available for \code{labeler} types \code{function} and \code{call}.
 
-\code{vm@var_labels_get} now makes variables \code{id}, \code{var_nms}, and \code{vm}
+\code{vm@var_set_value_space_eval} now makes variables \code{id}, \code{var_nms}, and \code{vm}
 available for \code{labeler} types \code{function} and \code{call}.
 
 \code{vm@var_set_value_space_sample} object \code{x} passed to the \code{sampler} renamed

@@ -150,6 +150,18 @@ assert_is_value_space <- function(
   )
 }
 
+test_is_value_space <- function(
+  x,
+  x_nm = NULL,
+  call = NULL
+) {
+  out <- tryCatch(
+    assert_is_value_space(x = x),
+    error = function(e) e
+  )
+  return(!inherits(out, "error"))
+}
+
 assert_is_var_dt_column_type <- function(
   x,
   x_nm = NULL,

@@ -31,6 +31,23 @@ particular see the examples.
 
 \section{News}{
 
+\subsection{News for version 1.6.0}{
+\subsection{vm@var_set_value_space_eval}{
+
+\code{vm@var_set_value_space_eval} now can make use of a \code{labeler} of class
+\code{data.table} in cases where no \code{value_space} is defined for the \code{id},
+but \code{var_nms} is of length one, and that variable has such a \code{labeler}.
+}
+
+\subsection{vm@var_set_value_space_eval}{
+
+\code{vm@var_set_value_space_eval} now also allows the evaluation result of
+a \code{value_space} of type \code{expr} or \code{fun} to be a \code{value_space} object
+in itself. In fact that is recommended from now on.
+}
+
+}
+
 \subsection{News for version 1.5.0}{
 \subsection{vm@vame_harmonise_dt}{
 
@@ -198,7 +215,7 @@ available for \code{labeler} types \code{function} and \code{call}.
 
 \subsection{vm@var_set_value_space_eval}{
 
-\code{vm@var_labels_get} now makes variables \code{id}, \code{var_nms}, and \code{vm}
+\code{vm@var_set_value_space_eval} now makes variables \code{id}, \code{var_nms}, and \code{vm}
 available for \code{labeler} types \code{function} and \code{call}.
 }
 

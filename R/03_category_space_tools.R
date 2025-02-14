@@ -4,10 +4,7 @@ value_space_to_subset_dt__ <- function(
   env,
   assertion_type = "prod_input"
 ) {
-  dbc::assert_is_list(
-    value_space,
-    assertion_type = assertion_type
-  )
+  assert_is_value_space(value_space, assertion_type = assertion_type)
   dbc::assert_is_character_nonNA_vector(
     var_nms,
     assertion_type = assertion_type
@@ -25,33 +22,6 @@ value_space_to_subset_dt__ <- function(
       j = .SD,
       .SDcols = var_nms
     ]
-  } else if ("expr" %in% names(value_space)) {
-    expr_eval_env <- new.env(parent = env)
-    expr_eval_env[["var_nms"]] <- var_nms
-    out <- tryCatch(
-      eval(value_space[["expr"]], envir = expr_eval_env),
-      error = function(e) e
-    )
-    if (inherits(out, "error")) {
-      stop(
-        "When evaluating expression\n\n",
-        deparse1(value_space[["expr"]]),
-        "\n\n",
-        "Encountered error:\n",
-        out[["message"]]
-      )
-    }
-    if (is.vector(out) && !is.list(out)) {
-      dt <- data.table::data.table(x = out)
-      data.table::setnames(dt, "x", var_nms)
-    } else if (inherits(out, "data.table")) {
-      dt <- out
-    } else {
-      stop("Internal error: no handling defined for result of class ",
-           deparse1(class(out)), " of expression ",
-           deparse1(value_space[["expr"]]), ". ",
-           "Complain to the package maintainer please.")
-    }
   } else if ("set" %in% names(value_space)) {
     dbc::assert_prod_interim_has_length(var_nms, expected_length = 1L)
     dt <- data.table::data.table(x = value_space[["set"]])
@@ -103,19 +73,34 @@ category_space_dt_list__ <- function(
     env,
     assertion_type = assertion_type
   )
-  value_spaces <- var_set_meta_get_all(vm, meta_nm = "value_space")
-  var_nm_sets <- var_set_meta_get_all(vm, meta_nm = "var_nm_set")
-  pos_set <- sort(unique(unlist(lapply(var_nms, function(var_nm) {
-    var_to_var_set_pos(vm = vm, var_nm = var_nm, style = "all")
-  }))))
-  dtl <- lapply(pos_set, function(i) {
-    vs_i <- value_spaces[[i]]
-    if (is.null(vs_i)) {
-      return(NULL)
-    }
+
+  meta_dt <- data.table::data.table(
+    pos = sort(unique(unlist(lapply(var_nms, function(var_nm) {
+      var_to_var_set_pos(vm = vm, var_nm = var_nm, style = "all")
+    }))))
+  )
+  data.table::set(
+    meta_dt,
+    j = "id",
+    value = var_set_pos_to_id(vm = vm, pos = meta_dt[["pos"]])
+  )
+  data.table::set(
+    meta_dt,
+    j = "var_nm_set",
+    value = var_set_meta_get_all(vm, meta_nm = "var_nm_set")[meta_dt[["pos"]]]
+  )
+  dtl <- lapply(seq_along(meta_dt[["id"]]), function(i) {
+    id_i <- meta_dt[["id"]][i]
+    var_nms_i <- intersect(var_nms, meta_dt[["var_nm_set"]][[i]])
+    vs_i <- var_set_value_space_eval(
+      vm = vm,
+      id = id_i,
+      var_nms = var_nms_i,
+      env = env
+    )
     value_space_to_subset_dt__(
       value_space = vs_i,
-      var_nms = intersect(var_nms, var_nm_sets[[i]]),
+      var_nms = var_nms_i,
       env = env
     )
   })
