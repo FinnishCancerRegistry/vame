@@ -74,21 +74,28 @@ category_space_dt_list__ <- function(
     assertion_type = assertion_type
   )
 
-  meta_dt <- data.table::data.table(
-    pos = sort(unique(unlist(lapply(var_nms, function(var_nm) {
-      var_to_var_set_pos(vm = vm, var_nm = var_nm, style = "all")
-    }))))
-  )
-  data.table::set(
-    meta_dt,
-    j = "id",
-    value = var_set_pos_to_id(vm = vm, pos = meta_dt[["pos"]])
-  )
-  data.table::set(
-    meta_dt,
-    j = "var_nm_set",
-    value = var_set_meta_get_all(vm, meta_nm = "var_nm_set")[meta_dt[["pos"]]]
-  )
+  meta_dt <- local({
+    id <- NULL
+    var_nms <- var_nms
+    handle_arg_ids_et_var_nms_inplace__(
+      vm = vm,
+      ids_arg_nm = "id",
+      var_nms_arg_nm = "var_nms",
+      required_meta_nms = "value_space"
+    )
+    meta_dt <- data.table::data.table(
+      id = id
+    )
+    data.table::set(
+      meta_dt,
+      j = "var_nm_set",
+      value = lapply(meta_dt[["id"]], function(id) {
+        var_set_meta_get(vm, id = id, meta_nm = "var_nm_set")
+      })
+    )
+    meta_dt[]
+  })
+
   dtl <- lapply(seq_along(meta_dt[["id"]]), function(i) {
     id_i <- meta_dt[["id"]][i]
     var_nms_i <- intersect(var_nms, meta_dt[["var_nm_set"]][[i]])
