@@ -1145,7 +1145,7 @@ var_set_value_space_eval <- function(
       )
       return(value_space)
     } else {
-      stop(sprintf("No `value_space` defined for `id = %s`"), deparse1(id))
+      stop(sprintf("No `value_space` defined for `id = %s`", deparse1(id)))
     }
   }
 
