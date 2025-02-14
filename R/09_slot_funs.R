@@ -1017,6 +1017,35 @@ var_set_value_space_eval <- function(
   # - `vm@var_set_value_space_eval`
   # @codedoc_comment_block feature_funs(value spaces)
 
+  # @codedoc_comment_block function_example(vm@var_set_value_space_eval)
+  # # vm@var_set_value_space_eval
+  # vm <- vame::VariableMetadata(
+  #   var_dt = data.table::data.table(
+  #     var_nm = c("a", "b", "c")
+  #   ),
+  #   var_set_dt = data.table::data.table(
+  #     id = c("a_set", "b_set", "c_set"),
+  #     var_nm_set = list("a", "b", "c"),
+  #     value_space = list(
+  #       list(expr = quote(list(set = 1:3))),
+  #       list(expr = quote(1:3)),
+  #       list(set = 1:3)
+  #     )
+  #   )
+  # )
+  # stopifnot(
+  #   identical(
+  #     vm@var_set_value_space_eval(id = "a_set"),
+  #     vm@var_set_value_space_eval(id = "b_set")
+  #   ),
+  #   identical(
+  #     vm@var_set_value_space_eval(id = "a_set"),
+  #     vm@var_set_value_space_eval(id = "c_set")
+  #   )
+  # )
+  # @codedoc_comment_block function_example(vm@var_set_value_space_eval)
+
+
   # @codedoc_comment_block news("vm@var_set_value_space_eval", "2023-07-03", "0.1.1")
   # New slot `vm@var_set_value_space_eval`.
   # @codedoc_comment_block news("vm@var_set_value_space_eval", "2023-07-03", "0.1.1")
@@ -2040,6 +2069,7 @@ var_meta_set <- function(
   assert_meta(vm = vm, x = value, meta_nm = meta_nm, must_exist = FALSE)
 
   # @codedoc_comment_block function_example(vm@var_meta_set)
+  # # vm@var_meta_set
   # vm <- vame::VariableMetadata(
   #   var_dt = data.table::data.table(
   #     var_nm = "a"
@@ -2710,7 +2740,7 @@ vame_harmonise_dt <- function(
   # @codedoc_comment_block news("vm@vame_harmonise_dt", "2024-12-19", "1.5.0")
 
   # @codedoc_comment_block function_example(vm@vame_harmonise_dt)
-  # # example of using vm@vame_harmonise_dt
+  # # vm@vame_harmonise_dt
   # vm <- vame::VariableMetadata(
   #   var_dt = data.table::data.table(
   #     var_nm = c("a1", "a2", "official|A"),

@@ -588,7 +588,36 @@ Environment where a value space will be evaluated, if applicable.
 \itemize{
 \item \code{NULL}: Use the environment where the function was called.
 \item \code{environment}: Use this environment.
-}}
+}
+
+\emph{Examples}
+
+\if{html}{\out{<div class="sourceCode">}}\preformatted{# vm@var_set_value_space_eval
+vm <- vame::VariableMetadata(
+  var_dt = data.table::data.table(
+    var_nm = c("a", "b", "c")
+  ),
+  var_set_dt = data.table::data.table(
+    id = c("a_set", "b_set", "c_set"),
+    var_nm_set = list("a", "b", "c"),
+    value_space = list(
+      list(expr = quote(list(set = 1:3))),
+      list(expr = quote(1:3)),
+      list(set = 1:3)
+    )
+  )
+)
+stopifnot(
+  identical(
+    vm@var_set_value_space_eval(id = "a_set"),
+    vm@var_set_value_space_eval(id = "b_set")
+  ),
+  identical(
+    vm@var_set_value_space_eval(id = "a_set"),
+    vm@var_set_value_space_eval(id = "c_set")
+  )
+)
+}\if{html}{\out{</div>}}}
 
 \item{\code{var_set_value_space_get}}{\emph{Description}
 
@@ -978,7 +1007,8 @@ In \verb{_set} functions the value to set for the specified metadata.
 
 \emph{Examples}
 
-\if{html}{\out{<div class="sourceCode">}}\preformatted{vm <- vame::VariableMetadata(
+\if{html}{\out{<div class="sourceCode">}}\preformatted{# vm@var_meta_set
+vm <- vame::VariableMetadata(
   var_dt = data.table::data.table(
     var_nm = "a"
   ),
@@ -1316,7 +1346,7 @@ without taking a copy.
 
 \emph{Examples}
 
-\if{html}{\out{<div class="sourceCode">}}\preformatted{# example of using vm@vame_harmonise_dt
+\if{html}{\out{<div class="sourceCode">}}\preformatted{# vm@vame_harmonise_dt
 vm <- vame::VariableMetadata(
   var_dt = data.table::data.table(
     var_nm = c("a1", "a2", "official|A"),
@@ -3245,6 +3275,31 @@ stopifnot(
     list(vm@var_set_maker_get(id = "b_set")[["dep_var_nm_set"]])
   )
 )
+# vm@var_set_value_space_eval
+vm <- vame::VariableMetadata(
+  var_dt = data.table::data.table(
+    var_nm = c("a", "b", "c")
+  ),
+  var_set_dt = data.table::data.table(
+    id = c("a_set", "b_set", "c_set"),
+    var_nm_set = list("a", "b", "c"),
+    value_space = list(
+      list(expr = quote(list(set = 1:3))),
+      list(expr = quote(1:3)),
+      list(set = 1:3)
+    )
+  )
+)
+stopifnot(
+  identical(
+    vm@var_set_value_space_eval(id = "a_set"),
+    vm@var_set_value_space_eval(id = "b_set")
+  ),
+  identical(
+    vm@var_set_value_space_eval(id = "a_set"),
+    vm@var_set_value_space_eval(id = "c_set")
+  )
+)
 # random sampling
 c_lo <- as.Date("2001-01-01")
 c_hi <- as.Date("2020-12-31")
@@ -3428,6 +3483,7 @@ a_sample_distribution <- table(a_sample[["a"]])
 stopifnot(
   a_sample_distribution[1] < a_sample_distribution[6]
 )
+# vm@var_meta_set
 vm <- vame::VariableMetadata(
   var_dt = data.table::data.table(
     var_nm = "a"
@@ -3506,7 +3562,7 @@ stopifnot(
     "Syntymapaivamaara."
   )
 )
-# example of using vm@vame_harmonise_dt
+# vm@vame_harmonise_dt
 vm <- vame::VariableMetadata(
   var_dt = data.table::data.table(
     var_nm = c("a1", "a2", "official|A"),
