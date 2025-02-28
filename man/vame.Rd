@@ -31,6 +31,21 @@ particular see the examples.
 
 \section{News}{
 
+\subsection{News for version 1.7.0}{
+\subsection{vame::VariableMetadata}{
+
+\code{vame::VariableMetadata} now raises an error if \code{var_dt$var_nm} has any
+duplicates.
+}
+
+\subsection{vame::VariableMetadata}{
+
+\code{vame::VariableMetadata} now raises an error if \code{var_set_dt$id} has any
+duplicates.
+}
+
+}
+
 \subsection{News for version 1.6.0}{
 \subsection{vm@var_set_value_space_eval}{
 

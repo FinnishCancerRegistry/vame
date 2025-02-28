@@ -214,6 +214,16 @@ assert_is_var_dt <- function(
     assertion_type = assertion_type,
     required_names = c("var_nm")
   )
+  # @codedoc_comment_block news("vame::VariableMetadata", "2025-02-28", "1.7.0")
+  # `vame::VariableMetadata` now raises an error if `var_dt$var_nm` has any
+  # duplicates.
+  # @codedoc_comment_block news("vame::VariableMetadata", "2025-02-28", "1.7.0")
+  dbc::assert_has_no_duplicates(
+    x = x[["var_nm"]],
+    x_nm = sprintf("%s[[\"var_nm\"]]", x_nm),
+    call = call,
+    assertion_type = assertion_type
+  )
   # @codedoc_comment_block news("VariableMetadata", "2023-12-01", "0.2.0")
   # `label_dt` was renamed to `labeler`.
   # @codedoc_comment_block news("VariableMetadata", "2023-12-01", "0.2.0")
@@ -268,6 +278,16 @@ assert_is_var_set_dt <- function(
     call = call,
     assertion_type = assertion_type,
     required_names = c("id", "var_nm_set")
+  )
+  # @codedoc_comment_block news("vame::VariableMetadata", "2025-02-28", "1.7.0")
+  # `vame::VariableMetadata` now raises an error if `var_set_dt$id` has any
+  # duplicates.
+  # @codedoc_comment_block news("vame::VariableMetadata", "2025-02-28", "1.7.0")
+  dbc::assert_has_no_duplicates(
+    x = x[["id"]],
+    x_nm = sprintf("%s[[\"id\"]]", x_nm),
+    call = call,
+    assertion_type = assertion_type
   )
   dbc::assert_is_list(
     x = x[["var_nm_set"]],

@@ -2319,6 +2319,16 @@ The following functions are part of this feature:
 }
 }
 
+\section{News for version 1.7.0}{
+
+
+\code{vame::VariableMetadata} now raises an error if \code{var_dt$var_nm} has any
+duplicates.
+
+\code{vame::VariableMetadata} now raises an error if \code{var_set_dt$id} has any
+duplicates.
+}
+
 \section{News for version 1.6.0}{
 
 
