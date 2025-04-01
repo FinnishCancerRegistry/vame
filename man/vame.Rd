@@ -31,6 +31,18 @@ particular see the examples.
 
 \section{News}{
 
+\subsection{News for version 1.8.0}{
+\subsection{vm@var_set_make}{
+
+\code{vm@var_set_make} now deletes all other columns except \code{var_nms} from output
+if such exist. Previously the user could request for e.g.
+\code{var_nms = "my_var_1"} only, but if the underlying \code{maker} was defined for
+e.g. \code{c("my_var_1", "my_var_2")}, then both were included in output.
+So now only \code{"my_var_1"} would be included.
+}
+
+}
+
 \subsection{News for version 1.7.0}{
 \subsection{vame::VariableMetadata}{
 

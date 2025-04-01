@@ -342,6 +342,10 @@ If \code{maker[["maker"]] == "aggregate"}, we use an internally defined
 expression that uses \code{vm@var_aggregate}.
 Else \code{maker[["maker"]]} must be an R expression. In both cases the
 expression is evaluated in the evaluation environment.
+\item Delete columns other than \code{var_nms} if found. E.g. if user supplied
+\code{var_nms = "my_var_1"} but the \code{maker} produced a \code{data.table} with
+columns \code{my_var_1} and \code{my_var_2}, remote the latter. If user supplied
+\code{var_nms = NULL} then nothing is deleted.
 \item The \code{data.table} resulting from the \code{maker} call is returned after
 setting the \code{var_set_make_meta} attribute as a list containing the
 elements \code{id}, \code{var_nms}, and \code{dep_var_nm_set}.
@@ -2101,6 +2105,38 @@ stopifnot(
     check.attributes = FALSE
   )
 )
+
+# Example where the same `maker` produces multiple columns
+vm <- vame::VariableMetadata(
+  var_dt = data.table::data.table(
+    var_nm = c("a", "b")
+  ),
+  var_set_dt = data.table::data.table(
+    id = "ab_set",
+    var_nm_set = list(ab_set = c("a", "b")),
+    maker = list(
+      a_set = list(
+        dep_var_nm_set = "c",
+        maker = quote(\{
+          dt <- data.table::data.table(
+            a = c + 1L,
+            b = c - 1L
+          )
+          return(dt[])
+        \})
+      )
+    )
+  )
+)
+dt <- data.table::data.table(c = 1:5)
+obs_ab <- vm@var_set_make(id = "ab_set", data = dt)
+obs_a <- vm@var_set_make(id = "ab_set", var_nms = "a", data = dt)
+obs_b <- vm@var_set_make(id = "ab_set", var_nms = "b", data = dt)
+stopifnot(
+  identical(names(obs_ab), c("a", "b")),
+  identical(names(obs_a), "a"),
+  identical(names(obs_b), "b")
+)
 }\if{html}{\out{</div>}}
 
 The following functions are related to this feature:
@@ -2317,6 +2353,16 @@ The following functions are part of this feature:
 \item \code{vm@vame_category_space_dt_list}
 \item \code{vm@vame_category_space_dt}
 }
+}
+
+\section{News for version 1.8.0}{
+
+
+\code{vm@var_set_make} now deletes all other columns except \code{var_nms} from output
+if such exist. Previously the user could request for e.g.
+\code{var_nms = "my_var_1"} only, but if the underlying \code{maker} was defined for
+e.g. \code{c("my_var_1", "my_var_2")}, then both were included in output.
+So now only \code{"my_var_1"} would be included.
 }
 
 \section{News for version 1.7.0}{
@@ -3262,6 +3308,38 @@ stopifnot(
     ),
     check.attributes = FALSE
   )
+)
+
+# Example where the same `maker` produces multiple columns
+vm <- vame::VariableMetadata(
+  var_dt = data.table::data.table(
+    var_nm = c("a", "b")
+  ),
+  var_set_dt = data.table::data.table(
+    id = "ab_set",
+    var_nm_set = list(ab_set = c("a", "b")),
+    maker = list(
+      a_set = list(
+        dep_var_nm_set = "c",
+        maker = quote({
+          dt <- data.table::data.table(
+            a = c + 1L,
+            b = c - 1L
+          )
+          return(dt[])
+        })
+      )
+    )
+  )
+)
+dt <- data.table::data.table(c = 1:5)
+obs_ab <- vm@var_set_make(id = "ab_set", data = dt)
+obs_a <- vm@var_set_make(id = "ab_set", var_nms = "a", data = dt)
+obs_b <- vm@var_set_make(id = "ab_set", var_nms = "b", data = dt)
+stopifnot(
+  identical(names(obs_ab), c("a", "b")),
+  identical(names(obs_a), "a"),
+  identical(names(obs_b), "b")
 )
 vm <- vame::VariableMetadata(
   var_dt = data.table::data.table(

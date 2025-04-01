@@ -546,6 +546,38 @@ var_set_make <- function(
   #     check.attributes = FALSE
   #   )
   # )
+  #
+  # # Example where the same `maker` produces multiple columns
+  # vm <- vame::VariableMetadata(
+  #   var_dt = data.table::data.table(
+  #     var_nm = c("a", "b")
+  #   ),
+  #   var_set_dt = data.table::data.table(
+  #     id = "ab_set",
+  #     var_nm_set = list(ab_set = c("a", "b")),
+  #     maker = list(
+  #       a_set = list(
+  #         dep_var_nm_set = "c",
+  #         maker = quote({
+  #           dt <- data.table::data.table(
+  #             a = c + 1L,
+  #             b = c - 1L
+  #           )
+  #           return(dt[])
+  #         })
+  #       )
+  #     )
+  #   )
+  # )
+  # dt <- data.table::data.table(c = 1:5)
+  # obs_ab <- vm@var_set_make(id = "ab_set", data = dt)
+  # obs_a <- vm@var_set_make(id = "ab_set", var_nms = "a", data = dt)
+  # obs_b <- vm@var_set_make(id = "ab_set", var_nms = "b", data = dt)
+  # stopifnot(
+  #   identical(names(obs_ab), c("a", "b")),
+  #   identical(names(obs_a), "a"),
+  #   identical(names(obs_b), "b")
+  # )
   # @codedoc_comment_block feature_example(make)
 
   dbc::assert_has_one_of_classes(env, classes = c("NULL", "environment"))
@@ -695,7 +727,25 @@ var_set_make <- function(
     stop("Internal error: invalid var_set_dt$maker for id = ", deparse1(id))
   }
 
+  dbc::assert_prod_output_is_data_table(dt)
   dbc::assert_prod_output_has_names(dt, required_names = var_nms)
+  # @codedoc_comment_block news("vm@var_set_make", "2025-04-01", "1.8.0")
+  # `vm@var_set_make` now deletes all other columns except `var_nms` from output
+  # if such exist. Previously the user could request for e.g.
+  # `var_nms = "my_var_1"` only, but if the underlying `maker` was defined for
+  # e.g. `c("my_var_1", "my_var_2")`, then both were included in output.
+  # So now only `"my_var_1"` would be included.
+  # @codedoc_comment_block news("vm@var_set_make", "2025-04-01", "1.8.0")
+  # @codedoc_comment_block vm@var_set_make
+  # - Delete columns other than `var_nms` if found. E.g. if user supplied
+  #   `var_nms = "my_var_1"` but the `maker` produced a `data.table` with
+  #   columns `my_var_1` and `my_var_2`, remote the latter. If user supplied 
+  #   `var_nms = NULL` then nothing is deleted.
+  # @codedoc_comment_block vm@var_set_make
+  del_col_nms <- setdiff(names(dt), var_nms)
+  if (length(del_col_nms) > 0) {
+    data.table::set(dt, j = del_col_nms, value = NULL)
+  }
   # @codedoc_comment_block news("vm@var_set_make", "2024-10-02", "1.3.0")
   # `vm@var_set_make` now sets attribute `var_set_make_meta` on its output.
   # @codedoc_comment_block news("vm@var_set_make", "2024-10-02", "1.3.0")
@@ -704,7 +754,6 @@ var_set_make <- function(
   #   setting the `var_set_make_meta` attribute as a list containing the
   #   elements `id`, `var_nms`, and `dep_var_nm_set`.
   # @codedoc_comment_block vm@var_set_make
-  dbc::assert_prod_output_is_data_table(dt)
   data.table::setattr(
     dt,
     "var_set_make_meta",
