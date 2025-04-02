@@ -31,6 +31,14 @@ particular see the examples.
 
 \section{News}{
 
+\subsection{News for version 1.9.1}{
+\subsection{vm@vame_make}{
+
+Improved \code{callbacks} deprecation message.
+}
+
+}
+
 \subsection{News for version 1.9.0}{
 \subsection{vm@vame_make}{
 

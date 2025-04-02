@@ -2372,6 +2372,12 @@ The following functions are part of this feature:
 }
 }
 
+\section{News for version 1.9.1}{
+
+
+Improved \code{callbacks} deprecation message.
+}
+
 \section{News for version 1.9.0}{
 
 
