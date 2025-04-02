@@ -979,8 +979,8 @@ deprecate_arg_callbacks <- function(callbacks) {
   }
   return(callbacks)
 }
-if (utils::packageVersion("vame") >= "1.10.9000") {
-  stop("Have you removed arg `callbacks`?")
+if (utils::packageVersion("vame") >= "1.10.0") {
+  warning("Hi developer, remember, `callbacks` must be removed in 1.11.0")
 }
 
 assert_is_arg_optional_steps <- function(
