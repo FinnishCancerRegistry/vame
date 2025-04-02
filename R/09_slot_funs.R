@@ -934,12 +934,13 @@ vame_make <- function(
         print(meta_df[setdiff(seq_len(nrow(meta_df)), order_of_ids), ])
         stop(
           "Could not determine order in which to call `maker`s: One or more ",
-          "variable sets in set of ids `", deparse1(ids), "` has `maker` ",
+          "variable sets in set of ids `", deparse1(unname(ids)),
+          "` has `maker` ",
           "dependencies not satisfied by what was passed via `data` and what ",
           "other `maker`s can produce. Either pass more variable via `data` ",
           "or fix one or more of the `maker`s. See the printed table above ",
           "for more information. Argument `data` contains objects with names `",
-          deparse1(data_obj_nm_set), "`"
+          deparse1(unname(data_obj_nm_set)), "`"
         )
       }
       order_of_ids[i] <- match(makeable_ids, ids)[1L]
