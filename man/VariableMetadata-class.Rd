@@ -466,18 +466,28 @@ if that is defined.
 For instance if \code{maker} for \code{ids[1]} requires the variables
 created by the \code{maker} for \code{ids[2]}, then the latter is called first.
 \item Calls \code{optional_steps[["pre_lapply"]](env = main_env)} if defined.
-\item For each \code{ids} element:
+\item Call \code{lapply} on \code{ids} with an anonymous function.
+For each \code{ids} element:
 \itemize{
 \item Calls \code{optional_steps[["lapply_on_entry"]](env = lapply_fun_env)} if
 defined. \code{lapply_fun_env} is the local environment of the anonymous
-function that \code{lapply} calls.
-\item Calls \code{on.exit(optional_steps[["lapply_on_exit"]](env = lapply_fun_env))}
+function that \code{lapply} calls. \code{lapply_fun_env} contains object
+\code{id} at this point, an individual \code{var_set_dt$id} value.
+\item Calls
+\code{on.exit(optional_steps[["lapply_on_exit"]](env = lapply_fun_env))}
 if defined.
-\item Calls \code{optional_steps[["lapply_pre_var_set_make"]](env = lapply_fun_env)}
-if that is defined.
+\item Calls
+\code{optional_steps[["lapply_pre_var_set_make"]](env = lapply_fun_env)}
+if that is defined. \code{lapply_fun_env} contains objects
+\code{id} and \code{var_nms_of_id}, where the latter is the intersection of
+arg \code{var_nms} and those variable names that the variable set with
+\code{id} contains.
 \item Calls \code{vm@var_set_make}.
-\item Calls \code{optional_steps[["lapply_post_var_set_make"]](env = lapply_fun_env)}
-if that is defined.
+\item Calls
+\code{optional_steps[["lapply_post_var_set_make"]](env = lapply_fun_env)}
+if that is defined. \code{lapply_fun_env} contains objects
+\code{id}, \code{var_nms_of_id}, and \code{made_dt} where the \code{made_dt} is the result
+of the \code{var_set_make} call.
 \item Adds the created columns into \code{data[["df"]]}. The same object is used
 in subsequent calls to \code{vm@var_set_make}.
 }
