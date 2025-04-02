@@ -457,26 +457,26 @@ stopifnot(
 
 Call multiple \code{var_set_dt$maker}s in sequence. Performs these steps:
 \itemize{
-\item Calls \code{callbacks[["on_entry"]](env = main_env)} if defined.
+\item Calls \code{optional_steps[["on_entry"]](env = main_env)} if defined.
 \code{main_env} is the local environment of the main function.
-\item Calls \code{on.exit(callbacks[["on_exit"]](env = main_env))}
+\item Calls \code{on.exit(optional_steps[["on_exit"]](env = main_env))}
 if that is defined.
 \item Infers \code{ids} to use if user gave \code{var_nms} but not \code{ids} and vice versa.
 \item Determines order in which the \code{maker}s of \code{ids} should be called.
 For instance if \code{maker} for \code{ids[1]} requires the variables
 created by the \code{maker} for \code{ids[2]}, then the latter is called first.
-\item Calls \code{callbacks[["pre_lapply"]](env = main_env)} if defined.
+\item Calls \code{optional_steps[["pre_lapply"]](env = main_env)} if defined.
 \item For each \code{ids} element:
 \itemize{
-\item Calls \code{callbacks[["lapply_on_entry"]](env = lapply_fun_env)} if
+\item Calls \code{optional_steps[["lapply_on_entry"]](env = lapply_fun_env)} if
 defined. \code{lapply_fun_env} is the local environment of the anonymous
 function that \code{lapply} calls.
-\item Calls \code{on.exit(callbacks[["lapply_on_exit"]](env = lapply_fun_env))}
+\item Calls \code{on.exit(optional_steps[["lapply_on_exit"]](env = lapply_fun_env))}
 if defined.
-\item Calls \code{callbacks[["lapply_pre_var_set_make"]](env = lapply_fun_env)}
+\item Calls \code{optional_steps[["lapply_pre_var_set_make"]](env = lapply_fun_env)}
 if that is defined.
 \item Calls \code{vm@var_set_make}.
-\item Calls \code{callbacks[["lapply_post_var_set_make"]](env = lapply_fun_env)}
+\item Calls \code{optional_steps[["lapply_post_var_set_make"]](env = lapply_fun_env)}
 if that is defined.
 \item Adds the created columns into \code{data[["df"]]}. The same object is used
 in subsequent calls to \code{vm@var_set_make}.
@@ -489,7 +489,7 @@ columns \code{id}, \code{var_nms}, and \code{dep_var_nm_set} in the order of exe
 
 \emph{Usage}
 
-\code{vm@vame_make(data, ids, var_nms, env, callbacks)}
+\code{vm@vame_make(data, ids, var_nms, env, optional_steps, callbacks)}
 
 \emph{Arguments}
 
@@ -523,6 +523,13 @@ Environment where a value space will be evaluated, if applicable.
 \itemize{
 \item \code{NULL}: Use the environment where the function was called.
 \item \code{environment}: Use this environment.
+}
+
+optional_steps \verb{[NULL, list]} (default \code{NULL})
+\itemize{
+\item \code{NULL}: Function is called normally.
+\item \code{list}: These functions are called during the run. See \strong{Description} /
+\strong{Details}.
 }
 
 callbacks \verb{[NULL, list]} (default \code{NULL})
@@ -2353,6 +2360,14 @@ The following functions are part of this feature:
 \item \code{vm@vame_category_space_dt_list}
 \item \code{vm@vame_category_space_dt}
 }
+}
+
+\section{News for version 1.9.0}{
+
+
+\code{vm@vame_make} gains arg \code{optional_steps} to replace \code{callbacks}.
+Using \code{callbacks} throws a warning now, an error starting in 1.10.0
+and it will be removed in 1.11.0.
 }
 
 \section{News for version 1.8.0}{

@@ -31,6 +31,16 @@ particular see the examples.
 
 \section{News}{
 
+\subsection{News for version 1.9.0}{
+\subsection{vm@vame_make}{
+
+\code{vm@vame_make} gains arg \code{optional_steps} to replace \code{callbacks}.
+Using \code{callbacks} throws a warning now, an error starting in 1.10.0
+and it will be removed in 1.11.0.
+}
+
+}
+
 \subsection{News for version 1.8.0}{
 \subsection{vm@var_set_make}{
 

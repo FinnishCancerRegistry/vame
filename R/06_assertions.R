@@ -960,13 +960,43 @@ assert_meta <- function(
   }
 }
 
-assert_is_callbacks <- function(
+deprecate_arg_callbacks <- function(callbacks) {
+  pkg_v <- utils::packageVersion("vame")
+  if (is.null(callbacks)) {
+    return(callbacks)
+  }
+  if (pkg_v < "1.10.0") {
+    warning("Use argument `optional_steps` instead of `callbacks`. ",
+            "Using `callbacks` will raise an error starting in 1.10.0 and ",
+            "it will be removed in version 1.11.0.")
+  } else if (pkg_v < "1.11.0") {
+    stop("Use argument `optional_steps` instead of `callbacks`. ",
+         "Using `callbacks` raises an error since 1.10.0 and ",
+         "it will be removed in version 1.11.0.")
+  } else {
+    stop("`callbacks` should already have been removed from use. Complain ",
+         "to the maintainer of package `vame` if you see this.")
+  }
+  return(callbacks)
+}
+if (utils::packageVersion("vame") >= "1.10.9000") {
+  stop("Have you removed arg `callbacks`?")
+}
+
+assert_is_arg_optional_steps <- function(
   x,
   x_nm = NULL,
   call = NULL,
   assertion_type = NULL
 ) {
   dbc::handle_args_inplace()
+  # @codedoc_comment_block doc_slot_fun_arg(optional_steps)
+  # @param optional_steps `[NULL, list]` (default `NULL`)
+  #
+  # - `NULL`: Function is called normally.
+  # - `list`: These functions are called during the run. See **Description** /
+  #   **Details**.
+  # @codedoc_comment_block doc_slot_fun_arg(optional_steps)
   # @codedoc_comment_block doc_slot_fun_arg(callbacks)
   # @param callbacks `[NULL, list]` (default `NULL`)
   #

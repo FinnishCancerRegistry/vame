@@ -824,6 +824,7 @@ vame_make <- function(
   ids = NULL,
   var_nms = NULL,
   env = NULL,
+  optional_steps = NULL,
   callbacks = NULL
 ) {
   # @codedoc_comment_block feature_funs(make)
@@ -839,19 +840,25 @@ vame_make <- function(
   # @codedoc_comment_block vm@vame_make
   # Call multiple `var_set_dt$maker`s in sequence. Performs these steps:
   #
-  # - Calls `callbacks[["on_entry"]](env = main_env)` if defined.
+  # - Calls `optional_steps[["on_entry"]](env = main_env)` if defined.
   #   `main_env` is the local environment of the main function.
   # @codedoc_comment_block vm@vame_make
+  # @codedoc_comment_block news("vm@vame_make", "2025-04-02", "1.9.0")
+  # `vm@vame_make` gains arg `optional_steps` to replace `callbacks`.
+  # Using `callbacks` throws a warning now, an error starting in 1.10.0
+  # and it will be removed in 1.11.0.
+  # @codedoc_comment_block news("vm@vame_make", "2025-04-02", "1.9.0")
   main_env <- environment()
+  optional_steps <- deprecate_arg_callbacks(callbacks)
   if ("on_entry" %in% names(callbacks)) {
-    callbacks[["on_entry"]](env = main_env)
+    optional_steps[["on_entry"]](env = main_env)
   }
   # @codedoc_comment_block vm@vame_make
-  # - Calls `on.exit(callbacks[["on_exit"]](env = main_env))`
+  # - Calls `on.exit(optional_steps[["on_exit"]](env = main_env))`
   #   if that is defined.
   # @codedoc_comment_block vm@vame_make
   if ("on_exit" %in% names(callbacks)) {
-    on.exit(callbacks[["on_exit"]](env = main_env))
+    on.exit(optional_steps[["on_exit"]](env = main_env))
   }
 
   # @codedoc_comment_block vame::vame_make::data
@@ -879,7 +886,7 @@ vame_make <- function(
   # @codedoc_comment_block news("vm@vame_make", "2024-09-11", "1.0.0")
   # `vm@vame_make` gains argument `callbacks`.
   # @codedoc_comment_block news("vm@vame_make", "2024-09-11", "1.0.0")
-  assert_is_callbacks(callbacks)
+  assert_is_arg_optional_steps(callbacks)
 
   ids <- local({
     # @codedoc_comment_block news("vm@vame_make", "2024-05-13", "0.5.2")
@@ -953,10 +960,10 @@ vame_make <- function(
   # Rename `vm@vame_make` `callbacks` element `pre_loop` to `pre_lapply`.
   # @codedoc_comment_block news("vm@vame_make", "2024-09-11", "1.2.0")
   # @codedoc_comment_block vm@vame_make
-  # - Calls `callbacks[["pre_lapply"]](env = main_env)` if defined.
+  # - Calls `optional_steps[["pre_lapply"]](env = main_env)` if defined.
   # @codedoc_comment_block vm@vame_make
   if ("pre_lapply" %in% names(callbacks)) {
-    callbacks[["pre_lapply"]](env = main_env)
+    optional_steps[["pre_lapply"]](env = main_env)
   }
   vame_make_meta_dt <- data.table::rbindlist(lapply(ids, function(id) {
     # @codedoc_comment_block news("vm@vame_make", "2024-09-26", "1.2.0")
@@ -964,23 +971,23 @@ vame_make <- function(
     # @codedoc_comment_block news("vm@vame_make", "2024-09-26", "1.2.0")
     # @codedoc_comment_block vm@vame_make
     # - For each `ids` element:
-    #   * Calls `callbacks[["lapply_on_entry"]](env = lapply_fun_env)` if
+    #   * Calls `optional_steps[["lapply_on_entry"]](env = lapply_fun_env)` if
     #     defined. `lapply_fun_env` is the local environment of the anonymous
     #     function that `lapply` calls.
     # @codedoc_comment_block vm@vame_make
     lapply_fun_env <- environment()
     if ("lapply_on_entry" %in% names(callbacks)) {
-      callbacks[["lapply_on_entry"]](env = lapply_fun_env)
+      optional_steps[["lapply_on_entry"]](env = lapply_fun_env)
     }
     # @codedoc_comment_block news("vm@vame_make", "2024-09-26", "1.2.0")
     # `vm@vame_make` gains `callbacks` element `lapply_on_exit`.
     # @codedoc_comment_block news("vm@vame_make", "2024-09-26", "1.2.0")
     # @codedoc_comment_block vm@vame_make
-    #   * Calls `on.exit(callbacks[["lapply_on_exit"]](env = lapply_fun_env))`
+    #   * Calls `on.exit(optional_steps[["lapply_on_exit"]](env = lapply_fun_env))`
     #     if defined.
     # @codedoc_comment_block vm@vame_make
     if ("lapply_on_exit" %in% names(callbacks)) {
-      on.exit(callbacks[["lapply_on_exit"]](env = lapply_fun_env))
+      on.exit(optional_steps[["lapply_on_exit"]](env = lapply_fun_env))
     }
     # this called just in case some make expression makes use of a slot function
     # --- see where the slots are created.
@@ -995,11 +1002,11 @@ vame_make <- function(
     # `vm@vame_make` gains `callbacks` element `lapply_pre_var_set_make`.
     # @codedoc_comment_block news("vm@vame_make", "2024-09-26", "1.2.0")
     # @codedoc_comment_block vm@vame_make
-    #   * Calls `callbacks[["lapply_pre_var_set_make"]](env = lapply_fun_env)`
+    #   * Calls `optional_steps[["lapply_pre_var_set_make"]](env = lapply_fun_env)`
     #     if that is defined.
     # @codedoc_comment_block vm@vame_make
     if ("lapply_pre_var_set_make" %in% names(callbacks)) {
-      callbacks[["lapply_pre_var_set_make"]](env = lapply_fun_env)
+      optional_steps[["lapply_pre_var_set_make"]](env = lapply_fun_env)
     }
     # @codedoc_comment_block vm@vame_make
     #   * Calls `vm@var_set_make`.
@@ -1016,11 +1023,11 @@ vame_make <- function(
     # `lapply_post_var_set_make`.
     # @codedoc_comment_block news("vm@vame_make", "2024-09-11", "1.2.0")
     # @codedoc_comment_block vm@vame_make
-    #   * Calls `callbacks[["lapply_post_var_set_make"]](env = lapply_fun_env)`
+    #   * Calls `optional_steps[["lapply_post_var_set_make"]](env = lapply_fun_env)`
     #     if that is defined.
     # @codedoc_comment_block vm@vame_make
     if ("lapply_post_var_set_make" %in% names(callbacks)) {
-      callbacks[["lapply_post_var_set_make"]](env = lapply_fun_env)
+      optional_steps[["lapply_post_var_set_make"]](env = lapply_fun_env)
     }
     # @codedoc_comment_block vm@vame_make
     #   * Adds the created columns into `data[["df"]]`. The same object is used
