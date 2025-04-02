@@ -834,6 +834,18 @@ vame_make <- function(
   # New function `vm@vame_make`.
   # @codedoc_comment_block news("vm@vame_make", "2024-01-19", "0.3.0")
 
+  # @codedoc_comment_block news("vm@vame_make", "2024-09-11", "1.0.0")
+  # `vm@vame_make` gains argument `callbacks`.
+  # @codedoc_comment_block news("vm@vame_make", "2024-09-11", "1.0.0")
+  assert_is_arg_optional_steps(callbacks)
+  # @codedoc_comment_block news("vm@vame_make", "2025-04-02", "1.9.0")
+  # `vm@vame_make` gains arg `optional_steps` to replace `callbacks`.
+  # Using `callbacks` throws a warning now, an error starting in 1.10.0
+  # and it will be removed in 1.11.0.
+  # @codedoc_comment_block news("vm@vame_make", "2025-04-02", "1.9.0")
+  assert_is_arg_optional_steps(optional_steps)
+  optional_steps <- deprecate_arg_callbacks(callbacks)
+
   # @codedoc_comment_block news("vm@vame_make", "2024-09-11", "1.0.1")
   # `vm@vame_make` gains `callbacks` element `on_entry`.
   # @codedoc_comment_block news("vm@vame_make", "2024-09-11", "1.0.1")
@@ -843,13 +855,7 @@ vame_make <- function(
   # - Calls `optional_steps[["on_entry"]](env = main_env)` if defined.
   #   `main_env` is the local environment of the main function.
   # @codedoc_comment_block vm@vame_make
-  # @codedoc_comment_block news("vm@vame_make", "2025-04-02", "1.9.0")
-  # `vm@vame_make` gains arg `optional_steps` to replace `callbacks`.
-  # Using `callbacks` throws a warning now, an error starting in 1.10.0
-  # and it will be removed in 1.11.0.
-  # @codedoc_comment_block news("vm@vame_make", "2025-04-02", "1.9.0")
   main_env <- environment()
-  optional_steps <- deprecate_arg_callbacks(callbacks)
   if ("on_entry" %in% names(callbacks)) {
     optional_steps[["on_entry"]](env = main_env)
   }
@@ -882,11 +888,6 @@ vame_make <- function(
   if (is.null(env)) {
     env <- parent.frame(1L)
   }
-
-  # @codedoc_comment_block news("vm@vame_make", "2024-09-11", "1.0.0")
-  # `vm@vame_make` gains argument `callbacks`.
-  # @codedoc_comment_block news("vm@vame_make", "2024-09-11", "1.0.0")
-  assert_is_arg_optional_steps(callbacks)
 
   ids <- local({
     # @codedoc_comment_block news("vm@vame_make", "2024-05-13", "0.5.2")
