@@ -54,12 +54,17 @@ vd_implied_get <- function(
     var_nm = unique(unlist(vsd[["var_nm_set"]]))
   )
   if (nrow(dt) == 0L) {
+    # @codedococ_comment_block news("vm@vame_union_append", "2025-04-04", "1.9.2")
+    # Fixed a bug which sometimes caused an issue with `vm@vame_union_append`:
+    # `var_dt$var_set_dt_pos_set` could be created as an `integer`
+    # column instead of the intended `list` column.
+    # @codedococ_comment_block news("vm@vame_union_append", "2025-04-04", "1.9.2")
     return(data.table::data.table(
       var_nm = character(0L),
-      var_set_dt_pos_set = integer(0L)
+      var_set_dt_pos_set = list()
     ))
   }
-  
+
   dt <- data.table::data.table(
     var_nm = unlist(vsd[["var_nm_set"]]),
     var_set_dt_pos_set = unlist(lapply(
