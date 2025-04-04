@@ -2372,6 +2372,13 @@ The following functions are part of this feature:
 }
 }
 
+\section{News for version 1.9.3}{
+
+
+Fixed a bug which sometimes caused an issue with refreshing
+\code{var_dt$var_set_dt_pos_set}.
+}
+
 \section{News for version 1.9.2}{
 
 

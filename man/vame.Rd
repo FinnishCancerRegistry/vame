@@ -30,6 +30,15 @@ particular see the examples.
 
 \section{News}{
 
+\subsection{News for version 1.9.3}{
+\subsection{vm@vame_union_append}{
+
+Fixed a bug which sometimes caused an issue with refreshing
+\code{var_dt$var_set_dt_pos_set}.
+}
+
+}
+
 \subsection{News for version 1.9.2}{
 \subsection{vm@vame_union_append}{
 

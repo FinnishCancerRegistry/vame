@@ -117,6 +117,13 @@ vd_vsd_linkage_refresh <- function(
     return(invisible(NULL))
   }
   vdi <- vd_implied_get(vm)
+  # @codedoc_comment_block news("vm@vame_union_append", "2025-04-04", "1.9.3")
+  # Fixed a bug which sometimes caused an issue with refreshing
+  # `var_dt$var_set_dt_pos_set`.
+  # @codedoc_comment_block news("vm@vame_union_append", "2025-04-04", "1.9.3")
+  if ("var_set_dt_pos_set" %in% names(vd)) {
+    data.table::set(vd, j = "var_set_dt_pos_set", value = NULL)
+  }
   i.var_set_dt_pos_set <- NULL # appease R CMD CHECK
   #' @importFrom data.table :=
   vd[
