@@ -25,8 +25,7 @@ particular see the examples.
 
 ```r
 devtools::install_github(
-  "FinnishCancerRegistry/vame",
-  ref = readline("enter latest tag on github: ")
+  "FinnishCancerRegistry/vame@release"
 )
 ```
 

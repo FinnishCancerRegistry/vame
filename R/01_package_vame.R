@@ -103,8 +103,7 @@ doc_dev_todo__ <- function(df = NULL) {
 #
 # ```r
 # devtools::install_github(
-#   "FinnishCancerRegistry/vame",
-#   ref = readline("enter latest tag on github: ")
+#   "FinnishCancerRegistry/vame@release"
 # )
 # ```
 # @codedoc_comment_block R_package_description(vame)

@@ -23,8 +23,7 @@ particular see the examples.
 }
 \section{Recommended installation}{
 \if{html}{\out{<div class="sourceCode r">}}\preformatted{devtools::install_github(
-  "FinnishCancerRegistry/vame",
-  ref = readline("enter latest tag on github: ")
+  "FinnishCancerRegistry/vame@release"
 )
 }\if{html}{\out{</div>}}
 }
