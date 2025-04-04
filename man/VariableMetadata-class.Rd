@@ -2372,6 +2372,14 @@ The following functions are part of this feature:
 }
 }
 
+\section{News for version 1.9.2}{
+
+
+Fixed a bug which sometimes caused an issue with \code{vm@vame_union_append}:
+\code{var_dt$var_set_dt_pos_set} could be created as an \code{integer}
+column instead of the intended \code{list} column.
+}
+
 \section{News for version 1.9.1}{
 
 

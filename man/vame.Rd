@@ -30,6 +30,16 @@ particular see the examples.
 
 \section{News}{
 
+\subsection{News for version 1.9.2}{
+\subsection{vm@vame_union_append}{
+
+Fixed a bug which sometimes caused an issue with \code{vm@vame_union_append}:
+\code{var_dt$var_set_dt_pos_set} could be created as an \code{integer}
+column instead of the intended \code{list} column.
+}
+
+}
+
 \subsection{News for version 1.9.1}{
 \subsection{vm@vame_make}{
 
