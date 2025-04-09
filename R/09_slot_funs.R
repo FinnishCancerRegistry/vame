@@ -1863,14 +1863,24 @@ var_aggregate <- function(
     dt = dt
   )
   if (!is_aggregateable) {
-    stop("cannot aggregate ", from_var_nm, " to ", to_var_nm, "; ",
-          "aggregation only possible when there is exactly one ",
-          "level of the target variable for each level of the starting ",
-          "variable. if e.g. ", from_var_nm, " = 1 can be either ",
-          to_var_nm, " = 1 or 2, cannot aggregate.")
+    stop(
+      "cannot aggregate ", from_var_nm, " to ", to_var_nm, "; ",
+      "aggregation only possible when there is exactly one ",
+      "level of the target variable for each level of the starting ",
+      "variable. if e.g. ", from_var_nm, " = 1 can be either ",
+      to_var_nm, " = 1 or 2, cannot aggregate."
+    )
   }
   jdt <- data.table::setDT(list(x = x))
   data.table::setnames(jdt, "x", from_var_nm)
+  if (!identical(class(x), class(dt[[from_var_nm]]))) {
+    stop(
+      "`x` and `value_space` for `from_var_nm = \"", from_var_nm, "\"` ",
+      "do not match. Join between `x` and its `value_space` not possible. ",
+      "`class(x) = ", deparse1(class(x)), "` vs. ",
+      "`class(vs_of_from_var_nm) = ", deparse1(dt[[from_var_nm]]), "`."
+    )
+  }
   dt[
     i = jdt,
     on = from_var_nm,
