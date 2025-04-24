@@ -1882,6 +1882,11 @@ var_aggregate <- function(
   jdt <- data.table::setDT(list(x = x))
   data.table::setnames(jdt, "x", from_var_nm)
   if (!identical(class(x), class(dt[[from_var_nm]]))) {
+    # @codedoc_comment_block news("vm@var_aggregate", "2025-04-24", "1.9.4")
+    # `vm@var_aggregate` now checks that `x` and the `value_space` of
+    # `to_var_nm` have identical class vectors and raises an informative
+    # error if that is not the case.
+    # @codedoc_comment_block news("vm@var_aggregate", "2025-04-24", "1.9.4")
     stop(
       "`x` and `value_space` for `from_var_nm = \"", from_var_nm, "\"` ",
       "do not match. Join between `x` and its `value_space` not possible. ",

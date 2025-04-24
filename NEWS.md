@@ -7,6 +7,12 @@
 `vm@var_aggregate` optimised to simply return `x` if
 `from_var_nm == to_var_nm`.
 
+### vm@var_aggregate
+
+`vm@var_aggregate` now checks that `x` and the `value_space` of
+`to_var_nm` have identical class vectors and raises an informative
+error if that is not the case.
+
 
 ## News for version 1.9.3
 

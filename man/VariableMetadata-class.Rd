@@ -2377,6 +2377,10 @@ The following functions are part of this feature:
 
 \code{vm@var_aggregate} optimised to simply return \code{x} if
 \code{from_var_nm == to_var_nm}.
+
+\code{vm@var_aggregate} now checks that \code{x} and the \code{value_space} of
+\code{to_var_nm} have identical class vectors and raises an informative
+error if that is not the case.
 }
 
 \section{News for version 1.9.3}{
