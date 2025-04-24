@@ -1837,9 +1837,6 @@ var_aggregate <- function(
   from_var_nm,
   to_var_nm
 ) {
-  # @codedoc_comment_block vm@var_aggregate
-  # Returns correspoding level of `to_var_nm` for each value in `x`.
-  # @codedoc_comment_block vm@var_aggregate
   # @codedoc_comment_block feature_funs(category spaces)
   # - `vm@var_aggregate`
   # @codedoc_comment_block feature_funs(category spaces)
@@ -1860,10 +1857,25 @@ var_aggregate <- function(
   # `vm@var_aggregate` optimised to simply return `x` if
   # `from_var_nm == to_var_nm`.
   # @codedoc_comment_block news("vm@var_aggregate", "2025-04-24", "1.9.4")
+  # @codedoc_comment_block vm@var_aggregate
+  # Returns correspoding level of `to_var_nm` for each value in `x`.
+  # Performs the following steps:
+  #
+  # - If `from_var_nm == to_var_nm`, simply return `x` early.
+  # @codedoc_comment_block vm@var_aggregate
   if (from_var_nm == to_var_nm) {
     return(x)
   }
+  # @codedoc_comment_block vm@var_aggregate
+  # - Call `vm@vame_category_space_dt` to get a joint `data.table` with both
+  #   `from_var_nm` and `to_var_nm`.
+  # @codedoc_comment_block vm@var_aggregate
   dt <- vame_category_space_dt(vm, c(from_var_nm, to_var_nm))
+  # @codedoc_comment_block vm@var_aggregate
+  # - Check if `from_var_nm` is aggregateable to `to_var_nm`. Raise an
+  #   informative error if it isn't.
+  # @codedoc_insert_comment_block var_is_aggregateable_to__
+  # @codedoc_comment_block vm@var_aggregate
   is_aggregateable <- var_is_aggregateable_to__(
     vm,
     from_var_nm = from_var_nm,
@@ -1879,12 +1891,16 @@ var_aggregate <- function(
       to_var_nm, " = 1 or 2, cannot aggregate."
     )
   }
+  # @codedoc_comment_block vm@var_aggregate
+  # - Check that `x` and the `value_space` for `from_var_nm` have the same
+  #   exact `class`. Raise an informative error if that is not the case.
+  # @codedoc_comment_block vm@var_aggregate
   jdt <- data.table::setDT(list(x = x))
   data.table::setnames(jdt, "x", from_var_nm)
   if (!identical(class(x), class(dt[[from_var_nm]]))) {
     # @codedoc_comment_block news("vm@var_aggregate", "2025-04-24", "1.9.4")
     # `vm@var_aggregate` now checks that `x` and the `value_space` of
-    # `to_var_nm` have identical class vectors and raises an informative
+    # `from_var_nm` have identical class vectors and raises an informative
     # error if that is not the case.
     # @codedoc_comment_block news("vm@var_aggregate", "2025-04-24", "1.9.4")
     stop(
@@ -1894,12 +1910,18 @@ var_aggregate <- function(
       "`class(vs_of_from_var_nm) = ", deparse1(dt[[from_var_nm]]), "`."
     )
   }
-  dt[
+  # @codedoc_comment_block vm@var_aggregate
+  # - Simply do a join on the joint `data.table` using `x` to return values of
+  #   `to_var_nm` for each value of `x`.
+  # @codedoc_comment_block vm@var_aggregate
+  out <- dt[
     i = jdt,
     on = from_var_nm,
+    #' @importFrom data.table .SD
     j = .SD[[1L]],
     .SDcols = to_var_nm
   ]
+  return(out[])
 }
 
 

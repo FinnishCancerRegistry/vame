@@ -277,22 +277,39 @@ var_is_aggregateable_to__ <- function(
   vm,
   from_var_nm,
   to_var_nm,
-  dt
+  dt = NULL
 ) {
   assert_is_variablemetadata(vm, assertion_type = "prod_input")
-  stopifnot(
-    identical(sort(names(dt)), sort(union(from_var_nm, to_var_nm)))
-  )
+  if (is.null(dt)) {
+    dt <- vame_category_space_dt(vm = vm, var_nms = c(from_var_nm, to_var_nm))
+  } else {
+    dbc::assert_prod_input_is_data_table(dt)
+    dbc::assert_prod_input_is_TRUE(
+      length(setdiff(names(dt), c(from_var_nm, to_var_nm))) == 0L
+    )
+  }
   # @codedoc_comment_block news("vm@var_aggregate", "2024-02-15", "0.4.0")
   # `vm@var_aggregate` now always considers it possible to aggregate to
   # `to_var_nm` if it only has one value.
   # @codedoc_comment_block news("vm@var_aggregate", "2024-02-15", "0.4.0")
+  # @codedoc_comment_block var_is_aggregateable_to__
+  # - A variable named `from_var_nm` is aggregateble to `to_var_nm` if:
+  #   + `from_var_nm` == `to_var_nm`.
+  #   + Variable named `to_var_nm` has only one value in its `value_space`.
+  # @codedoc_comment_block var_is_aggregateable_to__
   if (from_var_nm == to_var_nm || data.table::uniqueN(dt[[to_var_nm]]) == 1L) {
     return(TRUE)
   }
   from_type <- var_meta_get(vm, from_var_nm, "type")
   to_type <- var_meta_get(vm, to_var_nm, "type")
-  if (from_type != to_type || from_type != "categorical") {
+  # @codedoc_comment_block var_is_aggregateable_to__
+  #   + Both `from_var_nm` and `to_var_nm` have `var_dt$type` set to
+  #     `"categorical"`,
+  #     AND they have a common `value_space` object,
+  #     AND `from_var_nm` has no duplicates in a table that contains the
+  #     complete joint `value_space` of `from_var_nm` and `to_var_nm`.
+  # @codedoc_comment_block var_is_aggregateable_to__
+  if (from_type != "categorical" || to_type != "categorical") {
     return(FALSE)
   }
   from_pos_set <- var_meta_get(vm, from_var_nm, "var_set_dt_pos_set")

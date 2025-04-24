@@ -40,7 +40,7 @@ particular see the examples.
 \subsection{vm@var_aggregate}{
 
 \code{vm@var_aggregate} now checks that \code{x} and the \code{value_space} of
-\code{to_var_nm} have identical class vectors and raises an informative
+\code{from_var_nm} have identical class vectors and raises an informative
 error if that is not the case.
 }
 

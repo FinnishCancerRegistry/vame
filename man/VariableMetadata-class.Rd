@@ -877,6 +877,28 @@ Name of a variable. Aggregation to this from another variable.}
 \item{\code{var_aggregate}}{\emph{Description}
 
 Returns correspoding level of \code{to_var_nm} for each value in \code{x}.
+Performs the following steps:
+\itemize{
+\item If \code{from_var_nm == to_var_nm}, simply return \code{x} early.
+\item Call \code{vm@vame_category_space_dt} to get a joint \code{data.table} with both
+\code{from_var_nm} and \code{to_var_nm}.
+\item Check if \code{from_var_nm} is aggregateable to \code{to_var_nm}. Raise an
+informative error if it isn't.
+\item A variable named \code{from_var_nm} is aggregateble to \code{to_var_nm} if:
+\itemize{
+\item \code{from_var_nm} == \code{to_var_nm}.
+\item Variable named \code{to_var_nm} has only one value in its \code{value_space}.
+\item Both \code{from_var_nm} and \code{to_var_nm} have \code{var_dt$type} set to
+\code{"categorical"},
+AND they have a common \code{value_space} object,
+AND \code{from_var_nm} has no duplicates in a table that contains the
+complete joint \code{value_space} of \code{from_var_nm} and \code{to_var_nm}.
+}
+\item Check that \code{x} and the \code{value_space} for \code{from_var_nm} have the same
+exact \code{class}. Raise an informative error if that is not the case.
+\item Simply do a join on the joint \code{data.table} using \code{x} to return values of
+\code{to_var_nm} for each value of \code{x}.
+}
 
 \emph{Usage}
 
@@ -2379,7 +2401,7 @@ The following functions are part of this feature:
 \code{from_var_nm == to_var_nm}.
 
 \code{vm@var_aggregate} now checks that \code{x} and the \code{value_space} of
-\code{to_var_nm} have identical class vectors and raises an informative
+\code{from_var_nm} have identical class vectors and raises an informative
 error if that is not the case.
 }
 

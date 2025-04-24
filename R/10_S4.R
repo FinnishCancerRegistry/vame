@@ -9,7 +9,14 @@ vame_slot_nms_get__ <- function() {
   return(.__VAME_SLOT_FUN_NMS__)
 }
 
-doc_slot_fun_arg__ <- function(df, fun_nm, arg_nm, with_tag = FALSE) {
+codedoc_df__ <- function() {
+  codedoc::extract_keyed_comment_blocks()
+}
+
+doc_slot_fun_arg__ <- function(df = NULL, fun_nm, arg_nm, with_tag = FALSE) {
+  if (is.null(df)) {
+    df <- codedoc_df__()
+  }
   key_options <- c(
     sprintf("vame::%s::%s", fun_nm, arg_nm),
     sprintf("doc_slot_fun_arg(%s)", arg_nm)
@@ -33,7 +40,10 @@ doc_slot_fun_arg__ <- function(df, fun_nm, arg_nm, with_tag = FALSE) {
   return(lines)
 }
 
-doc_slot_fun__ <- function(df, fun_nm) {
+doc_slot_fun__ <- function(df = NULL, fun_nm) {
+  if (is.null(df)) {
+    df <- codedoc_df__()
+  }
   key <- paste0("vm@", fun_nm)
   description <- unlist(df[["comment_block"]][df[["key"]] == key])
   fun_arg_nms <- names(formals(match.fun(fun_nm)))
@@ -83,7 +93,7 @@ doc_slot_fun__ <- function(df, fun_nm) {
 }
 doc_slot_funs__ <- function(df = NULL, fun_nms = NULL) {
   if (is.null(df)) {
-    df <- codedoc::extract_keyed_comment_blocks()
+    df <- codedoc_df__()
   }
   if (is.null(fun_nms)) {
     fun_nms <- vame_slot_nms_get__()
@@ -93,7 +103,7 @@ doc_slot_funs__ <- function(df = NULL, fun_nms = NULL) {
 }
 doc_variablemetadata_features__ <- function(df = NULL) {
   if (is.null(df)) {
-    df <- codedoc::extract_keyed_comment_blocks()
+    df <- codedoc_df__()
   }
   feature_keys <- unique(df[["key"]])
   feature_regex <- "^feature[(]"
@@ -122,7 +132,7 @@ doc_variablemetadata_news__ <- function() {
 }
 doc_variablemetadata_details__ <- function(df = NULL) {
   if (is.null(df)) {
-    df <- codedoc::extract_keyed_comment_blocks()
+    df <- codedoc_df__()
   }
   belongs_in_details <- grepl("^recommendation[(]", df[["key"]])
   lines <- unlist(df[["comment_block"]][belongs_in_details])
@@ -134,7 +144,7 @@ doc_variablemetadata_details__ <- function(df = NULL) {
 }
 doc_variablemetadata_examples__ <- function(df = NULL) {
   if (is.null(df)) {
-    df <- codedoc::extract_keyed_comment_blocks()
+    df <- codedoc_df__()
   }
   is_example <- grepl(
     "(^feature_example[(])|(^general_example$)|(^function_example[(])",
@@ -460,7 +470,7 @@ methods::setClass(
 #'
 #' @export
 #' @eval local({
-#'   df <- codedoc::extract_keyed_comment_blocks()
+#'   df <- codedoc_df__()
 #'   c(
 #'     doc_slot_funs__(df = df),
 #'     doc_variablemetadata_details__(df = df),
