@@ -1855,6 +1855,14 @@ var_aggregate <- function(
   # Values of a specified variable.
   # @codedoc_comment_block doc_slot_fun_arg(x)
   dbc::assert_is_vector(x)
+
+  # @codedoc_comment_block news("vm@var_aggregate", "2025-04-24", "1.9.4")
+  # `vm@var_aggregate` optimised to simply return `x` if
+  # `from_var_nm == to_var_nm`.
+  # @codedoc_comment_block news("vm@var_aggregate", "2025-04-24", "1.9.4")
+  if (from_var_nm == to_var_nm) {
+    return(x)
+  }
   dt <- vame_category_space_dt(vm, c(from_var_nm, to_var_nm))
   is_aggregateable <- var_is_aggregateable_to__(
     vm,

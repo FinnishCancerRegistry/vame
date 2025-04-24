@@ -30,6 +30,15 @@ particular see the examples.
 
 \section{News}{
 
+\subsection{News for version 1.9.4}{
+\subsection{vm@var_aggregate}{
+
+\code{vm@var_aggregate} optimised to simply return \code{x} if
+\code{from_var_nm == to_var_nm}.
+}
+
+}
+
 \subsection{News for version 1.9.3}{
 \subsection{vm@vame_union_append}{
 

@@ -2372,6 +2372,13 @@ The following functions are part of this feature:
 }
 }
 
+\section{News for version 1.9.4}{
+
+
+\code{vm@var_aggregate} optimised to simply return \code{x} if
+\code{from_var_nm == to_var_nm}.
+}
+
 \section{News for version 1.9.3}{
 
 
