@@ -221,8 +221,12 @@ handle_arg_ids_et_var_nms_inplace__ <- function(
         good_ids <- ids[n_found_meta_nms_by_id == length(required_meta_nms)]
         dt <- dt[dt[["id"]] %in% good_ids, ]
         if (nrow(dt) == 0) {
-          stop("Could not determine `ids`: No variable set has all required ",
-               "metadata `", deparse1(required_meta_nms), "`")
+          stop(
+            "Could not determine `ids` for ",
+            "`var_nms = ", deparse1(unname(var_nms)), "`: ",
+            "No variable set has all required ",
+            "metadata `", deparse1(required_meta_nms), "`"
+          )
         }
       }
       if (!is.null(n_max_ids)) {
