@@ -1165,7 +1165,7 @@ var_set_value_space_eval <- function(
   dbc::assert_inherits(vm, required_class = "VariableMetadata")
 
   assert_is_var_set_id(vm, id)
-  assert_is_arg_var_nms(var_nms)
+  assert_is_arg_var_nms(vm = vm, x = var_nms)
   value_space_var_nms <- var_set_meta_get(vm, id = id, meta_nm = "var_nm_set")
   if (is.null(var_nms)) {
     var_nms <- value_space_var_nms
@@ -3003,7 +3003,12 @@ vame_harmonise_dt <- function(
   #   (rare) instances where one variable can be harmonised into multiple
   #   variables that have `var_dt$is_harmonised` value `TRUE`.
   # @codedoc_comment_block vame::vame_harmonise_dt::var_nms
-  assert_is_var_nms(vm = vm, x = var_nms, must_exist = FALSE, allow_null = TRUE)
+  assert_is_arg_var_nms(
+    vm = vm,
+    x = var_nms,
+    must_exist = FALSE,
+    allow_null = TRUE
+  )
   if (!var_meta_is_defined(vm = vm, var_nm = NULL, meta_nm = "is_harmonised")) {
     stop("Your `vame::VariableMetadata` object does not have ",
          "`var_dt$is_harmonised` defined. This boolean column is needed to ",

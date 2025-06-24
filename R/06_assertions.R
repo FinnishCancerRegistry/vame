@@ -709,7 +709,7 @@ assert_is_arg_data <- function(
   )
 }
 
-assert_is_var_nms <- function(
+assert_is_arg_var_nms <- function(
   vm,
   x,
   x_nm = NULL,
@@ -919,24 +919,6 @@ assert_is_arg_ids <- function(
       assertion_type = assertion_type
     )
   })
-}
-
-assert_is_arg_var_nms <- function(
-  x,
-  x_nm = NULL,
-  call = NULL,
-  assertion_type = NULL,
-  vm
-) {
-  dbc::handle_args_inplace()
-  dbc::assert_is_one_of(
-    x = x,
-    x_nm = x_nm,
-    call = call,
-    assertion_type = assertion_type,
-    funs = list(dbc::report_is_NULL,
-                dbc::report_is_character_nonNA_vector)
-  )
 }
 
 assert_meta <- function(

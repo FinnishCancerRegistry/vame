@@ -179,7 +179,12 @@ handle_arg_ids_et_var_nms_inplace__ <- function(
   #   uses all variable names in those variable sets.
   # - `character`: Use these variable names.
   # @codedoc_comment_block doc_slot_fun_arg(var_nms)
-  assert_is_arg_var_nms(var_nms)
+  assert_is_arg_var_nms(
+    vm = vm,
+    x = var_nms,
+    must_exist = TRUE,
+    allow_null = TRUE
+  )
   all_var_nm_sets <- var_set_var_nm_set_get_all(vm = vm)
   all_ids <- var_set_meta_get_all(vm = vm, meta_nm = "id")
   if (is.null(ids) && is.null(var_nms)) {
