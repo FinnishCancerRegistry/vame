@@ -1558,7 +1558,7 @@ both \code{var_dt} and \code{var_set_dt}.
 
 \emph{Usage}
 
-\code{vm@vame_subset(var_dt_expr, var_set_dt_expr)}
+\code{vm@vame_subset(var_dt_expr, var_set_dt_expr, enclos)}
 
 \emph{Arguments}
 
@@ -1572,6 +1572,11 @@ var_set_dt_expr \verb{[NULL, logical, integer]} (default \code{NULL})
 An R expression that should evaluate into \code{NULL}, \code{logical}, or \code{integer}.
 The latter two are used to subset \code{var_set_dt_expr}. \code{NULL} implies no
 subset.
+
+enclos \verb{[NULL, environment]} (default \code{NULL})
+
+Context environment for evaluating \code{var_dt_expr} and \code{var_set_dt_expr}.
+Effectively we do e.g. \code{eval(var_dt_expr, envir = var_dt, enclos = enclos)}.
 
 \emph{Examples}
 
@@ -1590,7 +1595,8 @@ var_dt = data.table::data.table(
     )))
   )
 )
-vm@vame_subset(var_dt_expr = var_nm == "a")
+allowed_value_set <- "a"
+vm@vame_subset(var_dt_expr = var_nm \%in\% allowed_value_set)
 stopifnot(
   identical(unname(vm@var_meta_get_all(meta_nm = "var_nm")), "a"),
   identical(names(vm@var_set_value_space_eval("set_01")[["dt"]]), "a")
@@ -2392,6 +2398,12 @@ The following functions are part of this feature:
 \item \code{vm@vame_category_space_dt_list}
 \item \code{vm@vame_category_space_dt}
 }
+}
+
+\section{News for version 1.10.0}{
+
+
+\code{vm@vame_subset} gained argument \code{enclos}.
 }
 
 \section{News for version 1.9.4}{
@@ -3908,7 +3920,8 @@ var_dt = data.table::data.table(
     )))
   )
 )
-vm@vame_subset(var_dt_expr = var_nm == "a")
+allowed_value_set <- "a"
+vm@vame_subset(var_dt_expr = var_nm \%in\% allowed_value_set)
 stopifnot(
   identical(unname(vm@var_meta_get_all(meta_nm = "var_nm")), "a"),
   identical(names(vm@var_set_value_space_eval("set_01")[["dt"]]), "a")

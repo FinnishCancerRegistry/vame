@@ -30,6 +30,14 @@ particular see the examples.
 
 \section{News}{
 
+\subsection{News for version 1.10.0}{
+\subsection{vm@vame_subset}{
+
+\code{vm@vame_subset} gained argument \code{enclos}.
+}
+
+}
+
 \subsection{News for version 1.9.4}{
 \subsection{vm@var_aggregate}{
 

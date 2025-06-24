@@ -336,7 +336,8 @@ vame_list_set <- function(vm, value) {
 vame_subset_expr <- function(
   vm,
   var_dt_expr = NULL,
-  var_set_dt_expr = NULL
+  var_set_dt_expr = NULL,
+  enclos = NULL
 ) {
   assert_is_variablemetadata(vm, assertion_type = "prod_input")
   dbc::assert_is_one_of(
@@ -349,23 +350,44 @@ vame_subset_expr <- function(
     funs = list(dbc::report_is_NULL,
                 dbc::report_is_language_object)
   )
+  dbc::assert_is_one_of(
+    enclos,
+    funs = list(dbc::report_is_NULL,
+                dbc::report_is_environment)
+  )
+  if (is.null(enclos)) {
+    enclos <- parent.frame(1L)
+  }
+  eval_env <- new.env(parent = enclos)
   need_to_intersect <- FALSE
   if (!is.null(var_dt_expr)) {
     vd <- vd_get(vm)
-    vd <- eval(substitute(vd[i = expr], list(expr = var_dt_expr)))
-    vd_set(vm, vd)
+    eval_env[["var_dt"]] <- vd
+    vd_subset <- eval(
+      var_dt_expr,
+      envir = vd,
+      enclos = eval_env
+    )
+    rm(list = "var_dt", envir = eval_env)
+    vd_set(vm, vd[vd_subset, ])
     need_to_intersect <- TRUE
   }
   if (!is.null(var_set_dt_expr)) {
     vsd <- vsd_get(vm)
-    vsd <- eval(substitute(vsd[i = expr], list(expr = var_set_dt_expr)))
-    vsd_set(vm, vsd)
+    eval_env[["var_set_dt"]] <- vsd
+    vsd_subset <- eval(
+      var_dt_expr,
+      envir = vsd,
+      enclos = eval_env
+    )
+    rm(list = "var_set_dt", envir = eval_env)
+    vsd_set(vm, vsd[vsd_subset, ])
     need_to_intersect <- TRUE
   }
   if (need_to_intersect) {
     vd_vsd_intersect(vm)
   }
-  return(invisible(NULL))
+  return(invisible(vm))
 }
 
 

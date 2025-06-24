@@ -3198,7 +3198,8 @@ vame_copy <- function(vm) {
 vame_subset <- function(
   vm,
   var_dt_expr = NULL,
-  var_set_dt_expr = NULL
+  var_set_dt_expr = NULL,
+  enclos = NULL
 ) {
   # @codedoc_comment_block vm@vame_subset
   # Subset whole `VariableMetadata` object. Subset either `var_dt` or
@@ -3222,7 +3223,8 @@ vame_subset <- function(
   #     )))
   #   )
   # )
-  # vm@vame_subset(var_dt_expr = var_nm == "a")
+  # allowed_value_set <- "a"
+  # vm@vame_subset(var_dt_expr = var_nm %in% allowed_value_set)
   # stopifnot(
   #   identical(unname(vm@var_meta_get_all(meta_nm = "var_nm")), "a"),
   #   identical(names(vm@var_set_value_space_eval("set_01")[["dt"]]), "a")
@@ -3252,10 +3254,29 @@ vame_subset <- function(
   # subset.
   # @codedoc_comment_block doc_slot_fun_arg(var_set_dt_expr)
   var_set_dt_expr <- substitute(var_set_dt_expr, env = parent.frame(1L))
+
+  # @codedoc_comment_block doc_slot_fun_arg(enclos)
+  # @param enclos `[NULL, environment]` (default `NULL`)
+  #
+  # Context environment for evaluating `var_dt_expr` and `var_set_dt_expr`.
+  # Effectively we do e.g. `eval(var_dt_expr, envir = var_dt, enclos = enclos)`.
+  # @codedoc_comment_block doc_slot_fun_arg(enclos)
+  # @codedoc_comment_block news("vm@vame_subset", "2025-06-24", "1.10.0")
+  # `vm@vame_subset` gained argument `enclos`.
+  # @codedoc_comment_block news("vm@vame_subset", "2025-06-24", "1.10.0")
+  dbc::assert_is_one_of(
+    enclos,
+    funs = list(dbc::report_is_NULL,
+                dbc::report_is_environment)
+  )
+  if (is.null(enclos)) {
+    enclos <- parent.frame(1L)
+  }
   vame_subset_expr(
     vm = vm,
     var_dt_expr = var_dt_expr,
-    var_set_dt_expr = var_set_dt_expr
+    var_set_dt_expr = var_set_dt_expr,
+    enclos = enclos
   )
   return(invisible(NULL))
 }
