@@ -1577,6 +1577,10 @@ enclos \verb{[NULL, environment]} (default \code{NULL})
 
 Context environment for evaluating \code{var_dt_expr} and \code{var_set_dt_expr}.
 Effectively we do e.g. \code{eval(var_dt_expr, envir = var_dt, enclos = enclos)}.
+\itemize{
+\item \code{NULL}: Use the environment where \code{vm@vame_subset} was called.
+\item \code{environment}: Use this environment.
+}
 
 \emph{Examples}
 
@@ -2398,6 +2402,13 @@ The following functions are part of this feature:
 \item \code{vm@vame_category_space_dt_list}
 \item \code{vm@vame_category_space_dt}
 }
+}
+
+\section{News for version 1.10.1}{
+
+
+\code{vm@vame_subset} arg \code{enclos} default fixed. Now uses the environment
+where \code{vm@vame_subset} is called.
 }
 
 \section{News for version 1.10.0}{

@@ -3260,6 +3260,9 @@ vame_subset <- function(
   #
   # Context environment for evaluating `var_dt_expr` and `var_set_dt_expr`.
   # Effectively we do e.g. `eval(var_dt_expr, envir = var_dt, enclos = enclos)`.
+  #
+  # - `NULL`: Use the environment where `vm@vame_subset` was called.
+  # - `environment`: Use this environment.
   # @codedoc_comment_block doc_slot_fun_arg(enclos)
   # @codedoc_comment_block news("vm@vame_subset", "2025-06-24", "1.10.0")
   # `vm@vame_subset` gained argument `enclos`.
@@ -3270,7 +3273,11 @@ vame_subset <- function(
                 dbc::report_is_environment)
   )
   if (is.null(enclos)) {
-    enclos <- parent.frame(1L)
+    # @codedoc_comment_block news("vm@vame_subset", "2025-06-24", "1.10.1")
+    # `vm@vame_subset` arg `enclos` default fixed. Now uses the environment
+    # where `vm@vame_subset` is called.
+    # @codedoc_comment_block news("vm@vame_subset", "2025-06-24", "1.10.1")
+    enclos <- parent.frame(2L)
   }
   vame_subset_expr(
     vm = vm,

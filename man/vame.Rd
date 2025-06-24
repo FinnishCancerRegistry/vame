@@ -30,6 +30,15 @@ particular see the examples.
 
 \section{News}{
 
+\subsection{News for version 1.10.1}{
+\subsection{vm@vame_subset}{
+
+\code{vm@vame_subset} arg \code{enclos} default fixed. Now uses the environment
+where \code{vm@vame_subset} is called.
+}
+
+}
+
 \subsection{News for version 1.10.0}{
 \subsection{vm@vame_subset}{
 
