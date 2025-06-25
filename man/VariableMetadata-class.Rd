@@ -1552,21 +1552,27 @@ stopifnot(
 
 \item{\code{vame_subset}}{\emph{Description}
 
-Subset whole \code{VariableMetadata} object in-place. Subset either \code{var_dt} or
+Subset whole \code{VariableMetadata} object in-place. This means that your
+\code{VariableMetadata} object is modified and no copy is taken.
+Subset either \code{var_dt} or
 \code{var_set_dt} (or both) and keep only metadata for variables that appear in
 both \code{var_dt} and \code{var_set_dt}. Performs the following steps:
 \itemize{
+\item Collect \code{var_dt_expr} and \code{var_set_dt_expr} using \code{substitute}.
+\item If \code{is.null(enclos)}, use the environment where \code{vm@vame_subset}
+was called.
 \item Create an empty new evaluation environment \code{eval_env} with \code{enclos} as
 parent. Populate it with \code{var_dt} and \code{var_set_dt}.
-\item If \code{var_dt_expr} is not \code{NULL}, perform
-\code{eval(var_dt_expr, envir = eval_env[["var_dt"]], enclos = eval_env)}
+\item \code{eval} \code{var_dt_expr} with
+\code{envir = eval_env[["var_dt"]]} and \code{enclos = enclos}
 and use the result to take a subset of \code{eval_env[["var_dt"]]}.
-\item If \code{var_set_dt_expr} is not \code{NULL}, perform
-\code{eval(var_set_dt_expr, envir = eval_env[["var_set_dt"]], enclos = eval_env)}
-and use the result to take a subset of \code{eval_env[["var_set_dt"]]}.
-\item If any data was dropped from either \code{var_dt} or \code{var_set_dt}, take an
+Peform \code{eval} until the result is not a \code{name} or a \code{call} object
+or at most 10 times.
+Raise an error if the result is not a \code{logical},
+\code{integer}, or \code{NULL} object.
+\item Do the same with \code{var_set_dt_expr} and \code{eval_env[["var_set_dt"]]}.
+\item If any data was dropped from either \code{var_dt} or \code{var_set_dt},
 remove variables in \code{var_dt} not appearing in \code{var_set_dt} and vice versa.
-\item Return the subset of the \code{VariableMetadata} invisibly.
 }
 
 \emph{Usage}
@@ -1575,16 +1581,25 @@ remove variables in \code{var_dt} not appearing in \code{var_set_dt} and vice ve
 
 \emph{Arguments}
 
-var_dt_expr \verb{[NULL, logical, integer]} (default \code{NULL})
+var_dt_expr \verb{[NULL, logical, integer, name, call]} (default \code{NULL})
 
-An R expression that should evaluate into \code{NULL}, \code{logical}, or \code{integer}.
-The latter two are used to subset \code{var_dt}. \code{NULL} implies no subset.
+Subset \code{var_dt}.
+\itemize{
+\item \code{NULL}: No subsetting.
+\item \code{logical} / \code{integer}: Subset to these rows.
+\item \code{name} / \code{call}: The expression is evaluated and must result in the other
+allowed classes.
+}
 
-var_set_dt_expr \verb{[NULL, logical, integer]} (default \code{NULL})
+var_set_dt_expr \verb{[NULL, logical, integer, name, call]} (default \code{NULL})
 
-An R expression that should evaluate into \code{NULL}, \code{logical}, or \code{integer}.
-The latter two are used to subset \code{var_set_dt_expr}. \code{NULL} implies no
-subset.
+Subset \code{var_set_dt}.
+\itemize{
+\item \code{NULL}: No subsetting.
+\item \code{logical} / \code{integer}: Subset to these rows.
+\item \code{name} / \code{call}: The expression is evaluated and must result in the other
+allowed classes.
+}
 
 enclos \verb{[NULL, environment]} (default \code{NULL})
 
@@ -1629,6 +1644,14 @@ vm_2@vame_subset(var_set_dt_expr = var_set_dt[["id"]] \%in\% allowed_id_set)
 stopifnot(
   identical(unname(vm_2@var_meta_get_all(meta_nm = "var_nm")), "c"),
   identical(unname(vm_2@var_set_meta_get_all(meta_nm = "id")), "set_02")
+)
+
+allowed_id_set <- "set_02"
+vm_3 <- vm@vame_copy()
+vm_3@vame_subset(var_set_dt_expr = quote(id \%in\% allowed_id_set))
+stopifnot(
+  identical(unname(vm_3@var_meta_get_all(meta_nm = "var_nm")), "c"),
+  identical(unname(vm_3@var_set_meta_get_all(meta_nm = "id")), "set_02")
 )
 }\if{html}{\out{</div>}}}
 
@@ -2427,6 +2450,13 @@ The following functions are part of this feature:
 \item \code{vm@vame_category_space_dt_list}
 \item \code{vm@vame_category_space_dt}
 }
+}
+
+\section{News for version 1.10.3}{
+
+
+\code{vm@vame_subset} now allows \code{var_dt_expr} and \code{var_set_dt_expr} to
+themselves be quoted expressions (\code{name} / \code{call} objects).
 }
 
 \section{News for version 1.10.2}{
@@ -3980,6 +4010,14 @@ vm_2@vame_subset(var_set_dt_expr = var_set_dt[["id"]] \%in\% allowed_id_set)
 stopifnot(
   identical(unname(vm_2@var_meta_get_all(meta_nm = "var_nm")), "c"),
   identical(unname(vm_2@var_set_meta_get_all(meta_nm = "id")), "set_02")
+)
+
+allowed_id_set <- "set_02"
+vm_3 <- vm@vame_copy()
+vm_3@vame_subset(var_set_dt_expr = quote(id \%in\% allowed_id_set))
+stopifnot(
+  identical(unname(vm_3@var_meta_get_all(meta_nm = "var_nm")), "c"),
+  identical(unname(vm_3@var_set_meta_get_all(meta_nm = "id")), "set_02")
 )
 vm_1 <- vame::VariableMetadata(
   var_dt = data.table::data.table(

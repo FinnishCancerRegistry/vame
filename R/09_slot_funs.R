@@ -3201,14 +3201,6 @@ vame_subset <- function(
   var_set_dt_expr = NULL,
   enclos = NULL
 ) {
-  # @codedoc_comment_block vm@vame_subset
-  # Subset whole `VariableMetadata` object in-place. Subset either `var_dt` or
-  # `var_set_dt` (or both) and keep only metadata for variables that appear in
-  # both `var_dt` and `var_set_dt`. Performs the following steps:
-  #
-  # @codedoc_insert_comment_block vm@vame_subset_expr
-  # @codedoc_comment_block vm@vame_subset
-
   # @codedoc_comment_block function_example(vm@vame_subset)
   # # vm@vame_subset
   # vm <- vame::VariableMetadata(
@@ -3243,17 +3235,38 @@ vame_subset <- function(
   #   identical(unname(vm_2@var_meta_get_all(meta_nm = "var_nm")), "c"),
   #   identical(unname(vm_2@var_set_meta_get_all(meta_nm = "id")), "set_02")
   # )
+  #
+  # allowed_id_set <- "set_02"
+  # vm_3 <- vm@vame_copy()
+  # vm_3@vame_subset(var_set_dt_expr = quote(id %in% allowed_id_set))
+  # stopifnot(
+  #   identical(unname(vm_3@var_meta_get_all(meta_nm = "var_nm")), "c"),
+  #   identical(unname(vm_3@var_set_meta_get_all(meta_nm = "id")), "set_02")
+  # )
   # @codedoc_comment_block function_example(vm@vame_subset)
 
   # @codedoc_comment_block news("vm@vame_subset", "2023-12-01", "0.2.0")
   # Rename `expr` to `var_dt_expr`. Add arg `var_set_dt_expr`.
   # @codedoc_comment_block news("vm@vame_subset", "2023-12-01", "0.2.0")
 
-  # @codedoc_comment_block doc_slot_fun_arg(var_dt_expr)
-  # @param var_dt_expr `[NULL, logical, integer]` (default `NULL`)
+  # @codedoc_comment_block vm@vame_subset
+  # Subset whole `VariableMetadata` object in-place. This means that your
+  # `VariableMetadata` object is modified and no copy is taken.
+  # Subset either `var_dt` or
+  # `var_set_dt` (or both) and keep only metadata for variables that appear in
+  # both `var_dt` and `var_set_dt`. Performs the following steps:
   #
-  # An R expression that should evaluate into `NULL`, `logical`, or `integer`.
-  # The latter two are used to subset `var_dt`. `NULL` implies no subset.
+  # - Collect `var_dt_expr` and `var_set_dt_expr` using `substitute`.
+  # @codedoc_comment_block vm@vame_subset
+  # @codedoc_comment_block doc_slot_fun_arg(var_dt_expr)
+  # @param var_dt_expr `[NULL, logical, integer, name, call]` (default `NULL`)
+  #
+  # Subset `var_dt`.
+  #
+  # - `NULL`: No subsetting.
+  # - `logical` / `integer`: Subset to these rows.
+  # - `name` / `call`: The expression is evaluated and must result in the other
+  #   allowed classes.
   # @codedoc_comment_block doc_slot_fun_arg(var_dt_expr)
   # @codedoc_comment_block news("vm@vame_subset", "2024-08-22", "0.5.4")
   # Fix use of `substitute` in turning args `var_dt_expr` + `var_set_dt_expr`
@@ -3261,11 +3274,14 @@ vame_subset <- function(
   # @codedoc_comment_block news("vm@vame_subset", "2024-08-22", "0.5.4")
   var_dt_expr <- substitute(var_dt_expr, env = parent.frame(1L))
   # @codedoc_comment_block doc_slot_fun_arg(var_set_dt_expr)
-  # @param var_set_dt_expr `[NULL, logical, integer]` (default `NULL`)
+  # @param var_set_dt_expr `[NULL, logical, integer, name, call]` (default `NULL`)
   #
-  # An R expression that should evaluate into `NULL`, `logical`, or `integer`.
-  # The latter two are used to subset `var_set_dt_expr`. `NULL` implies no
-  # subset.
+  # Subset `var_set_dt`.
+  #
+  # - `NULL`: No subsetting.
+  # - `logical` / `integer`: Subset to these rows.
+  # - `name` / `call`: The expression is evaluated and must result in the other
+  #   allowed classes.
   # @codedoc_comment_block doc_slot_fun_arg(var_set_dt_expr)
   var_set_dt_expr <- substitute(var_set_dt_expr, env = parent.frame(1L))
 
@@ -3287,12 +3303,19 @@ vame_subset <- function(
                 dbc::report_is_environment)
   )
   if (is.null(enclos)) {
+    # @codedoc_comment_block vm@vame_subset
+    # - If `is.null(enclos)`, use the environment where `vm@vame_subset`
+    #   was called.
+    # @codedoc_comment_block vm@vame_subset
     # @codedoc_comment_block news("vm@vame_subset", "2025-06-24", "1.10.1")
     # `vm@vame_subset` arg `enclos` default fixed. Now uses the environment
     # where `vm@vame_subset` is called.
     # @codedoc_comment_block news("vm@vame_subset", "2025-06-24", "1.10.1")
     enclos <- parent.frame(2L)
   }
+  # @codedoc_comment_block vm@vame_subset
+  # @codedoc_insert_comment_block vm@vame_subset_expr
+  # @codedoc_comment_block vm@vame_subset
   vame_subset_expr(
     vm = vm,
     var_dt_expr = var_dt_expr,

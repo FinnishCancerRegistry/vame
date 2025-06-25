@@ -30,6 +30,15 @@ particular see the examples.
 
 \section{News}{
 
+\subsection{News for version 1.10.3}{
+\subsection{vm@vame_subset}{
+
+\code{vm@vame_subset} now allows \code{var_dt_expr} and \code{var_set_dt_expr} to
+themselves be quoted expressions (\code{name} / \code{call} objects).
+}
+
+}
+
 \subsection{News for version 1.10.2}{
 \subsection{vm@vame_subset}{
 

@@ -366,57 +366,67 @@ vame_subset_expr <- function(
   eval_env[["var_dt"]] <-  vd_get(vm)
   eval_env[["var_set_dt"]] <- vsd_get(vm)
   need_to_intersect <- FALSE
-  if (!is.null(var_dt_expr)) {
-    # @codedoc_comment_block vm@vame_subset_expr
-    # - If `var_dt_expr` is not `NULL`, perform
-    #   `eval(var_dt_expr, envir = eval_env[["var_dt"]], enclos = eval_env)`
-    #   and use the result to take a subset of `eval_env[["var_dt"]]`.
-    # @codedoc_comment_block vm@vame_subset_expr
-    vd_subset <- eval(
-      var_dt_expr,
-      envir = eval_env[["var_dt"]],
-      enclos = eval_env
-    )
-    vd_subset[is.na(vd_subset)] <- FALSE
-    if (any(!vd_subset)) {
-      eval_env[["var_dt"]] <- eval_env[["var_dt"]][vd_subset, ]
-      vd_set(vm, eval_env[["var_dt"]])
-      need_to_intersect <- TRUE
+  vame_subset_expr_env <- environment()
+  lapply(c("var_dt", "var_set_dt"), function(dt_nm) {
+    expr_obj_nm <- paste0(dt_nm, "_expr")
+    obj_subset <- vame_subset_expr_env[[expr_obj_nm]]
+    n_tries <- 0L
+    while ((is.name(obj_subset) || is.call(obj_subset)) && n_tries <= 10) {
+      # @codedoc_comment_block vm@vame_subset_expr
+      # - `eval` `var_dt_expr` with
+      #   `envir = eval_env[["var_dt"]]` and `enclos = enclos`
+      #   and use the result to take a subset of `eval_env[["var_dt"]]`.
+      #   Peform `eval` until the result is not a `name` or a `call` object
+      #   or at most 10 times.
+      # @codedoc_comment_block vm@vame_subset_expr
+      # @codedoc_comment_block news("vm@vame_subset", "2025-06-25", "1.10.2")
+      # `vm@vame_subset` fix: in 1.10.1 (but not before) mistakenly evaluated
+      # `var_dt_expr` when `var_set_dt_expr` was supposed to be evaluted.
+      # @codedoc_comment_block news("vm@vame_subset", "2025-06-25", "1.10.2")
+      # @codedoc_comment_block news("vm@vame_subset", "2025-06-25", "1.10.3")
+      # `vm@vame_subset` now allows `var_dt_expr` and `var_set_dt_expr` to
+      # themselves be quoted expressions (`name` / `call` objects).
+      # @codedoc_comment_block news("vm@vame_subset", "2025-06-25", "1.10.3")
+      n_tries <- n_tries + 1L
+      obj_subset <- eval(
+        obj_subset,
+        envir = eval_env[[dt_nm]],
+        enclos = eval_env
+      )
     }
-  }
-  if (!is.null(var_set_dt_expr)) {
-    # @codedoc_comment_block news("vm@vame_subset", "2025-06-25", "1.10.2")
-    # `vm@vame_subset` fix: in 1.10.1 (but not before) mistakenly evaluated
-    # `var_dt_expr` when `var_set_dt_expr` was supposed to be evaluted.
-    # @codedoc_comment_block news("vm@vame_subset", "2025-06-25", "1.10.2")
-    # @codedoc_comment_block vm@vame_subset_expr
-    # - If `var_set_dt_expr` is not `NULL`, perform
-    #   `eval(var_set_dt_expr, envir = eval_env[["var_set_dt"]], enclos = eval_env)`
-    #   and use the result to take a subset of `eval_env[["var_set_dt"]]`.
-    # @codedoc_comment_block vm@vame_subset_expr
-    vsd_subset <- eval(
-      var_set_dt_expr,
-      envir = eval_env[["var_set_dt"]],
-      enclos = eval_env
-    )
-    vsd_subset[is.na(vsd_subset)] <- FALSE
-    if (any(!vsd_subset)) {
-      eval_env[["var_set_dt"]] <- eval_env[["var_set_dt"]][vsd_subset, ]
-      vsd_set(vm, eval_env[["var_set_dt"]])
-      need_to_intersect <- TRUE
+    if (!inherits(obj_subset, c("logical", "integer", "NULL"))) {
+      # @codedoc_comment_block vm@vame_subset_expr
+      #   Raise an error if the result is not a `logical`,
+      #   `integer`, or `NULL` object.
+      # - Do the same with `var_set_dt_expr` and `eval_env[["var_set_dt"]]`.
+      # @codedoc_comment_block vm@vame_subset_expr
+      stop(
+        "Evaluation of `", expr_obj_nm, "` did not result in a `logical`, ",
+        "`integer`, nor `NULL` object after ", n_tries, " tries. Instead ",
+        "result had class(es) ", deparse1(class(obj_subset))
+      )
     }
-  }
+    if (is.logical(obj_subset)) {
+      obj_subset[is.na(obj_subset)] <- FALSE
+    }
+    if ((is.logical(obj_subset) && any(!obj_subset)) | is.integer(obj_subset)) {
+      eval_env[[dt_nm]] <- eval_env[[dt_nm]][obj_subset, ]
+      switch(
+        dt_nm,
+        var_dt = vd_set(vm, eval_env[["var_dt"]]),
+        var_set_dt = vsd_set(vm, eval_env[["var_set_dt"]])
+      )
+      vame_subset_expr_env[["need_to_intersect"]] <- TRUE
+    }
+  })
   # @codedoc_comment_block vm@vame_subset_expr
-  # - If any data was dropped from either `var_dt` or `var_set_dt`, take an
+  # - If any data was dropped from either `var_dt` or `var_set_dt`,
   #   remove variables in `var_dt` not appearing in `var_set_dt` and vice versa.
   # @codedoc_comment_block vm@vame_subset_expr
   if (need_to_intersect) {
     vd_vsd_intersect(vm)
   }
-  # @codedoc_comment_block vm@vame_subset_expr
-  # - Return the subset of the `VariableMetadata` invisibly.
-  # @codedoc_comment_block vm@vame_subset_expr
-  return(invisible(vm))
+  return(invisible(NULL))
 }
 
 
