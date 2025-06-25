@@ -34,6 +34,40 @@ See \strong{Details} and \strong{Features} for more information.}
 A list of metadata concerning the whole \code{VariableMetadata} object.
 Its elements can be anything you want.
 E.g. \code{vame_list = list(dataset_version = "1.0.0")}.}
+
+\item{vm_2}{\verb{[VariableMetadata]} (no default)
+
+\code{VariableMetadata} object whose metadata will be appended to the current
+\code{VariableMetadata} object.
+
+\emph{\strong{Examples}}
+
+\if{html}{\out{<div class="sourceCode">}}\preformatted{vm_1 <- vame::VariableMetadata(
+  var_dt = data.table::data.table(
+    var_nm = c("a", "b"),
+    my_meta = c("vm_1_a", "vm_1_b")
+  ),
+  var_set_dt = data.table::data.table(
+    id = "ab",
+    var_nm_set = list(c("a", "b"))
+  )
+)
+vm_2 <- vame::VariableMetadata(
+  var_dt = data.table::data.table(
+    var_nm = c("b", "c"),
+    my_meta = c("vm_2_b", "vm_2_c")
+  ),
+  var_set_dt = data.table::data.table(
+    id = "bc",
+    var_nm_set = list(c("b", "c"))
+  )
+)
+vm_1@vame_union_append(vm_2)
+stopifnot(
+  vm_1@var_meta_get(var_nm = "b", meta_nm = "my_meta") == "vm_1_b",
+  vm_1@var_meta_get(var_nm = "c", meta_nm = "my_meta") == "vm_2_c"
+)
+}\if{html}{\out{</div>}}}
 }
 \description{
 Create and make use of a \code{VariableMetadata} object. It contains
@@ -92,84 +126,84 @@ inside nodes.
 \section{Slots}{
 
 \describe{
-\item{\code{var_set_dt_copy}}{\emph{Description}
+\item{\code{var_set_dt_copy}}{\emph{\strong{Description}}
 
 Returns a deep copy of \code{var_set_dt_copy}.
 
-\emph{Usage}
+\emph{\strong{Usage}}
 
 \code{vm@var_set_dt_copy()}}
 
-\item{\code{var_set_meta_is_defined}}{\emph{Description}
+\item{\code{var_set_meta_is_defined}}{\emph{\strong{Description}}
 
 Returns \code{TRUE} if \code{var_set_dt[[meta_nm]]} has a value for a particular
 \code{id}. Unless \code{id = NULL}, then \code{vm@var_set_meta_is_defined}
 checks whether that column exists at all in \code{var_set_dt}.
 
-\emph{Usage}
+\emph{\strong{Usage}}
 
 \code{vm@var_set_meta_is_defined(id, meta_nm)}
 
-\emph{Arguments}
+\emph{\strong{Arguments}}
 
-id \verb{[any]} (no default)
+\strong{\code{id}} \verb{[any]} (no default)
 
 ID, or "name", of a variable set. The class of \code{id} is defined when you
 create the \code{VariableMetadata} object and it can be pretty much anything.
 
-meta_nm \verb{[character]} (no default)
+\strong{\code{meta_nm}} \verb{[character]} (no default)
 
 Name of a metadata column in \code{var_set_dt} or \code{var_dt} (depending on context)
 of a \code{VariableMetadata} object.}
 
-\item{\code{var_set_meta_get}}{\emph{Description}
+\item{\code{var_set_meta_get}}{\emph{\strong{Description}}
 
 Get metadata for a specific variable set.
 
-\emph{Usage}
+\emph{\strong{Usage}}
 
 \code{vm@var_set_meta_get(id, meta_nm)}
 
-\emph{Arguments}
+\emph{\strong{Arguments}}
 
-id \verb{[any]} (no default)
+\strong{\code{id}} \verb{[any]} (no default)
 
 ID, or "name", of a variable set. The class of \code{id} is defined when you
 create the \code{VariableMetadata} object and it can be pretty much anything.
 
-meta_nm \verb{[character]} (no default)
+\strong{\code{meta_nm}} \verb{[character]} (no default)
 
 Name of a metadata column in \code{var_set_dt} or \code{var_dt} (depending on context)
 of a \code{VariableMetadata} object.}
 
-\item{\code{var_set_meta_set}}{\emph{Description}
+\item{\code{var_set_meta_set}}{\emph{\strong{Description}}
 
 Set metadata for a specific variable set.
 \code{value} is wrapped inside a \code{list} if \code{var_set_dt[[meta_nm]]} is a \code{list}
 or if \code{meta_nm \%in\% c("value_space", "maker")}. This is necessary for
 correct assignment into a \code{list}-valued column.
 
-\emph{Usage}
+\emph{\strong{Usage}}
 
 \code{vm@var_set_meta_set(id, meta_nm, value)}
 
-\emph{Arguments}
+\emph{\strong{Arguments}}
 
-id \verb{[any]} (no default)
+\strong{\code{id}} \verb{[any]} (no default)
 
 ID, or "name", of a variable set. The class of \code{id} is defined when you
 create the \code{VariableMetadata} object and it can be pretty much anything.
 
-meta_nm \verb{[character]} (no default)
+\strong{\code{meta_nm}} \verb{[character]} (no default)
 
 Name of a metadata column in \code{var_set_dt} or \code{var_dt} (depending on context)
 of a \code{VariableMetadata} object.
 
-value \verb{[any]} (no default)
+\strong{\code{value}} \verb{[any]} (no default)
 
 In \verb{_set} functions the value to set for the specified metadata.
 
-\emph{Examples}
+\emph{\strong{Examples}}
 
 \if{html}{\out{<div class="sourceCode">}}\preformatted{vm <- vame::VariableMetadata(
   var_dt = data.table::data.table(
@@ -191,131 +225,131 @@ stopifnot(
 )
 }\if{html}{\out{</div>}}}
 
-\item{\code{var_set_meta_get_all}}{\emph{Description}
+\item{\code{var_set_meta_get_all}}{\emph{\strong{Description}}
 
 Get all metadata for a specific variable set.
 
-\emph{Usage}
+\emph{\strong{Usage}}
 
 \code{vm@var_set_meta_get_all(meta_nm)}
 
-\emph{Arguments}
+\emph{\strong{Arguments}}
 
-meta_nm \verb{[character]} (no default)
+\strong{\code{meta_nm}} \verb{[character]} (no default)
 
 Name of a metadata column in \code{var_set_dt} or \code{var_dt} (depending on context)
 of a \code{VariableMetadata} object.}
 
-\item{\code{var_set_var_nm_set_get_all}}{\emph{Description}
+\item{\code{var_set_var_nm_set_get_all}}{\emph{\strong{Description}}
 
 Get every variable name set.
 
-\emph{Usage}
+\emph{\strong{Usage}}
 
 \code{vm@var_set_var_nm_set_get_all()}}
 
-\item{\code{var_set_var_nm_set_get}}{\emph{Description}
+\item{\code{var_set_var_nm_set_get}}{\emph{\strong{Description}}
 
 Get a specific variable name set.
 
-\emph{Usage}
+\emph{\strong{Usage}}
 
 \code{vm@var_set_var_nm_set_get(id)}
 
-\emph{Arguments}
+\emph{\strong{Arguments}}
 
-id \verb{[any]} (no default)
+\strong{\code{id}} \verb{[any]} (no default)
 
 ID, or "name", of a variable set. The class of \code{id} is defined when you
 create the \code{VariableMetadata} object and it can be pretty much anything.}
 
-\item{\code{var_set_var_nm_set_set}}{\emph{Description}
+\item{\code{var_set_var_nm_set_set}}{\emph{\strong{Description}}
 
 Set a new value for a specific variable name set.
 
-\emph{Usage}
+\emph{\strong{Usage}}
 
 \code{vm@var_set_var_nm_set_set(id, value)}
 
-\emph{Arguments}
+\emph{\strong{Arguments}}
 
-id \verb{[any]} (no default)
+\strong{\code{id}} \verb{[any]} (no default)
 
 ID, or "name", of a variable set. The class of \code{id} is defined when you
 create the \code{VariableMetadata} object and it can be pretty much anything.
 
-value \verb{[any]} (no default)
+\strong{\code{value}} \verb{[any]} (no default)
 
 In \verb{_set} functions the value to set for the specified metadata.}
 
-\item{\code{var_set_rename}}{\emph{Description}
+\item{\code{var_set_rename}}{\emph{\strong{Description}}
 
 Rename variable sets --- change \code{var_set_dt$id} values.
 
-\emph{Usage}
+\emph{\strong{Usage}}
 
 \code{vm@var_set_rename(old_ids, new_ids)}
 
-\emph{Arguments}
+\emph{\strong{Arguments}}
 
-old_ids \verb{[any]} (no default)
+\strong{\code{old_ids}} \verb{[any]} (no default)
 
 Old variable set IDs.
 
-new_ids \verb{[any]} (no default)
+\strong{\code{new_ids}} \verb{[any]} (no default)
 
 New variable set IDs.}
 
-\item{\code{var_set_remove}}{\emph{Description}
+\item{\code{var_set_remove}}{\emph{\strong{Description}}
 
 Remove a variable set by \code{id}.
 
-\emph{Usage}
+\emph{\strong{Usage}}
 
 \code{vm@var_set_remove(id)}
 
-\emph{Arguments}
+\emph{\strong{Arguments}}
 
-id \verb{[any]} (no default)
+\strong{\code{id}} \verb{[any]} (no default)
 
 ID, or "name", of a variable set. The class of \code{id} is defined when you
 create the \code{VariableMetadata} object and it can be pretty much anything.}
 
-\item{\code{var_set_maker_get}}{\emph{Description}
+\item{\code{var_set_maker_get}}{\emph{\strong{Description}}
 
 Get specific \code{var_set_dt$maker}.
 
-\emph{Usage}
+\emph{\strong{Usage}}
 
 \code{vm@var_set_maker_get(id)}
 
-\emph{Arguments}
+\emph{\strong{Arguments}}
 
-id \verb{[any]} (no default)
+\strong{\code{id}} \verb{[any]} (no default)
 
 ID, or "name", of a variable set. The class of \code{id} is defined when you
 create the \code{VariableMetadata} object and it can be pretty much anything.}
 
-\item{\code{var_set_maker_set}}{\emph{Description}
+\item{\code{var_set_maker_set}}{\emph{\strong{Description}}
 
 Assign specific \code{var_set_dt$maker}.
 
-\emph{Usage}
+\emph{\strong{Usage}}
 
 \code{vm@var_set_maker_set(id, value)}
 
-\emph{Arguments}
+\emph{\strong{Arguments}}
 
-id \verb{[any]} (no default)
+\strong{\code{id}} \verb{[any]} (no default)
 
 ID, or "name", of a variable set. The class of \code{id} is defined when you
 create the \code{VariableMetadata} object and it can be pretty much anything.
 
-value \verb{[any]} (no default)
+\strong{\code{value}} \verb{[any]} (no default)
 
 In \verb{_set} functions the value to set for the specified metadata.}
 
-\item{\code{var_set_make}}{\emph{Description}
+\item{\code{var_set_make}}{\emph{\strong{Description}}
 
 Call specific \code{var_set_dt$maker}.
 \code{vm@var_set_make} performs the following steps:
@@ -351,13 +385,13 @@ setting the \code{var_set_make_meta} attribute as a list containing the
 elements \code{id}, \code{var_nms}, and \code{dep_var_nm_set}.
 }
 
-\emph{Usage}
+\emph{\strong{Usage}}
 
 \code{vm@var_set_make(data, id, var_nms, env)}
 
-\emph{Arguments}
+\emph{\strong{Arguments}}
 
-data \verb{[data.frame, data.table, list, NULL]}
+\strong{\code{data}} \verb{[data.frame, data.table, list, NULL]}
 \itemize{
 \item \code{data.frame}/\code{data.table}: Columns contain necessary data.
 \itemize{
@@ -377,19 +411,19 @@ of \code{data$df} are appended into \code{data} as list elements and
 }
 }
 
-id \verb{[any]} (no default)
+\strong{\code{id}} \verb{[any]} (no default)
 
 ID, or "name", of a variable set. The class of \code{id} is defined when you
 create the \code{VariableMetadata} object and it can be pretty much anything.
 
-var_nms \verb{[NULL, character]} (default \code{NULL})
+\strong{\code{var_nms}} \verb{[NULL, character]} (default \code{NULL})
 \itemize{
 \item \code{NULL}: Behaviour varies. If the function has the argument \code{ids} or \code{id},
 uses all variable names in those variable sets.
 \item \code{character}: Use these variable names.
 }
 
-env \verb{[NULL, environment]} (default \code{NULL})
+\strong{\code{env}} \verb{[NULL, environment]} (default \code{NULL})
 
 Environment where a value space will be evaluated, if applicable.
 \itemize{
@@ -397,20 +431,20 @@ Environment where a value space will be evaluated, if applicable.
 \item \code{environment}: Use this environment.
 }}
 
-\item{\code{var_set_maker_get_dep_var_nm_sets}}{\emph{Description}
+\item{\code{var_set_maker_get_dep_var_nm_sets}}{\emph{\strong{Description}}
 
-\emph{Usage}
+\emph{\strong{Usage}}
 
 \code{vm@var_set_maker_get_dep_var_nm_sets(id)}
 
-\emph{Arguments}
+\emph{\strong{Arguments}}
 
-id \verb{[any]} (no default)
+\strong{\code{id}} \verb{[any]} (no default)
 
 ID, or "name", of a variable set. The class of \code{id} is defined when you
 create the \code{VariableMetadata} object and it can be pretty much anything.
 
-\emph{Examples}
+\emph{\strong{Examples}}
 
 \if{html}{\out{<div class="sourceCode">}}\preformatted{vm <- vame::VariableMetadata(
   var_dt = data.table::data.table(
@@ -453,7 +487,7 @@ stopifnot(
 )
 }\if{html}{\out{</div>}}}
 
-\item{\code{vame_make}}{\emph{Description}
+\item{\code{vame_make}}{\emph{\strong{Description}}
 
 Call multiple \code{var_set_dt$maker}s in sequence. Performs these steps:
 \itemize{
@@ -497,13 +531,13 @@ The \code{vame_make_meta} attribute is set as a \code{data.table} containing the
 columns \code{id}, \code{var_nms}, and \code{dep_var_nm_set} in the order of execution.
 }
 
-\emph{Usage}
+\emph{\strong{Usage}}
 
 \code{vm@vame_make(data, ids, var_nms, env, optional_steps, callbacks)}
 
-\emph{Arguments}
+\emph{\strong{Arguments}}
 
-data \verb{[data.frame, data.table, list]} (no default)
+\strong{\code{data}} \verb{[data.frame, data.table, list]} (no default)
 \itemize{
 \item \code{data.frame}/\code{data.table}: Columns contain necessary data.
 \item \code{list}: Element \code{data$df} can be a \code{data.frame}/
@@ -512,7 +546,7 @@ Alternatively the list elements can contain necessary data directly,
 or a combination of the two.
 }
 
-ids \verb{[NULL, vector]} (default \code{NULL})
+\strong{\code{ids}} \verb{[NULL, vector]} (default \code{NULL})
 \itemize{
 \item \code{NULL}: Behaviour varies. An error is raised if this cannot be inferred.
 If the function has the argument \code{var_nms}, that will be used
@@ -520,14 +554,14 @@ to infer \code{ids}.
 \item \code{vector}: One or more values that can be found in \code{var_set_dt$id}.
 }
 
-var_nms \verb{[NULL, character]} (default \code{NULL})
+\strong{\code{var_nms}} \verb{[NULL, character]} (default \code{NULL})
 \itemize{
 \item \code{NULL}: Behaviour varies. If the function has the argument \code{ids} or \code{id},
 uses all variable names in those variable sets.
 \item \code{character}: Use these variable names.
 }
 
-env \verb{[NULL, environment]} (default \code{NULL})
+\strong{\code{env}} \verb{[NULL, environment]} (default \code{NULL})
 
 Environment where a value space will be evaluated, if applicable.
 \itemize{
@@ -535,21 +569,21 @@ Environment where a value space will be evaluated, if applicable.
 \item \code{environment}: Use this environment.
 }
 
-optional_steps \verb{[NULL, list]} (default \code{NULL})
+\strong{\code{optional_steps}} \verb{[NULL, list]} (default \code{NULL})
 \itemize{
 \item \code{NULL}: Function is called normally.
 \item \code{list}: These functions are called during the run. See \strong{Description} /
 \strong{Details}.
 }
 
-callbacks \verb{[NULL, list]} (default \code{NULL})
+\strong{\code{callbacks}} \verb{[NULL, list]} (default \code{NULL})
 \itemize{
 \item \code{NULL}: Function is called normally.
 \item \code{list}: These functions are called during the run. See \strong{Description} /
 \strong{Details}.
 }}
 
-\item{\code{var_set_value_space_eval}}{\emph{Description}
+\item{\code{var_set_value_space_eval}}{\emph{\strong{Description}}
 
 Retrieve and evaluate value space for a variable set given its \code{id}.
 \itemize{
@@ -585,25 +619,25 @@ a \code{data.table}) is subset into the requested variables only if
 the \code{data.table} contains more than the requested variables.
 }
 
-\emph{Usage}
+\emph{\strong{Usage}}
 
 \code{vm@var_set_value_space_eval(id, var_nms, env)}
 
-\emph{Arguments}
+\emph{\strong{Arguments}}
 
-id \verb{[any]} (no default)
+\strong{\code{id}} \verb{[any]} (no default)
 
 ID, or "name", of a variable set. The class of \code{id} is defined when you
 create the \code{VariableMetadata} object and it can be pretty much anything.
 
-var_nms \verb{[NULL, character]} (default \code{NULL})
+\strong{\code{var_nms}} \verb{[NULL, character]} (default \code{NULL})
 \itemize{
 \item \code{NULL}: Behaviour varies. If the function has the argument \code{ids} or \code{id},
 uses all variable names in those variable sets.
 \item \code{character}: Use these variable names.
 }
 
-env \verb{[NULL, environment]} (default \code{NULL})
+\strong{\code{env}} \verb{[NULL, environment]} (default \code{NULL})
 
 Environment where a value space will be evaluated, if applicable.
 \itemize{
@@ -611,7 +645,7 @@ Environment where a value space will be evaluated, if applicable.
 \item \code{environment}: Use this environment.
 }
 
-\emph{Examples}
+\emph{\strong{Examples}}
 
 \if{html}{\out{<div class="sourceCode">}}\preformatted{# vm@var_set_value_space_eval
 vm <- vame::VariableMetadata(
@@ -657,76 +691,76 @@ stopifnot(all.equal(
 ))
 }\if{html}{\out{</div>}}}
 
-\item{\code{var_set_value_space_get}}{\emph{Description}
+\item{\code{var_set_value_space_get}}{\emph{\strong{Description}}
 
 Get the value space of a specific variable set without evaluting it.
 
-\emph{Usage}
+\emph{\strong{Usage}}
 
 \code{vm@var_set_value_space_get(id)}
 
-\emph{Arguments}
+\emph{\strong{Arguments}}
 
-id \verb{[any]} (no default)
+\strong{\code{id}} \verb{[any]} (no default)
 
 ID, or "name", of a variable set. The class of \code{id} is defined when you
 create the \code{VariableMetadata} object and it can be pretty much anything.}
 
-\item{\code{var_set_value_space_set}}{\emph{Description}
+\item{\code{var_set_value_space_set}}{\emph{\strong{Description}}
 
 Set the value space of a specific variable set.
 
-\emph{Usage}
+\emph{\strong{Usage}}
 
 \code{vm@var_set_value_space_set(id, value_space)}
 
-\emph{Arguments}
+\emph{\strong{Arguments}}
 
-id \verb{[any]} (no default)
+\strong{\code{id}} \verb{[any]} (no default)
 
 ID, or "name", of a variable set. The class of \code{id} is defined when you
 create the \code{VariableMetadata} object and it can be pretty much anything.
 
-value_space \verb{[list]} (no default)
+\strong{\code{value_space}} \verb{[list]} (no default)
 
 A value space to assign for the specified variable set.}
 
-\item{\code{var_set_value_space_dt_subset}}{\emph{Description}
+\item{\code{var_set_value_space_dt_subset}}{\emph{\strong{Description}}
 
 Take a subset of a value space dt for a variable set and set that as the value space.
 
-\emph{Usage}
+\emph{\strong{Usage}}
 
 \code{vm@var_set_value_space_dt_subset(id, expr)}
 
-\emph{Arguments}
+\emph{\strong{Arguments}}
 
-id \verb{[any]} (no default)
+\strong{\code{id}} \verb{[any]} (no default)
 
 ID, or "name", of a variable set. The class of \code{id} is defined when you
 create the \code{VariableMetadata} object and it can be pretty much anything.
 
-expr \verb{[any]} (no default)
+\strong{\code{expr}} \verb{[any]} (no default)
 
 Expression to subset a \code{data.table} object. Available columns depends on
 context.}
 
-\item{\code{var_set_value_space_sampler_get}}{\emph{Description}
+\item{\code{var_set_value_space_sampler_get}}{\emph{\strong{Description}}
 
 Retrieve value space sampler for given \code{id} from \code{var_set_dt$sampler}.
 
-\emph{Usage}
+\emph{\strong{Usage}}
 
 \code{vm@var_set_value_space_sampler_get(id)}
 
-\emph{Arguments}
+\emph{\strong{Arguments}}
 
-id \verb{[any]} (no default)
+\strong{\code{id}} \verb{[any]} (no default)
 
 ID, or "name", of a variable set. The class of \code{id} is defined when you
 create the \code{VariableMetadata} object and it can be pretty much anything.}
 
-\item{\code{var_set_value_space_sampler_set}}{\emph{Description}
+\item{\code{var_set_value_space_sampler_set}}{\emph{\strong{Description}}
 
 Assign value space sampler for given \code{id} in \code{var_set_dt$sampler}.
 
@@ -749,22 +783,22 @@ see \code{?all.vars}.
 See the documentation for \code{var_set_value_space_sample} to understand how
 the \code{sampler} object is used.
 
-\emph{Usage}
+\emph{\strong{Usage}}
 
 \code{vm@var_set_value_space_sampler_set(id, value)}
 
-\emph{Arguments}
+\emph{\strong{Arguments}}
 
-id \verb{[any]} (no default)
+\strong{\code{id}} \verb{[any]} (no default)
 
 ID, or "name", of a variable set. The class of \code{id} is defined when you
 create the \code{VariableMetadata} object and it can be pretty much anything.
 
-value \verb{[any]} (no default)
+\strong{\code{value}} \verb{[any]} (no default)
 
 In \verb{_set} functions the value to set for the specified metadata.}
 
-\item{\code{var_set_value_space_sample}}{\emph{Description}
+\item{\code{var_set_value_space_sample}}{\emph{\strong{Description}}
 
 Take \code{n} random samples from the value space of \code{id}.
 
@@ -809,29 +843,29 @@ list.
 \item The output of sampling is always a \code{data.table} with \code{n} rows.
 }
 
-\emph{Usage}
+\emph{\strong{Usage}}
 
 \code{vm@var_set_value_space_sample(id, var_nms, n, data, env)}
 
-\emph{Arguments}
+\emph{\strong{Arguments}}
 
-id \verb{[any]} (no default)
+\strong{\code{id}} \verb{[any]} (no default)
 
 ID, or "name", of a variable set. The class of \code{id} is defined when you
 create the \code{VariableMetadata} object and it can be pretty much anything.
 
-var_nms \verb{[NULL, character]} (default \code{NULL})
+\strong{\code{var_nms}} \verb{[NULL, character]} (default \code{NULL})
 \itemize{
 \item \code{NULL}: Behaviour varies. If the function has the argument \code{ids} or \code{id},
 uses all variable names in those variable sets.
 \item \code{character}: Use these variable names.
 }
 
-n \verb{[integer]} (default \code{1L})
+\strong{\code{n}} \verb{[integer]} (default \code{1L})
 
 Number of random samples to take.
 
-data \verb{[NULL, data.frame, data.table, list]} (default \code{NULL})
+\strong{\code{data}} \verb{[NULL, data.frame, data.table, list]} (default \code{NULL})
 \itemize{
 \item \code{NULL}: No data is used.
 \item \code{data.frame}/\code{data.table}: These variables are used as-is.
@@ -848,7 +882,7 @@ Of course you can also pass
 directly if that is more convenient.
 }
 
-env \verb{[NULL, environment]} (default \code{NULL})
+\strong{\code{env}} \verb{[NULL, environment]} (default \code{NULL})
 
 Environment where a value space will be evaluated, if applicable.
 \itemize{
@@ -856,25 +890,25 @@ Environment where a value space will be evaluated, if applicable.
 \item \code{environment}: Use this environment.
 }}
 
-\item{\code{var_is_aggregateable_to}}{\emph{Description}
+\item{\code{var_is_aggregateable_to}}{\emph{\strong{Description}}
 
 Returns \code{TRUE} if \code{from_var_nm} can be aggregated into \code{to_var_nm}.
 
-\emph{Usage}
+\emph{\strong{Usage}}
 
 \code{vm@var_is_aggregateable_to(from_var_nm, to_var_nm)}
 
-\emph{Arguments}
+\emph{\strong{Arguments}}
 
-from_var_nm \verb{[character]} (no default)
+\strong{\code{from_var_nm}} \verb{[character]} (no default)
 
 Name of a variable. Aggregation from this to another variable.
 
-to_var_nm \verb{[character]} (no default)
+\strong{\code{to_var_nm}} \verb{[character]} (no default)
 
 Name of a variable. Aggregation to this from another variable.}
 
-\item{\code{var_aggregate}}{\emph{Description}
+\item{\code{var_aggregate}}{\emph{\strong{Description}}
 
 Returns correspoding level of \code{to_var_nm} for each value in \code{x}.
 Performs the following steps:
@@ -900,25 +934,25 @@ exact \code{class}. Raise an informative error if that is not the case.
 \code{to_var_nm} for each value of \code{x}.
 }
 
-\emph{Usage}
+\emph{\strong{Usage}}
 
 \code{vm@var_aggregate(x, from_var_nm, to_var_nm)}
 
-\emph{Arguments}
+\emph{\strong{Arguments}}
 
-x \verb{[any]} (no default)
+\strong{\code{x}} \verb{[any]} (no default)
 
 Values of a specified variable.
 
-from_var_nm \verb{[character]} (no default)
+\strong{\code{from_var_nm}} \verb{[character]} (no default)
 
 Name of a variable. Aggregation from this to another variable.
 
-to_var_nm \verb{[character]} (no default)
+\strong{\code{to_var_nm}} \verb{[character]} (no default)
 
 Name of a variable. Aggregation to this from another variable.}
 
-\item{\code{var_value_space_eval}}{\emph{Description}
+\item{\code{var_value_space_eval}}{\emph{\strong{Description}}
 
 Get and evaluate value space for a variable.
 This gets tricky when a variable has been defined in more than one
@@ -935,17 +969,17 @@ all separate value spaces is formed and that will be returned.
 any way to decide which value space to use.
 }
 
-\emph{Usage}
+\emph{\strong{Usage}}
 
 \code{vm@var_value_space_eval(var_nm, env)}
 
-\emph{Arguments}
+\emph{\strong{Arguments}}
 
-var_nm \verb{[character]} (no default)
+\strong{\code{var_nm}} \verb{[character]} (no default)
 
 Name of a variable.
 
-env \verb{[NULL, environment]} (default \code{NULL})
+\strong{\code{env}} \verb{[NULL, environment]} (default \code{NULL})
 
 Environment where a value space will be evaluated, if applicable.
 \itemize{
@@ -953,37 +987,37 @@ Environment where a value space will be evaluated, if applicable.
 \item \code{environment}: Use this environment.
 }}
 
-\item{\code{var_assert}}{\emph{Description}
+\item{\code{var_assert}}{\emph{\strong{Description}}
 
 Assert that values in \code{x} are proper values of \code{var_nm}.
 
-\emph{Usage}
+\emph{\strong{Usage}}
 
 \code{vm@var_assert(x, var_nm, x_nm, call, assertion_type, env)}
 
-\emph{Arguments}
+\emph{\strong{Arguments}}
 
-x \verb{[any]} (no default)
+\strong{\code{x}} \verb{[any]} (no default)
 
 Values of a specified variable.
 
-var_nm \verb{[character]} (no default)
+\strong{\code{var_nm}} \verb{[character]} (no default)
 
 Name of a variable.
 
-x_nm \verb{[NULL, character]} (default \code{NULL})
+\strong{\code{x_nm}} \verb{[NULL, character]} (default \code{NULL})
 
 See \link[dbc:argument_handlers]{dbc::handle_arg_x_nm}.
 
-call \verb{[NULL, language]} (default \code{NULL})
+\strong{\code{call}} \verb{[NULL, language]} (default \code{NULL})
 
 See \link[dbc:argument_handlers]{dbc::handle_arg_call}.
 
-assertion_type \verb{[NULL, character]} (default \code{NULL})
+\strong{\code{assertion_type}} \verb{[NULL, character]} (default \code{NULL})
 
 See \link[dbc:assertion_types]{dbc::handle_arg_assertion_type}.
 
-env \verb{[NULL, environment]} (default \code{NULL})
+\strong{\code{env}} \verb{[NULL, environment]} (default \code{NULL})
 
 Environment where a value space will be evaluated, if applicable.
 \itemize{
@@ -991,81 +1025,81 @@ Environment where a value space will be evaluated, if applicable.
 \item \code{environment}: Use this environment.
 }}
 
-\item{\code{var_dt_copy}}{\emph{Description}
+\item{\code{var_dt_copy}}{\emph{\strong{Description}}
 
 Returns a deep copy of \code{var_dt}.
 
-\emph{Usage}
+\emph{\strong{Usage}}
 
 \code{vm@var_dt_copy()}}
 
-\item{\code{var_meta_is_defined}}{\emph{Description}
+\item{\code{var_meta_is_defined}}{\emph{\strong{Description}}
 
 Returns \code{TRUE} if \code{var_dt[[meta_nm]]} exists for a particular \code{var_nm}.
 Unless \code{var_nm = NULL}, then \code{vm@var_meta_is_defined} checks whether that
 column exists in \code{var_dt} at all.
 
-\emph{Usage}
+\emph{\strong{Usage}}
 
 \code{vm@var_meta_is_defined(var_nm, meta_nm)}
 
-\emph{Arguments}
+\emph{\strong{Arguments}}
 
-var_nm \verb{[character]} (no default)
+\strong{\code{var_nm}} \verb{[character]} (no default)
 
 Name of a variable.
 
-meta_nm \verb{[character]} (no default)
+\strong{\code{meta_nm}} \verb{[character]} (no default)
 
 Name of a metadata column in \code{var_set_dt} or \code{var_dt} (depending on context)
 of a \code{VariableMetadata} object.}
 
-\item{\code{var_meta_get}}{\emph{Description}
+\item{\code{var_meta_get}}{\emph{\strong{Description}}
 
 Get metadata for a variable.
 
-\emph{Usage}
+\emph{\strong{Usage}}
 
 \code{vm@var_meta_get(var_nm, meta_nm)}
 
-\emph{Arguments}
+\emph{\strong{Arguments}}
 
-var_nm \verb{[character]} (no default)
+\strong{\code{var_nm}} \verb{[character]} (no default)
 
 Name of a variable.
 
-meta_nm \verb{[character]} (no default)
+\strong{\code{meta_nm}} \verb{[character]} (no default)
 
 Name of a metadata column in \code{var_set_dt} or \code{var_dt} (depending on context)
 of a \code{VariableMetadata} object.}
 
-\item{\code{var_meta_set}}{\emph{Description}
+\item{\code{var_meta_set}}{\emph{\strong{Description}}
 
 Set metadata for a variable.
 \code{value} is wrapped inside a \code{list} if \code{var_dt[[meta_nm]]} is a \code{list}
 or if \code{meta_nm \%in\% c("describer", "labeler")}. This is necessary for
 correct assignment into a \code{list}-valued column.
 
-\emph{Usage}
+\emph{\strong{Usage}}
 
 \code{vm@var_meta_set(var_nm, meta_nm, value)}
 
-\emph{Arguments}
+\emph{\strong{Arguments}}
 
-var_nm \verb{[character]} (no default)
+\strong{\code{var_nm}} \verb{[character]} (no default)
 
 Name of a variable.
 
-meta_nm \verb{[character]} (no default)
+\strong{\code{meta_nm}} \verb{[character]} (no default)
 
 Name of a metadata column in \code{var_set_dt} or \code{var_dt} (depending on context)
 of a \code{VariableMetadata} object.
 
-value \verb{[any]} (no default)
+\strong{\code{value}} \verb{[any]} (no default)
 
 In \verb{_set} functions the value to set for the specified metadata.
 
-\emph{Examples}
+\emph{\strong{Examples}}
 
 \if{html}{\out{<div class="sourceCode">}}\preformatted{# vm@var_meta_set
 vm <- vame::VariableMetadata(
@@ -1101,22 +1135,22 @@ stopifnot(
 )
 }\if{html}{\out{</div>}}}
 
-\item{\code{var_meta_get_all}}{\emph{Description}
+\item{\code{var_meta_get_all}}{\emph{\strong{Description}}
 
 Get metadata for all variables.
 
-\emph{Usage}
+\emph{\strong{Usage}}
 
 \code{vm@var_meta_get_all(meta_nm)}
 
-\emph{Arguments}
+\emph{\strong{Arguments}}
 
-meta_nm \verb{[character]} (no default)
+\strong{\code{meta_nm}} \verb{[character]} (no default)
 
 Name of a metadata column in \code{var_set_dt} or \code{var_dt} (depending on context)
 of a \code{VariableMetadata} object.}
 
-\item{\code{var_rename}}{\emph{Description}
+\item{\code{var_rename}}{\emph{\strong{Description}}
 
 Rename variables. The name is changed in the following places:
 \itemize{
@@ -1128,66 +1162,66 @@ functions --- you will have to do that youself.
 \item \code{var_set_dt$var_nm_set}
 }
 
-\emph{Usage}
+\emph{\strong{Usage}}
 
 \code{vm@var_rename(old_var_nms, new_var_nms)}
 
-\emph{Arguments}
+\emph{\strong{Arguments}}
 
-old_var_nms \verb{[character]} (no default)
+\strong{\code{old_var_nms}} \verb{[character]} (no default)
 
 Variable names to change.
 
-new_var_nms \verb{[character]} (no default)
+\strong{\code{new_var_nms}} \verb{[character]} (no default)
 
 Variable names to change to.}
 
-\item{\code{var_remove}}{\emph{Description}
+\item{\code{var_remove}}{\emph{\strong{Description}}
 
 Remove a variable.
 
-\emph{Usage}
+\emph{\strong{Usage}}
 
 \code{vm@var_remove(var_nm)}
 
-\emph{Arguments}
+\emph{\strong{Arguments}}
 
-var_nm \verb{[character]} (no default)
+\strong{\code{var_nm}} \verb{[character]} (no default)
 
 Name of a variable.}
 
-\item{\code{var_labeler_get}}{\emph{Description}
+\item{\code{var_labeler_get}}{\emph{\strong{Description}}
 
 Get the labeler for a variable.
 Set the labeler for a variable.
 
-\emph{Usage}
+\emph{\strong{Usage}}
 
 \code{vm@var_labeler_get(var_nm)}
 
-\emph{Arguments}
+\emph{\strong{Arguments}}
 
-var_nm \verb{[character]} (no default)
+\strong{\code{var_nm}} \verb{[character]} (no default)
 
 Name of a variable.}
 
-\item{\code{var_labeler_set}}{\emph{Description}
+\item{\code{var_labeler_set}}{\emph{\strong{Description}}
 
-\emph{Usage}
+\emph{\strong{Usage}}
 
 \code{vm@var_labeler_set(var_nm, value)}
 
-\emph{Arguments}
+\emph{\strong{Arguments}}
 
-var_nm \verb{[character]} (no default)
+\strong{\code{var_nm}} \verb{[character]} (no default)
 
 Name of a variable.
 
-value \verb{[any]} (no default)
+\strong{\code{value}} \verb{[any]} (no default)
 
 In \verb{_set} functions the value to set for the specified metadata.}
 
-\item{\code{var_labels_get}}{\emph{Description}
+\item{\code{var_labels_get}}{\emph{\strong{Description}}
 
 Get label for each value in \code{x} for \code{var_nm}.
 \itemize{
@@ -1205,21 +1239,21 @@ evaluation environment is set to \code{labeler_env}.
 left join on the \code{data.table}.
 }
 
-\emph{Usage}
+\emph{\strong{Usage}}
 
 \code{vm@var_labels_get(x, var_nm, label_nm, labeler_env)}
 
-\emph{Arguments}
+\emph{\strong{Arguments}}
 
-x \verb{[any]} (no default)
+\strong{\code{x}} \verb{[any]} (no default)
 
 Values of a specified variable.
 
-var_nm \verb{[character]} (no default)
+\strong{\code{var_nm}} \verb{[character]} (no default)
 
 Name of a variable.
 
-label_nm \verb{[NULL, character]} (default \code{NULL})
+\strong{\code{label_nm}} \verb{[NULL, character]} (default \code{NULL})
 
 Name of a column in the \code{labeler} that has been assigned for the variable.
 Labels will be taken from this column.
@@ -1229,7 +1263,7 @@ Labels will be taken from this column.
 \item \code{character}: Use this column name.
 }
 
-labeler_env \verb{[NULL, environment]} (default \code{NULL})
+\strong{\code{labeler_env}} \verb{[NULL, environment]} (default \code{NULL})
 
 Environment where \code{labeler} of class \code{call} is evaluated.
 \itemize{
@@ -1237,38 +1271,38 @@ Environment where \code{labeler} of class \code{call} is evaluated.
 \item \code{environment}: Use this environment.
 }}
 
-\item{\code{var_describer_get}}{\emph{Description}
+\item{\code{var_describer_get}}{\emph{\strong{Description}}
 
 Get the describer for a variable.
 Set the describer for a variable.
 
-\emph{Usage}
+\emph{\strong{Usage}}
 
 \code{vm@var_describer_get(var_nm)}
 
-\emph{Arguments}
+\emph{\strong{Arguments}}
 
-var_nm \verb{[character]} (no default)
+\strong{\code{var_nm}} \verb{[character]} (no default)
 
 Name of a variable.}
 
-\item{\code{var_describer_set}}{\emph{Description}
+\item{\code{var_describer_set}}{\emph{\strong{Description}}
 
-\emph{Usage}
+\emph{\strong{Usage}}
 
 \code{vm@var_describer_set(var_nm, value)}
 
-\emph{Arguments}
+\emph{\strong{Arguments}}
 
-var_nm \verb{[character]} (no default)
+\strong{\code{var_nm}} \verb{[character]} (no default)
 
 Name of a variable.
 
-value \verb{[any]} (no default)
+\strong{\code{value}} \verb{[any]} (no default)
 
 In \verb{_set} functions the value to set for the specified metadata.}
 
-\item{\code{var_description_get}}{\emph{Description}
+\item{\code{var_description_get}}{\emph{\strong{Description}}
 
 Get description for \code{var_nm}.
 \itemize{
@@ -1286,17 +1320,17 @@ environment is populated by the variables listed above.
 the list.
 }
 
-\emph{Usage}
+\emph{\strong{Usage}}
 
 \code{vm@var_description_get(var_nm, descr_nm, describer_env)}
 
-\emph{Arguments}
+\emph{\strong{Arguments}}
 
-var_nm \verb{[character]} (no default)
+\strong{\code{var_nm}} \verb{[character]} (no default)
 
 Name of a variable.
 
-descr_nm \verb{[NULL, character]} (default \code{NULL})
+\strong{\code{descr_nm}} \verb{[NULL, character]} (default \code{NULL})
 
 Name of a description in the \code{describer} that has been assigned for the
 variable.
@@ -1306,7 +1340,7 @@ Else raises an error.
 \item \code{character}: Use this description name.
 }
 
-describer_env \verb{[NULL, environment]} (default \code{NULL})
+\strong{\code{describer_env}} \verb{[NULL, environment]} (default \code{NULL})
 
 Parent environment of evaluation environment where \code{describer} of class
 \code{call} is evaluated.
@@ -1315,22 +1349,22 @@ Parent environment of evaluation environment where \code{describer} of class
 \item \code{environment}: Use this environment.
 }}
 
-\item{\code{var_value_space_sample}}{\emph{Description}
+\item{\code{var_value_space_sample}}{\emph{\strong{Description}}
 
 Wrapper for \code{vm@var_set_value_space_sample} for when you want a random
 sample for only one variable.
 
-\emph{Usage}
+\emph{\strong{Usage}}
 
 \code{vm@var_value_space_sample(var_nm, env, n)}
 
-\emph{Arguments}
+\emph{\strong{Arguments}}
 
-var_nm \verb{[character]} (no default)
+\strong{\code{var_nm}} \verb{[character]} (no default)
 
 Name of a variable.
 
-env \verb{[NULL, environment]} (default \code{NULL})
+\strong{\code{env}} \verb{[NULL, environment]} (default \code{NULL})
 
 Environment where a value space will be evaluated, if applicable.
 \itemize{
@@ -1338,58 +1372,58 @@ Environment where a value space will be evaluated, if applicable.
 \item \code{environment}: Use this environment.
 }
 
-n \verb{[integer]} (default \code{1L})
+\strong{\code{n}} \verb{[integer]} (default \code{1L})
 
 Number of random samples to take.}
 
-\item{\code{var_var_set_dt_pos_set_get}}{\emph{Description}
+\item{\code{var_var_set_dt_pos_set_get}}{\emph{\strong{Description}}
 
 Retrieve positions (indices) of where \code{var_nm} is part of
 \code{var_set_dt$var_nm_set}.
 
-\emph{Usage}
+\emph{\strong{Usage}}
 
 \code{vm@var_var_set_dt_pos_set_get(var_nm)}
 
-\emph{Arguments}
+\emph{\strong{Arguments}}
 
-var_nm \verb{[character]} (no default)
+\strong{\code{var_nm}} \verb{[character]} (no default)
 
 Name of a variable.}
 
-\item{\code{var_var_set_dt_id_set_get}}{\emph{Description}
+\item{\code{var_var_set_dt_id_set_get}}{\emph{\strong{Description}}
 
 Retrieve \code{var_set_dt$id} values of where \code{var_nm} is part of
 \code{var_set_dt$var_nm_set}.
 
-\emph{Usage}
+\emph{\strong{Usage}}
 
 \code{vm@var_var_set_dt_id_set_get(var_nm)}
 
-\emph{Arguments}
+\emph{\strong{Arguments}}
 
-var_nm \verb{[character]} (no default)
+\strong{\code{var_nm}} \verb{[character]} (no default)
 
 Name of a variable.}
 
-\item{\code{vame_harmonise_dt}}{\emph{Description}
+\item{\code{vame_harmonise_dt}}{\emph{\strong{Description}}
 
 Recode (via \code{maker} calls) and rename columns. Requires
 \code{var_dt$is_harmonised} to be defined. The \code{maker}s of those variables
 which have \code{is_harmonised == TRUE} determine which variables harmonise
 into the harmonised forms. See \strong{Examples}.
 
-\emph{Usage}
+\emph{\strong{Usage}}
 
 \code{vm@vame_harmonise_dt(dt, var_nms, inplace)}
 
-\emph{Arguments}
+\emph{\strong{Arguments}}
 
-dt \verb{[data.table]}
+\strong{\code{dt}} \verb{[data.table]}
 
 \code{data.table} object to harmonise.
 
-var_nms \verb{[NULL, character]} (default \code{NULL})
+\strong{\code{var_nms}} \verb{[NULL, character]} (default \code{NULL})
 \itemize{
 \item \code{NULL}: Try to harmonise all columns of \code{dt}.
 \item \code{character}: Harmonise these only and raise an error this fails.
@@ -1399,12 +1433,12 @@ of old with new regardless of \code{var_dt$is_harmonised}. Mandatory in
 variables that have \code{var_dt$is_harmonised} value \code{TRUE}.
 }
 
-inplace \verb{[logical]} (default \code{FALSE})
+\strong{\code{inplace}} \verb{[logical]} (default \code{FALSE})
 
 If \code{FALSE}, a copy of \code{dt} is taken. If \code{FALSE}, \code{dt} is modified in-place
 without taking a copy.
 
-\emph{Examples}
+\emph{\strong{Examples}}
 
 \if{html}{\out{<div class="sourceCode">}}\preformatted{# vm@vame_harmonise_dt
 vm <- vame::VariableMetadata(
@@ -1521,15 +1555,15 @@ stopifnot(
 )
 }\if{html}{\out{</div>}}}
 
-\item{\code{vame_copy}}{\emph{Description}
+\item{\code{vame_copy}}{\emph{\strong{Description}}
 
 Take a deep copy of a VariableMetadata object. See \code{?data.table::copy}.
 
-\emph{Usage}
+\emph{\strong{Usage}}
 
 \code{vm@vame_copy()}
 
-\emph{Examples}
+\emph{\strong{Examples}}
 
 \if{html}{\out{<div class="sourceCode">}}\preformatted{vm@vame_copy
 vm_1 <- vame::VariableMetadata(
@@ -1550,7 +1584,7 @@ stopifnot(
 )
 }\if{html}{\out{</div>}}}
 
-\item{\code{vame_subset}}{\emph{Description}
+\item{\code{vame_subset}}{\emph{\strong{Description}}
 
 Subset whole \code{VariableMetadata} object in-place. This means that your
 \code{VariableMetadata} object is modified and no copy is taken.
@@ -1575,13 +1609,13 @@ Raise an error if the result is not a \code{logical},
 remove variables in \code{var_dt} not appearing in \code{var_set_dt} and vice versa.
 }
 
-\emph{Usage}
+\emph{\strong{Usage}}
 
 \code{vm@vame_subset(var_dt_expr, var_set_dt_expr, enclos)}
 
-\emph{Arguments}
+\emph{\strong{Arguments}}
 
-var_dt_expr \verb{[NULL, logical, integer, name, call]} (default \code{NULL})
+\strong{\code{var_dt_expr}} \verb{[NULL, logical, integer, name, call]} (default \code{NULL})
 
 Subset \code{var_dt}.
 \itemize{
@@ -1591,7 +1625,7 @@ Subset \code{var_dt}.
 allowed classes.
 }
 
-var_set_dt_expr \verb{[NULL, logical, integer, name, call]} (default \code{NULL})
+\strong{\code{var_set_dt_expr}} \verb{[NULL, logical, integer, name, call]} (default \code{NULL})
 
 Subset \code{var_set_dt}.
 \itemize{
@@ -1601,7 +1635,7 @@ Subset \code{var_set_dt}.
 allowed classes.
 }
 
-enclos \verb{[NULL, environment]} (default \code{NULL})
+\strong{\code{enclos}} \verb{[NULL, environment]} (default \code{NULL})
 
 Context environment for evaluating \code{var_dt_expr} and \code{var_set_dt_expr}.
 Effectively we do e.g. \code{eval(var_dt_expr, envir = var_dt, enclos = enclos)}.
@@ -1610,7 +1644,7 @@ Effectively we do e.g. \code{eval(var_dt_expr, envir = var_dt, enclos = enclos)}
 \item \code{environment}: Use this environment.
 }
 
-\emph{Examples}
+\emph{\strong{Examples}}
 
 \if{html}{\out{<div class="sourceCode">}}\preformatted{# vm@vame_subset
 vm <- vame::VariableMetadata(
@@ -1655,7 +1689,7 @@ stopifnot(
 )
 }\if{html}{\out{</div>}}}
 
-\item{\code{vame_union_append}}{\emph{Description}
+\item{\code{vame_union_append}}{\emph{\strong{Description}}
 
 Append new data into \code{VariableMetadata} object from another.
 No pre-existing data are overwritten. Performs the following steps:
@@ -1673,104 +1707,70 @@ The function always returns \code{NULL} invisibly and the modifications are
 made into \code{vm} in-place.
 }
 
-\emph{Usage}
+\emph{\strong{Usage}}
 
 \code{vm@vame_union_append(vm_2)}
 
-\emph{Arguments}
+\emph{\strong{Arguments}}}
 
-vm_2 \verb{[VariableMetadata]} (no default)
-
-\code{VariableMetadata} object whose metadata will be appended to the current
-\code{VariableMetadata} object.
-
-\emph{Examples}
-
-\if{html}{\out{<div class="sourceCode">}}\preformatted{vm_1 <- vame::VariableMetadata(
-  var_dt = data.table::data.table(
-    var_nm = c("a", "b"),
-    my_meta = c("vm_1_a", "vm_1_b")
-  ),
-  var_set_dt = data.table::data.table(
-    id = "ab",
-    var_nm_set = list(c("a", "b"))
-  )
-)
-vm_2 <- vame::VariableMetadata(
-  var_dt = data.table::data.table(
-    var_nm = c("b", "c"),
-    my_meta = c("vm_2_b", "vm_2_c")
-  ),
-  var_set_dt = data.table::data.table(
-    id = "bc",
-    var_nm_set = list(c("b", "c"))
-  )
-)
-vm_1@vame_union_append(vm_2)
-stopifnot(
-  vm_1@var_meta_get(var_nm = "b", meta_nm = "my_meta") == "vm_1_b",
-  vm_1@var_meta_get(var_nm = "c", meta_nm = "my_meta") == "vm_2_c"
-)
-}\if{html}{\out{</div>}}}
-
-\item{\code{vame_meta_is_defined}}{\emph{Description}
+\item{\code{vame_meta_is_defined}}{\emph{\strong{Description}}
 
 Returns \code{TRUE} if \code{vame_list} has non-\code{NULL} element named \code{meta_nm}.
 
-\emph{Usage}
+\emph{\strong{Usage}}
 
 \code{vm@vame_meta_is_defined(meta_nm)}
 
-\emph{Arguments}
+\emph{\strong{Arguments}}
 
-meta_nm \verb{[character]} (no default)
+\strong{\code{meta_nm}} \verb{[character]} (no default)
 
 Name of a metadata column in \code{var_set_dt} or \code{var_dt} (depending on context)
 of a \code{VariableMetadata} object.}
 
-\item{\code{vame_meta_get}}{\emph{Description}
+\item{\code{vame_meta_get}}{\emph{\strong{Description}}
 
 Retrieve an element of \code{vame_list}.
 
-\emph{Usage}
+\emph{\strong{Usage}}
 
 \code{vm@vame_meta_get(meta_nm)}
 
-\emph{Arguments}
+\emph{\strong{Arguments}}
 
-meta_nm \verb{[character]} (no default)
+\strong{\code{meta_nm}} \verb{[character]} (no default)
 
 Name of a metadata column in \code{var_set_dt} or \code{var_dt} (depending on context)
 of a \code{VariableMetadata} object.}
 
-\item{\code{vame_meta_set}}{\emph{Description}
+\item{\code{vame_meta_set}}{\emph{\strong{Description}}
 
 Assign an element of \code{vame_meta_set}.
 
-\emph{Usage}
+\emph{\strong{Usage}}
 
 \code{vm@vame_meta_set(meta_nm, value)}
 
-\emph{Arguments}
+\emph{\strong{Arguments}}
 
-meta_nm \verb{[character]} (no default)
+\strong{\code{meta_nm}} \verb{[character]} (no default)
 
 Name of a metadata column in \code{var_set_dt} or \code{var_dt} (depending on context)
 of a \code{VariableMetadata} object.
 
-value \verb{[any]} (no default)
+\strong{\code{value}} \verb{[any]} (no default)
 
 In \verb{_set} functions the value to set for the specified metadata.}
 
-\item{\code{vame_value_space_sampler_get}}{\emph{Description}
+\item{\code{vame_value_space_sampler_get}}{\emph{\strong{Description}}
 
 Retrieve \code{meta_list$sampler}.
 
-\emph{Usage}
+\emph{\strong{Usage}}
 
 \code{vm@vame_value_space_sampler_get()}}
 
-\item{\code{vame_value_space_sampler_set}}{\emph{Description}
+\item{\code{vame_value_space_sampler_set}}{\emph{\strong{Description}}
 
 Assign \code{meta_list$sampler}.
 
@@ -1793,17 +1793,17 @@ see \code{?all.vars}.
 See the documentation for \code{vame_value_space_sample} to understand how
 the \code{sampler} object is used.
 
-\emph{Usage}
+\emph{\strong{Usage}}
 
 \code{vm@vame_value_space_sampler_set(value)}
 
-\emph{Arguments}
+\emph{\strong{Arguments}}
 
-value \verb{[any]} (no default)
+\strong{\code{value}} \verb{[any]} (no default)
 
 In \verb{_set} functions the value to set for the specified metadata.}
 
-\item{\code{vame_value_space_sample}}{\emph{Description}
+\item{\code{vame_value_space_sample}}{\emph{\strong{Description}}
 
 \code{vm@var_value_space_sample} always returns a vector of length \code{n}.
 If \code{vame_list$sampler} has not been set, \code{vm@vame_value_space_sample}
@@ -1822,13 +1822,13 @@ If \code{var_nms} was supplied, only those columns are in the output in the
 given order.
 Else all columns for each variable set identified by \code{ids} are present.
 
-\emph{Usage}
+\emph{\strong{Usage}}
 
 \code{vm@vame_value_space_sample(ids, n, data, var_nms, env)}
 
-\emph{Arguments}
+\emph{\strong{Arguments}}
 
-ids \verb{[NULL, vector]} (default \code{NULL})
+\strong{\code{ids}} \verb{[NULL, vector]} (default \code{NULL})
 \itemize{
 \item \code{NULL}: Behaviour varies. An error is raised if this cannot be inferred.
 If the function has the argument \code{var_nms}, that will be used
@@ -1836,11 +1836,11 @@ to infer \code{ids}.
 \item \code{vector}: One or more values that can be found in \code{var_set_dt$id}.
 }
 
-n \verb{[integer]} (default \code{1L})
+\strong{\code{n}} \verb{[integer]} (default \code{1L})
 
 Number of random samples to take.
 
-data \verb{[NULL, data.frame, data.table, list]} (default \code{NULL})
+\strong{\code{data}} \verb{[NULL, data.frame, data.table, list]} (default \code{NULL})
 \itemize{
 \item \code{NULL}: No data is used.
 \item \code{data.frame}/\code{data.table}: These variables are used as-is.
@@ -1857,14 +1857,14 @@ Of course you can also pass
 directly if that is more convenient.
 }
 
-var_nms \verb{[NULL, character]} (default \code{NULL})
+\strong{\code{var_nms}} \verb{[NULL, character]} (default \code{NULL})
 \itemize{
 \item \code{NULL}: Behaviour varies. If the function has the argument \code{ids} or \code{id},
 uses all variable names in those variable sets.
 \item \code{character}: Use these variable names.
 }
 
-env \verb{[NULL, environment]} (default \code{NULL})
+\strong{\code{env}} \verb{[NULL, environment]} (default \code{NULL})
 
 Environment where a value space will be evaluated, if applicable.
 \itemize{
@@ -1872,7 +1872,7 @@ Environment where a value space will be evaluated, if applicable.
 \item \code{environment}: Use this environment.
 }}
 
-\item{\code{vame_value_space_sample_default}}{\emph{Description}
+\item{\code{vame_value_space_sample_default}}{\emph{\strong{Description}}
 
 \code{vm@vame_value_space_sample_default}
 calls \code{vm@var_set_value_space_sample} for every pertinent variable set
@@ -1880,13 +1880,13 @@ and combines the results into one large \code{data.table}.
 \code{vm@vame_value_space_sample_default} always returns a \code{data.table} with \code{n}
 rows.
 
-\emph{Usage}
+\emph{\strong{Usage}}
 
 \code{vm@vame_value_space_sample_default(ids, env, var_nms, data, n)}
 
-\emph{Arguments}
+\emph{\strong{Arguments}}
 
-ids \verb{[NULL, vector]} (default \code{NULL})
+\strong{\code{ids}} \verb{[NULL, vector]} (default \code{NULL})
 \itemize{
 \item \code{NULL}: Behaviour varies. An error is raised if this cannot be inferred.
 If the function has the argument \code{var_nms}, that will be used
@@ -1894,7 +1894,7 @@ to infer \code{ids}.
 \item \code{vector}: One or more values that can be found in \code{var_set_dt$id}.
 }
 
-env \verb{[NULL, environment]} (default \code{NULL})
+\strong{\code{env}} \verb{[NULL, environment]} (default \code{NULL})
 
 Environment where a value space will be evaluated, if applicable.
 \itemize{
@@ -1902,14 +1902,14 @@ Environment where a value space will be evaluated, if applicable.
 \item \code{environment}: Use this environment.
 }
 
-var_nms \verb{[NULL, character]} (default \code{NULL})
+\strong{\code{var_nms}} \verb{[NULL, character]} (default \code{NULL})
 \itemize{
 \item \code{NULL}: Behaviour varies. If the function has the argument \code{ids} or \code{id},
 uses all variable names in those variable sets.
 \item \code{character}: Use these variable names.
 }
 
-data \verb{[NULL, data.frame, data.table, list]} (default \code{NULL})
+\strong{\code{data}} \verb{[NULL, data.frame, data.table, list]} (default \code{NULL})
 \itemize{
 \item \code{NULL}: No data is used.
 \item \code{data.frame}/\code{data.table}: These variables are used as-is.
@@ -1926,36 +1926,36 @@ Of course you can also pass
 directly if that is more convenient.
 }
 
-n \verb{[integer]} (default \code{1L})
+\strong{\code{n}} \verb{[integer]} (default \code{1L})
 
 Number of random samples to take.}
 
-\item{\code{vame_list_copy}}{\emph{Description}
+\item{\code{vame_list_copy}}{\emph{\strong{Description}}
 
 Get a deep copy of \code{meta_list}.
 
-\emph{Usage}
+\emph{\strong{Usage}}
 
 \code{vm@vame_list_copy()}}
 
-\item{\code{vame_category_space_dt_list}}{\emph{Description}
+\item{\code{vame_category_space_dt_list}}{\emph{\strong{Description}}
 
 Get list of category space \code{data.table} objects.
 
-\emph{Usage}
+\emph{\strong{Usage}}
 
 \code{vm@vame_category_space_dt_list(var_nms, env)}
 
-\emph{Arguments}
+\emph{\strong{Arguments}}
 
-var_nms \verb{[NULL, character]} (default \code{NULL})
+\strong{\code{var_nms}} \verb{[NULL, character]} (default \code{NULL})
 \itemize{
 \item \code{NULL}: Behaviour varies. If the function has the argument \code{ids} or \code{id},
 uses all variable names in those variable sets.
 \item \code{character}: Use these variable names.
 }
 
-env \verb{[NULL, environment]} (default \code{NULL})
+\strong{\code{env}} \verb{[NULL, environment]} (default \code{NULL})
 
 Environment where a value space will be evaluated, if applicable.
 \itemize{
@@ -1963,24 +1963,24 @@ Environment where a value space will be evaluated, if applicable.
 \item \code{environment}: Use this environment.
 }}
 
-\item{\code{vame_category_space_dt}}{\emph{Description}
+\item{\code{vame_category_space_dt}}{\emph{\strong{Description}}
 
 Get a category space \code{data.table}.
 
-\emph{Usage}
+\emph{\strong{Usage}}
 
 \code{vm@vame_category_space_dt(var_nms, env)}
 
-\emph{Arguments}
+\emph{\strong{Arguments}}
 
-var_nms \verb{[NULL, character]} (default \code{NULL})
+\strong{\code{var_nms}} \verb{[NULL, character]} (default \code{NULL})
 \itemize{
 \item \code{NULL}: Behaviour varies. If the function has the argument \code{ids} or \code{id},
 uses all variable names in those variable sets.
 \item \code{character}: Use these variable names.
 }
 
-env \verb{[NULL, environment]} (default \code{NULL})
+\strong{\code{env}} \verb{[NULL, environment]} (default \code{NULL})
 
 Environment where a value space will be evaluated, if applicable.
 \itemize{

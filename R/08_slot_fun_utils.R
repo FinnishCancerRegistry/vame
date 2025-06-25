@@ -36,7 +36,7 @@ handle_arg_data__ <- function(
   if (output_type == "arg_list") {
     if (is.data.frame(data)) {
       # @codedoc_comment_block specs(vame:::handle_arg_data__("arg_list"))
-      # @param data `[data.frame, data.table, list, NULL]`
+      # **`data`** `[data.frame, data.table, list, NULL]`
       #
       # - `data.frame`/`data.table`: Columns contain necessary data.
       # @codedoc_comment_block steps(vame:::handle_arg_data__("arg_list"))
@@ -91,7 +91,7 @@ handle_arg_data__ <- function(
   } else if (output_type == "df_list") {
     if (is.data.frame(data)) {
       # @codedoc_comment_block specs(vame:::handle_arg_data__("df_list"))
-      # @param data `[data.frame, data.table, list]` (no default)
+      # **`data`** `[data.frame, data.table, list]` (no default)
       #
       # - `data.frame`/`data.table`: Columns contain necessary data.
       # @codedoc_comment_block specs(vame:::handle_arg_data__("df_list"))
@@ -164,7 +164,7 @@ handle_arg_ids_et_var_nms_inplace__ <- function(
   ids <- calling_env[[ids_arg_nm]]
   var_nms <- calling_env[[var_nms_arg_nm]]
   # @codedoc_comment_block doc_slot_fun_arg(ids)
-  # @param ids `[NULL, vector]` (default `NULL`)
+  # **`ids`** `[NULL, vector]` (default `NULL`)
   #
   # - `NULL`: Behaviour varies. An error is raised if this cannot be inferred.
   #   If the function has the argument `var_nms`, that will be used
@@ -173,7 +173,7 @@ handle_arg_ids_et_var_nms_inplace__ <- function(
   # @codedoc_comment_block doc_slot_fun_arg(ids)
   assert_is_arg_ids(vm = vm, x = ids)
   # @codedoc_comment_block doc_slot_fun_arg(var_nms)
-  # @param var_nms `[NULL, character]` (default `NULL`)
+  # **`var_nms`** `[NULL, character]` (default `NULL`)
   #
   # - `NULL`: Behaviour varies. If the function has the argument `ids` or `id`,
   #   uses all variable names in those variable sets.

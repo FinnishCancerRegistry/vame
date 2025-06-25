@@ -13,7 +13,7 @@ codedoc_df__ <- function() {
   codedoc::extract_keyed_comment_blocks()
 }
 
-doc_slot_fun_arg__ <- function(df = NULL, fun_nm, arg_nm, with_tag = FALSE) {
+doc_slot_fun_arg__ <- function(df = NULL, fun_nm, arg_nm) {
   if (is.null(df)) {
     df <- codedoc_df__()
   }
@@ -29,10 +29,6 @@ doc_slot_fun_arg__ <- function(df = NULL, fun_nm, arg_nm, with_tag = FALSE) {
   }
   while (lines[1] == "") {
     lines <- lines[-1]
-  }
-  if (!with_tag) {
-    lines <- gsub("^@param +", "", lines)
-    lines <- gsub("``", "`", lines)
   }
   if (lines[length(lines)] != "") {
     lines <- c(lines, "")
@@ -54,11 +50,11 @@ doc_slot_fun__ <- function(df = NULL, fun_nm) {
   lines <- c(
     paste0("@slot ", fun_nm),
     "",
-    "*Description*",
+    "***Description***",
     "",
     description,
     "",
-    "*Usage*",
+    "***Usage***",
     "",
     paste0("`", slot_call_string, "`"),
     ""
@@ -66,7 +62,7 @@ doc_slot_fun__ <- function(df = NULL, fun_nm) {
   if (length(slot_fun_arg_nms) > 0) {
     lines <- c(
       lines,
-      "*Arguments*",
+      "***Arguments***",
       "",
       unlist(lapply(
         slot_fun_arg_nms, doc_slot_fun_arg__,
@@ -81,7 +77,7 @@ doc_slot_fun__ <- function(df = NULL, fun_nm) {
     lines <- c(
       lines,
       "",
-      "*Examples*",
+      "***Examples***",
       "",
       "```",
       example_lines,

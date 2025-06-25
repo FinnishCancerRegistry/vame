@@ -681,7 +681,7 @@ assert_is_arg_data <- function(
 ) {
   dbc::handle_args_inplace()
   # @codedoc_comment_block doc_slot_fun_arg(data)
-  # @param data `[NULL, data.frame, data.table, list]` (default `NULL`)
+  # **`data`** `[NULL, data.frame, data.table, list]` (default `NULL`)
   #
   # - `NULL`: No data is used.
   # - `data.frame`/`data.table`: These variables are used as-is.
@@ -980,14 +980,14 @@ assert_is_arg_optional_steps <- function(
 ) {
   dbc::handle_args_inplace()
   # @codedoc_comment_block doc_slot_fun_arg(optional_steps)
-  # @param optional_steps `[NULL, list]` (default `NULL`)
+  # **`optional_steps`** `[NULL, list]` (default `NULL`)
   #
   # - `NULL`: Function is called normally.
   # - `list`: These functions are called during the run. See **Description** /
   #   **Details**.
   # @codedoc_comment_block doc_slot_fun_arg(optional_steps)
   # @codedoc_comment_block doc_slot_fun_arg(callbacks)
-  # @param callbacks `[NULL, list]` (default `NULL`)
+  # **`callbacks`** `[NULL, list]` (default `NULL`)
   #
   # - `NULL`: Function is called normally.
   # - `list`: These functions are called during the run. See **Description** /
