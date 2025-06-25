@@ -35,7 +35,7 @@ dt_join_assign__ <- function(
     ],
     list(LHS = dt_col_nms, RHS = expr_rhs)
   )
-  
+
   eval(expr)
 }
 

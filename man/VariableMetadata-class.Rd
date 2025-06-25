@@ -34,40 +34,6 @@ See \strong{Details} and \strong{Features} for more information.}
 A list of metadata concerning the whole \code{VariableMetadata} object.
 Its elements can be anything you want.
 E.g. \code{vame_list = list(dataset_version = "1.0.0")}.}
-
-\item{vm_2}{\verb{[VariableMetadata]} (no default)
-
-\code{VariableMetadata} object whose metadata will be appended to the current
-\code{VariableMetadata} object.
-
-\emph{\strong{Examples}}
-
-\if{html}{\out{<div class="sourceCode">}}\preformatted{vm_1 <- vame::VariableMetadata(
-  var_dt = data.table::data.table(
-    var_nm = c("a", "b"),
-    my_meta = c("vm_1_a", "vm_1_b")
-  ),
-  var_set_dt = data.table::data.table(
-    id = "ab",
-    var_nm_set = list(c("a", "b"))
-  )
-)
-vm_2 <- vame::VariableMetadata(
-  var_dt = data.table::data.table(
-    var_nm = c("b", "c"),
-    my_meta = c("vm_2_b", "vm_2_c")
-  ),
-  var_set_dt = data.table::data.table(
-    id = "bc",
-    var_nm_set = list(c("b", "c"))
-  )
-)
-vm_1@vame_union_append(vm_2)
-stopifnot(
-  vm_1@var_meta_get(var_nm = "b", meta_nm = "my_meta") == "vm_1_b",
-  vm_1@var_meta_get(var_nm = "c", meta_nm = "my_meta") == "vm_2_c"
-)
-}\if{html}{\out{</div>}}}
 }
 \description{
 Create and make use of a \code{VariableMetadata} object. It contains
@@ -1711,7 +1677,41 @@ made into \code{vm} in-place.
 
 \code{vm@vame_union_append(vm_2)}
 
-\emph{\strong{Arguments}}}
+\emph{\strong{Arguments}}
+
+\strong{\code{vm_2}} \verb{[VariableMetadata]} (no default)
+
+\code{VariableMetadata} object whose metadata will be appended to the current
+\code{VariableMetadata} object.
+
+\emph{\strong{Examples}}
+
+\if{html}{\out{<div class="sourceCode">}}\preformatted{vm_1 <- vame::VariableMetadata(
+  var_dt = data.table::data.table(
+    var_nm = c("a", "b"),
+    my_meta = c("vm_1_a", "vm_1_b")
+  ),
+  var_set_dt = data.table::data.table(
+    id = "ab",
+    var_nm_set = list(c("a", "b"))
+  )
+)
+vm_2 <- vame::VariableMetadata(
+  var_dt = data.table::data.table(
+    var_nm = c("b", "c"),
+    my_meta = c("vm_2_b", "vm_2_c")
+  ),
+  var_set_dt = data.table::data.table(
+    id = "bc",
+    var_nm_set = list(c("b", "c"))
+  )
+)
+vm_1@vame_union_append(vm_2)
+stopifnot(
+  vm_1@var_meta_get(var_nm = "b", meta_nm = "my_meta") == "vm_1_b",
+  vm_1@var_meta_get(var_nm = "c", meta_nm = "my_meta") == "vm_2_c"
+)
+}\if{html}{\out{</div>}}}
 
 \item{\code{vame_meta_is_defined}}{\emph{\strong{Description}}
 

@@ -56,14 +56,14 @@ var_set_meta_get <- function(
   # @codedoc_comment_block vm@var_set_meta_get
   # Get metadata for a specific variable set.
   # @codedoc_comment_block vm@var_set_meta_get
-  
+
   assert_is_variablemetadata(vm)
-  
+
   assert_is_var_set_id(vm, id)
-    
+
   # @codedoc_comment_block doc_slot_fun_arg(meta_nm)
   # **`meta_nm`** `[character]` (no default)
-  # 
+  #
   # Name of a metadata column in `var_set_dt` or `var_dt` (depending on context)
   # of a `VariableMetadata` object.
   # @codedoc_comment_block doc_slot_fun_arg(meta_nm)
@@ -187,10 +187,10 @@ var_set_var_nm_set_get_all <- function(
   # @codedoc_comment_block news("vm@var_set_var_nm_set_get_all", "2023-12-04", "0.2.0")
   # Rename `vm@var_set_list_get` to `vm@var_set_var_nm_set_get_all`.
   # @codedoc_comment_block news("vm@var_set_var_nm_set_get_all", "2023-12-04", "0.2.0")
-    
+
   # @codedoc_comment_block doc_slot_fun_arg(vm)
   # **`vm`** `[VariableMetadata]` (no default)
-  # 
+  #
   # A `VariableMetadata` object.
   # @codedoc_comment_block doc_slot_fun_arg(vm)
   var_set_meta_get_all(vm, meta_nm = "var_nm_set")
@@ -203,7 +203,7 @@ var_set_var_nm_set_get <- function(
   # @codedoc_comment_block vm@var_set_var_nm_set_get
   # Get a specific variable name set.
   # @codedoc_comment_block vm@var_set_var_nm_set_get
-  
+
   # @codedoc_comment_block news("vm@var_set_var_nm_set_get", "2023-12-04", "0.2.0")
   # Rename `vm@var_set_get` to `vm@var_set_var_nm_set_get`.
   # @codedoc_comment_block news("vm@var_set_var_nm_set_get", "2023-12-04", "0.2.0")
@@ -218,7 +218,7 @@ var_set_var_nm_set_set <- function(
   # @codedoc_comment_block vm@var_set_var_nm_set_set
   # Set a new value for a specific variable name set.
   # @codedoc_comment_block vm@var_set_var_nm_set_set
-  
+
   # @codedoc_comment_block news("vm@var_set_var_nm_set_set", "2023-12-04", "0.2.0")
   # New function `vm@var_set_var_nm_set_set`.
   # @codedoc_comment_block news("vm@var_set_var_nm_set_set", "2023-12-04", "0.2.0")
@@ -235,7 +235,7 @@ var_set_rename <- function(
   vm,
   old_ids,
   new_ids
-) {  
+) {
   # @codedoc_comment_block vm@var_set_rename
   # Rename variable sets --- change `var_set_dt$id` values.
   # @codedoc_comment_block vm@var_set_rename
@@ -246,12 +246,12 @@ var_set_rename <- function(
 
   # @codedoc_comment_block doc_slot_fun_arg(old_ids)
   # **`old_ids`** `[any]` (no default)
-  # 
+  #
   # Old variable set IDs.
   # @codedoc_comment_block doc_slot_fun_arg(old_ids)
   # @codedoc_comment_block doc_slot_fun_arg(new_ids)
   # **`new_ids`** `[any]` (no default)
-  # 
+  #
   # New variable set IDs.
   # @codedoc_comment_block doc_slot_fun_arg(new_ids)
   dbc::assert_is_nonNA(new_ids)
@@ -354,7 +354,7 @@ var_set_make <- function(
   # The recommended approach to writing a `maker` for a variable set is to
   # write a function and store a call to it as the `maker`. See the example
   # for the `make` feature:
-  # 
+  #
   # ```
   # @codedoc_insert_comment_block feature_example(make)
   # ```
@@ -739,7 +739,7 @@ var_set_make <- function(
   # @codedoc_comment_block vm@var_set_make
   # - Delete columns other than `var_nms` if found. E.g. if user supplied
   #   `var_nms = "my_var_1"` but the `maker` produced a `data.table` with
-  #   columns `my_var_1` and `my_var_2`, remote the latter. If user supplied 
+  #   columns `my_var_1` and `my_var_2`, remote the latter. If user supplied
   #   `var_nms = NULL` then nothing is deleted.
   # @codedoc_comment_block vm@var_set_make
   del_col_nms <- setdiff(names(dt), var_nms)
@@ -1383,7 +1383,7 @@ var_set_value_space_dt_subset <- function(
   assert_is_var_set_id(vm, id)
   # @codedoc_comment_block doc_slot_fun_arg(expr)
   # **`expr`** `[any]` (no default)
-  # 
+  #
   # Expression to subset a `data.table` object. Available columns depends on
   # context.
   # @codedoc_comment_block doc_slot_fun_arg(expr)
@@ -1518,7 +1518,7 @@ var_set_value_space_sample <- function(
   #     return(out[])
   #   })
   # )
-  # 
+  #
   # ad_sample <- vm@var_set_value_space_sample(id = "ad", n = 4L)
   # b_sample <- vm@var_set_value_space_sample(id = "b", n = 4L)
   # c_sample <- vm@var_set_value_space_sample(id = "c", n = 4L)
@@ -1812,13 +1812,13 @@ var_is_aggregateable_to <- function(
 
   # @codedoc_comment_block doc_slot_fun_arg(from_var_nm)
   # **`from_var_nm`** `[character]` (no default)
-  # 
+  #
   # Name of a variable. Aggregation from this to another variable.
   # @codedoc_comment_block doc_slot_fun_arg(from_var_nm)
   assert_is_var_nm(vm, from_var_nm)
   # @codedoc_comment_block doc_slot_fun_arg(to_var_nm)
   # **`to_var_nm`** `[character]` (no default)
-  # 
+  #
   # Name of a variable. Aggregation to this from another variable.
   # @codedoc_comment_block doc_slot_fun_arg(to_var_nm)
   assert_is_var_nm(vm, to_var_nm)
@@ -1848,7 +1848,7 @@ var_aggregate <- function(
   assert_is_var_nm(vm, to_var_nm)
   # @codedoc_comment_block doc_slot_fun_arg(x)
   # **`x`** `[any]` (no default)
-  # 
+  #
   # Values of a specified variable.
   # @codedoc_comment_block doc_slot_fun_arg(x)
   dbc::assert_is_vector(x)
@@ -1940,7 +1940,7 @@ var_value_space_eval <- function(
 
   # @codedoc_comment_block doc_slot_fun_arg(var_nm)
   # **`var_nm`** `[character]` (no default)
-  # 
+  #
   # Name of a variable.
   # @codedoc_comment_block doc_slot_fun_arg(var_nm)
   assert_is_var_nm(vm, var_nm)
@@ -2064,19 +2064,19 @@ var_assert <- function(
 
   # @codedoc_comment_block doc_slot_fun_arg(x_nm)
   # **`x_nm`** `[NULL, character]` (default `NULL`)
-  # 
+  #
   # See [dbc::handle_arg_x_nm].
   # @codedoc_comment_block doc_slot_fun_arg(x_nm)
   x_nm <- dbc::handle_arg_x_nm(x_nm)
   # @codedoc_comment_block doc_slot_fun_arg(call)
   # **`call`** `[NULL, language]` (default `NULL`)
-  # 
+  #
   # See [dbc::handle_arg_call].
   # @codedoc_comment_block doc_slot_fun_arg(call)
   call <- dbc::handle_arg_call(call)
   # @codedoc_comment_block doc_slot_fun_arg(assertion_type)
   # **`assertion_type`** `[NULL, character]` (default `NULL`)
-  # 
+  #
   # See [dbc::handle_arg_assertion_type].
   # @codedoc_comment_block doc_slot_fun_arg(assertion_type)
   assertion_type <- dbc::handle_arg_assertion_type(assertion_type)
@@ -2329,7 +2329,7 @@ var_rename <- function(
     # @codedoc_comment_block vm@var_rename
     # - `var_set_dt$value_space`, if the `value_space` object is of type `dt`.
     #   If the `value_space` is of type `expr` or `fun`, `vm@var_rename` emits
-    #   a warning because it does not attempt to alter R expressions or 
+    #   a warning because it does not attempt to alter R expressions or
     #   functions --- you will have to do that youself.
     # @codedoc_comment_block vm@var_rename
     # @codedoc_comment_block news("vm@var_rename", "2023-12-07", "0.2.2")
@@ -2343,7 +2343,7 @@ var_rename <- function(
           data.table::setnames(vs[["dt"]], old_var_nm, new_var_nm)
         } else if (any(c("expr", "fun") %in% names(vs))) {
           warning(
-            "vm@var_rename cannot handle value_space object of type ", 
+            "vm@var_rename cannot handle value_space object of type ",
             names(vs)[1], "; you must alter the value_space object for ",
             "id = ", id, " yourself"
           )
@@ -2613,7 +2613,7 @@ var_description_get <- function(
   # @codedoc_comment_block news("vm@var_description_get", "2024-01-22", "0.4.0")
   # New function `vm@var_description_get`.
   # @codedoc_comment_block news("vm@var_description_get", "2024-01-22", "0.4.0")
-  
+
   # @codedoc_comment_block feature(describing)
   # The describing feature becomes available if
   # the `var_dt` of a `VariableMetadata` object has a `describer` column value
@@ -2677,10 +2677,10 @@ var_description_get <- function(
   # @codedoc_comment_block feature_example(describing)
   assert_is_var_nm(vm, var_nm)
   describer <- var_describer_get(vm, var_nm = var_nm)
-  
+
   # @codedoc_comment_block doc_slot_fun_arg(descr_nm)
   # **`descr_nm`** `[NULL, character]` (default `NULL`)
-  # 
+  #
   # Name of a description in the `describer` that has been assigned for the
   # variable.
   #
@@ -2699,7 +2699,7 @@ var_description_get <- function(
 
   # @codedoc_comment_block doc_slot_fun_arg(describer_env)
   # **`describer_env`** `[NULL, environment]` (default `NULL`)
-  # 
+  #
   # Parent environment of evaluation environment where `describer` of class
   # `call` is evaluated.
   #
@@ -3811,15 +3811,15 @@ vame_category_space_dt <- function(
   # value combinations.
   #
   # @codedoc_insert_comment_block specification(var_dt$type)
-  # 
+  #
   # This feature relies on the value spaces feature. See the documentation
   # for that feature for more information.
   #
   # The following functions are part of this feature:
   # @codedoc_insert_comment_block feature_funs(category spaces)
-  # 
+  #
   # @codedoc_comment_block feature(category spaces)
-  
+
   # @codedoc_comment_block feature_funs(category spaces)
   # - `vm@vame_category_space_dt`
   # @codedoc_comment_block feature_funs(category spaces)

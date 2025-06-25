@@ -109,7 +109,7 @@ value_space_type_funs__ <- list(
       # - `"expr"`: An unevaluated R expression.
       #   This can be used to define the (joint) value
       #   space of one or more variables. What to do with the result of the
-      #   expression is deduced from the type of the result --- e.g. a 
+      #   expression is deduced from the type of the result --- e.g. a
       #   `data.table` result will be handled in the same manner as if the
       #   `value_space` had been of type `dt`. This can be useful for making use
       #   of functions to define the value space:

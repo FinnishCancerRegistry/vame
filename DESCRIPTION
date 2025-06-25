@@ -1,19 +1,19 @@
 Package: vame
 Title: Variable Metadata
 Version: 1.10.2
-Authors@R: 
+Authors@R:
     person("Joonas", "Miettinen", , "joonas.miettinen@cancer.fi", role = c("aut", "cre"),
            comment = c(ORCID = "0000-0001-8624-6754"))
 Description: Define value spaces and other metadata for variables.
 License: MIT + file LICENSE
-Depends: 
+Depends:
     R (>= 2.10)
 Imports:
     data.table (>= 1.14.8),
     dbc (>= 0.4.11),
     methods (>= 4.2.2),
     utils (>= 4.2.2)
-Suggests: 
+Suggests:
     codedoc (>= 0.3.8),
     devtools (>= 2.4.5),
     testthat (>= 3.0.0)

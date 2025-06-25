@@ -5,7 +5,7 @@ doc_dev_todo__ <- function(df = NULL) {
     )
   } else {
     df <- df[grepl("^dev_todo[(]", df[["key"]]), ]
-  }  
+  }
   priority_type_topic <- gsub(
     "(^dev_todo[(])|([)]$)",
     "",
