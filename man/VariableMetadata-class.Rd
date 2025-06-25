@@ -316,9 +316,18 @@ of a \code{VariableMetadata} object.
   )
 )
 stopifnot(
-  identical(vm@var_set_meta_get_all(meta_nm = "my_int_meta"), c(1L, NA_integer_)),
-  identical(vm@var_set_meta_get_all(meta_nm = "my_list_meta"), list(NULL, 1:3)),
-  identical(names(vm@var_set_meta_get_all(meta_nm = "my_int_meta")), c("set_a", "set_b"))
+  identical(
+    names(vm@var_set_meta_get_all(meta_nm = "my_list_meta")),
+    c("set_a", "set_b")
+  ),
+  identical(
+    vm@var_set_meta_get_all(meta_nm = "my_int_meta"),
+    c(set_a = 1L, set_b = NA_integer_)
+  ),
+  identical(
+    vm@var_set_meta_get_all(meta_nm = "my_list_meta"),
+    list(set_a = NULL, set_b = 1:3)
+  )
 )
 }\if{html}{\out{</div>}}}
 
@@ -3489,9 +3498,18 @@ vm <- vame::VariableMetadata(
   )
 )
 stopifnot(
-  identical(vm@var_set_meta_get_all(meta_nm = "my_int_meta"), c(1L, NA_integer_)),
-  identical(vm@var_set_meta_get_all(meta_nm = "my_list_meta"), list(NULL, 1:3)),
-  identical(names(vm@var_set_meta_get_all(meta_nm = "my_int_meta")), c("set_a", "set_b"))
+  identical(
+    names(vm@var_set_meta_get_all(meta_nm = "my_list_meta")),
+    c("set_a", "set_b")
+  ),
+  identical(
+    vm@var_set_meta_get_all(meta_nm = "my_int_meta"),
+    c(set_a = 1L, set_b = NA_integer_)
+  ),
+  identical(
+    vm@var_set_meta_get_all(meta_nm = "my_list_meta"),
+    list(set_a = NULL, set_b = 1:3)
+  )
 )
 # Example of make feature
 make_dg_y <- function(
