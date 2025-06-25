@@ -182,304 +182,6 @@ methods::setClass(
 #' @docType class
 #' @name VariableMetadata-class
 #' @aliases VariableMetadata
-#' @examples
-#' # vame::VariableMetadata ----------------------------------------------------
-#'
-#' # basic example of different kinds of variables
-#' value_space_d <- function() 1:3 * 100L
-#' vm <- vame::VariableMetadata(
-#'   var_dt = data.table::data.table(
-#'     var_nm = c("a", "b", "c", "d", "e", "f", "g", "h"),
-#'     type = c("categorical", "categorical",
-#'              "categorical",
-#'              "my_type_1", "my_type_2", "my_type_3", "my_type_4", "my_type_5")
-#'   ),
-#'   var_set_dt = data.table::data.table(
-#'     id = c("ab", "c", "d", "e", "f", "g", "h"),
-#'     var_nm_set = list(
-#'       ab = c("a", "b"),
-#'       c = "c", d = "d", e = "e", f = "f", g = "g", h = "h"),
-#'     value_space = list(
-#'       ab = list(dt = data.table::data.table(
-#'         a = c(1L, 2L, 2L),
-#'         b = c(11L, 21L, 22L)
-#'       )),
-#'       c = list(set = c("a", "b")),
-#'       d = list(expr = quote(value_space_d())),
-#'       e = list(bounds = list(
-#'         lo = 0.0, hi = 10.0,
-#'         lo_inclusive = TRUE, hi_inclusive = TRUE
-#'       )),
-#'       f = list(bounds = list(
-#'         lo = as.Date("1901-01-01"), hi = as.Date("2023-12-31"),
-#'         lo_inclusive = TRUE, hi_inclusive = TRUE
-#'       )),
-#'       g = list(unrestricted = list(class_set = c("IDate", "Date"))),
-#'       h = list(regex = "^[a-z]$")
-#'     )
-#'   )
-#' )
-#' vm@var_assert(1L, var_nm = "a")
-#' vm@var_assert(21L, var_nm = "b")
-#' vm@var_assert("a", var_nm = "c")
-#' vm@var_assert(100L, var_nm = "d")
-#' vm@var_assert(c(0.0, 10.0), var_nm = "e")
-#' vm@var_assert(as.Date("1901-01-01"), var_nm = "f")
-#' vm@var_assert(data.table::as.IDate("1901-01-01"), var_nm = "g")
-#' vm@var_assert(letters, var_nm = "h")
-#' my_fun <- function(e_values) {
-#'   vm@var_assert(e_values, var_nm = "e")
-#'   e_values + 1
-#' }
-#' my_fun(0.0)
-#'
-#' # assignment after creating a VariableMetadata object
-#' vm@var_meta_set(var_nm = "f", meta_nm = "type", value = "my_date")
-#' stopifnot(
-#'   vm@var_meta_get(var_nm = "f", meta_nm = "type") == "my_date"
-#' )
-#' vm@var_set_value_space_set(id = "c", value_space = list(set = c("x", "z")))
-#' stopifnot(
-#'   identical(vm@var_set_value_space_get(id = "c"), list(set = c("x", "z")))
-#' )
-#'
-#' # renaming, removing variables
-#' vm <- vame::VariableMetadata(
-#'   var_dt = data.table::data.table(
-#'     var_nm = c("a", "b", "c"),
-#'     flavour = c("tasty", "rancid", "bitter")
-#'   ),
-#'   var_set_dt = data.table::data.table(
-#'     id = "set_01",
-#'     var_nm_set = list(c("a", "b")),
-#'     value_space = list(list(dt = data.table::data.table(
-#'       a = 1:2,
-#'       b = 3:4
-#'     )))
-#'   )
-#' )
-#'
-#' vm@var_rename("a", "A")
-#' stopifnot(
-#'   identical(vm@var_meta_get("A", "flavour"), "tasty"),
-#'   identical(names(vm@var_set_value_space_get("set_01")[["dt"]]), c("A", "b")),
-#'   identical(vm@var_set_meta_get("set_01", "var_nm_set"), c("A", "b"))
-#' )
-#'
-#' vm@var_set_rename("set_01", "Ab")
-#' stopifnot(
-#'   identical(vm@var_set_meta_get_all("id"), c("Ab" = "Ab"))
-#' )
-#'
-#' vm@var_remove("b")
-#' stopifnot(
-#'   identical(names(vm@var_set_value_space_get("Ab")[["dt"]]), "A"),
-#'   identical(vm@var_set_meta_get("Ab", "var_nm_set"), "A")
-#' )
-#'
-#' vm@var_set_remove("Ab")
-#' stopifnot(
-#'   identical(length(vm@var_set_meta_get_all("var_nm_set")), 0L)
-#' )
-#'
-#' # retrieving category space data.tables
-#' dt_01 <- data.table::CJ(a = 1:3, b = 3:1, c = 1:3)
-#' dt_02 <- data.table::CJ(d = 1:2, e = 2:1)
-#' vm <- vame::VariableMetadata(
-#'   var_dt = data.table::data.table(
-#'     var_nm = c("a", "b", "c", "d", "e", "f"),
-#'     type = "categorical"
-#'   ),
-#'   var_set_dt = data.table::data.table(
-#'     id = c("abc", "de", "f"),
-#'     var_nm_set = list(
-#'       abc = c("a", "b", "c"),
-#'       de = c("d", "e"),
-#'       f = "f"
-#'      ),
-#'     value_space = list(
-#'       abc = list(dt = dt_01),
-#'       de = list(expr = quote({
-#'         dt_02[
-#'           i = !duplicated(dt_02, by = var_nms),
-#'           j = .SD,
-#'           .SDcols = var_nms
-#'         ]
-#'       })),
-#'       f = list(bounds = list(
-#'         lo = 0L, hi = 10L,
-#'         lo_inclusive = TRUE, hi_inclusive = TRUE
-#'       ))
-#'     )
-#'   )
-#' )
-#'
-#' stopifnot(
-#'   all.equal(
-#'     vm@vame_category_space_dt(c("a", "b")),
-#'     dt_01[
-#'       i = !duplicated(dt_01, by = c("a", "b")),
-#'       j = .SD,
-#'       .SDcols = c("a", "b")
-#'     ],
-#'     check.attributes = FALSE
-#'   ),
-#'   all.equal(
-#'     vm@vame_category_space_dt(c("d", "e")),
-#'     dt_02,
-#'     check.attributes = FALSE
-#'   ),
-#'   all.equal(
-#'     vm@vame_category_space_dt(c("a", "f")),
-#'     data.table::CJ(a = 1:3, f = 0:10),
-#'     check.attributes = FALSE
-#'   )
-#' )
-#'
-#' # getting category space data.tables --- here a variable appears in
-#' # two different value spaces. this can be handy for defining joint value
-#' # spaces and also conversions & aggregations.
-#' dt_01 <- data.table::CJ(a = 1:3, b = 3:1, c = 1:3)
-#' dt_02 <- data.table::CJ(a = 0:1, e = 2:1)
-#' dt_03 <- data.table::data.table(a = 0:3, a_2 = c(1L,1L, 2L,2L))
-#' vm <- vame::VariableMetadata(
-#'   var_dt = data.table::data.table(
-#'     var_nm = c("a", "b", "c", "e", "a_2"),
-#'     type = "categorical"
-#'   ),
-#'   var_set_dt = data.table::data.table(
-#'     id = c("set_01", "set_02", "set_03"),
-#'     var_nm_set = list(c("a", "b", "c"), c("a", "e"), c("a", "a_2")),
-#'     value_space = list(
-#'       list(dt = dt_01),
-#'       list(dt = dt_02),
-#'       list(dt = dt_03)
-#'     )
-#'   )
-#' )
-#'
-#' obs <- vm@vame_category_space_dt(c("a", "b", "e"))
-#' exp <- data.table::data.table(
-#'   a = c(0L, 0L, 1L, 1L, 1L, 1L, 1L, 1L, 2L, 2L, 2L, 3L, 3L, 3L),
-#'   b = c(NA, NA, 1L, 1L, 2L, 2L, 3L, 3L, 1L, 2L, 3L, 1L, 2L, 3L),
-#'   e = c(1L, 2L, 1L, 2L, 1L, 2L, 1L, 2L, NA, NA, NA, NA, NA, NA)
-#' )
-#' data.table::setkeyv(obs, names(obs))
-#' data.table::setkeyv(exp, names(exp))
-#' stopifnot(
-#'   all.equal(obs, exp, check.attributes = FALSE)
-#' )
-#'
-#' stopifnot(
-#'   vm@var_is_aggregateable_to("a", "a_2"),
-#'   identical(vm@var_aggregate(0:1, "a", "a_2"), c(1L,1L))
-#' )
-#'
-#' # getting labels for variable levels
-#' dt_01 <- data.table::CJ(a = 1:3, b = 3:1, c = 4:5)
-#' vm <- vame::VariableMetadata(
-#'   var_dt = data.table::data.table(
-#'     var_nm = c("a", "b", "c"),
-#'     type = "categorical",
-#'     labeler = list(
-#'       a = data.table::data.table(
-#'         x = 1:3,
-#'         en = paste0("a_level_", 1:3)
-#'       ),
-#'       b = quote({
-#'         dt <- data.table::data.table(
-#'           x = 1:3,
-#'           en = paste0("b_level_", 1:3)
-#'         )
-#'         dt[[label_nm]][match(x, dt[["x"]])]
-#'       }),
-#'       c = NULL
-#'     )
-#'   ),
-#'   var_set_dt = data.table::data.table(
-#'     id = c("set_01"),
-#'     var_nm_set = list(c("a", "b", "c")),
-#'     value_space = list(
-#'       list(dt = dt_01)
-#'     )
-#'   )
-#' )
-#'
-#' obs <- vm@var_labels_get(x = 1:4, var_nm = "a", label_nm = "en")
-#' exp <- c(paste0("a_level_", 1:3), NA)
-#' stopifnot(
-#'   identical(obs, exp)
-#' )
-#'
-#' obs <- tryCatch(
-#'   vm@var_labels_get(
-#'     x = 1:4,
-#'     var_nm = "a",
-#'     label_nm = "this does not exist"
-#'   ),
-#'   error = function(e) e[["message"]]
-#' )
-#' exp <- paste0(
-#'   "label_nm = \"this does not exist\"",
-#'   " not one of the defined label names: \"en\""
-#' )
-#' stopifnot(
-#'   grepl(exp, obs)
-#' )
-#'
-#' obs <- tryCatch(
-#'   vm@var_labels_get(
-#'     x = 1:4,
-#'     var_nm = "c",
-#'     label_nm = "en"
-#'   ),
-#'   error = function(e) e[["message"]]
-#' )
-#' exp <- "Variable \"c\" has no labeler defined"
-#' stopifnot(
-#'   grepl(exp, obs)
-#' )
-#'
-#' # adding data to a pre-existing VariableMetadata object
-#' vm_1 <- vame::VariableMetadata(
-#'   var_dt = data.table::data.table(
-#'     var_nm = c("a", "b"),
-#'     type = "categorical",
-#'     labeler = list(
-#'       a = data.table::data.table(x = 1:2, label = c("a_1", "a_2")),
-#'       b = NULL
-#'     )
-#'   ),
-#'   var_set_dt = data.table::data.table(
-#'     id = "ab",
-#'     var_nm_set = list(ab = c("a", "b")),
-#'     value_space = list(ab = list(dt = data.table::CJ(a = 1:2, b = 3:4)))
-#'   )
-#' )
-#' # note that vm_2 var_dt does not have columns "type", "labeler" --- those
-#' # will be NA / NULL for "c" and "d".
-#' vm_2 <- vame::VariableMetadata(
-#'   var_dt = data.table::data.table(var_nm = c("c", "d")),
-#'   var_set_dt = data.table::data.table(
-#'     id = "cd",
-#'     var_nm_set = list(cd = c("c", "d")),
-#'     value_space = list(cd = list(dt = data.table::CJ(c = 5:6, d = 7:8)))
-#'   )
-#' )
-#' vm_1@vame_union_append(vm_2)
-#' stopifnot(
-#'   c("ab", "cd") %in% vm_1@var_set_meta_get_all("id")
-#' )
-#'
-#' # taking a copy of a VariableMetadata object
-#' vm_3 <- vm_2@vame_copy()
-#' vm_2@var_rename("d", "dd")
-#' stopifnot(
-#'   "d" %in% vm_3@var_meta_get_all("var_nm"),
-#'   !"d" %in% vm_2@var_meta_get_all("var_nm"),
-#'   "dd" %in% vm_2@var_meta_get_all("var_nm")
-#' )
-#'
 #' @export
 #' @eval local({
 #'   df <- codedoc_df__()
@@ -496,6 +198,316 @@ VariableMetadata <- function(
   var_set_dt,
   vame_list = NULL
 ) {
+  # @codedoc_comment_block general_example(vame::VariableMetadata)
+  # # vame::VariableMetadata
+  #
+  # # maybe the most important type of metadata: what values are different
+  # # variables allowed to have? here we define value_space objects for that.
+  # value_space_d <- function() 1:3 * 100L
+  # vm <- vame::VariableMetadata(
+  #   var_dt = data.table::data.table(
+  #     var_nm = c("a", "b", "c", "d", "e", "f", "g", "h"),
+  #     type = c("categorical", "categorical",
+  #              "categorical",
+  #              "my_type_1", "my_type_2", "my_type_3", "my_type_4", "my_type_5")
+  #   ),
+  #   var_set_dt = data.table::data.table(
+  #     id = c("ab", "c", "d", "e", "f", "g", "h"),
+  #     var_nm_set = list(
+  #       ab = c("a", "b"),
+  #       c = "c", d = "d", e = "e", f = "f", g = "g", h = "h"),
+  #     value_space = list(
+  #       ab = list(dt = data.table::data.table(
+  #         a = c(1L, 2L, 2L),
+  #         b = c(11L, 21L, 22L)
+  #       )),
+  #       c = list(set = c("a", "b")),
+  #       d = list(expr = quote(value_space_d())),
+  #       e = list(bounds = list(
+  #         lo = 0.0, hi = 10.0,
+  #         lo_inclusive = TRUE, hi_inclusive = TRUE
+  #       )),
+  #       f = list(bounds = list(
+  #         lo = as.Date("1901-01-01"), hi = as.Date("2023-12-31"),
+  #         lo_inclusive = TRUE, hi_inclusive = TRUE
+  #       )),
+  #       g = list(unrestricted = list(class_set = c("IDate", "Date"))),
+  #       h = list(regex = "^[a-z]$")
+  #     )
+  #   )
+  # )
+  #
+  # # this information can be used to e.g. verify data.
+  # vm@var_assert(1L, var_nm = "a")
+  # vm@var_assert(21L, var_nm = "b")
+  # vm@var_assert("a", var_nm = "c")
+  # vm@var_assert(100L, var_nm = "d")
+  # vm@var_assert(c(0.0, 10.0), var_nm = "e")
+  # vm@var_assert(as.Date("1901-01-01"), var_nm = "f")
+  # vm@var_assert(data.table::as.IDate("1901-01-01"), var_nm = "g")
+  # vm@var_assert(letters, var_nm = "h")
+  # my_fun <- function(e_values) {
+  #   vm@var_assert(e_values, var_nm = "e")
+  #   e_values + 1
+  # }
+  # my_fun(0.0)
+  #
+  # # VariableMetadata objects can be modified after creation.
+  # # lets change some metadata.
+  # vm@var_meta_set(var_nm = "f", meta_nm = "type", value = "my_date")
+  # stopifnot(
+  #   vm@var_meta_get(var_nm = "f", meta_nm = "type") == "my_date"
+  # )
+  # vm@var_set_value_space_set(id = "c", value_space = list(set = c("x", "z")))
+  # stopifnot(
+  #   identical(vm@var_set_value_space_get(id = "c"), list(set = c("x", "z")))
+  # )
+  #
+  # # renaming, removing variables
+  # vm <- vame::VariableMetadata(
+  #   var_dt = data.table::data.table(
+  #     var_nm = c("a", "b", "c"),
+  #     flavour = c("tasty", "rancid", "bitter")
+  #   ),
+  #   var_set_dt = data.table::data.table(
+  #     id = "set_01",
+  #     var_nm_set = list(c("a", "b")),
+  #     value_space = list(list(dt = data.table::data.table(
+  #       a = 1:2,
+  #       b = 3:4
+  #     )))
+  #   )
+  # )
+  #
+  # vm@var_rename("a", "A")
+  # stopifnot(
+  #   identical(vm@var_meta_get("A", "flavour"), "tasty"),
+  #   identical(names(vm@var_set_value_space_get("set_01")[["dt"]]), c("A", "b")),
+  #   identical(vm@var_set_meta_get("set_01", "var_nm_set"), c("A", "b"))
+  # )
+  #
+  # vm@var_set_rename("set_01", "Ab")
+  # stopifnot(
+  #   identical(vm@var_set_meta_get_all("id"), c("Ab" = "Ab"))
+  # )
+  #
+  # vm@var_remove("b")
+  # stopifnot(
+  #   identical(names(vm@var_set_value_space_get("Ab")[["dt"]]), "A"),
+  #   identical(vm@var_set_meta_get("Ab", "var_nm_set"), "A")
+  # )
+  #
+  # vm@var_set_remove("Ab")
+  # stopifnot(
+  #   identical(length(vm@var_set_meta_get_all("var_nm_set")), 0L)
+  # )
+  #
+  # # another important feature is the possibility of retrieving a table of
+  # # allowed categories for one or more variables. this comes up when (a subset
+  # # of) observed data contains only some of the categories (think one age
+  # # group for one sex is not present in data) but we want all possible
+  # # categories to appear in our statistics. if we have defined these
+  # # categories in advance as value_space objects, they are usable in this
+  # # regard as well.
+  # dt_01 <- data.table::CJ(a = 1:3, b = 3:1, c = 1:3)
+  # dt_02 <- data.table::CJ(d = 1:2, e = 2:1)
+  # vm <- vame::VariableMetadata(
+  #   var_dt = data.table::data.table(
+  #     var_nm = c("a", "b", "c", "d", "e", "f"),
+  #     type = "categorical"
+  #   ),
+  #   var_set_dt = data.table::data.table(
+  #     id = c("abc", "de", "f"),
+  #     var_nm_set = list(
+  #       abc = c("a", "b", "c"),
+  #       de = c("d", "e"),
+  #       f = "f"
+  #      ),
+  #     value_space = list(
+  #       abc = list(dt = dt_01),
+  #       de = list(expr = quote({
+  #         dt_02[
+  #           i = !duplicated(dt_02, by = var_nms),
+  #           j = .SD,
+  #           .SDcols = var_nms
+  #         ]
+  #       })),
+  #       f = list(bounds = list(
+  #         lo = 0L, hi = 10L,
+  #         lo_inclusive = TRUE, hi_inclusive = TRUE
+  #       ))
+  #     )
+  #   )
+  # )
+  #
+  # stopifnot(
+  #   all.equal(
+  #     vm@vame_category_space_dt(c("a", "b")),
+  #     dt_01[
+  #       i = !duplicated(dt_01, by = c("a", "b")),
+  #       j = .SD,
+  #       .SDcols = c("a", "b")
+  #     ],
+  #     check.attributes = FALSE
+  #   ),
+  #   all.equal(
+  #     vm@vame_category_space_dt(c("d", "e")),
+  #     dt_02,
+  #     check.attributes = FALSE
+  #   ),
+  #   all.equal(
+  #     vm@vame_category_space_dt(c("a", "f")),
+  #     data.table::CJ(a = 1:3, f = 0:10),
+  #     check.attributes = FALSE
+  #   )
+  # )
+  #
+  # # getting category space data.tables --- here a variable appears in
+  # # two different value spaces. this can be handy for defining joint value
+  # # spaces and also conversions & aggregations.
+  # dt_01 <- data.table::CJ(a = 1:3, b = 3:1, c = 1:3)
+  # dt_02 <- data.table::CJ(a = 0:1, e = 2:1)
+  # dt_03 <- data.table::data.table(a = 0:3, a_2 = c(1L,1L, 2L,2L))
+  # vm <- vame::VariableMetadata(
+  #   var_dt = data.table::data.table(
+  #     var_nm = c("a", "b", "c", "e", "a_2"),
+  #     type = "categorical"
+  #   ),
+  #   var_set_dt = data.table::data.table(
+  #     id = c("set_01", "set_02", "set_03"),
+  #     var_nm_set = list(c("a", "b", "c"), c("a", "e"), c("a", "a_2")),
+  #     value_space = list(
+  #       list(dt = dt_01),
+  #       list(dt = dt_02),
+  #       list(dt = dt_03)
+  #     )
+  #   )
+  # )
+  #
+  # obs <- vm@vame_category_space_dt(c("a", "b", "e"))
+  # exp <- data.table::data.table(
+  #   a = c(0L, 0L, 1L, 1L, 1L, 1L, 1L, 1L, 2L, 2L, 2L, 3L, 3L, 3L),
+  #   b = c(NA, NA, 1L, 1L, 2L, 2L, 3L, 3L, 1L, 2L, 3L, 1L, 2L, 3L),
+  #   e = c(1L, 2L, 1L, 2L, 1L, 2L, 1L, 2L, NA, NA, NA, NA, NA, NA)
+  # )
+  # data.table::setkeyv(obs, names(obs))
+  # data.table::setkeyv(exp, names(exp))
+  # stopifnot(
+  #   all.equal(obs, exp, check.attributes = FALSE)
+  # )
+  #
+  # stopifnot(
+  #   vm@var_is_aggregateable_to("a", "a_2"),
+  #   identical(vm@var_aggregate(0:1, "a", "a_2"), c(1L,1L))
+  # )
+  #
+  # # getting labels for variable levels
+  # dt_01 <- data.table::CJ(a = 1:3, b = 3:1, c = 4:5)
+  # vm <- vame::VariableMetadata(
+  #   var_dt = data.table::data.table(
+  #     var_nm = c("a", "b", "c"),
+  #     type = "categorical",
+  #     labeler = list(
+  #       a = data.table::data.table(
+  #         x = 1:3,
+  #         en = paste0("a_level_", 1:3)
+  #       ),
+  #       b = quote({
+  #         dt <- data.table::data.table(
+  #           x = 1:3,
+  #           en = paste0("b_level_", 1:3)
+  #         )
+  #         dt[[label_nm]][match(x, dt[["x"]])]
+  #       }),
+  #       c = NULL
+  #     )
+  #   ),
+  #   var_set_dt = data.table::data.table(
+  #     id = c("set_01"),
+  #     var_nm_set = list(c("a", "b", "c")),
+  #     value_space = list(
+  #       list(dt = dt_01)
+  #     )
+  #   )
+  # )
+  #
+  # obs <- vm@var_labels_get(x = 1:4, var_nm = "a", label_nm = "en")
+  # exp <- c(paste0("a_level_", 1:3), NA)
+  # stopifnot(
+  #   identical(obs, exp)
+  # )
+  #
+  # obs <- tryCatch(
+  #   vm@var_labels_get(
+  #     x = 1:4,
+  #     var_nm = "a",
+  #     label_nm = "this does not exist"
+  #   ),
+  #   error = function(e) e[["message"]]
+  # )
+  # exp <- paste0(
+  #   "label_nm = \"this does not exist\"",
+  #   " not one of the defined label names: \"en\""
+  # )
+  # stopifnot(
+  #   grepl(exp, obs)
+  # )
+  #
+  # obs <- tryCatch(
+  #   vm@var_labels_get(
+  #     x = 1:4,
+  #     var_nm = "c",
+  #     label_nm = "en"
+  #   ),
+  #   error = function(e) e[["message"]]
+  # )
+  # exp <- "Variable \"c\" has no labeler defined"
+  # stopifnot(
+  #   grepl(exp, obs)
+  # )
+  #
+  # # adding data to a pre-existing VariableMetadata object
+  # vm_1 <- vame::VariableMetadata(
+  #   var_dt = data.table::data.table(
+  #     var_nm = c("a", "b"),
+  #     type = "categorical",
+  #     labeler = list(
+  #       a = data.table::data.table(x = 1:2, label = c("a_1", "a_2")),
+  #       b = NULL
+  #     )
+  #   ),
+  #   var_set_dt = data.table::data.table(
+  #     id = "ab",
+  #     var_nm_set = list(ab = c("a", "b")),
+  #     value_space = list(ab = list(dt = data.table::CJ(a = 1:2, b = 3:4)))
+  #   )
+  # )
+  # # note that vm_2 var_dt does not have columns "type", "labeler" --- those
+  # # will be NA / NULL for "c" and "d".
+  # vm_2 <- vame::VariableMetadata(
+  #   var_dt = data.table::data.table(var_nm = c("c", "d")),
+  #   var_set_dt = data.table::data.table(
+  #     id = "cd",
+  #     var_nm_set = list(cd = c("c", "d")),
+  #     value_space = list(cd = list(dt = data.table::CJ(c = 5:6, d = 7:8)))
+  #   )
+  # )
+  # vm_1@vame_union_append(vm_2)
+  # stopifnot(
+  #   c("ab", "cd") %in% vm_1@var_set_meta_get_all("id")
+  # )
+  #
+  # # taking a copy of a VariableMetadata object
+  # vm_3 <- vm_2@vame_copy()
+  # vm_2@var_rename("d", "dd")
+  # stopifnot(
+  #   "d" %in% vm_3@var_meta_get_all("var_nm"),
+  #   !"d" %in% vm_2@var_meta_get_all("var_nm"),
+  #   "dd" %in% vm_2@var_meta_get_all("var_nm")
+  # )
+  #
+  # @codedoc_comment_block general_example(vame::VariableMetadata)
+
   # @codedoc_comment_block news("vame::VariableMetadata", "2023-06-30", "0.1.0")
   # First release.
   # @codedoc_comment_block news("vame::VariableMetadata", "2023-06-30", "0.1.0")

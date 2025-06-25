@@ -89,8 +89,7 @@ doc_dev_todo__ <- function(df = NULL) {
 #
 # The `VariableMetadata` class is intended for storing metadata for which there
 # is "one right way". For instance, a variable has one correct description in
-# text. This philosophy excludes tasks such as creating a manual for a dataset,
-# which can take many forms.
+# text.
 #
 # See the help page `?vame::VariableMetadata` for more information. In
 # particular see the examples.
@@ -98,6 +97,12 @@ doc_dev_todo__ <- function(df = NULL) {
 # <!-- badges: start -->
 # [![R-CMD-check](https://github.com/FinnishCancerRegistry/vame/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/FinnishCancerRegistry/vame/actions/workflows/R-CMD-check.yaml)
 # <!-- badges: end -->
+#
+# # Basic example
+#
+# ```r
+# @codedoc_insert_comment_block general_example(vame::VariableMetadata)
+# ```
 #
 # # Recommended installation
 #
