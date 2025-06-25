@@ -1,7 +1,7 @@
 # var_set funs -----------------------------------------------------------------
 var_set_dt_copy <- function(vm) {
   # @codedoc_comment_block vm@var_set_dt_copy
-  # Returns a deep copy of `var_set_dt_copy`.
+  # Returns a deep copy of `var_set_dt`.
   # @codedoc_comment_block vm@var_set_dt_copy
   # @codedoc_comment_block news("vm@var_set_dt_copy", "2023-12-13", "0.2.2")
   # New function `vm@var_set_dt_copy`.
@@ -17,11 +17,26 @@ var_set_meta_is_defined <- function(
   id,
   meta_nm
 ) {
-  # @codedoc_comment_block vm@var_set_meta_is_defined
-  # Returns `TRUE` if `var_set_dt[[meta_nm]]` has a value for a particular
-  # `id`. Unless `id = NULL`, then `vm@var_set_meta_is_defined`
-  # checks whether that column exists at all in `var_set_dt`.
-  # @codedoc_comment_block vm@var_set_meta_is_defined
+  # @codedoc_comment_block function_example(vm@var_set_meta_is_defined)
+  # vm <- vame::VariableMetadata(
+  #   var_dt = data.table::data.table(
+  #     var_nm = c("a", "b")
+  #   ),
+  #   var_set_dt = data.table::data.table(
+  #     id = c("set_a", "set_b"),
+  #     var_nm_set = list("a", "b"),
+  #     my_list_meta = list(NULL, 1:3),
+  #     my_int_meta = c(1L, NA_integer_)
+  #   )
+  # )
+  # stopifnot(
+  #   identical(vm@var_set_meta_is_defined(id = "set_a", meta_nm = "my_int_meta"), TRUE),
+  #   identical(vm@var_set_meta_is_defined(id = "set_b", meta_nm = "my_int_meta"), FALSE),
+  #   identical(vm@var_set_meta_is_defined(id = "set_a", meta_nm = "my_list_meta"), FALSE),
+  #   identical(vm@var_set_meta_is_defined(id = "set_b", meta_nm = "my_list_meta"), TRUE)
+  # )
+  # @codedoc_comment_block function_example(vm@var_set_meta_is_defined)
+
   # @codedoc_comment_block news("vm@var_set_meta_is_defined", "2023-12-12", "0.2.2")
   # New function `vm@var_set_meta_is_defined`.
   # @codedoc_comment_block news("vm@var_set_meta_is_defined", "2023-12-12", "0.2.2")
@@ -32,19 +47,34 @@ var_set_meta_is_defined <- function(
   # @codedoc_comment_block news("vm@var_set_meta_is_defined", "2024-12-19", "1.5.0")
   assert_is_variablemetadata(vm)
   vsd <- vsd_get(vm)
-  if (is.null(id)) {
-    return(meta_nm %in% names(vsd))
-  }
+  # @codedoc_comment_block vm@var_set_meta_is_defined
+  # Detects whether metadata has been defined for a variable set.
+  #
+  # - If `meta_nm` is not a column name of `var_set_dt`, return `FALSE`.
+  # @codedoc_comment_block vm@var_set_meta_is_defined
   if (!meta_nm %in% names(vsd)) {
     return(FALSE)
   }
+  if (is.null(id)) {
+    # @codedoc_comment_block vm@var_set_meta_is_defined
+    # - If `meta_nm` IS a column name of `var_set_dt` and `id = NULL`, return
+    #   `TRUE`.
+    # @codedoc_comment_block vm@var_set_meta_is_defined
+    return(TRUE)
+  }
+  assert_is_id(x = id, vm = vm)
   pos <- var_set_id_to_pos(vm, id)
+
+  # @codedoc_comment_block vm@var_set_meta_is_defined
+  # - Else return `TRUE`/`FALSE`  for whether `var_set_dt[[meta_nm]]`
+  #   is defined for the particular `id`. For list-valued column a
+  #   `NULL` element will result in `FALSE` and for other column types
+  #   a missing (`?is.na`) value results in `FALSE`. Otherwise you get `TRUE`.
+  # @codedoc_comment_block vm@var_set_meta_is_defined
   if (is.list(vsd[[meta_nm]])) {
-    meta <- vsd[[meta_nm]][[pos]]
-    return(!is.null(meta))
+    return(!is.null(vsd[[meta_nm]][[pos]]))
   } else {
-    meta <- vsd[[meta_nm]][pos]
-    return(!is.na(meta))
+    return(!is.na(vsd[[meta_nm]][pos]))
   }
 }
 
@@ -57,6 +87,23 @@ var_set_meta_get <- function(
   # Get metadata for a specific variable set.
   # @codedoc_comment_block vm@var_set_meta_get
 
+  # @codedoc_comment_block function_example(vm@var_set_meta_get)
+  # vm <- vame::VariableMetadata(
+  #   var_dt = data.table::data.table(
+  #     var_nm = c("a", "b")
+  #   ),
+  #   var_set_dt = data.table::data.table(
+  #     id = c("set_a", "set_b"),
+  #     var_nm_set = list("a", "b"),
+  #     my_list_meta = list(NULL, 1:3),
+  #     my_int_meta = c(1L, NA_integer_)
+  #   )
+  # )
+  # stopifnot(
+  #   identical(vm@var_set_meta_get(id = "set_a", meta_nm = "my_int_meta"), 1L),
+  #   identical(vm@var_set_meta_get(id = "set_b", meta_nm = "my_list_meta"), 1:3)
+  # )
+  # @codedoc_comment_block function_example(vm@var_set_meta_get)
   assert_is_variablemetadata(vm)
 
   assert_is_var_set_id(vm, id)
@@ -81,6 +128,34 @@ var_set_meta_set <- function(
   # @codedoc_comment_block vm@var_set_meta_set
   # Set metadata for a specific variable set.
   # @codedoc_comment_block vm@var_set_meta_set
+
+  # @codedoc_comment_block function_example(vm@var_set_meta_set)
+  # vm <- vame::VariableMetadata(
+  #   var_dt = data.table::data.table(
+  #     var_nm = c("a", "b")
+  #   ),
+  #   var_set_dt = data.table::data.table(
+  #     id = c("set_a", "set_b"),
+  #     var_nm_set = list("a", "b"),
+  #     my_list_meta = list(NULL, 1:3),
+  #     my_int_meta = c(1L, NA_integer_)
+  #   )
+  # )
+  # vm@var_set_meta_set(
+  #   id = "set_a",
+  #   meta_nm = "my_int_meta",
+  #   value = 2L
+  # )
+  # vm@var_set_meta_set(
+  #   id = "set_a",
+  #   meta_nm = "my_new_int_meta",
+  #   value = 10L
+  # )
+  # stopifnot(
+  #   identical(vm@var_set_meta_get(id = "set_a", meta_nm = "my_int_meta"), 2L),
+  #   identical(vm@var_set_meta_get(id = "set_a", meta_nm = "my_new_int_meta"), 10L)
+  # )
+  # @codedoc_comment_block function_example(vm@var_set_meta_set)
 
   assert_is_variablemetadata(vm)
 
@@ -164,8 +239,28 @@ var_set_meta_get_all <- function(
   meta_nm
 ) {
   # @codedoc_comment_block vm@var_set_meta_get_all
-  # Get all metadata for a specific variable set.
+  # Get specific metadata for every variable set.
   # @codedoc_comment_block vm@var_set_meta_get_all
+
+  # @codedoc_comment_block function_example(vm@var_set_meta_get_all)
+  # vm <- vame::VariableMetadata(
+  #   var_dt = data.table::data.table(
+  #     var_nm = c("a", "b")
+  #   ),
+  #   var_set_dt = data.table::data.table(
+  #     id = c("set_a", "set_b"),
+  #     var_nm_set = list("a", "b"),
+  #     my_list_meta = list(NULL, 1:3),
+  #     my_int_meta = c(1L, NA_integer_)
+  #   )
+  # )
+  # stopifnot(
+  #   identical(vm@var_set_meta_get_all(meta_nm = "my_int_meta"), c(1L, NA_integer_)),
+  #   identical(vm@var_set_meta_get_all(meta_nm = "my_list_meta"), list(NULL, 1:3)),
+  #   identical(names(vm@var_set_meta_get_all(meta_nm = "my_int_meta")), c("set_a", "set_b"))
+  # )
+  # @codedoc_comment_block function_example(vm@var_set_meta_get_all)
+
   # @codedoc_comment_block news("vm@var_set_meta_get_all", "2023-12-04", "0.2.0")
   # `vm@var_set_meta_get_all` now always sets `var_set_dt$id` as the names
   # of the output list or vector.

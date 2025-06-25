@@ -118,7 +118,7 @@ and the variable has either a \code{labeler} or a guaranteed categorical
 \describe{
 \item{\code{var_set_dt_copy}}{\emph{\strong{Description}}
 
-Returns a deep copy of \code{var_set_dt_copy}.
+Returns a deep copy of \code{var_set_dt}.
 
 \emph{\strong{Usage}}
 
@@ -126,9 +126,16 @@ Returns a deep copy of \code{var_set_dt_copy}.
 
 \item{\code{var_set_meta_is_defined}}{\emph{\strong{Description}}
 
-Returns \code{TRUE} if \code{var_set_dt[[meta_nm]]} has a value for a particular
-\code{id}. Unless \code{id = NULL}, then \code{vm@var_set_meta_is_defined}
-checks whether that column exists at all in \code{var_set_dt}.
+Detects whether metadata has been defined for a variable set.
+\itemize{
+\item If \code{meta_nm} is not a column name of \code{var_set_dt}, return \code{FALSE}.
+\item If \code{meta_nm} IS a column name of \code{var_set_dt} and \code{id = NULL}, return
+\code{TRUE}.
+\item Else return \code{TRUE}/\code{FALSE}  for whether \code{var_set_dt[[meta_nm]]}
+is defined for the particular \code{id}. For list-valued column a
+\code{NULL} element will result in \code{FALSE} and for other column types
+a missing (\code{?is.na}) value results in \code{FALSE}. Otherwise you get \code{TRUE}.
+}
 
 \emph{\strong{Usage}}
 
@@ -144,7 +151,28 @@ create the \code{VariableMetadata} object and it can be pretty much anything.
 \strong{\code{meta_nm}} \verb{[character]} (no default)
 
 Name of a metadata column in \code{var_set_dt} or \code{var_dt} (depending on context)
-of a \code{VariableMetadata} object.}
+of a \code{VariableMetadata} object.
+
+\emph{\strong{Examples}}
+
+\if{html}{\out{<div class="sourceCode">}}\preformatted{vm <- vame::VariableMetadata(
+  var_dt = data.table::data.table(
+    var_nm = c("a", "b")
+  ),
+  var_set_dt = data.table::data.table(
+    id = c("set_a", "set_b"),
+    var_nm_set = list("a", "b"),
+    my_list_meta = list(NULL, 1:3),
+    my_int_meta = c(1L, NA_integer_)
+  )
+)
+stopifnot(
+  identical(vm@var_set_meta_is_defined(id = "set_a", meta_nm = "my_int_meta"), TRUE),
+  identical(vm@var_set_meta_is_defined(id = "set_b", meta_nm = "my_int_meta"), FALSE),
+  identical(vm@var_set_meta_is_defined(id = "set_a", meta_nm = "my_list_meta"), FALSE),
+  identical(vm@var_set_meta_is_defined(id = "set_b", meta_nm = "my_list_meta"), TRUE)
+)
+}\if{html}{\out{</div>}}}
 
 \item{\code{var_set_meta_get}}{\emph{\strong{Description}}
 
@@ -164,7 +192,26 @@ create the \code{VariableMetadata} object and it can be pretty much anything.
 \strong{\code{meta_nm}} \verb{[character]} (no default)
 
 Name of a metadata column in \code{var_set_dt} or \code{var_dt} (depending on context)
-of a \code{VariableMetadata} object.}
+of a \code{VariableMetadata} object.
+
+\emph{\strong{Examples}}
+
+\if{html}{\out{<div class="sourceCode">}}\preformatted{vm <- vame::VariableMetadata(
+  var_dt = data.table::data.table(
+    var_nm = c("a", "b")
+  ),
+  var_set_dt = data.table::data.table(
+    id = c("set_a", "set_b"),
+    var_nm_set = list("a", "b"),
+    my_list_meta = list(NULL, 1:3),
+    my_int_meta = c(1L, NA_integer_)
+  )
+)
+stopifnot(
+  identical(vm@var_set_meta_get(id = "set_a", meta_nm = "my_int_meta"), 1L),
+  identical(vm@var_set_meta_get(id = "set_b", meta_nm = "my_list_meta"), 1:3)
+)
+}\if{html}{\out{</div>}}}
 
 \item{\code{var_set_meta_set}}{\emph{\strong{Description}}
 
@@ -197,6 +244,31 @@ In \verb{_set} functions the value to set for the specified metadata.
 
 \if{html}{\out{<div class="sourceCode">}}\preformatted{vm <- vame::VariableMetadata(
   var_dt = data.table::data.table(
+    var_nm = c("a", "b")
+  ),
+  var_set_dt = data.table::data.table(
+    id = c("set_a", "set_b"),
+    var_nm_set = list("a", "b"),
+    my_list_meta = list(NULL, 1:3),
+    my_int_meta = c(1L, NA_integer_)
+  )
+)
+vm@var_set_meta_set(
+  id = "set_a",
+  meta_nm = "my_int_meta",
+  value = 2L
+)
+vm@var_set_meta_set(
+  id = "set_a",
+  meta_nm = "my_new_int_meta",
+  value = 10L
+)
+stopifnot(
+  identical(vm@var_set_meta_get(id = "set_a", meta_nm = "my_int_meta"), 2L),
+  identical(vm@var_set_meta_get(id = "set_a", meta_nm = "my_new_int_meta"), 10L)
+)
+vm <- vame::VariableMetadata(
+  var_dt = data.table::data.table(
     var_nm = "a"
   ),
   var_set_dt = data.table::data.table(
@@ -217,7 +289,7 @@ stopifnot(
 
 \item{\code{var_set_meta_get_all}}{\emph{\strong{Description}}
 
-Get all metadata for a specific variable set.
+Get specific metadata for every variable set.
 
 \emph{\strong{Usage}}
 
@@ -228,7 +300,27 @@ Get all metadata for a specific variable set.
 \strong{\code{meta_nm}} \verb{[character]} (no default)
 
 Name of a metadata column in \code{var_set_dt} or \code{var_dt} (depending on context)
-of a \code{VariableMetadata} object.}
+of a \code{VariableMetadata} object.
+
+\emph{\strong{Examples}}
+
+\if{html}{\out{<div class="sourceCode">}}\preformatted{vm <- vame::VariableMetadata(
+  var_dt = data.table::data.table(
+    var_nm = c("a", "b")
+  ),
+  var_set_dt = data.table::data.table(
+    id = c("set_a", "set_b"),
+    var_nm_set = list("a", "b"),
+    my_list_meta = list(NULL, 1:3),
+    my_int_meta = c(1L, NA_integer_)
+  )
+)
+stopifnot(
+  identical(vm@var_set_meta_get_all(meta_nm = "my_int_meta"), c(1L, NA_integer_)),
+  identical(vm@var_set_meta_get_all(meta_nm = "my_list_meta"), list(NULL, 1:3)),
+  identical(names(vm@var_set_meta_get_all(meta_nm = "my_int_meta")), c("set_a", "set_b"))
+)
+}\if{html}{\out{</div>}}}
 
 \item{\code{var_set_var_nm_set_get_all}}{\emph{\strong{Description}}
 
@@ -3312,6 +3404,63 @@ stopifnot(
 
 vm <- vame::VariableMetadata(
   var_dt = data.table::data.table(
+    var_nm = c("a", "b")
+  ),
+  var_set_dt = data.table::data.table(
+    id = c("set_a", "set_b"),
+    var_nm_set = list("a", "b"),
+    my_list_meta = list(NULL, 1:3),
+    my_int_meta = c(1L, NA_integer_)
+  )
+)
+stopifnot(
+  identical(vm@var_set_meta_is_defined(id = "set_a", meta_nm = "my_int_meta"), TRUE),
+  identical(vm@var_set_meta_is_defined(id = "set_b", meta_nm = "my_int_meta"), FALSE),
+  identical(vm@var_set_meta_is_defined(id = "set_a", meta_nm = "my_list_meta"), FALSE),
+  identical(vm@var_set_meta_is_defined(id = "set_b", meta_nm = "my_list_meta"), TRUE)
+)
+vm <- vame::VariableMetadata(
+  var_dt = data.table::data.table(
+    var_nm = c("a", "b")
+  ),
+  var_set_dt = data.table::data.table(
+    id = c("set_a", "set_b"),
+    var_nm_set = list("a", "b"),
+    my_list_meta = list(NULL, 1:3),
+    my_int_meta = c(1L, NA_integer_)
+  )
+)
+stopifnot(
+  identical(vm@var_set_meta_get(id = "set_a", meta_nm = "my_int_meta"), 1L),
+  identical(vm@var_set_meta_get(id = "set_b", meta_nm = "my_list_meta"), 1:3)
+)
+vm <- vame::VariableMetadata(
+  var_dt = data.table::data.table(
+    var_nm = c("a", "b")
+  ),
+  var_set_dt = data.table::data.table(
+    id = c("set_a", "set_b"),
+    var_nm_set = list("a", "b"),
+    my_list_meta = list(NULL, 1:3),
+    my_int_meta = c(1L, NA_integer_)
+  )
+)
+vm@var_set_meta_set(
+  id = "set_a",
+  meta_nm = "my_int_meta",
+  value = 2L
+)
+vm@var_set_meta_set(
+  id = "set_a",
+  meta_nm = "my_new_int_meta",
+  value = 10L
+)
+stopifnot(
+  identical(vm@var_set_meta_get(id = "set_a", meta_nm = "my_int_meta"), 2L),
+  identical(vm@var_set_meta_get(id = "set_a", meta_nm = "my_new_int_meta"), 10L)
+)
+vm <- vame::VariableMetadata(
+  var_dt = data.table::data.table(
     var_nm = "a"
   ),
   var_set_dt = data.table::data.table(
@@ -3327,6 +3476,22 @@ vm@var_set_meta_set(
 )
 stopifnot(
   identical(vm@var_set_value_space_get(id = "A"), a_value_space)
+)
+vm <- vame::VariableMetadata(
+  var_dt = data.table::data.table(
+    var_nm = c("a", "b")
+  ),
+  var_set_dt = data.table::data.table(
+    id = c("set_a", "set_b"),
+    var_nm_set = list("a", "b"),
+    my_list_meta = list(NULL, 1:3),
+    my_int_meta = c(1L, NA_integer_)
+  )
+)
+stopifnot(
+  identical(vm@var_set_meta_get_all(meta_nm = "my_int_meta"), c(1L, NA_integer_)),
+  identical(vm@var_set_meta_get_all(meta_nm = "my_list_meta"), list(NULL, 1:3)),
+  identical(names(vm@var_set_meta_get_all(meta_nm = "my_int_meta")), c("set_a", "set_b"))
 )
 # Example of make feature
 make_dg_y <- function(
