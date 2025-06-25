@@ -103,7 +103,7 @@ doc_variablemetadata_features__ <- function(df = NULL) {
   }
   feature_keys <- unique(df[["key"]])
   feature_regex <- "^feature[(]"
-  feature_keys <- feature_keys[ grepl(feature_regex, feature_keys)]
+  feature_keys <- feature_keys[grepl(feature_regex, feature_keys)]
   if (length(feature_keys) == 0) {
     return(character(0L))
   }

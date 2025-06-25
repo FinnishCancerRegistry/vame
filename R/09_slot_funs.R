@@ -1980,15 +1980,13 @@ var_value_space_eval <- function(
   #   `vm@var_set_value_space_eval`. If the exact same value space has been
   #   produced multiple times, duplicates are removed.
   # @codedoc_comment_block vm@var_value_space_eval
-  value_space <- lapply(
-    vsd[["id"]][pos_set],
-    function(id) {
-      var_set_value_space_eval(
-        vm  =vm,
-        id = id,
-        var_nms = var_nm,
-        env = env
-      )
+  value_space <- lapply(vsd[["id"]][pos_set], function(id) {
+    var_set_value_space_eval(
+      vm = vm,
+      id = id,
+      var_nms = var_nm,
+      env = env
+    )
   })
   value_space <- unique(value_space)
   # @codedoc_comment_block vm@var_value_space_eval
@@ -2547,7 +2545,7 @@ var_labels_get <- function(
       label_nm <- label_nm_set[1]
     } else if (!label_nm %in% label_nm_set) {
       stop("label_nm = \"", label_nm, "\" not one of the defined ",
-            "label names: ", deparse1(label_nm_set))
+           "label names: ", deparse1(label_nm_set))
     }
     dbc::assert_has_class(x = x, required_class = class(labeler[["x"]]))
     jdt <- data.table::setDT(list(x = x))

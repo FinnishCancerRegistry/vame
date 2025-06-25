@@ -415,7 +415,7 @@ assert_is_sampler <- assert_is_value_space_sampler <- function(
     ),
     fail_messages = c(
       paste0("R expression `", deparse1(x), "` from object/expression `",
-              x_nm , "` must contain variable `n`")
+             x_nm, "` must contain variable `n`")
     ),
     call = call,
     env = environment()
