@@ -3202,32 +3202,46 @@ vame_subset <- function(
   enclos = NULL
 ) {
   # @codedoc_comment_block vm@vame_subset
-  # Subset whole `VariableMetadata` object. Subset either `var_dt` or
+  # Subset whole `VariableMetadata` object in-place. Subset either `var_dt` or
   # `var_set_dt` (or both) and keep only metadata for variables that appear in
-  # both `var_dt` and `var_set_dt`.
+  # both `var_dt` and `var_set_dt`. Performs the following steps:
+  #
+  # @codedoc_insert_comment_block vm@vame_subset_expr
   # @codedoc_comment_block vm@vame_subset
 
   # @codedoc_comment_block function_example(vm@vame_subset)
   # # vm@vame_subset
   # vm <- vame::VariableMetadata(
-  # var_dt = data.table::data.table(
+  #   var_dt = data.table::data.table(
   #     var_nm = c("a", "b", "c"),
   #     flavour = c("tasty", "rancid", "bitter")
   #   ),
   #   var_set_dt = data.table::data.table(
-  #     id = "set_01",
-  #     var_nm_set = list(c("a", "b")),
-  #     value_space = list(list(dt = data.table::data.table(
-  #       a = 1:2,
-  #       b = 3:4
-  #     )))
+  #     id = c("set_01", "set_02"),
+  #     var_nm_set = list(c("a", "b"), "c"),
+  #     value_space = list(
+  #       set_01 = list(dt = data.table::data.table(
+  #         a = 1:2,
+  #         b = 3:4
+  #       )),
+  #       set_02 = list(set = 5:6)
+  #     )
   #   )
   # )
   # allowed_value_set <- "a"
-  # vm@vame_subset(var_dt_expr = var_nm %in% allowed_value_set)
+  # vm_1 <- vm@vame_copy()
+  # vm_1@vame_subset(var_dt_expr = var_nm %in% allowed_value_set)
   # stopifnot(
-  #   identical(unname(vm@var_meta_get_all(meta_nm = "var_nm")), "a"),
-  #   identical(names(vm@var_set_value_space_eval("set_01")[["dt"]]), "a")
+  #   identical(unname(vm_1@var_meta_get_all(meta_nm = "var_nm")), "a"),
+  #   identical(names(vm_1@var_set_value_space_eval("set_01")[["dt"]]), "a")
+  # )
+  #
+  # allowed_id_set <- "set_02"
+  # vm_2 <- vm@vame_copy()
+  # vm_2@vame_subset(var_set_dt_expr = var_set_dt[["id"]] %in% allowed_id_set)
+  # stopifnot(
+  #   identical(unname(vm_2@var_meta_get_all(meta_nm = "var_nm")), "c"),
+  #   identical(unname(vm_2@var_set_meta_get_all(meta_nm = "id")), "set_02")
   # )
   # @codedoc_comment_block function_example(vm@vame_subset)
 

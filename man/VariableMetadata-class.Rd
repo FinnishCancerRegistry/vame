@@ -1552,9 +1552,22 @@ stopifnot(
 
 \item{\code{vame_subset}}{\emph{Description}
 
-Subset whole \code{VariableMetadata} object. Subset either \code{var_dt} or
+Subset whole \code{VariableMetadata} object in-place. Subset either \code{var_dt} or
 \code{var_set_dt} (or both) and keep only metadata for variables that appear in
-both \code{var_dt} and \code{var_set_dt}.
+both \code{var_dt} and \code{var_set_dt}. Performs the following steps:
+\itemize{
+\item Create an empty new evaluation environment \code{eval_env} with \code{enclos} as
+parent. Populate it with \code{var_dt} and \code{var_set_dt}.
+\item If \code{var_dt_expr} is not \code{NULL}, perform
+\code{eval(var_dt_expr, envir = eval_env[["var_dt"]], enclos = eval_env)}
+and use the result to take a subset of \code{eval_env[["var_dt"]]}.
+\item If \code{var_set_dt_expr} is not \code{NULL}, perform
+\code{eval(var_set_dt_expr, envir = eval_env[["var_set_dt"]], enclos = eval_env)}
+and use the result to take a subset of \code{eval_env[["var_set_dt"]]}.
+\item If any data was dropped from either \code{var_dt} or \code{var_set_dt}, take an
+remove variables in \code{var_dt} not appearing in \code{var_set_dt} and vice versa.
+\item Return the subset of the \code{VariableMetadata} invisibly.
+}
 
 \emph{Usage}
 
@@ -1586,24 +1599,36 @@ Effectively we do e.g. \code{eval(var_dt_expr, envir = var_dt, enclos = enclos)}
 
 \if{html}{\out{<div class="sourceCode">}}\preformatted{# vm@vame_subset
 vm <- vame::VariableMetadata(
-var_dt = data.table::data.table(
+  var_dt = data.table::data.table(
     var_nm = c("a", "b", "c"),
     flavour = c("tasty", "rancid", "bitter")
   ),
   var_set_dt = data.table::data.table(
-    id = "set_01",
-    var_nm_set = list(c("a", "b")),
-    value_space = list(list(dt = data.table::data.table(
-      a = 1:2,
-      b = 3:4
-    )))
+    id = c("set_01", "set_02"),
+    var_nm_set = list(c("a", "b"), "c"),
+    value_space = list(
+      set_01 = list(dt = data.table::data.table(
+        a = 1:2,
+        b = 3:4
+      )),
+      set_02 = list(set = 5:6)
+    )
   )
 )
 allowed_value_set <- "a"
-vm@vame_subset(var_dt_expr = var_nm \%in\% allowed_value_set)
+vm_1 <- vm@vame_copy()
+vm_1@vame_subset(var_dt_expr = var_nm \%in\% allowed_value_set)
 stopifnot(
-  identical(unname(vm@var_meta_get_all(meta_nm = "var_nm")), "a"),
-  identical(names(vm@var_set_value_space_eval("set_01")[["dt"]]), "a")
+  identical(unname(vm_1@var_meta_get_all(meta_nm = "var_nm")), "a"),
+  identical(names(vm_1@var_set_value_space_eval("set_01")[["dt"]]), "a")
+)
+
+allowed_id_set <- "set_02"
+vm_2 <- vm@vame_copy()
+vm_2@vame_subset(var_set_dt_expr = var_set_dt[["id"]] \%in\% allowed_id_set)
+stopifnot(
+  identical(unname(vm_2@var_meta_get_all(meta_nm = "var_nm")), "c"),
+  identical(unname(vm_2@var_set_meta_get_all(meta_nm = "id")), "set_02")
 )
 }\if{html}{\out{</div>}}}
 
@@ -2402,6 +2427,13 @@ The following functions are part of this feature:
 \item \code{vm@vame_category_space_dt_list}
 \item \code{vm@vame_category_space_dt}
 }
+}
+
+\section{News for version 1.10.2}{
+
+
+\code{vm@vame_subset} fix: in 1.10.1 (but not before) mistakenly evaluated
+\code{var_dt_expr} when \code{var_set_dt_expr} was supposed to be evaluted.
 }
 
 \section{News for version 1.10.1}{
@@ -3918,24 +3950,36 @@ stopifnot(
 )
 # vm@vame_subset
 vm <- vame::VariableMetadata(
-var_dt = data.table::data.table(
+  var_dt = data.table::data.table(
     var_nm = c("a", "b", "c"),
     flavour = c("tasty", "rancid", "bitter")
   ),
   var_set_dt = data.table::data.table(
-    id = "set_01",
-    var_nm_set = list(c("a", "b")),
-    value_space = list(list(dt = data.table::data.table(
-      a = 1:2,
-      b = 3:4
-    )))
+    id = c("set_01", "set_02"),
+    var_nm_set = list(c("a", "b"), "c"),
+    value_space = list(
+      set_01 = list(dt = data.table::data.table(
+        a = 1:2,
+        b = 3:4
+      )),
+      set_02 = list(set = 5:6)
+    )
   )
 )
 allowed_value_set <- "a"
-vm@vame_subset(var_dt_expr = var_nm \%in\% allowed_value_set)
+vm_1 <- vm@vame_copy()
+vm_1@vame_subset(var_dt_expr = var_nm \%in\% allowed_value_set)
 stopifnot(
-  identical(unname(vm@var_meta_get_all(meta_nm = "var_nm")), "a"),
-  identical(names(vm@var_set_value_space_eval("set_01")[["dt"]]), "a")
+  identical(unname(vm_1@var_meta_get_all(meta_nm = "var_nm")), "a"),
+  identical(names(vm_1@var_set_value_space_eval("set_01")[["dt"]]), "a")
+)
+
+allowed_id_set <- "set_02"
+vm_2 <- vm@vame_copy()
+vm_2@vame_subset(var_set_dt_expr = var_set_dt[["id"]] \%in\% allowed_id_set)
+stopifnot(
+  identical(unname(vm_2@var_meta_get_all(meta_nm = "var_nm")), "c"),
+  identical(unname(vm_2@var_set_meta_get_all(meta_nm = "id")), "set_02")
 )
 vm_1 <- vame::VariableMetadata(
   var_dt = data.table::data.table(

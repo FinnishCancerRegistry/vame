@@ -30,6 +30,15 @@ particular see the examples.
 
 \section{News}{
 
+\subsection{News for version 1.10.2}{
+\subsection{vm@vame_subset}{
+
+\code{vm@vame_subset} fix: in 1.10.1 (but not before) mistakenly evaluated
+\code{var_dt_expr} when \code{var_set_dt_expr} was supposed to be evaluted.
+}
+
+}
+
 \subsection{News for version 1.10.1}{
 \subsection{vm@vame_subset}{
 

@@ -358,35 +358,64 @@ vame_subset_expr <- function(
   if (is.null(enclos)) {
     enclos <- parent.frame(1L)
   }
+  # @codedoc_comment_block vm@vame_subset_expr
+  # - Create an empty new evaluation environment `eval_env` with `enclos` as
+  #   parent. Populate it with `var_dt` and `var_set_dt`.
+  # @codedoc_comment_block vm@vame_subset_expr
   eval_env <- new.env(parent = enclos)
+  eval_env[["var_dt"]] <-  vd_get(vm)
+  eval_env[["var_set_dt"]] <- vsd_get(vm)
   need_to_intersect <- FALSE
   if (!is.null(var_dt_expr)) {
-    vd <- vd_get(vm)
-    eval_env[["var_dt"]] <- vd
+    # @codedoc_comment_block vm@vame_subset_expr
+    # - If `var_dt_expr` is not `NULL`, perform
+    #   `eval(var_dt_expr, envir = eval_env[["var_dt"]], enclos = eval_env)`
+    #   and use the result to take a subset of `eval_env[["var_dt"]]`.
+    # @codedoc_comment_block vm@vame_subset_expr
     vd_subset <- eval(
       var_dt_expr,
-      envir = vd,
+      envir = eval_env[["var_dt"]],
       enclos = eval_env
     )
-    rm(list = "var_dt", envir = eval_env)
-    vd_set(vm, vd[vd_subset, ])
-    need_to_intersect <- TRUE
+    vd_subset[is.na(vd_subset)] <- FALSE
+    if (any(!vd_subset)) {
+      eval_env[["var_dt"]] <- eval_env[["var_dt"]][vd_subset, ]
+      vd_set(vm, eval_env[["var_dt"]])
+      need_to_intersect <- TRUE
+    }
   }
   if (!is.null(var_set_dt_expr)) {
-    vsd <- vsd_get(vm)
-    eval_env[["var_set_dt"]] <- vsd
+    # @codedoc_comment_block news("vm@vame_subset", "2025-06-25", "1.10.2")
+    # `vm@vame_subset` fix: in 1.10.1 (but not before) mistakenly evaluated
+    # `var_dt_expr` when `var_set_dt_expr` was supposed to be evaluted.
+    # @codedoc_comment_block news("vm@vame_subset", "2025-06-25", "1.10.2")
+    # @codedoc_comment_block vm@vame_subset_expr
+    # - If `var_set_dt_expr` is not `NULL`, perform
+    #   `eval(var_set_dt_expr, envir = eval_env[["var_set_dt"]], enclos = eval_env)`
+    #   and use the result to take a subset of `eval_env[["var_set_dt"]]`.
+    # @codedoc_comment_block vm@vame_subset_expr
     vsd_subset <- eval(
-      var_dt_expr,
-      envir = vsd,
+      var_set_dt_expr,
+      envir = eval_env[["var_set_dt"]],
       enclos = eval_env
     )
-    rm(list = "var_set_dt", envir = eval_env)
-    vsd_set(vm, vsd[vsd_subset, ])
-    need_to_intersect <- TRUE
+    vsd_subset[is.na(vsd_subset)] <- FALSE
+    if (any(!vsd_subset)) {
+      eval_env[["var_set_dt"]] <- eval_env[["var_set_dt"]][vsd_subset, ]
+      vsd_set(vm, eval_env[["var_set_dt"]])
+      need_to_intersect <- TRUE
+    }
   }
+  # @codedoc_comment_block vm@vame_subset_expr
+  # - If any data was dropped from either `var_dt` or `var_set_dt`, take an
+  #   remove variables in `var_dt` not appearing in `var_set_dt` and vice versa.
+  # @codedoc_comment_block vm@vame_subset_expr
   if (need_to_intersect) {
     vd_vsd_intersect(vm)
   }
+  # @codedoc_comment_block vm@vame_subset_expr
+  # - Return the subset of the `VariableMetadata` invisibly.
+  # @codedoc_comment_block vm@vame_subset_expr
   return(invisible(vm))
 }
 
