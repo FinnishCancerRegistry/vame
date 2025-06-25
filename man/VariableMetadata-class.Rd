@@ -52,11 +52,12 @@ See section \strong{Features} for what you can do with \code{VariableMetadata}
 objects.
 }
 \details{
-\code{var_dt}:
+\strong{Recommendations for \code{var_dt}:}
 
 \code{var_dt} is recommended to contain at least some sort of description for
 each variable. See the describing feature.
-\code{var_set_dt}:
+
+\strong{Recommendations for \code{var_set_dt}:}
 
 It is recommended that \code{var_set_dt} contains as small variable sets as
 possible. This includes even hierarchical variables such as area variables.
@@ -88,6 +89,29 @@ created using its parent. For instance, in \code{exit_date -> exit_year},
 a the \code{var_set_dt} as an implementation of such a graph --- and we want the
 graph to show all the dependencies as arrows, not to hide dependencies
 inside nodes.
+
+\strong{Function \code{vame::VariableMetadata}:}
+
+\code{vame::VariableMetadata} is a function that creates an object of S4 class
+\code{VariableMetadata}. It performs the following steps:
+\itemize{
+\item Collect and check \code{var_dt}, \code{var_set_dt}, and \code{vame_list}.
+\item Add slot functions.
+\item Call \verb{[methods::new]} with \code{Class = "VariableMetada"} with collected data
+and slot functions.
+\item "Intersect" data in the \code{VariableMetadata} object:
+Remove rows in \code{var_dt} where \code{var_dt[["var_nm"]]} does not appear in any
+\code{var_set_dt[["var_nm_set"]]}. Remove variables names in
+each \code{var_set_dt[["var_nm_set"]]} element that do not appear in
+\code{var_dt[["var_nm_set"]]}. \code{var_set_dt[["value_space"]]} objects are
+attempted to be subsetted when variables are removed from that variable set.
+Empty variable sets are removed entirely.
+\item Attempt to auto-assign \code{var_dt[["type"]][i]} to \code{"categorical"} for
+each \code{i}. \code{var_dt[["type"]][i] <- "categorical"} if it is at first \code{NA}
+and the variable has either a \code{labeler} or a guaranteed categorical
+(part of a) \code{value_space} object --- of type \code{set} or \code{dt}.
+\item Return the created \code{VariableMetadata} object.
+}
 }
 \section{Slots}{
 
@@ -268,7 +292,17 @@ New variable set IDs.}
 
 \item{\code{var_set_remove}}{\emph{\strong{Description}}
 
-Remove a variable set by \code{id}.
+Remove a variable set by \code{id}. Performs the following steps:
+\itemize{
+\item Drop the row in \code{var_set_dt} with the supplied \code{id}.
+\item "Intersect" data in the \code{VariableMetadata} object:
+Remove rows in \code{var_dt} where \code{var_dt[["var_nm"]]} does not appear in any
+\code{var_set_dt[["var_nm_set"]]}. Remove variables names in
+each \code{var_set_dt[["var_nm_set"]]} element that do not appear in
+\code{var_dt[["var_nm_set"]]}. \code{var_set_dt[["value_space"]]} objects are
+attempted to be subsetted when variables are removed from that variable set.
+Empty variable sets are removed entirely.
+}
 
 \emph{\strong{Usage}}
 
@@ -1571,8 +1605,13 @@ or at most 10 times.
 Raise an error if the result is not a \code{logical},
 \code{integer}, or \code{NULL} object.
 \item Do the same with \code{var_set_dt_expr} and \code{eval_env[["var_set_dt"]]}.
-\item If any data was dropped from either \code{var_dt} or \code{var_set_dt},
-remove variables in \code{var_dt} not appearing in \code{var_set_dt} and vice versa.
+\item "Intersect" data in the \code{VariableMetadata} object:
+Remove rows in \code{var_dt} where \code{var_dt[["var_nm"]]} does not appear in any
+\code{var_set_dt[["var_nm_set"]]}. Remove variables names in
+each \code{var_set_dt[["var_nm_set"]]} element that do not appear in
+\code{var_dt[["var_nm_set"]]}. \code{var_set_dt[["value_space"]]} objects are
+attempted to be subsetted when variables are removed from that variable set.
+Empty variable sets are removed entirely.
 }
 
 \emph{\strong{Usage}}

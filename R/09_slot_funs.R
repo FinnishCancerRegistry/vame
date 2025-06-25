@@ -268,15 +268,21 @@ var_set_remove <- function(
   vm,
   id
 ) {
-  # @codedoc_comment_block vm@var_set_remove
-  # Remove a variable set by `id`.
-  # @codedoc_comment_block vm@var_set_remove
   assert_is_var_set_id(vm, id)
   pos <- var_set_id_to_pos(vm, id)
   vsd <- vsd_get(vm)
   vsd_subset <- setdiff(seq_len(nrow(vsd)), pos)
+  # @codedoc_comment_block vm@var_set_remove
+  # Remove a variable set by `id`. Performs the following steps:
+  #
+  # - Drop the row in `var_set_dt` with the supplied `id`.
+  # @codedoc_comment_block vm@var_set_remove
   vsd <- vsd[vsd_subset, ]
   vsd_set(vm, vsd)
+  # @codedoc_comment_block vm@var_set_remove
+  # - "Intersect" data in the `VariableMetadata` object:
+  # @codedoc_insert_comment_block vame:::vd_vsd_intersect
+  # @codedoc_comment_block vm@var_set_remove
   vd_vsd_intersect(vm)
   return(invisible(NULL))
 }

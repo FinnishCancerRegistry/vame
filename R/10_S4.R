@@ -126,32 +126,48 @@ doc_variablemetadata_news__ <- function() {
     detect_allowed_keys = "(vm@)|(vame::VariableMetadata)"
   )
 }
-doc_variablemetadata_details__ <- function(df = NULL) {
+doc_variablemetadata_section__ <- function(
+  section_name,
+  df = NULL
+) {
   if (is.null(df)) {
     df <- codedoc_df__()
   }
-  belongs_in_details <- grepl("^recommendation[(]", df[["key"]])
-  lines <- unlist(df[["comment_block"]][belongs_in_details])
+  re <- switch(
+    section_name,
+    details = "(^vame::VariableMetadata$)|(^recommendation[(])",
+    examples =
+      "(^feature_example[(])|(^general_example$)|(^function_example[(])"
+  )
+  use <- grepl(re, df[["key"]])
+  lines <- unlist(df[["comment_block"]][use])
   lines <- c(
-    "@details",
+    switch(
+      section_name,
+      details = "@details",
+      examples = "@examples"
+    ),
     lines
   )
   return(lines)
 }
+doc_variablemetadata_details__ <- function(df = NULL) {
+  doc_variablemetadata_section__(
+    section_name = "details",
+    df = df
+  )
+}
+doc_variablemetadata_recommendations__ <- function(df = NULL) {
+  doc_variablemetadata_section__(
+    section_name = "recommendations",
+    df = df
+  )
+}
 doc_variablemetadata_examples__ <- function(df = NULL) {
-  if (is.null(df)) {
-    df <- codedoc_df__()
-  }
-  is_example <- grepl(
-    "(^feature_example[(])|(^general_example$)|(^function_example[(])",
-    df[["key"]]
+  doc_variablemetadata_section__(
+    section_name = "examples",
+    df = df
   )
-  lines <- unlist(df[["comment_block"]][is_example])
-  lines <- c(
-    "@examples",
-    lines
-  )
-  return(lines)
 }
 
 methods::setClass(
@@ -491,10 +507,11 @@ VariableMetadata <- function(
   #' See **Details** and **Features** for more information.
   assert_is_var_dt(var_dt)
   # @codedoc_comment_block recommendation(var_dt)
-  # `var_dt`:
+  # **Recommendations for `var_dt`:**
   #
   # `var_dt` is recommended to contain at least some sort of description for
   # each variable. See the describing feature.
+  #
   # @codedoc_comment_block recommendation(var_dt)
 
   #' @param var_set_dt `[data.table]`
@@ -513,7 +530,7 @@ VariableMetadata <- function(
   # documentation.
   # @codedoc_comment_block news("vame::VariableMetadata", "2024-03-07", "0.4.0")
   # @codedoc_comment_block recommendation(var_set_dt)
-  # `var_set_dt`:
+  # **Recommendations for `var_set_dt`:**
   #
   # It is recommended that `var_set_dt` contains as small variable sets as
   # possible. This includes even hierarchical variables such as area variables.
@@ -544,6 +561,7 @@ VariableMetadata <- function(
   # a the `var_set_dt` as an implementation of such a graph --- and we want the
   # graph to show all the dependencies as arrows, not to hide dependencies
   # inside nodes.
+  #
   # @codedoc_comment_block recommendation(var_set_dt)
   assert_is_var_set_dt(var_set_dt)
   # @codedoc_comment_block news("vame::VariableMetadata", "2023-12-12", "0.2.2")
@@ -570,6 +588,14 @@ VariableMetadata <- function(
   #' `vame::VariableMetadata` function.
   #' See section **Features** for what you can do with `VariableMetadata`
   #' objects.
+  # @codedoc_comment_block vame::VariableMetadata
+  # **Function `vame::VariableMetadata`:**
+  #
+  # `vame::VariableMetadata` is a function that creates an object of S4 class
+  # `VariableMetadata`. It performs the following steps:
+  #
+  # - Collect and check `var_dt`, `var_set_dt`, and `vame_list`.
+  # @codedoc_comment_block vame::VariableMetadata
   funs <- new.env(parent = pkg_env)
   funs$data <- new.env(parent = emptyenv())
   funs$data$var_dt <- var_dt
@@ -577,6 +603,9 @@ VariableMetadata <- function(
   funs$data$vame_list <- vame_list
   slot_fun_nms <- vame_slot_nms_get__()
   lapply(slot_fun_nms, function(slot_fun_nm) {
+    # @codedoc_comment_block vame::VariableMetadata
+    # - Add slot functions.
+    # @codedoc_comment_block vame::VariableMetadata
     alias_fun_nm <- paste0("vame:::", slot_fun_nm)
     alias_fun <- eval(parse(text = alias_fun_nm))
     args <- formals(alias_fun)
@@ -613,8 +642,16 @@ VariableMetadata <- function(
     funs[[fun_nm]]
   })
   names(slots) <- slot_fun_nms
+  # @codedoc_comment_block vame::VariableMetadata
+  # - Call `[methods::new]` with `Class = "VariableMetada"` with collected data
+  #   and slot functions.
+  # @codedoc_comment_block vame::VariableMetadata
   arg_list <- c(list(Class = "VariableMetadata"), slots)
   out <- do.call(methods::new, arg_list, quote = TRUE)
+  # @codedoc_comment_block vame::VariableMetadata
+  # - "Intersect" data in the `VariableMetadata` object:
+  # @codedoc_insert_comment_block vame:::vd_vsd_intersect
+  # @codedoc_comment_block vame::VariableMetadata
   vd_vsd_intersect(out)
   if (nrow(vd_get(out)) == 0) {
     stop("vame::VariableMetadata call resulted in no variables being defined. ",
@@ -649,6 +686,12 @@ VariableMetadata <- function(
       # Also, if `var_dt$type` was already something other than `NA` for a
       # variable, the automatic determination is not attempted.
       # @codedoc_comment_block news("vame::VariableMetadata", "2024-04-18", "0.5.0")
+      # @codedoc_comment_block vame::VariableMetadata
+      # - Attempt to auto-assign `var_dt[["type"]][i]` to `"categorical"` for
+      #   each `i`. `var_dt[["type"]][i] <- "categorical"` if it is at first `NA`
+      #   and the variable has either a `labeler` or a guaranteed categorical
+      #   (part of a) `value_space` object --- of type `set` or `dt`.
+      # @codedoc_comment_block vame::VariableMetadata
       return(
         any(c("set", "dt") %in% names(vs)) ||
           out@var_meta_is_defined(var_nm = var_nm, meta_nm = "labeler")
@@ -663,6 +706,9 @@ VariableMetadata <- function(
     value = "categorical"
   )
 
+  # @codedoc_comment_block vame::VariableMetadata
+  # - Return the created `VariableMetadata` object.
+  # @codedoc_comment_block vame::VariableMetadata
   return(out)
 }
 

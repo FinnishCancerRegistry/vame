@@ -138,6 +138,14 @@ vd_vsd_linkage_refresh <- function(
 vd_vsd_intersect <- function(
   vm
 ) {
+  # @codedoc_comment_block vame:::vd_vsd_intersect
+  # Remove rows in `var_dt` where `var_dt[["var_nm"]]` does not appear in any
+  # `var_set_dt[["var_nm_set"]]`. Remove variables names in
+  # each `var_set_dt[["var_nm_set"]]` element that do not appear in
+  # `var_dt[["var_nm_set"]]`. `var_set_dt[["value_space"]]` objects are
+  # attempted to be subsetted when variables are removed from that variable set.
+  # Empty variable sets are removed entirely.
+  # @codedoc_comment_block vame:::vd_vsd_intersect
   assert_is_variablemetadata(vm, assertion_type = "prod_input")
   vd <- vd_get(vm)
   vdi <- vd_implied_get(vm)
@@ -420,8 +428,8 @@ vame_subset_expr <- function(
     }
   })
   # @codedoc_comment_block vm@vame_subset_expr
-  # - If any data was dropped from either `var_dt` or `var_set_dt`,
-  #   remove variables in `var_dt` not appearing in `var_set_dt` and vice versa.
+  # - "Intersect" data in the `VariableMetadata` object:
+  # @codedoc_insert_comment_block vame:::vd_vsd_intersect
   # @codedoc_comment_block vm@vame_subset_expr
   if (need_to_intersect) {
     vd_vsd_intersect(vm)
