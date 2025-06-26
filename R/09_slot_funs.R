@@ -9,7 +9,7 @@ var_set_dt_print <- function(vm, ...) {
   # @codedoc_comment_block vame::var_set_dt_print::...
   # **`...`**
   #
-  # Arguments passed to `print.data.table`
+  # Arguments passed to `print.data.table`.
   # @codedoc_comment_block vame::var_set_dt_print::...
   print(vsd_get(vm), ...)
 }
@@ -2249,7 +2249,7 @@ var_dt_print <- function(vm, ...) {
   # @codedoc_comment_block vame::var_dt_print::...
   # **`...`**
   #
-  # Arguments passed to `print.data.table`
+  # Arguments passed to `print.data.table`.
   # @codedoc_comment_block vame::var_dt_print::...
 
   print(vd_get(vm), ...)

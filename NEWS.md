@@ -2,7 +2,7 @@
 
 ## News for version 1.10.4
 
-### vame::print.VariableMetadata
+### vame::print_VariableMetadata
 
 Improved `print` method of `VariableMetadata`. It no longer prints all
 available functions (a long list). Instead now simply `var_dt`,

@@ -90,6 +90,28 @@ a the \code{var_set_dt} as an implementation of such a graph --- and we want the
 graph to show all the dependencies as arrows, not to hide dependencies
 inside nodes.
 
+\strong{Class \code{VariableMetadata}}
+
+\code{VariableMetadata} is an S4 class. All its slots, accessed by e.g.
+\code{my_vame@var_dt_print()}, are functions.
+\code{VariableMetadata} has the following methods:
+\itemize{
+\item \code{print} method for \code{VariableMetadata} object so you can do e.g.
+\code{print(my_vame)}. It passes arguments to \code{print.data.table}, so e.g.
+\code{print(my_vame, nrows = 1L)} works. It uses by default
+\code{nrows = 5L} and \code{topn = 5L} for brevity. The \code{print} method runs
+\itemize{
+\item \code{print(var_dt, ...)},
+\item \code{print(var_set_dt, ...)}, and
+\item \code{ print(summary(vame_list_get(x)))}
+}
+\item \code{show} method for \code{VariableMetadata} object so that your
+\code{VariableMetadata} object is printed if you run e.g. \code{show(my_vame)}
+or simply run \code{my_vame}.
+The \code{show} method simply runs \code{print(object)}, so the \code{print} method for
+\code{VariableMetadata} with defaults.
+}
+
 \strong{Function \code{vame::VariableMetadata}:}
 
 \code{vame::VariableMetadata} is a function that creates an object of S4 class
@@ -128,7 +150,7 @@ Print \code{var_set_dt}.
 
 \strong{\code{...}}
 
-Arguments passed to \code{print.data.table}}
+Arguments passed to \code{print.data.table}.}
 
 \item{\code{var_set_dt_copy}}{\emph{\strong{Description}}
 
@@ -1152,7 +1174,7 @@ Print \code{var_dt}.
 
 \strong{\code{...}}
 
-Arguments passed to \code{print.data.table}}
+Arguments passed to \code{print.data.table}.}
 
 \item{\code{var_dt_copy}}{\emph{\strong{Description}}
 
@@ -4027,5 +4049,5 @@ vm <- vame::VariableMetadata(
 print(vm, nrows = 1L, topn = 1L)
 vm@var_dt_print(nrows = 1L)
 vm@var_set_dt_print(nrows = 1L)
-vm@vame_list_print(nrows = 1L)
+vm@vame_list_print()
 }

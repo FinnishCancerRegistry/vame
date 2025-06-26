@@ -341,7 +341,7 @@ stopifnot(
 \section{News}{
 
 \subsection{News for version 1.10.4}{
-\subsection{vame::print.VariableMetadata}{
+\subsection{vame::print_VariableMetadata}{
 
 Improved \code{print} method of \code{VariableMetadata}. It no longer prints all
 available functions (a long list). Instead now simply \code{var_dt},
