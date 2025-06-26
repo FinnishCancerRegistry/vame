@@ -340,6 +340,31 @@ stopifnot(
 
 \section{News}{
 
+\subsection{News for version 1.10.4}{
+\subsection{vame::print.VariableMetadata}{
+
+Improved \code{print} method of \code{VariableMetadata}. It no longer prints all
+available functions (a long list). Instead now simply \code{var_dt},
+\code{var_set_dt}  (first five rows), and names of \code{vame_list} are printed.
+}
+
+\subsection{vm@vame_list_print}{
+
+New function \code{vm@vame_list_print}.
+}
+
+\subsection{vm@var_dt_print}{
+
+New function \code{vm@var_dt_print}.
+}
+
+\subsection{vm@var_set_dt_print}{
+
+New function \code{vm@var_set_dt_print}.
+}
+
+}
+
 \subsection{News for version 1.10.3}{
 \subsection{vm@vame_subset}{
 

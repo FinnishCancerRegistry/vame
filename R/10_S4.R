@@ -724,44 +724,75 @@ VariableMetadata <- function(
   return(out)
 }
 
+#' @eval codedoc::pkg_doc_fun("vame::print.VariableMetadata", "VariableMetadata")
+print.VariableMetadata <- function(x, ...) {
+  # @codedoc_comment_block vame::print.VariableMetadata
+  # `print` method for `VariableMetadata` object. It simply prints (by default
+  # the first five rows of) `var_dt`, `var_set_dt`, and the `summary` output of
+  # `vame_list`.
+  # @codedoc_comment_block vame::print.VariableMetadata
+
+  # @codedoc_comment_block function_example(vame::print.VariableMetadata)    
+  # vm <- vame::VariableMetadata(
+  #   var_dt = data.table::data.table(
+  #     var_nm = letters
+  #   ),
+  #   var_set_dt = data.table::data.table(
+  #     id = letters,
+  #     var_nm_set = as.list(letters)
+  #   )
+  # )
+  # print(vm, nrows = 1L, topn = 1L)
+  # vm@var_dt_print(nrows = 1L)
+  # vm@var_set_dt_print(nrows = 1L)
+  # vm@vame_list_print(nrows = 1L)
+  # @codedoc_comment_block function_example(vame::print.VariableMetadata)
+
+  # @codedoc_comment_block news("vame::print.VariableMetadata", "2025-06-26", "1.10.4")
+  # Improved `print` method of `VariableMetadata`. It no longer prints all
+  # available functions (a long list). Instead now simply `var_dt`,
+  # `var_set_dt`  (first five rows), and names of `vame_list` are printed.
+  # @codedoc_comment_block news("vame::print.VariableMetadata", "2025-06-26", "1.10.4")
+
+  cat("VariableMetadata object -----\nvar_dt:\n")
+  # @codedoc_comment_block vame::print.VariableMetadata::...
+  # **`...`**
+  #
+  # Arguments passed to `print.data.table`.
+  # @codedoc_comment_block vame::print.VariableMetadata::...
+  arg_list <- local({
+    arg_list <- list(nrows = 5L, topn = 5L)
+    user_arg_list <- list(...)
+    arg_list[names(user_arg_list)] <- user_arg_list
+    arg_list
+  })
+  arg_list[["x"]] <- vd_get(x)
+  do.call(print, arg_list, quote = TRUE)
+  cat("\nvar_set_dt:\n")
+  arg_list[["x"]] <- vsd_get(x)
+  do.call(print, arg_list, quote = TRUE)
+  cat("\nvame_list:\n")
+  print(summary(vame_list_get(x)))
+}
 methods::setMethod(
   f = "print",
   signature = "VariableMetadata",
-  definition = function(x) {
-    ids <- x@var_set_meta_get_all("id")
-    sets <- x@var_set_meta_get_all("var_nm_set")
-    cat(
-      "VariableMetadata object ----\n",
-
-      "Functions:\n",
-      vapply(vame_slot_nms_get__(), function(obj_nm) {
-        paste0("  @", obj_nm, "()\n")
-      }, character(1L)),
-
-      "Variable sets:\n",
-      vapply(
-        seq_along(ids),
-        function(i) {
-          set_string <- paste0(
-            "\"", utils::head(sets[[i]], 5), "\"",
-            collapse = ", "
-          )
-          if (length(sets[[i]]) > 5) {
-            set_string <- paste0(set_string, ", ...")
-          }
-          set_string <- paste0("c(", set_string, ")")
-          paste0("  \"", ids[i], "\": ", set_string, "\n")
-        },
-        character(1L)
-      )
-    )
-  }
+  definition = print.VariableMetadata
 )
 
+
+#' @eval codedoc::pkg_doc_fun(
+#'   "vame::show.VariableMetadata",
+#'   "VariableMetadata"
+#' )
+show.VariableMetadata <- function(object) {
+  # @codedoc_comment_block vame::show.VariableMetadata
+  # `show` method for `VariableMetadata` object. It simply runs `print(object)`.
+  # @codedoc_comment_block vame::show.VariableMetadata
+  print(object)
+}
 methods::setMethod(
   f = "show",
   signature = "VariableMetadata",
-  definition = function(object) {
-    print(object)
-  }
+  definition = show.VariableMetadata
 )

@@ -116,6 +116,20 @@ and the variable has either a \code{labeler} or a guaranteed categorical
 \section{Slots}{
 
 \describe{
+\item{\code{var_set_dt_print}}{\emph{\strong{Description}}
+
+Print \code{var_set_dt}.
+
+\emph{\strong{Usage}}
+
+\code{vm@var_set_dt_print(...)}
+
+\emph{\strong{Arguments}}
+
+\strong{\code{...}}
+
+Arguments passed to \code{print.data.table}}
+
 \item{\code{var_set_dt_copy}}{\emph{\strong{Description}}
 
 Returns a deep copy of \code{var_set_dt}.
@@ -1126,6 +1140,20 @@ Environment where a value space will be evaluated, if applicable.
 \item \code{environment}: Use this environment.
 }}
 
+\item{\code{var_dt_print}}{\emph{\strong{Description}}
+
+Print \code{var_dt}.
+
+\emph{\strong{Usage}}
+
+\code{vm@var_dt_print(...)}
+
+\emph{\strong{Arguments}}
+
+\strong{\code{...}}
+
+Arguments passed to \code{print.data.table}}
+
 \item{\code{var_dt_copy}}{\emph{\strong{Description}}
 
 Returns a deep copy of \code{var_dt}.
@@ -2070,6 +2098,14 @@ directly if that is more convenient.
 
 Number of random samples to take.}
 
+\item{\code{vame_list_print}}{\emph{\strong{Description}}
+
+Run \code{print(summary(meta_list))}.
+
+\emph{\strong{Usage}}
+
+\code{vm@vame_list_print()}}
+
 \item{\code{vame_list_copy}}{\emph{\strong{Description}}
 
 Get a deep copy of \code{meta_list}.
@@ -2590,6 +2626,16 @@ The following functions are part of this feature:
 \item \code{vm@vame_category_space_dt_list}
 \item \code{vm@vame_category_space_dt}
 }
+}
+
+\section{News for version 1.10.4}{
+
+
+New function \code{vm@vame_list_print}.
+
+New function \code{vm@var_dt_print}.
+
+New function \code{vm@var_set_dt_print}.
 }
 
 \section{News for version 1.10.3}{
@@ -3969,4 +4015,17 @@ stopifnot(
   vm_1@var_meta_get(var_nm = "b", meta_nm = "my_meta") == "vm_1_b",
   vm_1@var_meta_get(var_nm = "c", meta_nm = "my_meta") == "vm_2_c"
 )
+vm <- vame::VariableMetadata(
+  var_dt = data.table::data.table(
+    var_nm = letters
+  ),
+  var_set_dt = data.table::data.table(
+    id = letters,
+    var_nm_set = as.list(letters)
+  )
+)
+print(vm, nrows = 1L, topn = 1L)
+vm@var_dt_print(nrows = 1L)
+vm@var_set_dt_print(nrows = 1L)
+vm@vame_list_print(nrows = 1L)
 }

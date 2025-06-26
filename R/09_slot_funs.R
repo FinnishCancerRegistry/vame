@@ -1,4 +1,19 @@
 # var_set funs -----------------------------------------------------------------
+var_set_dt_print <- function(vm, ...) {
+  # @codedoc_comment_block vm@var_set_dt_print
+  # Print `var_set_dt`.
+  # @codedoc_comment_block vm@var_set_dt_print
+  # @codedoc_comment_block news("vm@var_set_dt_print", "2025-06-26", "1.10.4")
+  # New function `vm@var_set_dt_print`.
+  # @codedoc_comment_block news("vm@var_set_dt_print", "2025-06-26", "1.10.4")
+  # @codedoc_comment_block vame::var_set_dt_print::...
+  # **`...`**
+  #
+  # Arguments passed to `print.data.table`
+  # @codedoc_comment_block vame::var_set_dt_print::...
+  print(vsd_get(vm), ...)
+}
+
 var_set_dt_copy <- function(vm) {
   # @codedoc_comment_block vm@var_set_dt_copy
   # Returns a deep copy of `var_set_dt`.
@@ -2224,6 +2239,22 @@ var_assert <- function(
 
 
 # var funs ---------------------------------------------------------------------
+var_dt_print <- function(vm, ...) {
+  # @codedoc_comment_block vm@var_dt_print
+  # Print `var_dt`.
+  # @codedoc_comment_block vm@var_dt_print
+  # @codedoc_comment_block news("vm@var_dt_print", "2025-06-26", "1.10.4")
+  # New function `vm@var_dt_print`.
+  # @codedoc_comment_block news("vm@var_dt_print", "2025-06-26", "1.10.4")
+  # @codedoc_comment_block vame::var_dt_print::...
+  # **`...`**
+  #
+  # Arguments passed to `print.data.table`
+  # @codedoc_comment_block vame::var_dt_print::...
+
+  print(vd_get(vm), ...)
+}
+
 var_dt_copy <- function(vm) {
   # @codedoc_comment_block vm@var_dt_copy
   # Returns a deep copy of `var_dt`.
@@ -3850,6 +3881,18 @@ vame_value_space_sample_default <- function(
     y = n
   )
   return(sample_dt[])
+}
+
+# vame_list functions ----------------------------------------------------------
+vame_list_print <- function(vm) {
+  # @codedoc_comment_block vm@vame_list_print
+  # Run `print(summary(meta_list))`.
+  # @codedoc_comment_block vm@vame_list_print
+
+  # @codedoc_comment_block news("vm@vame_list_print", "2025-06-26", "1.10.4")
+  # New function `vm@vame_list_print`.
+  # @codedoc_comment_block news("vm@vame_list_print", "2025-06-26", "1.10.4")
+  print(summary(vame_list_get(vm)))
 }
 
 vame_list_copy <- function(vm) {
