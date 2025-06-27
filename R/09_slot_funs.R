@@ -45,6 +45,8 @@ var_set_meta_is_defined <- function(
   #   )
   # )
   # stopifnot(
+  #   identical(vm@var_set_meta_is_defined(id = NULL, meta_nm = "my_int_meta"), TRUE),
+  #   identical(vm@var_set_meta_is_defined(id = NULL, meta_nm = "x"), FALSE),
   #   identical(vm@var_set_meta_is_defined(id = "set_a", meta_nm = "my_int_meta"), TRUE),
   #   identical(vm@var_set_meta_is_defined(id = "set_b", meta_nm = "my_int_meta"), FALSE),
   #   identical(vm@var_set_meta_is_defined(id = "set_a", meta_nm = "my_list_meta"), FALSE),
@@ -65,20 +67,13 @@ var_set_meta_is_defined <- function(
   # @codedoc_comment_block vm@var_set_meta_is_defined
   # Detects whether metadata has been defined for a variable set.
   #
-  # - If `meta_nm` is not a column name of `var_set_dt`, return `FALSE`.
+  # - Detects whether `meta_nm` is a column name of `var_set_dt`.
+  #   If not or if `is.null(id)`, return results early.
   # @codedoc_comment_block vm@var_set_meta_is_defined
-  if (!meta_nm %in% names(vsd)) {
-    return(FALSE)
+  out <- meta_nm %in% names(vsd)
+  if (is.null(id) || isFALSE(out)) {
+    return(out)
   }
-  if (is.null(id)) {
-    # @codedoc_comment_block vm@var_set_meta_is_defined
-    # - If `meta_nm` IS a column name of `var_set_dt` and `id = NULL`, return
-    #   `TRUE`.
-    # @codedoc_comment_block vm@var_set_meta_is_defined
-    return(TRUE)
-  }
-  assert_is_id(x = id, vm = vm)
-  pos <- var_set_id_to_pos(vm, id)
 
   # @codedoc_comment_block vm@var_set_meta_is_defined
   # - Else return `TRUE`/`FALSE`  for whether `var_set_dt[[meta_nm]]`
@@ -86,11 +81,14 @@ var_set_meta_is_defined <- function(
   #   `NULL` element will result in `FALSE` and for other column types
   #   a missing (`?is.na`) value results in `FALSE`. Otherwise you get `TRUE`.
   # @codedoc_comment_block vm@var_set_meta_is_defined
+  assert_is_id(x = id, vm = vm)
+  pos <- var_set_id_to_pos(vm, id)
   if (is.list(vsd[[meta_nm]])) {
-    return(!is.null(vsd[[meta_nm]][[pos]]))
+    out <- !is.null(vsd[[meta_nm]][[pos]])
   } else {
-    return(!is.na(vsd[[meta_nm]][pos]))
+    out <- !is.na(vsd[[meta_nm]][pos])
   }
+  return(out)
 }
 
 var_set_meta_get <- function(
@@ -1239,7 +1237,7 @@ var_set_value_space_eval <- function(
   #   )
   # )
   #
-  # # Since v1.6.0, a `labeler` of calss `data.table` can also be used.
+  # # Since v1.6.0, a `labeler` of class `data.table` can also be used.
   # vm <- vame::VariableMetadata(
   #   var_dt = data.table::data.table(
   #     var_nm = "a",
@@ -2273,11 +2271,28 @@ var_meta_is_defined <- function(
   var_nm,
   meta_nm
 ) {
-  # @codedoc_comment_block vm@var_meta_is_defined
-  # Returns `TRUE` if `var_dt[[meta_nm]]` exists for a particular `var_nm`.
-  # Unless `var_nm = NULL`, then `vm@var_meta_is_defined` checks whether that
-  # column exists in `var_dt` at all.
-  # @codedoc_comment_block vm@var_meta_is_defined
+  # @codedoc_comment_block function_example(vm@var_meta_is_defined)
+  # vm <- vame::VariableMetadata(
+  #   var_dt = data.table::data.table(
+  #     var_nm = c("a", "b"),
+  #     my_int_meta = c(1L, NA),
+  #     my_list_meta = list(NULL, 1:3)
+  #   ),
+  #   var_set_dt = data.table::data.table(
+  #     id = c("set_a", "set_b"),
+  #     var_nm_set = list("a", "b")
+  #   )
+  # )
+  # stopifnot(
+  #   identical(vm@var_meta_is_defined(var_nm = NULL, meta_nm = "my_int_meta"), TRUE),
+  #   identical(vm@var_meta_is_defined(var_nm = NULL, meta_nm = "x"), FALSE),
+  #   identical(vm@var_meta_is_defined(var_nm = "a", meta_nm = "my_int_meta"), TRUE),
+  #   identical(vm@var_meta_is_defined(var_nm = "b", meta_nm = "my_int_meta"), FALSE),
+  #   identical(vm@var_meta_is_defined(var_nm = "a", meta_nm = "my_list_meta"), FALSE),
+  #   identical(vm@var_meta_is_defined(var_nm = "b", meta_nm = "my_list_meta"), TRUE)
+  # )
+  # @codedoc_comment_block function_example(vm@var_meta_is_defined)
+
   # @codedoc_comment_block news("vm@var_meta_is_defined", "2023-12-12", "0.2.2")
   # New function `vm@var_meta_is_defined`.
   # @codedoc_comment_block news("vm@var_meta_is_defined", "2023-12-12", "0.2.2")
@@ -2288,22 +2303,31 @@ var_meta_is_defined <- function(
   # `vm@var_meta_is_defined` now also allows `var_nm = NULL`. Then it returns
   # `TRUE/FALSE` depending on whether `meta_nm` is a column name of `var_dt`.
   # @codedoc_comment_block news("vm@var_meta_is_defined", "2024-12-19", "1.5.0")
+  # @codedoc_comment_block vm@var_meta_is_defined
+  # Returns `TRUE`/ `FALSE` to indicate whether a metadatum is considered to be
+  # defined.
+  #
+  # - Detects whether `meta_nm` is a column name of `var_dt`. If not or if
+  #   `is.null(var_nm)`, return result early.
+  # @codedoc_comment_block vm@var_meta_is_defined
   vd <- vd_get(vm)
-  if (is.null(var_nm)) {
-    return(meta_nm %in% names(vd))
+  out <- meta_nm %in% names(vd)
+  if (is.null(var_nm) || isFALSE(out)) {
+    return(out)
   }
+  # @codedoc_comment_block vm@var_meta_is_defined
+  # - If `var_dt[[meta_nm]]` is a `list`, detects whether the element for
+  #   `var_nm` is `NULL` or not. For other column types detects whether the
+  #   element is `NA` or not.
+  # @codedoc_comment_block vm@var_meta_is_defined
   assert_is_var_nm(vm, var_nm)
   pos <- data.table::chmatch(var_nm, vd[["var_nm"]])
-  if (!meta_nm %in% names(vd)) {
-    return(FALSE)
-  }
   if (is.list(vd[[meta_nm]])) {
-    meta <- vd[[meta_nm]][[pos]]
-    return(!is.null(meta))
+    out <- !is.null(vd[[meta_nm]][[pos]])
   } else {
-    meta <- vd[[meta_nm]][pos]
-    return(!is.na(meta))
+    out <- !is.na(vd[[meta_nm]][pos])
   }
+  return(out)
 }
 
 var_meta_get <- function(

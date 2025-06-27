@@ -164,9 +164,8 @@ Returns a deep copy of \code{var_set_dt}.
 
 Detects whether metadata has been defined for a variable set.
 \itemize{
-\item If \code{meta_nm} is not a column name of \code{var_set_dt}, return \code{FALSE}.
-\item If \code{meta_nm} IS a column name of \code{var_set_dt} and \code{id = NULL}, return
-\code{TRUE}.
+\item Detects whether \code{meta_nm} is a column name of \code{var_set_dt}.
+If not or if \code{is.null(id)}, return results early.
 \item Else return \code{TRUE}/\code{FALSE}  for whether \code{var_set_dt[[meta_nm]]}
 is defined for the particular \code{id}. For list-valued column a
 \code{NULL} element will result in \code{FALSE} and for other column types
@@ -203,6 +202,8 @@ of a \code{VariableMetadata} object.
   )
 )
 stopifnot(
+  identical(vm@var_set_meta_is_defined(id = NULL, meta_nm = "my_int_meta"), TRUE),
+  identical(vm@var_set_meta_is_defined(id = NULL, meta_nm = "x"), FALSE),
   identical(vm@var_set_meta_is_defined(id = "set_a", meta_nm = "my_int_meta"), TRUE),
   identical(vm@var_set_meta_is_defined(id = "set_b", meta_nm = "my_int_meta"), FALSE),
   identical(vm@var_set_meta_is_defined(id = "set_a", meta_nm = "my_list_meta"), FALSE),
@@ -810,7 +811,7 @@ stopifnot(
   )
 )
 
-# Since v1.6.0, a `labeler` of calss `data.table` can also be used.
+# Since v1.6.0, a `labeler` of class `data.table` can also be used.
 vm <- vame::VariableMetadata(
   var_dt = data.table::data.table(
     var_nm = "a",
@@ -1186,9 +1187,15 @@ Returns a deep copy of \code{var_dt}.
 
 \item{\code{var_meta_is_defined}}{\emph{\strong{Description}}
 
-Returns \code{TRUE} if \code{var_dt[[meta_nm]]} exists for a particular \code{var_nm}.
-Unless \code{var_nm = NULL}, then \code{vm@var_meta_is_defined} checks whether that
-column exists in \code{var_dt} at all.
+Returns \code{TRUE}/ \code{FALSE} to indicate whether a metadatum is considered to be
+defined.
+\itemize{
+\item Detects whether \code{meta_nm} is a column name of \code{var_dt}. If not or if
+\code{is.null(var_nm)}, return result early.
+\item If \code{var_dt[[meta_nm]]} is a \code{list}, detects whether the element for
+\code{var_nm} is \code{NULL} or not. For other column types detects whether the
+element is \code{NA} or not.
+}
 
 \emph{\strong{Usage}}
 
@@ -1203,7 +1210,30 @@ Name of a variable.
 \strong{\code{meta_nm}} \verb{[character]} (no default)
 
 Name of a metadata column in \code{var_set_dt} or \code{var_dt} (depending on context)
-of a \code{VariableMetadata} object.}
+of a \code{VariableMetadata} object.
+
+\emph{\strong{Examples}}
+
+\if{html}{\out{<div class="sourceCode">}}\preformatted{vm <- vame::VariableMetadata(
+  var_dt = data.table::data.table(
+    var_nm = c("a", "b"),
+    my_int_meta = c(1L, NA),
+    my_list_meta = list(NULL, 1:3)
+  ),
+  var_set_dt = data.table::data.table(
+    id = c("set_a", "set_b"),
+    var_nm_set = list("a", "b")
+  )
+)
+stopifnot(
+  identical(vm@var_meta_is_defined(var_nm = NULL, meta_nm = "my_int_meta"), TRUE),
+  identical(vm@var_meta_is_defined(var_nm = NULL, meta_nm = "x"), FALSE),
+  identical(vm@var_meta_is_defined(var_nm = "a", meta_nm = "my_int_meta"), TRUE),
+  identical(vm@var_meta_is_defined(var_nm = "b", meta_nm = "my_int_meta"), FALSE),
+  identical(vm@var_meta_is_defined(var_nm = "a", meta_nm = "my_list_meta"), FALSE),
+  identical(vm@var_meta_is_defined(var_nm = "b", meta_nm = "my_list_meta"), TRUE)
+)
+}\if{html}{\out{</div>}}}
 
 \item{\code{var_meta_get}}{\emph{\strong{Description}}
 
@@ -3194,6 +3224,8 @@ vm <- vame::VariableMetadata(
   )
 )
 stopifnot(
+  identical(vm@var_set_meta_is_defined(id = NULL, meta_nm = "my_int_meta"), TRUE),
+  identical(vm@var_set_meta_is_defined(id = NULL, meta_nm = "x"), FALSE),
   identical(vm@var_set_meta_is_defined(id = "set_a", meta_nm = "my_int_meta"), TRUE),
   identical(vm@var_set_meta_is_defined(id = "set_b", meta_nm = "my_int_meta"), FALSE),
   identical(vm@var_set_meta_is_defined(id = "set_a", meta_nm = "my_list_meta"), FALSE),
@@ -3563,7 +3595,7 @@ stopifnot(
   )
 )
 
-# Since v1.6.0, a `labeler` of calss `data.table` can also be used.
+# Since v1.6.0, a `labeler` of class `data.table` can also be used.
 vm <- vame::VariableMetadata(
   var_dt = data.table::data.table(
     var_nm = "a",
@@ -3761,6 +3793,25 @@ a_sample <- my_vm@var_set_value_space_sample(
 a_sample_distribution <- table(a_sample[["a"]])
 stopifnot(
   a_sample_distribution[1] < a_sample_distribution[6]
+)
+vm <- vame::VariableMetadata(
+  var_dt = data.table::data.table(
+    var_nm = c("a", "b"),
+    my_int_meta = c(1L, NA),
+    my_list_meta = list(NULL, 1:3)
+  ),
+  var_set_dt = data.table::data.table(
+    id = c("set_a", "set_b"),
+    var_nm_set = list("a", "b")
+  )
+)
+stopifnot(
+  identical(vm@var_meta_is_defined(var_nm = NULL, meta_nm = "my_int_meta"), TRUE),
+  identical(vm@var_meta_is_defined(var_nm = NULL, meta_nm = "x"), FALSE),
+  identical(vm@var_meta_is_defined(var_nm = "a", meta_nm = "my_int_meta"), TRUE),
+  identical(vm@var_meta_is_defined(var_nm = "b", meta_nm = "my_int_meta"), FALSE),
+  identical(vm@var_meta_is_defined(var_nm = "a", meta_nm = "my_list_meta"), FALSE),
+  identical(vm@var_meta_is_defined(var_nm = "b", meta_nm = "my_list_meta"), TRUE)
 )
 # vm@var_meta_set
 vm <- vame::VariableMetadata(
