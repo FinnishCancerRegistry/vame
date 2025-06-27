@@ -2,7 +2,7 @@
 ^.+[.]code-workspace$
 ^\.github$
 ^dev$
-^sandbox[.]R$
+^sandbox.*[.]R$
 ^.*\.Rproj$
 ^\.Rproj\.user$
 ^\.radian_history$

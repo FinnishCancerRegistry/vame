@@ -1,5 +1,5 @@
 *.code-workspace
-sandbox.R
+sandbox*.R
 .Rproj.user
 .Rhistory
 .radian_history
