@@ -2066,6 +2066,25 @@ var_is_aggregateable_to <- function(
   # @codedoc_comment_block vm@var_is_aggregateable_to
   # Returns `TRUE` if `from_var_nm` can be aggregated into `to_var_nm`.
   # @codedoc_comment_block vm@var_is_aggregateable_to
+  # @codedoc_comment_block function_example(vm@var_is_aggregateable_to)
+  # vm <- vame::VariableMetadata(
+  #   var_dt = data.table::data.table(
+  #     var_nm = c("a1", "a2")
+  #   ),
+  #   var_set_dt = data.table::data.table(
+  #     id = "a1_&_a2",
+  #     var_nm_set = list(c("a1", "a2")),
+  #     value_space = list("a1_&_a2" = list(dt = data.table::data.table(
+  #       a1 = c(1L, 1L, 2L, 2L),
+  #       a2 = c(11L, 12L, 21L, 22L)
+  #     )))
+  #   )
+  # )
+  # stopifnot(
+  #   vm@var_is_aggregateable_to(from_var_nm = "a2", to_var_nm = "a1"),
+  #   !vm@var_is_aggregateable_to(from_var_nm = "a1", to_var_nm = "a2")
+  # )
+  # @codedoc_comment_block function_example(vm@var_is_aggregateable_to)
   # @codedoc_comment_block feature_funs(category spaces)
   # - `vm@var_is_aggregateable_to`
   # @codedoc_comment_block feature_funs(category spaces)
@@ -3468,7 +3487,7 @@ vame_copy <- function(vm) {
   # @codedoc_comment_block news("vm@vame_copy", "2023-08-10", "0.1.8")
 
   # @codedoc_comment_block function_example(vm@vame_copy)
-  # vm@vame_copy
+  # # vm@vame_copy
   # vm_1 <- vame::VariableMetadata(
   #   var_dt = data.table::data.table(var_nm = "a"),
   #   var_set_dt = data.table::data.table(id = "a", var_nm_set = list("a")),

@@ -1224,7 +1224,28 @@ Name of a variable. Aggregation from this to another variable.
 
 \strong{\code{to_var_nm}} \verb{[character]} (no default)
 
-Name of a variable. Aggregation to this from another variable.}
+Name of a variable. Aggregation to this from another variable.
+
+\emph{\strong{Examples}}
+
+\if{html}{\out{<div class="sourceCode">}}\preformatted{vm <- vame::VariableMetadata(
+  var_dt = data.table::data.table(
+    var_nm = c("a1", "a2")
+  ),
+  var_set_dt = data.table::data.table(
+    id = "a1_&_a2",
+    var_nm_set = list(c("a1", "a2")),
+    value_space = list("a1_&_a2" = list(dt = data.table::data.table(
+      a1 = c(1L, 1L, 2L, 2L),
+      a2 = c(11L, 12L, 21L, 22L)
+    )))
+  )
+)
+stopifnot(
+  vm@var_is_aggregateable_to(from_var_nm = "a2", to_var_nm = "a1"),
+  !vm@var_is_aggregateable_to(from_var_nm = "a1", to_var_nm = "a2")
+)
+}\if{html}{\out{</div>}}}
 
 \item{\code{var_aggregate}}{\emph{\strong{Description}}
 
@@ -1926,7 +1947,7 @@ Take a deep copy of a VariableMetadata object. See \code{?data.table::copy}.
 
 \emph{\strong{Examples}}
 
-\if{html}{\out{<div class="sourceCode">}}\preformatted{vm@vame_copy
+\if{html}{\out{<div class="sourceCode">}}\preformatted{# vm@vame_copy
 vm_1 <- vame::VariableMetadata(
   var_dt = data.table::data.table(var_nm = "a"),
   var_set_dt = data.table::data.table(id = "a", var_nm_set = list("a")),
@@ -2862,6 +2883,9 @@ The following functions are part of this feature:
 
 \section{News for version 1.11.0}{
 
+
+Fixed automatic assignment \code{type = "categorical"}. It now also works
+if \code{type} did not exist at all in the user-supplied \code{var_dt}.
 
 \code{vm@vame_make} arg \code{callbacks} removed. Use \code{optional_steps}.
 You will have to rebuild your \code{VariableMetadata} object to make
@@ -4127,6 +4151,23 @@ stopifnot(
 )
 vm <- vame::VariableMetadata(
   var_dt = data.table::data.table(
+    var_nm = c("a1", "a2")
+  ),
+  var_set_dt = data.table::data.table(
+    id = "a1_&_a2",
+    var_nm_set = list(c("a1", "a2")),
+    value_space = list("a1_&_a2" = list(dt = data.table::data.table(
+      a1 = c(1L, 1L, 2L, 2L),
+      a2 = c(11L, 12L, 21L, 22L)
+    )))
+  )
+)
+stopifnot(
+  vm@var_is_aggregateable_to(from_var_nm = "a2", to_var_nm = "a1"),
+  !vm@var_is_aggregateable_to(from_var_nm = "a1", to_var_nm = "a2")
+)
+vm <- vame::VariableMetadata(
+  var_dt = data.table::data.table(
     var_nm = c("a", "b"),
     my_int_meta = c(1L, NA),
     my_list_meta = list(NULL, 1:3)
@@ -4336,7 +4377,7 @@ stopifnot(
   identical(names(my_dt_2), c("official|A2", "some_var")),
   my_dt_2[["official|A2"]] == 3:4
 )
-vm@vame_copy
+# vm@vame_copy
 vm_1 <- vame::VariableMetadata(
   var_dt = data.table::data.table(var_nm = "a"),
   var_set_dt = data.table::data.table(id = "a", var_nm_set = list("a")),
