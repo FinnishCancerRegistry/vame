@@ -1121,7 +1121,92 @@ Environment where a value space will be evaluated, if applicable.
 \itemize{
 \item \code{NULL}: Use the environment where the function was called.
 \item \code{environment}: Use this environment.
-}}
+}
+
+\emph{\strong{Examples}}
+
+\if{html}{\out{<div class="sourceCode">}}\preformatted{c_lo <- as.Date("2001-01-01")
+c_hi <- as.Date("2020-12-31")
+## see what default samplers do with bounds
+storage.mode(c_lo) <- storage.mode(c_hi) <- "integer"
+vm <- vame::VariableMetadata(
+  var_dt = data.table::data.table(
+    var_nm = c("a", "d", "b", "c"),
+    type = c("categorical", "categorical", "categorical", "my_type")
+  ),
+  var_set_dt = data.table::data.table(
+    id = c("ad", "b", "c", "e"),
+    var_nm_set = list(ad = c("a", "d"), b = "b", c = "c", e = "e"),
+    value_space = list(
+      ad = list(dt = data.table::CJ(a = 1:2, d = 3:4)),
+      b = list(set = 3:4),
+      c = list(bounds = list(
+        lo = c_lo,
+        hi = c_hi,
+        lo_inclusive = TRUE,
+        hi_inclusive = TRUE
+      )),
+      e = list(set = 1:2)
+    ),
+    sampler = list(
+      ad = NULL,
+      b = quote(\{
+        p <- c(0.25, 0.75)
+        out <- sample(vs[["set"]], size = n, replace = TRUE, p = p)
+        out <- data.table::setDT(list(b = out))
+        return(out[])
+      \}),
+      c = NULL,
+      e = quote(\{
+        stopifnot(
+          inherits(data, "list"),
+          "e_cond" \%in\% names(data),
+          length(data[["e_cond"]]) == n
+        )
+        dist <- data.table::data.table(
+          e_cond = c(1L, 1L, 2L, 2L),
+          e = c(1:2, 1:2),
+          p_cond = c(0.25, 0.75, 0.40, 0.60)
+        )
+        join_dt <- data.table::setDT(list(e_cond = data[["e_cond"]]))
+        out <- dist[
+          i = join_dt,
+          j = list(
+            e = sample(.SD[["e"]], replace = TRUE, prob = .SD[["p_cond"]])
+          ),
+          by = .EACHI
+        ]
+        data.table::set(out, j = setdiff(names(out), "e"), value = NULL)
+        return(out[])
+      \})
+    )
+  )
+)
+vm@var_set_value_space_sampler_set(
+  id = "c",
+  value = quote(\{
+    pool <- vs[["bounds"]][["lo"]]:vs[["bounds"]][["hi"]]
+    p <- dnorm(x = pool, mean = mean(pool), sd = 10)
+    class(pool) <- class(vs[["bounds"]][["lo"]])
+    out <- pool[sample(length(pool), size = n, replace = FALSE, prob = p)]
+    out <- data.table::setDT(list(c = out))
+    return(out[])
+  \})
+)
+
+ad_sample <- vm@var_set_value_space_sample(id = "ad", n = 4L)
+b_sample <- vm@var_set_value_space_sample(id = "b", n = 4L)
+c_sample <- vm@var_set_value_space_sample(id = "c", n = 4L)
+stopifnot(
+  inherits(ad_sample, "data.table"),
+  nrow(ad_sample) == 4,
+  inherits(b_sample, "data.table"),
+  nrow(b_sample) == 4,
+  inherits(c_sample, "data.table"),
+  storage.mode(c_sample$c) == "integer",
+  nrow(c_sample) == 4
+)
+}\if{html}{\out{</div>}}}
 
 \item{\code{var_is_aggregateable_to}}{\emph{\strong{Description}}
 
@@ -3775,6 +3860,87 @@ stopifnot(
     vm@var_set_value_space_get(id = "set_b")[["dt"]][["b"]],
     allowed_set_b
   )
+)
+c_lo <- as.Date("2001-01-01")
+c_hi <- as.Date("2020-12-31")
+## see what default samplers do with bounds
+storage.mode(c_lo) <- storage.mode(c_hi) <- "integer"
+vm <- vame::VariableMetadata(
+  var_dt = data.table::data.table(
+    var_nm = c("a", "d", "b", "c"),
+    type = c("categorical", "categorical", "categorical", "my_type")
+  ),
+  var_set_dt = data.table::data.table(
+    id = c("ad", "b", "c", "e"),
+    var_nm_set = list(ad = c("a", "d"), b = "b", c = "c", e = "e"),
+    value_space = list(
+      ad = list(dt = data.table::CJ(a = 1:2, d = 3:4)),
+      b = list(set = 3:4),
+      c = list(bounds = list(
+        lo = c_lo,
+        hi = c_hi,
+        lo_inclusive = TRUE,
+        hi_inclusive = TRUE
+      )),
+      e = list(set = 1:2)
+    ),
+    sampler = list(
+      ad = NULL,
+      b = quote({
+        p <- c(0.25, 0.75)
+        out <- sample(vs[["set"]], size = n, replace = TRUE, p = p)
+        out <- data.table::setDT(list(b = out))
+        return(out[])
+      }),
+      c = NULL,
+      e = quote({
+        stopifnot(
+          inherits(data, "list"),
+          "e_cond" \%in\% names(data),
+          length(data[["e_cond"]]) == n
+        )
+        dist <- data.table::data.table(
+          e_cond = c(1L, 1L, 2L, 2L),
+          e = c(1:2, 1:2),
+          p_cond = c(0.25, 0.75, 0.40, 0.60)
+        )
+        join_dt <- data.table::setDT(list(e_cond = data[["e_cond"]]))
+        out <- dist[
+          i = join_dt,
+          j = list(
+            e = sample(.SD[["e"]], replace = TRUE, prob = .SD[["p_cond"]])
+          ),
+          by = .EACHI
+        ]
+        data.table::set(out, j = setdiff(names(out), "e"), value = NULL)
+        return(out[])
+      })
+    )
+  )
+)
+vm@var_set_value_space_sampler_set(
+  id = "c",
+  value = quote({
+    pool <- vs[["bounds"]][["lo"]]:vs[["bounds"]][["hi"]]
+    p <- dnorm(x = pool, mean = mean(pool), sd = 10)
+    class(pool) <- class(vs[["bounds"]][["lo"]])
+    out <- pool[sample(length(pool), size = n, replace = FALSE, prob = p)]
+    out <- data.table::setDT(list(c = out))
+    return(out[])
+  })
+)
+
+ad_sample <- vm@var_set_value_space_sample(id = "ad", n = 4L)
+b_sample <- vm@var_set_value_space_sample(id = "b", n = 4L)
+c_sample <- vm@var_set_value_space_sample(id = "c", n = 4L)
+stopifnot(
+  inherits(ad_sample, "data.table"),
+  nrow(ad_sample) == 4,
+  inherits(b_sample, "data.table"),
+  nrow(b_sample) == 4,
+  inherits(c_sample, "data.table"),
+  storage.mode(c_sample$c) == "integer",
+  nrow(c_sample) == 4
 )
 # random sampling
 c_lo <- as.Date("2001-01-01")

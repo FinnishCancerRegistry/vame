@@ -1708,8 +1708,7 @@ var_set_value_space_sample <- function(
   # @codedoc_insert_comment_block feature_process(random sampling)
   # @codedoc_comment_block vm@var_set_value_space_sample
 
-  # @codedoc_comment_block feature_example(random sampling)
-  # # random sampling
+  # @codedoc_comment_block function_example(vm@var_set_value_space_sample)
   # c_lo <- as.Date("2001-01-01")
   # c_hi <- as.Date("2020-12-31")
   # ## see what default samplers do with bounds
@@ -1791,6 +1790,11 @@ var_set_value_space_sample <- function(
   #   storage.mode(c_sample$c) == "integer",
   #   nrow(c_sample) == 4
   # )
+  # @codedoc_comment_block function_example(vm@var_set_value_space_sample)
+
+  # @codedoc_comment_block feature_example(random sampling)
+  # # random sampling
+  # @codedoc_insert_comment_block function_example(vm@var_set_value_space_sample)
   #
   # vame_sample <- vm@vame_value_space_sample(
   #   ids = c("ad", "b", "c"),
