@@ -341,6 +341,12 @@ stopifnot(
 \section{News}{
 
 \subsection{News for version 1.11.0}{
+\subsection{vame::VariableMetadata}{
+
+Fixed automatic assignment \code{type = "categorical"}. It now also works
+if \code{type} did not exist at all in the user-supplied \code{var_dt}.
+}
+
 \subsection{vm@vame_make}{
 
 \code{vm@vame_make} arg \code{callbacks} removed. Use \code{optional_steps}.

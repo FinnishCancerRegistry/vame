@@ -2,6 +2,11 @@
 
 ## News for version 1.11.0
 
+### vame::VariableMetadata
+
+Fixed automatic assignment `type = "categorical"`. It now also works
+if `type` did not exist at all in the user-supplied `var_dt`.
+
 ### vm@vame_make
 
 `vm@vame_make` arg `callbacks` removed. Use `optional_steps`.

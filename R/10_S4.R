@@ -621,6 +621,7 @@ VariableMetadata <- function(
   funs$data$var_dt <- var_dt
   funs$data$var_set_dt <- var_set_dt
   funs$data$vame_list <- vame_list
+  rm(list = c("var_dt", "var_set_dt", "vame_list"))
   slot_fun_nms <- vame_slot_nms_get__()
   lapply(slot_fun_nms, function(slot_fun_nm) {
     # @codedoc_comment_block vame::VariableMetadata
@@ -686,17 +687,14 @@ VariableMetadata <- function(
   }
   environment(funs[["self_get"]]) <- funs
 
-  test_indices <- seq_len(nrow(funs$data$var_dt))
   if ("type" %in% names(funs$data$var_dt)) {
     test_indices <- which(is.na(funs$data$var_dt[["type"]]))
+  } else {
+    test_indices <- seq_len(nrow(funs$data$var_dt))
   }
   categorical_var_indices <- which(vapply(
     funs$data$var_dt[["var_nm"]][test_indices],
     function(var_nm) {
-      vs <- tryCatch(
-        out@var_value_space_eval(var_nm),
-        error = function(e) list()
-      )
       # @codedoc_comment_block news("vame::VariableMetadata", "2024-04-18", "0.5.0")
       # `vame::VariableMetadata` now automatically sets `var_dt$type` to
       # `"categorical"` where the variable's `value_space` is of type
@@ -706,25 +704,37 @@ VariableMetadata <- function(
       # Also, if `var_dt$type` was already something other than `NA` for a
       # variable, the automatic determination is not attempted.
       # @codedoc_comment_block news("vame::VariableMetadata", "2024-04-18", "0.5.0")
+      # @codedoc_comment_block news("vame::VariableMetadata", "2025-06-30", "1.11.0")
+      # Fixed automatic assignment `type = "categorical"`. It now also works
+      # if `type` did not exist at all in the user-supplied `var_dt`.
+      # @codedoc_comment_block news("vame::VariableMetadata", "2025-06-30", "1.11.0")
       # @codedoc_comment_block vame::VariableMetadata
       # - Attempt to auto-assign `var_dt[["type"]][i]` to `"categorical"` for
       #   each `i`. `var_dt[["type"]][i] <- "categorical"` if it is at first `NA`
       #   and the variable has either a `labeler` or a guaranteed categorical
       #   (part of a) `value_space` object --- of type `set` or `dt`.
       # @codedoc_comment_block vame::VariableMetadata
-      return(
-        any(c("set", "dt") %in% names(vs)) ||
-          out@var_meta_is_defined(var_nm = var_nm, meta_nm = "labeler")
+      is_categorical <- out@var_meta_is_defined(
+        var_nm = var_nm, meta_nm = "labeler"
       )
+      is_categorical <- is_categorical || any(
+        c("set", "dt") %in% names(tryCatch(
+          out@var_value_space_eval(var_nm),
+          error = function(e) list()
+        ))
+      )
+      return(is_categorical)
     },
     logical(1L)
   ))
-  data.table::set(
-    var_dt,
-    i = categorical_var_indices,
-    j = "type",
-    value = "categorical"
-  )
+  if (length(categorical_var_indices) > 0) {
+    data.table::set(
+      funs$data$var_dt,
+      i = categorical_var_indices,
+      j = "type",
+      value = "categorical"
+    )
+  }
 
   # @codedoc_comment_block vame::VariableMetadata
   # - Return the created `VariableMetadata` object.
