@@ -168,6 +168,23 @@ var_set_meta_set <- function(
   #   identical(vm@var_set_meta_get(id = "set_a", meta_nm = "my_int_meta"), 2L),
   #   identical(vm@var_set_meta_get(id = "set_a", meta_nm = "my_new_int_meta"), 10L)
   # )
+  #
+  # a_value_space <- list(set = 1:3)
+  # vm@var_set_meta_set(
+  #   id = "set_a",
+  #   meta_nm = "value_space",
+  #   value = a_value_space
+  # )
+  # b_value_space <- list(dt = data.table::data.table(b = 1:3))
+  # vm@var_set_meta_set(
+  #   id = "set_b",
+  #   meta_nm = "value_space",
+  #   value = b_value_space
+  # )
+  # stopifnot(
+  #   identical(vm@var_set_value_space_get(id = "set_a"), a_value_space),
+  #   identical(vm@var_set_value_space_get(id = "set_b"), b_value_space)
+  # )
   # @codedoc_comment_block function_example(vm@var_set_meta_set)
 
   assert_is_variablemetadata(vm)
@@ -185,27 +202,6 @@ var_set_meta_set <- function(
   #
   # In `_set` functions the value to set for the specified metadata.
   # @codedoc_comment_block doc_slot_fun_arg(value)
-
-  # @codedoc_comment_block function_example(vm@var_set_meta_set)
-  # vm <- vame::VariableMetadata(
-  #   var_dt = data.table::data.table(
-  #     var_nm = "a"
-  #   ),
-  #   var_set_dt = data.table::data.table(
-  #     id = "A",
-  #     var_nm_set = list("a")
-  #   )
-  # )
-  # a_value_space <- list(set = 1:3)
-  # vm@var_set_meta_set(
-  #   id = "A",
-  #   meta_nm = "value_space",
-  #   value = a_value_space
-  # )
-  # stopifnot(
-  #   identical(vm@var_set_value_space_get(id = "A"), a_value_space)
-  # )
-  # @codedoc_comment_block function_example(vm@var_set_meta_set)
 
   # @codedoc_comment_block news("vm@var_set_meta_set", "2024-09-02", "0.5.6")
   # `vm@var_set_meta_set` now checks `value` for validity for "officially"
@@ -357,6 +353,23 @@ var_set_rename <- function(
   # Rename variable sets --- change `var_set_dt$id` values.
   # @codedoc_comment_block vm@var_set_rename
 
+  # @codedoc_comment_block function_example(vm@var_set_rename)
+  # vm <- vame::VariableMetadata(
+  #   var_dt = data.table::data.table(var_nm = c("a", "b")),
+  #   var_set_dt = data.table::data.table(
+  #     id = c("set_a", "set_b"),
+  #     var_nm_set = list("a", "b")
+  #   )
+  # )
+  # vm@var_set_rename(old_ids = "set_a", new_ids = "set_A")
+  # stopifnot(
+  #   identical(
+  #     vm@var_set_meta_get_all(meta_nm = "id"),
+  #     c("set_A" = "set_A", "set_b" = "set_b")
+  #   )
+  # )
+  # @codedoc_comment_block function_example(vm@var_set_rename)
+
   # @codedoc_comment_block news("vm@var_set_rename", "2023-12-01", "0.2.0")
   # Rename `old` to `old_ids` and `new` to `new_ids`.
   # @codedoc_comment_block news("vm@var_set_rename", "2023-12-01", "0.2.0")
@@ -385,6 +398,26 @@ var_set_remove <- function(
   vm,
   id
 ) {
+  # @codedoc_comment_block function_example(vm@var_set_remove)
+  # vm <- vame::VariableMetadata(
+  #   var_dt = data.table::data.table(var_nm = c("a", "b")),
+  #   var_set_dt = data.table::data.table(
+  #     id = c("set_a", "set_b"),
+  #     var_nm_set = list("a", "b")
+  #   )
+  # )
+  # vm@var_set_remove(id = "set_a")
+  # stopifnot(
+  #   identical(
+  #     vm@var_set_meta_get_all(meta_nm = "id"),
+  #     c("set_b" = "set_b")
+  #   ),
+  #   identical(
+  #     vm@var_meta_get_all(meta_nm = "var_nm"),
+  #     c("b" = "b")
+  #   )
+  # )
+  # @codedoc_comment_block function_example(vm@var_set_remove)
   assert_is_var_set_id(vm, id)
   pos <- var_set_id_to_pos(vm, id)
   vsd <- vsd_get(vm)
@@ -893,6 +926,11 @@ var_set_maker_get_dep_var_nm_sets <- function(
   vm,
   id
 ) {
+  # @codedoc_comment_block vm@var_set_maker_get_dep_var_nm_sets
+  # Get list of dependency variable sets of a `maker`. Always returns a list of
+  # `character` vectors of variable names.
+  # @codedoc_comment_block vm@var_set_maker_get_dep_var_nm_sets
+
   # @codedoc_comment_block news("vm@var_set_maker_get_dep_var_nm_sets", "2024-10-02", "1.3.0")
   # New function `vm@var_set_maker_get_dep_var_nm_sets`.
   # @codedoc_comment_block news("vm@var_set_maker_get_dep_var_nm_sets", "2024-10-02", "1.3.0")
@@ -1451,7 +1489,7 @@ var_set_value_space_get <- function(
   id
 ) {
   # @codedoc_comment_block vm@var_set_value_space_get
-  # Get the value space of a specific variable set without evaluting it.
+  # Get the `value_space` of a specific variable set without evaluting it.
   # @codedoc_comment_block vm@var_set_value_space_get
   # @codedoc_comment_block feature_funs(value spaces)
   # - `vm@var_set_value_space_get`
@@ -1470,7 +1508,7 @@ var_set_value_space_set <- function(
   value_space
 ) {
   # @codedoc_comment_block vm@var_set_value_space_set
-  # Set the value space of a specific variable set.
+  # Set the `value_space` of a variable set.
   # @codedoc_comment_block vm@var_set_value_space_set
   # @codedoc_comment_block feature_funs(value spaces)
   # - `vm@var_set_value_space_set`
@@ -1490,28 +1528,125 @@ var_set_value_space_set <- function(
   )
 }
 
-
 var_set_value_space_dt_subset <- function(
   vm,
   id,
-  expr
+  expr,
+  enclos = NULL
 ) {
-  # @codedoc_comment_block vm@var_set_value_space_dt_subset
-  # Take a subset of a value space dt for a variable set and set that as the value space.
-  # @codedoc_comment_block vm@var_set_value_space_dt_subset
+  # @codedoc_comment_block function_example(vm@var_set_value_space_dt_subset)
+  # vm <- vame::VariableMetadata(
+  #   var_dt = data.table::data.table(var_nm = c("a", "b")),
+  #   var_set_dt = data.table::data.table(
+  #     id = c("set_a", "set_b"),
+  #     var_nm_set = list("a", "b"),
+  #     value_space = list(
+  #       set_a = list(dt = data.table::data.table(a = 1:5)),
+  #       set_b = list(dt = data.table::data.table(b = 4:7))
+  #     )
+  #   )
+  # )
+  # allowed_set_a <- 1:3
+  # vm@var_set_value_space_dt_subset(
+  #   id = "set_a",
+  #   expr = a %in% allowed_set_a
+  # )
+  # allowed_set_b <- 4:5
+  # vm@var_set_value_space_dt_subset(
+  #   id = "set_b",
+  #   expr = dt$b %in% allowed_set_b
+  # )
+  # vm@var_set_value_space_dt_subset(
+  #   id = "set_b",
+  #   expr = quote(b %in% allowed_set_b)
+  # )
+  # stopifnot(
+  #   identical(
+  #     vm@var_set_value_space_get(id = "set_a")[["dt"]][["a"]],
+  #     allowed_set_a
+  #   ),
+  #   identical(
+  #     vm@var_set_value_space_get(id = "set_b")[["dt"]][["b"]],
+  #     allowed_set_b
+  #   )
+  # )
+  # @codedoc_comment_block function_example(vm@var_set_value_space_dt_subset)
+
   # @codedoc_comment_block feature_funs(value spaces)
   # - `vm@var_set_value_space_dt_subset`
   # @codedoc_comment_block feature_funs(value spaces)
   assert_var_set_value_space_is_defined(vm)
   assert_is_var_set_id(vm, id)
-  # @codedoc_comment_block doc_slot_fun_arg(expr)
-  # **`expr`** `[any]` (no default)
+
+  # @codedoc_comment_block vame::var_set_value_space_dt_subset::enclos
+  # **`enclos`** `[NULL, environment]` (default `NULL`)
+  #
+  # Evaluation environment of `expr` will be a child of `enclos`.
+  #
+  # - `NULL`: Use environment where `vm@var_set_value_space_dt_subset` was
+  #   called.
+  # - `environment`: Use this environment.
+  # @codedoc_comment_block vame::var_set_value_space_dt_subset::enclos
+  # @codedoc_comment_block news("vm@var_set_value_space_dt_subset", "2025-06-30", "1.11.0")
+  # `vm@var_set_value_space_dt_subset` gains arg `enclos`.
+  # @codedoc_comment_block news("vm@var_set_value_space_dt_subset", "2025-06-30", "1.11.0")
+  dbc::assert_is_one_of(
+    enclos,
+    funs = list(dbc::report_is_NULL,
+                dbc::report_is_environment)
+  )
+  if (is.null(enclos)) {
+    enclos <- parent.frame(2L)
+  }
+  vs <- var_set_value_space_get(vm, id)
+  if (!"dt" %in% names(vs)) {
+    stop("Value space for id = \"", id, "\"  is not of type `dt`.")
+  }
+  # @codedoc_comment_block vm@var_set_value_space_dt_subset
+  # Take a subset of a value space dt for a variable set and set that as the
+  # value space. Performs the following steps:
+  #
+  # - Create new temporary environment `eval_env` as child of `enclos`.
+  #   Assign the `data.table` object of the `value_space` into
+  #   `eval_env[["dt"]]`.
+  # - Collect `expr` using `substitute`.
+  # @codedoc_comment_block vm@var_set_value_space_dt_subset
+  eval_env <- new.env(parent = enclos)
+  eval_env[["dt"]] <- vs[["dt"]]
+  # @codedoc_comment_block vame::var_set_value_space_dt_subset::expr
+  # **`expr`** `[name, call integer, logical]` (no default)
   #
   # Expression to subset a `data.table` object. Available columns depends on
-  # context.
-  # @codedoc_comment_block doc_slot_fun_arg(expr)
-  expr <- substitute(expr)
-  var_set_value_set_dt_subset_expr(vm, id, expr)
+  # context. Must be or evaluate to `integer` or `logical`.
+  # @codedoc_comment_block vame::var_set_value_space_dt_subset::expr
+  expr <- substitute(expr, env = parent.frame(1L))
+  dt_subset <- expr
+  n <- 0L
+  # @codedoc_comment_block vm@var_set_value_space_dt_subset
+  # - Call `expr <- eval(expr, envir = eval_env[["dt"]], enclos = eval_env)`
+  #   up to 10 times until result is not `name` or `call` object.
+  # @codedoc_comment_block vm@var_set_value_space_dt_subset
+  while (n <= 10 && (is.name(dt_subset) || is.call(dt_subset))) {
+    n <- n + 1L
+    dt_subset <- eval(
+      expr = dt_subset,
+      envir = eval_env[["dt"]],
+      enclos = eval_env
+    )
+  }
+  # @codedoc_comment_block vm@var_set_value_space_dt_subset
+  # - Raise an error if result of `expr` is not `logical` or `integer`.
+  # @codedoc_comment_block vm@var_set_value_space_dt_subset
+  if (!inherits(dt_subset, c("logical", "integer"))) {
+    stop("Result of `expr` was not `logical` nor `integer` vector after ",
+         n, " evaluations.")
+  }
+  # @codedoc_comment_block vm@var_set_value_space_dt_subset
+  # - Use result to subset `eval_env[["dt"]]`.
+  # - Set result as the new `value_space`.
+  # @codedoc_comment_block vm@var_set_value_space_dt_subset
+  var_set_value_space_set(vm, id, list(dt = eval_env[["dt"]][dt_subset, ]))
+  return(invisible(NULL))
 }
 
 var_set_value_space_sampler_get <- function(

@@ -261,25 +261,6 @@ var_set_value_space_is_defined <- function(
   return("value_space" %in% names(vsd))
 }
 
-var_set_value_set_dt_subset_expr <- function(
-  vm,
-  id,
-  expr
-) {
-  assert_is_variablemetadata(vm, assertion_type = "prod_input")
-  assert_var_set_value_space_is_defined(vm)
-  dbc::assert_is_language_object(expr, assertion_type = "prod_input")
-  vs <- var_set_value_space_get(vm, id)
-  dt <- vs[["dt"]]
-  if (!data.table::is.data.table(dt)) {
-    stop("Value space for id = \"", id, "\"  is not a data.table.")
-  }
-  dt_expr <- substitute(dt[i = expr], list(expr = expr))
-  dt <- eval(dt_expr)
-  var_set_value_space_set(vm, id, dt)
-  return(invisible(NULL))
-}
-
 # var funs ---------------------------------------------------------------------
 var_is_aggregateable_to__ <- function(
   vm,

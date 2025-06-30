@@ -304,23 +304,22 @@ stopifnot(
   identical(vm@var_set_meta_get(id = "set_a", meta_nm = "my_int_meta"), 2L),
   identical(vm@var_set_meta_get(id = "set_a", meta_nm = "my_new_int_meta"), 10L)
 )
-vm <- vame::VariableMetadata(
-  var_dt = data.table::data.table(
-    var_nm = "a"
-  ),
-  var_set_dt = data.table::data.table(
-    id = "A",
-    var_nm_set = list("a")
-  )
-)
+
 a_value_space <- list(set = 1:3)
 vm@var_set_meta_set(
-  id = "A",
+  id = "set_a",
   meta_nm = "value_space",
   value = a_value_space
 )
+b_value_space <- list(dt = data.table::data.table(b = 1:3))
+vm@var_set_meta_set(
+  id = "set_b",
+  meta_nm = "value_space",
+  value = b_value_space
+)
 stopifnot(
-  identical(vm@var_set_value_space_get(id = "A"), a_value_space)
+  identical(vm@var_set_value_space_get(id = "set_a"), a_value_space),
+  identical(vm@var_set_value_space_get(id = "set_b"), b_value_space)
 )
 }\if{html}{\out{</div>}}}
 
@@ -426,7 +425,25 @@ Old variable set IDs.
 
 \strong{\code{new_ids}} \verb{[any]} (no default)
 
-New variable set IDs.}
+New variable set IDs.
+
+\emph{\strong{Examples}}
+
+\if{html}{\out{<div class="sourceCode">}}\preformatted{vm <- vame::VariableMetadata(
+  var_dt = data.table::data.table(var_nm = c("a", "b")),
+  var_set_dt = data.table::data.table(
+    id = c("set_a", "set_b"),
+    var_nm_set = list("a", "b")
+  )
+)
+vm@var_set_rename(old_ids = "set_a", new_ids = "set_A")
+stopifnot(
+  identical(
+    vm@var_set_meta_get_all(meta_nm = "id"),
+    c("set_A" = "set_A", "set_b" = "set_b")
+  )
+)
+}\if{html}{\out{</div>}}}
 
 \item{\code{var_set_remove}}{\emph{\strong{Description}}
 
@@ -451,7 +468,29 @@ Empty variable sets are removed entirely.
 \strong{\code{id}} \verb{[any]} (no default)
 
 ID, or "name", of a variable set. The class of \code{id} is defined when you
-create the \code{VariableMetadata} object and it can be pretty much anything.}
+create the \code{VariableMetadata} object and it can be pretty much anything.
+
+\emph{\strong{Examples}}
+
+\if{html}{\out{<div class="sourceCode">}}\preformatted{vm <- vame::VariableMetadata(
+  var_dt = data.table::data.table(var_nm = c("a", "b")),
+  var_set_dt = data.table::data.table(
+    id = c("set_a", "set_b"),
+    var_nm_set = list("a", "b")
+  )
+)
+vm@var_set_remove(id = "set_a")
+stopifnot(
+  identical(
+    vm@var_set_meta_get_all(meta_nm = "id"),
+    c("set_b" = "set_b")
+  ),
+  identical(
+    vm@var_meta_get_all(meta_nm = "var_nm"),
+    c("b" = "b")
+  )
+)
+}\if{html}{\out{</div>}}}
 
 \item{\code{var_set_maker_get}}{\emph{\strong{Description}}
 
@@ -570,6 +609,9 @@ Environment where a value space will be evaluated, if applicable.
 }}
 
 \item{\code{var_set_maker_get_dep_var_nm_sets}}{\emph{\strong{Description}}
+
+Get list of dependency variable sets of a \code{maker}. Always returns a list of
+\code{character} vectors of variable names.
 
 \emph{\strong{Usage}}
 
@@ -831,7 +873,7 @@ stopifnot(all.equal(
 
 \item{\code{var_set_value_space_get}}{\emph{\strong{Description}}
 
-Get the value space of a specific variable set without evaluting it.
+Get the \code{value_space} of a specific variable set without evaluting it.
 
 \emph{\strong{Usage}}
 
@@ -846,7 +888,7 @@ create the \code{VariableMetadata} object and it can be pretty much anything.}
 
 \item{\code{var_set_value_space_set}}{\emph{\strong{Description}}
 
-Set the value space of a specific variable set.
+Set the \code{value_space} of a variable set.
 
 \emph{\strong{Usage}}
 
@@ -865,11 +907,23 @@ A value space to assign for the specified variable set.}
 
 \item{\code{var_set_value_space_dt_subset}}{\emph{\strong{Description}}
 
-Take a subset of a value space dt for a variable set and set that as the value space.
+Take a subset of a value space dt for a variable set and set that as the
+value space. Performs the following steps:
+\itemize{
+\item Create new temporary environment \code{eval_env} as child of \code{enclos}.
+Assign the \code{data.table} object of the \code{value_space} into
+\code{eval_env[["dt"]]}.
+\item Collect \code{expr} using \code{substitute}.
+\item Call \code{expr <- eval(expr, envir = eval_env[["dt"]], enclos = eval_env)}
+up to 10 times until result is not \code{name} or \code{call} object.
+\item Raise an error if result of \code{expr} is not \code{logical} or \code{integer}.
+\item Use result to subset \code{eval_env[["dt"]]}.
+\item Set result as the new \code{value_space}.
+}
 
 \emph{\strong{Usage}}
 
-\code{vm@var_set_value_space_dt_subset(id, expr)}
+\code{vm@var_set_value_space_dt_subset(id, expr, enclos)}
 
 \emph{\strong{Arguments}}
 
@@ -878,10 +932,58 @@ Take a subset of a value space dt for a variable set and set that as the value s
 ID, or "name", of a variable set. The class of \code{id} is defined when you
 create the \code{VariableMetadata} object and it can be pretty much anything.
 
-\strong{\code{expr}} \verb{[any]} (no default)
+\strong{\code{expr}} \verb{[name, call integer, logical]} (no default)
 
 Expression to subset a \code{data.table} object. Available columns depends on
-context.}
+context. Must be or evaluate to \code{integer} or \code{logical}.
+
+\strong{\code{enclos}} \verb{[NULL, environment]} (default \code{NULL})
+
+Evaluation environment of \code{expr} will be a child of \code{enclos}.
+\itemize{
+\item \code{NULL}: Use environment where \code{vm@var_set_value_space_dt_subset} was
+called.
+\item \code{environment}: Use this environment.
+}
+
+\emph{\strong{Examples}}
+
+\if{html}{\out{<div class="sourceCode">}}\preformatted{vm <- vame::VariableMetadata(
+  var_dt = data.table::data.table(var_nm = c("a", "b")),
+  var_set_dt = data.table::data.table(
+    id = c("set_a", "set_b"),
+    var_nm_set = list("a", "b"),
+    value_space = list(
+      set_a = list(dt = data.table::data.table(a = 1:5)),
+      set_b = list(dt = data.table::data.table(b = 4:7))
+    )
+  )
+)
+allowed_set_a <- 1:3
+vm@var_set_value_space_dt_subset(
+  id = "set_a",
+  expr = a \%in\% allowed_set_a
+)
+allowed_set_b <- 4:5
+vm@var_set_value_space_dt_subset(
+  id = "set_b",
+  expr = dt$b \%in\% allowed_set_b
+)
+vm@var_set_value_space_dt_subset(
+  id = "set_b",
+  expr = quote(b \%in\% allowed_set_b)
+)
+stopifnot(
+  identical(
+    vm@var_set_value_space_get(id = "set_a")[["dt"]][["a"]],
+    allowed_set_a
+  ),
+  identical(
+    vm@var_set_value_space_get(id = "set_b")[["dt"]][["b"]],
+    allowed_set_b
+  )
+)
+}\if{html}{\out{</div>}}}
 
 \item{\code{var_set_value_space_sampler_get}}{\emph{\strong{Description}}
 
@@ -2680,6 +2782,12 @@ The following functions are part of this feature:
 }
 }
 
+\section{News for version 1.11.0}{
+
+
+\code{vm@var_set_value_space_dt_subset} gains arg \code{enclos}.
+}
+
 \section{News for version 1.10.4}{
 
 
@@ -3271,23 +3379,22 @@ stopifnot(
   identical(vm@var_set_meta_get(id = "set_a", meta_nm = "my_int_meta"), 2L),
   identical(vm@var_set_meta_get(id = "set_a", meta_nm = "my_new_int_meta"), 10L)
 )
-vm <- vame::VariableMetadata(
-  var_dt = data.table::data.table(
-    var_nm = "a"
-  ),
-  var_set_dt = data.table::data.table(
-    id = "A",
-    var_nm_set = list("a")
-  )
-)
+
 a_value_space <- list(set = 1:3)
 vm@var_set_meta_set(
-  id = "A",
+  id = "set_a",
   meta_nm = "value_space",
   value = a_value_space
 )
+b_value_space <- list(dt = data.table::data.table(b = 1:3))
+vm@var_set_meta_set(
+  id = "set_b",
+  meta_nm = "value_space",
+  value = b_value_space
+)
 stopifnot(
-  identical(vm@var_set_value_space_get(id = "A"), a_value_space)
+  identical(vm@var_set_value_space_get(id = "set_a"), a_value_space),
+  identical(vm@var_set_value_space_get(id = "set_b"), b_value_space)
 )
 vm <- vame::VariableMetadata(
   var_dt = data.table::data.table(
@@ -3312,6 +3419,38 @@ stopifnot(
   identical(
     vm@var_set_meta_get_all(meta_nm = "my_list_meta"),
     list(set_a = NULL, set_b = 1:3)
+  )
+)
+vm <- vame::VariableMetadata(
+  var_dt = data.table::data.table(var_nm = c("a", "b")),
+  var_set_dt = data.table::data.table(
+    id = c("set_a", "set_b"),
+    var_nm_set = list("a", "b")
+  )
+)
+vm@var_set_rename(old_ids = "set_a", new_ids = "set_A")
+stopifnot(
+  identical(
+    vm@var_set_meta_get_all(meta_nm = "id"),
+    c("set_A" = "set_A", "set_b" = "set_b")
+  )
+)
+vm <- vame::VariableMetadata(
+  var_dt = data.table::data.table(var_nm = c("a", "b")),
+  var_set_dt = data.table::data.table(
+    id = c("set_a", "set_b"),
+    var_nm_set = list("a", "b")
+  )
+)
+vm@var_set_remove(id = "set_a")
+stopifnot(
+  identical(
+    vm@var_set_meta_get_all(meta_nm = "id"),
+    c("set_b" = "set_b")
+  ),
+  identical(
+    vm@var_meta_get_all(meta_nm = "var_nm"),
+    c("b" = "b")
   )
 )
 # Example of make feature
@@ -3611,6 +3750,41 @@ stopifnot(all.equal(
   list(dt = data.table::data.table(a = 1:3)),
   check.attributes = FALSE
 ))
+vm <- vame::VariableMetadata(
+  var_dt = data.table::data.table(var_nm = c("a", "b")),
+  var_set_dt = data.table::data.table(
+    id = c("set_a", "set_b"),
+    var_nm_set = list("a", "b"),
+    value_space = list(
+      set_a = list(dt = data.table::data.table(a = 1:5)),
+      set_b = list(dt = data.table::data.table(b = 4:7))
+    )
+  )
+)
+allowed_set_a <- 1:3
+vm@var_set_value_space_dt_subset(
+  id = "set_a",
+  expr = a \%in\% allowed_set_a
+)
+allowed_set_b <- 4:5
+vm@var_set_value_space_dt_subset(
+  id = "set_b",
+  expr = dt$b \%in\% allowed_set_b
+)
+vm@var_set_value_space_dt_subset(
+  id = "set_b",
+  expr = quote(b \%in\% allowed_set_b)
+)
+stopifnot(
+  identical(
+    vm@var_set_value_space_get(id = "set_a")[["dt"]][["a"]],
+    allowed_set_a
+  ),
+  identical(
+    vm@var_set_value_space_get(id = "set_b")[["dt"]][["b"]],
+    allowed_set_b
+  )
+)
 # random sampling
 c_lo <- as.Date("2001-01-01")
 c_hi <- as.Date("2020-12-31")

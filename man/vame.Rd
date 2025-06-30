@@ -340,6 +340,14 @@ stopifnot(
 
 \section{News}{
 
+\subsection{News for version 1.11.0}{
+\subsection{vm@var_set_value_space_dt_subset}{
+
+\code{vm@var_set_value_space_dt_subset} gains arg \code{enclos}.
+}
+
+}
+
 \subsection{News for version 1.10.4}{
 \subsection{vame::print_VariableMetadata}{
 
