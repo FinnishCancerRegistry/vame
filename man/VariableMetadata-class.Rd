@@ -713,7 +713,7 @@ columns \code{id}, \code{var_nms}, and \code{dep_var_nm_set} in the order of exe
 
 \emph{\strong{Usage}}
 
-\code{vm@vame_make(data, ids, var_nms, env, optional_steps, callbacks)}
+\code{vm@vame_make(data, ids, var_nms, env, optional_steps)}
 
 \emph{\strong{Arguments}}
 
@@ -750,13 +750,6 @@ Environment where a value space will be evaluated, if applicable.
 }
 
 \strong{\code{optional_steps}} \verb{[NULL, list]} (default \code{NULL})
-\itemize{
-\item \code{NULL}: Function is called normally.
-\item \code{list}: These functions are called during the run. See \strong{Description} /
-\strong{Details}.
-}
-
-\strong{\code{callbacks}} \verb{[NULL, list]} (default \code{NULL})
 \itemize{
 \item \code{NULL}: Function is called normally.
 \item \code{list}: These functions are called during the run. See \strong{Description} /
@@ -2785,6 +2778,10 @@ The following functions are part of this feature:
 \section{News for version 1.11.0}{
 
 
+\code{vm@vame_make} arg \code{callbacks} removed. Use \code{optional_steps}.
+You will have to rebuild your \code{VariableMetadata} object to make
+\code{vm@vame_make} work after this update.
+
 \code{vm@var_set_value_space_dt_subset} gains arg \code{enclos}.
 }
 
@@ -2849,12 +2846,6 @@ Fixed a bug which sometimes caused an issue with refreshing
 Fixed a bug which sometimes caused an issue with \code{vm@vame_union_append}:
 \code{var_dt$var_set_dt_pos_set} could be created as an \code{integer}
 column instead of the intended \code{list} column.
-}
-
-\section{News for version 1.9.1}{
-
-
-Improved \code{callbacks} deprecation message.
 }
 
 \section{News for version 1.9.0}{

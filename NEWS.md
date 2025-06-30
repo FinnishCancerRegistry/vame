@@ -2,6 +2,12 @@
 
 ## News for version 1.11.0
 
+### vm@vame_make
+
+`vm@vame_make` arg `callbacks` removed. Use `optional_steps`.
+You will have to rebuild your `VariableMetadata` object to make
+`vm@vame_make` work after this update.
+
 ### vm@var_set_value_space_dt_subset
 
 `vm@var_set_value_space_dt_subset` gains arg `enclos`.
@@ -88,13 +94,6 @@ Fixed a bug which sometimes caused an issue with refreshing
 Fixed a bug which sometimes caused an issue with `vm@vame_union_append`:
 `var_dt$var_set_dt_pos_set` could be created as an `integer`
 column instead of the intended `list` column.
-
-
-## News for version 1.9.1
-
-### vm@vame_make
-
-Improved `callbacks` deprecation message.
 
 
 ## News for version 1.9.0

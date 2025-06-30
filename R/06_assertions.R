@@ -942,36 +942,6 @@ assert_meta <- function(
   }
 }
 
-deprecate_arg_callbacks <- function(callbacks) {
-  pkg_v <- utils::packageVersion("vame")
-  if (is.null(callbacks)) {
-    return(callbacks)
-  }
-  # @codedoc_comment_block news("vm@vame_make", "2025-04-02", "1.9.1")
-  # Improved `callbacks` deprecation message.
-  # @codedoc_comment_block news("vm@vame_make", "2025-04-02", "1.9.1")
-  if (pkg_v < "1.10.0") {
-    warning("vm@vame_make: ",
-            "Use argument `optional_steps` instead of `callbacks`. ",
-            "Using `callbacks` will raise an error starting in 1.10.0 and ",
-            "it will be removed in version 1.11.0.")
-  } else if (pkg_v < "1.11.0") {
-    stop("vm@vame_make: ",
-         "Use argument `optional_steps` instead of `callbacks`. ",
-         "Using `callbacks` raises an error since 1.10.0 and ",
-         "it will be removed in version 1.11.0.")
-  } else {
-    stop("vm@vame_make: ",
-         "`callbacks` should already have been removed from use. Complain ",
-         "to the maintainer of package `vame` if you see this.")
-  }
-  return(callbacks)
-}
-if (utils::packageVersion("vame") >= "1.10.0") {
-  warning("Hi developer, remember, `vm@vame_make::callbacks` must be removed ",
-          "in 1.11.0")
-}
-
 assert_is_arg_optional_steps <- function(
   x,
   x_nm = NULL,
@@ -986,13 +956,6 @@ assert_is_arg_optional_steps <- function(
   # - `list`: These functions are called during the run. See **Description** /
   #   **Details**.
   # @codedoc_comment_block doc_slot_fun_arg(optional_steps)
-  # @codedoc_comment_block doc_slot_fun_arg(callbacks)
-  # **`callbacks`** `[NULL, list]` (default `NULL`)
-  #
-  # - `NULL`: Function is called normally.
-  # - `list`: These functions are called during the run. See **Description** /
-  #   **Details**.
-  # @codedoc_comment_block doc_slot_fun_arg(callbacks)
   dbc::assert_has_one_of_classes(
     x = x,
     x_nm = x_nm,
