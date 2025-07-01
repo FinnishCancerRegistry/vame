@@ -2369,6 +2369,35 @@ var_assert <- function(
   # @codedoc_comment_block vm@var_assert
   # Assert that values in `x` are proper values of `var_nm`.
   # @codedoc_comment_block vm@var_assert
+  # @codedoc_comment_block function_example(vm@var_assert)
+  # # vm@var_assert
+  # vm <- vame::VariableMetadata(
+  #   var_dt = data.table::data.table(
+  #     var_nm = c("a", "b")
+  #   ),
+  #   var_set_dt = data.table::data.table(
+  #     id = c("ab"),
+  #     var_nm_set = list(c("a", "b")),
+  #     value_space = list(ab = list(dt = data.table::data.table(
+  #       a = 1:3,
+  #       b = 3:1
+  #     )))
+  #   )
+  # )
+  # vm@var_assert(x = 1:2, var_nm = "a")
+  # vm@var_assert(x = 1:2, var_nm = "b")
+  # stopifnot(
+  #   inherits(tryCatch(
+  #     vm@var_assert(x = 4L, var_nm = "a"), error = function(e) e
+  #   ), "error"),
+  #   inherits(tryCatch(
+  #     vm@var_assert(x = 4L, var_nm = "b"), error = function(e) e
+  #   ), "error"),
+  #   inherits(tryCatch(
+  #     vm@var_assert(x = "1", var_nm = "b"), error = function(e) e
+  #   ), "error")
+  # )
+  # @codedoc_comment_block function_example(vm@var_assert)
   # @codedoc_comment_block feature_funs(assertions)
   # - `vm@var_assert`
   # @codedoc_comment_block feature_funs(assertions)

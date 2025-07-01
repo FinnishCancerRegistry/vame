@@ -1385,7 +1385,38 @@ Environment where a value space will be evaluated, if applicable.
 \itemize{
 \item \code{NULL}: Use the environment where the function was called.
 \item \code{environment}: Use this environment.
-}}
+}
+
+\emph{\strong{Examples}}
+
+\if{html}{\out{<div class="sourceCode">}}\preformatted{# vm@var_assert
+vm <- vame::VariableMetadata(
+  var_dt = data.table::data.table(
+    var_nm = c("a", "b")
+  ),
+  var_set_dt = data.table::data.table(
+    id = c("ab"),
+    var_nm_set = list(c("a", "b")),
+    value_space = list(ab = list(dt = data.table::data.table(
+      a = 1:3,
+      b = 3:1
+    )))
+  )
+)
+vm@var_assert(x = 1:2, var_nm = "a")
+vm@var_assert(x = 1:2, var_nm = "b")
+stopifnot(
+  inherits(tryCatch(
+    vm@var_assert(x = 4L, var_nm = "a"), error = function(e) e
+  ), "error"),
+  inherits(tryCatch(
+    vm@var_assert(x = 4L, var_nm = "b"), error = function(e) e
+  ), "error"),
+  inherits(tryCatch(
+    vm@var_assert(x = "1", var_nm = "b"), error = function(e) e
+  ), "error")
+)
+}\if{html}{\out{</div>}}}
 
 \item{\code{var_dt_print}}{\emph{\strong{Description}}
 
@@ -4264,6 +4295,33 @@ stopifnot(all.equal(
   vm@var_value_space_eval(var_nm = "a"),
   list(dt = data.table::data.table(a = 1:4))
 ))
+# vm@var_assert
+vm <- vame::VariableMetadata(
+  var_dt = data.table::data.table(
+    var_nm = c("a", "b")
+  ),
+  var_set_dt = data.table::data.table(
+    id = c("ab"),
+    var_nm_set = list(c("a", "b")),
+    value_space = list(ab = list(dt = data.table::data.table(
+      a = 1:3,
+      b = 3:1
+    )))
+  )
+)
+vm@var_assert(x = 1:2, var_nm = "a")
+vm@var_assert(x = 1:2, var_nm = "b")
+stopifnot(
+  inherits(tryCatch(
+    vm@var_assert(x = 4L, var_nm = "a"), error = function(e) e
+  ), "error"),
+  inherits(tryCatch(
+    vm@var_assert(x = 4L, var_nm = "b"), error = function(e) e
+  ), "error"),
+  inherits(tryCatch(
+    vm@var_assert(x = "1", var_nm = "b"), error = function(e) e
+  ), "error")
+)
 vm <- vame::VariableMetadata(
   var_dt = data.table::data.table(
     var_nm = c("a", "b"),
