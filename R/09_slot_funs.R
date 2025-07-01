@@ -2217,6 +2217,28 @@ var_value_space_eval <- function(
   # - `vm@var_value_space_eval`
   # @codedoc_comment_block feature_funs(value spaces)
 
+  # @codedoc_comment_block function_example(vm@var_value_space_eval)
+  # # vm@var_value_space_eval
+  # vm <- vame::VariableMetadata(
+  #   var_dt = data.table::data.table(
+  #     var_nm = c("a", "b", "c"),
+  #     type = "categorical"
+  #   ),
+  #   var_set_dt = data.table::data.table(
+  #     id = c("a_b", "a_c"),
+  #     var_nm_set = list(c("a", "b"), c("a", "c")),
+  #     value_space = list(
+  #       a_b = list(dt = data.table::data.table(a = 1:3, b = 3:1)),
+  #       a_c = list(dt = data.table::data.table(a = 2:4, b = 4:2))
+  #     )
+  #   )
+  # )
+  # stopifnot(all.equal(
+  #   vm@var_value_space_eval(var_nm = "a"),
+  #   list(dt = data.table::data.table(a = 1:4))
+  # ))
+  # @codedoc_comment_block function_example(vm@var_value_space_eval)
+
   # @codedoc_comment_block news("vm@var_value_space_eval", "2023-07-03", "0.1.1")
   # New slot `vm@var_value_space_eval`.
   # @codedoc_comment_block news("vm@var_value_space_eval", "2023-07-03", "0.1.1")
@@ -2227,13 +2249,21 @@ var_value_space_eval <- function(
   # Name of a variable.
   # @codedoc_comment_block doc_slot_fun_arg(var_nm)
   assert_is_var_nm(vm, var_nm)
+  # @codedoc_comment_block vame::var_value_space_eval::env
+  # **`env`** `[NULL, environment]` (default `NULL`)
+  #
+  # `env` passed to `vm@var_set_value_space_eval`.
+  #
+  # - `NULL`: Use environment where this function was called.
+  # - `environment`: Use this environment.
+  # @codedoc_comment_block vame::var_value_space_eval::env
   dbc::assert_is_one_of(
     env,
     funs = list(dbc::report_is_NULL,
                 dbc::report_is_environment)
   )
   if (is.null(env)) {
-    env <- parent.frame(1L)
+    env <- parent.frame(2L)
   }
   # @codedoc_comment_block vm@var_value_space_eval
   # Get and evaluate value space for a variable.
@@ -2241,23 +2271,37 @@ var_value_space_eval <- function(
   # `var_set_dt$value_space`. If there is a single `var_set_dt$value_space`
   # for only the variable of interest, that is used. Otherwise:
   # @codedoc_comment_block vm@var_value_space_eval
-  pos_set <- var_meta_get(vm, var_nm = var_nm, meta_nm = "var_set_dt_pos_set")
   vsd <- vsd_get(vm, var_nms = c("id", "var_nm_set", "value_space"))
-  pos_set <- pos_set[
-    !vapply(vsd[["value_space"]][pos_set], is.null, logical(1L))
-  ]
-  vs_lens <- vapply(vsd[["var_nm_set"]], length, integer(1L))
-  is_singular <- vs_lens == 1
-  if (sum(is_singular) == 1) {
-    pos_set <- pos_set[is_singular]
-  }
+  id_set <- local({
+    # @codedoc_comment_block news("vm@var_value_space_eval", "2025-06-30", "1.11.0")
+    # `vm@var_value_space_eval` robustified determination of which `var_set_dt`
+    # rows to make use of. Formerly could produce a cryptical error when
+    # a joint `value_space` with another variable was included in `var_set_dt`.
+    # @codedoc_comment_block news("vm@var_value_space_eval", "2025-06-30", "1.11.0")
+    pos_set <- var_meta_get(vm, var_nm = var_nm, meta_nm = "var_set_dt_pos_set")
+    id_set <- vsd[["id"]][pos_set]
+    has_vs <- vapply(
+      id_set, var_set_meta_is_defined, logical(1L),
+      meta = "value_space",
+      vm = vm
+    )
+    is_singular_vs <- has_vs & vapply(
+      vsd[["var_nm_set"]][pos_set], length, integer(1L)
+    ) == 1
+    if (sum(is_singular_vs) == 1) {
+      id_set <- id_set[is_singular_vs]
+    } else {
+      id_set <- id_set[has_vs]
+    }
+    id_set
+  })
 
   # @codedoc_comment_block vm@var_value_space_eval
   # - Every value space for the variable is evaluated via
   #   `vm@var_set_value_space_eval`. If the exact same value space has been
   #   produced multiple times, duplicates are removed.
   # @codedoc_comment_block vm@var_value_space_eval
-  value_space <- lapply(vsd[["id"]][pos_set], function(id) {
+  value_space <- lapply(id_set, function(id) {
     var_set_value_space_eval(
       vm = vm,
       id = id,
@@ -2271,7 +2315,9 @@ var_value_space_eval <- function(
   # @codedoc_comment_block vm@var_value_space_eval
   if (length(value_space) == 1) {
     value_space <- value_space[[1]]
-  } else if (var_meta_get(vm, var_nm, "type") == "categorical") {
+  } else if (
+    identical(unname(var_meta_get(vm, var_nm, "type")), "categorical")
+  ) {
     # @codedoc_comment_block vm@var_value_space_eval
     # - If the `var_dt$type == "categorical"` for this variable, the union of
     #   all separate value spaces is formed and that will be returned.
@@ -4135,6 +4181,57 @@ vame_category_space_dt <- function(
   # @codedoc_comment_block vm@vame_category_space_dt
   # Get a category space `data.table`.
   # @codedoc_comment_block vm@vame_category_space_dt
+
+  # @codedoc_comment_block function_example(vm@vame_category_space_dt)
+  # vm <- vame::VariableMetadata(
+  #   var_dt = data.table::data.table(
+  #     var_nm = c("a1", "a2", "b")
+  #   ),
+  #   var_set_dt = data.table::data.table(
+  #     id = c("a", "b"),
+  #     var_nm_set = list(c("a1", "a2"), "b"),
+  #     value_space = list(
+  #       a = list(dt = data.table::data.table(
+  #         a1 = c(10L, 10L, 20L, 20L),
+  #         a2 = c(11L, 12L, 21L, 22L)
+  #       )),
+  #       b = list(set = 1:3)
+  #     )
+  #   )
+  # )
+  # stopifnot(
+  #   all.equal(
+  #     vm@vame_category_space_dt(var_nms = "a1"),
+  #     data.table::data.table(a1 = c(10L, 20L))
+  #   ),
+  #   all.equal(
+  #     vm@vame_category_space_dt(var_nms = "a2"),
+  #     data.table::data.table(a2 = c(11L, 12L, 21L, 22L))
+  #   ),
+  #   all.equal(
+  #     vm@vame_category_space_dt(var_nms = c("a1", "a2")),
+  #     data.table::data.table(
+  #       a1 = c(10L, 10L, 20L, 20L),
+  #       a2 = c(11L, 12L, 21L, 22L)
+  #     )
+  #   ),
+  #   all.equal(
+  #     vm@vame_category_space_dt(var_nms = c("a1", "b")),
+  #     data.table::data.table(
+  #       a1 = c(10L, 10L, 10L, 20L, 20L, 20L),
+  #       b = c(1:3, 1:3)
+  #     )
+  #   ),
+  #   all.equal(
+  #     vm@vame_category_space_dt(var_nms = c("a1", "a2", "b")),
+  #     data.table::data.table(
+  #       a1 = rep(c(10L, 10L, 20L, 20L), each = 3L),
+  #       a2 = rep(c(11L, 12L, 21L, 22L), each = 3L),
+  #       b = rep(1:3, times = 4L)
+  #     )
+  #   )
+  # )
+  # @codedoc_comment_block function_example(vm@vame_category_space_dt)
 
   # @codedoc_comment_block feature(category spaces)
   # The category spaces feature becomes available when the value spaces feature

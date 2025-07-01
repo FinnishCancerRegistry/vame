@@ -17,6 +17,12 @@ You will have to rebuild your `VariableMetadata` object to make
 
 `vm@var_set_value_space_dt_subset` gains arg `enclos`.
 
+### vm@var_value_space_eval
+
+`vm@var_value_space_eval` robustified determination of which `var_set_dt`
+rows to make use of. Formerly could produce a cryptical error when
+a joint `value_space` with another variable was included in `var_set_dt`.
+
 
 ## News for version 1.10.4
 

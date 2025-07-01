@@ -359,6 +359,13 @@ You will have to rebuild your \code{VariableMetadata} object to make
 \code{vm@var_set_value_space_dt_subset} gains arg \code{enclos}.
 }
 
+\subsection{vm@var_value_space_eval}{
+
+\code{vm@var_value_space_eval} robustified determination of which \code{var_set_dt}
+rows to make use of. Formerly could produce a cryptical error when
+a joint \code{value_space} with another variable was included in \code{var_set_dt}.
+}
+
 }
 
 \subsection{News for version 1.10.4}{

@@ -1320,11 +1320,34 @@ Name of a variable.
 
 \strong{\code{env}} \verb{[NULL, environment]} (default \code{NULL})
 
-Environment where a value space will be evaluated, if applicable.
+\code{env} passed to \code{vm@var_set_value_space_eval}.
 \itemize{
-\item \code{NULL}: Use the environment where the function was called.
+\item \code{NULL}: Use environment where this function was called.
 \item \code{environment}: Use this environment.
-}}
+}
+
+\emph{\strong{Examples}}
+
+\if{html}{\out{<div class="sourceCode">}}\preformatted{# vm@var_value_space_eval
+vm <- vame::VariableMetadata(
+  var_dt = data.table::data.table(
+    var_nm = c("a", "b", "c"),
+    type = "categorical"
+  ),
+  var_set_dt = data.table::data.table(
+    id = c("a_b", "a_c"),
+    var_nm_set = list(c("a", "b"), c("a", "c")),
+    value_space = list(
+      a_b = list(dt = data.table::data.table(a = 1:3, b = 3:1)),
+      a_c = list(dt = data.table::data.table(a = 2:4, b = 4:2))
+    )
+  )
+)
+stopifnot(all.equal(
+  vm@var_value_space_eval(var_nm = "a"),
+  list(dt = data.table::data.table(a = 1:4))
+))
+}\if{html}{\out{</div>}}}
 
 \item{\code{var_assert}}{\emph{\strong{Description}}
 
@@ -2415,7 +2438,59 @@ Environment where a value space will be evaluated, if applicable.
 \itemize{
 \item \code{NULL}: Use the environment where the function was called.
 \item \code{environment}: Use this environment.
-}}
+}
+
+\emph{\strong{Examples}}
+
+\if{html}{\out{<div class="sourceCode">}}\preformatted{vm <- vame::VariableMetadata(
+  var_dt = data.table::data.table(
+    var_nm = c("a1", "a2", "b")
+  ),
+  var_set_dt = data.table::data.table(
+    id = c("a", "b"),
+    var_nm_set = list(c("a1", "a2"), "b"),
+    value_space = list(
+      a = list(dt = data.table::data.table(
+        a1 = c(10L, 10L, 20L, 20L),
+        a2 = c(11L, 12L, 21L, 22L)
+      )),
+      b = list(set = 1:3)
+    )
+  )
+)
+stopifnot(
+  all.equal(
+    vm@vame_category_space_dt(var_nms = "a1"),
+    data.table::data.table(a1 = c(10L, 20L))
+  ),
+  all.equal(
+    vm@vame_category_space_dt(var_nms = "a2"),
+    data.table::data.table(a2 = c(11L, 12L, 21L, 22L))
+  ),
+  all.equal(
+    vm@vame_category_space_dt(var_nms = c("a1", "a2")),
+    data.table::data.table(
+      a1 = c(10L, 10L, 20L, 20L),
+      a2 = c(11L, 12L, 21L, 22L)
+    )
+  ),
+  all.equal(
+    vm@vame_category_space_dt(var_nms = c("a1", "b")),
+    data.table::data.table(
+      a1 = c(10L, 10L, 10L, 20L, 20L, 20L),
+      b = c(1:3, 1:3)
+    )
+  ),
+  all.equal(
+    vm@vame_category_space_dt(var_nms = c("a1", "a2", "b")),
+    data.table::data.table(
+      a1 = rep(c(10L, 10L, 20L, 20L), each = 3L),
+      a2 = rep(c(11L, 12L, 21L, 22L), each = 3L),
+      b = rep(1:3, times = 4L)
+    )
+  )
+)
+}\if{html}{\out{</div>}}}
 }}
 
 \section{Features}{
@@ -2892,6 +2967,10 @@ You will have to rebuild your \code{VariableMetadata} object to make
 \code{vm@vame_make} work after this update.
 
 \code{vm@var_set_value_space_dt_subset} gains arg \code{enclos}.
+
+\code{vm@var_value_space_eval} robustified determination of which \code{var_set_dt}
+rows to make use of. Formerly could produce a cryptical error when
+a joint \code{value_space} with another variable was included in \code{var_set_dt}.
 }
 
 \section{News for version 1.10.4}{
@@ -4166,6 +4245,25 @@ stopifnot(
   vm@var_is_aggregateable_to(from_var_nm = "a2", to_var_nm = "a1"),
   !vm@var_is_aggregateable_to(from_var_nm = "a1", to_var_nm = "a2")
 )
+# vm@var_value_space_eval
+vm <- vame::VariableMetadata(
+  var_dt = data.table::data.table(
+    var_nm = c("a", "b", "c"),
+    type = "categorical"
+  ),
+  var_set_dt = data.table::data.table(
+    id = c("a_b", "a_c"),
+    var_nm_set = list(c("a", "b"), c("a", "c")),
+    value_space = list(
+      a_b = list(dt = data.table::data.table(a = 1:3, b = 3:1)),
+      a_c = list(dt = data.table::data.table(a = 2:4, b = 4:2))
+    )
+  )
+)
+stopifnot(all.equal(
+  vm@var_value_space_eval(var_nm = "a"),
+  list(dt = data.table::data.table(a = 1:4))
+))
 vm <- vame::VariableMetadata(
   var_dt = data.table::data.table(
     var_nm = c("a", "b"),
@@ -4459,6 +4557,54 @@ vm_1@vame_union_append(vm_2)
 stopifnot(
   vm_1@var_meta_get(var_nm = "b", meta_nm = "my_meta") == "vm_1_b",
   vm_1@var_meta_get(var_nm = "c", meta_nm = "my_meta") == "vm_2_c"
+)
+vm <- vame::VariableMetadata(
+  var_dt = data.table::data.table(
+    var_nm = c("a1", "a2", "b")
+  ),
+  var_set_dt = data.table::data.table(
+    id = c("a", "b"),
+    var_nm_set = list(c("a1", "a2"), "b"),
+    value_space = list(
+      a = list(dt = data.table::data.table(
+        a1 = c(10L, 10L, 20L, 20L),
+        a2 = c(11L, 12L, 21L, 22L)
+      )),
+      b = list(set = 1:3)
+    )
+  )
+)
+stopifnot(
+  all.equal(
+    vm@vame_category_space_dt(var_nms = "a1"),
+    data.table::data.table(a1 = c(10L, 20L))
+  ),
+  all.equal(
+    vm@vame_category_space_dt(var_nms = "a2"),
+    data.table::data.table(a2 = c(11L, 12L, 21L, 22L))
+  ),
+  all.equal(
+    vm@vame_category_space_dt(var_nms = c("a1", "a2")),
+    data.table::data.table(
+      a1 = c(10L, 10L, 20L, 20L),
+      a2 = c(11L, 12L, 21L, 22L)
+    )
+  ),
+  all.equal(
+    vm@vame_category_space_dt(var_nms = c("a1", "b")),
+    data.table::data.table(
+      a1 = c(10L, 10L, 10L, 20L, 20L, 20L),
+      b = c(1:3, 1:3)
+    )
+  ),
+  all.equal(
+    vm@vame_category_space_dt(var_nms = c("a1", "a2", "b")),
+    data.table::data.table(
+      a1 = rep(c(10L, 10L, 20L, 20L), each = 3L),
+      a2 = rep(c(11L, 12L, 21L, 22L), each = 3L),
+      b = rep(1:3, times = 4L)
+    )
+  )
 )
 vm <- vame::VariableMetadata(
   var_dt = data.table::data.table(
