@@ -366,6 +366,11 @@ rows to make use of. Formerly could produce a cryptical error when
 a joint \code{value_space} with another variable was included in \code{var_set_dt}.
 }
 
+\subsection{vm@var_value_space_sample}{
+
+\code{vm@var_value_space_sample} gains argument \code{data}.
+}
+
 }
 
 \subsection{News for version 1.10.4}{

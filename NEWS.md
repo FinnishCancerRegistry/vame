@@ -23,6 +23,10 @@ You will have to rebuild your `VariableMetadata` object to make
 rows to make use of. Formerly could produce a cryptical error when
 a joint `value_space` with another variable was included in `var_set_dt`.
 
+### vm@var_value_space_sample
+
+`vm@var_value_space_sample` gains argument `data`.
+
 
 ## News for version 1.10.4
 

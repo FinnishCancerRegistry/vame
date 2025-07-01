@@ -1968,13 +1968,34 @@ sample for only one variable.
 
 \emph{\strong{Usage}}
 
-\code{vm@var_value_space_sample(var_nm, env, n)}
+\code{vm@var_value_space_sample(var_nm, n, data, env)}
 
 \emph{\strong{Arguments}}
 
 \strong{\code{var_nm}} \verb{[character]} (no default)
 
 Name of a variable.
+
+\strong{\code{n}} \verb{[integer]} (default \code{1L})
+
+Number of random samples to take.
+
+\strong{\code{data}} \verb{[NULL, data.frame, data.table, list]} (default \code{NULL})
+\itemize{
+\item \code{NULL}: No data is used.
+\item \code{data.frame}/\code{data.table}: These variables are used as-is.
+\item \code{list}: Must by fully named. \code{list} elements are used as variables
+as-is, except the optional element \code{data$df} ---
+a \code{data.frame}/\code{data.table} --- is first turned into a \code{list},
+and \code{data} (without \code{data$df}) and \code{data$df} are combined into one longer
+\code{list}. This allows you to easily pass a \code{data.frame}/\code{data.table} and
+necessary accompanying variables for settings etc.
+E.g.
+\code{data = list(df = data.frame(my_col_1 = 1, my_col_2 = 2), my_custom_setting = "something")}.
+Of course you can also pass
+\code{data = list(my_col_1 = 1, my_col_2 = 2, my_custom_setting = "something")}
+directly if that is more convenient.
+}
 
 \strong{\code{env}} \verb{[NULL, environment]} (default \code{NULL})
 
@@ -1984,9 +2005,29 @@ Environment where a value space will be evaluated, if applicable.
 \item \code{environment}: Use this environment.
 }
 
-\strong{\code{n}} \verb{[integer]} (default \code{1L})
+\emph{\strong{Examples}}
 
-Number of random samples to take.}
+\if{html}{\out{<div class="sourceCode">}}\preformatted{vm <- vame::VariableMetadata(
+  var_dt = data.table::data.table(
+    var_nm = c("a")
+  ),
+  var_set_dt = data.table::data.table(
+    id = "a",
+    var_nm_set = list("a"),
+    sampler = list(a = quote(\{
+      data.table::data.table(
+        a = sample(1:3, size = n, replace = TRUE)
+      )[]
+    \}))
+  )
+)
+obs <- vm@var_value_space_sample(var_nm = "a", n = 10L)
+stopifnot(
+  is.integer(obs),
+  length(obs) == 10L,
+  obs \%in\% 1:3
+)
+}\if{html}{\out{</div>}}}
 
 \item{\code{var_var_set_dt_pos_set_get}}{\emph{\strong{Description}}
 
@@ -3178,6 +3219,8 @@ You will have to rebuild your \code{VariableMetadata} object to make
 \code{vm@var_value_space_eval} robustified determination of which \code{var_set_dt}
 rows to make use of. Formerly could produce a cryptical error when
 a joint \code{value_space} with another variable was included in \code{var_set_dt}.
+
+\code{vm@var_value_space_sample} gains argument \code{data}.
 }
 
 \section{News for version 1.10.4}{
@@ -4748,6 +4791,26 @@ stopifnot(
     ),
     "Syntymapaivamaara."
   )
+)
+vm <- vame::VariableMetadata(
+  var_dt = data.table::data.table(
+    var_nm = c("a")
+  ),
+  var_set_dt = data.table::data.table(
+    id = "a",
+    var_nm_set = list("a"),
+    sampler = list(a = quote({
+      data.table::data.table(
+        a = sample(1:3, size = n, replace = TRUE)
+      )[]
+    }))
+  )
+)
+obs <- vm@var_value_space_sample(var_nm = "a", n = 10L)
+stopifnot(
+  is.integer(obs),
+  length(obs) == 10L,
+  obs \%in\% 1:3
 )
 # vm@vame_harmonise_dt
 vm <- vame::VariableMetadata(

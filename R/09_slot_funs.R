@@ -3310,8 +3310,9 @@ var_description_get <- function(
 var_value_space_sample <- function(
   vm,
   var_nm,
-  env = NULL,
-  n = 1L
+  n = 1L,
+  data = NULL,
+  env = NULL
 ) {
   # @codedoc_comment_block vm@var_value_space_sample
   # Wrapper for `vm@var_set_value_space_sample` for when you want a random
@@ -3325,11 +3326,40 @@ var_value_space_sample <- function(
   # @codedoc_comment_block feature_funs(random sampling)
   # - `vm@var_value_space_sample`
   # @codedoc_comment_block feature_funs(random sampling)
-  id <- var_to_var_set_id(vm = vm, var_nm = var_nm)
+
+  # @codedoc_comment_block function_example(vm@var_value_space_sample)
+  # vm <- vame::VariableMetadata(
+  #   var_dt = data.table::data.table(
+  #     var_nm = c("a")
+  #   ),
+  #   var_set_dt = data.table::data.table(
+  #     id = "a",
+  #     var_nm_set = list("a"),
+  #     sampler = list(a = quote({
+  #       data.table::data.table(
+  #         a = sample(1:3, size = n, replace = TRUE)
+  #       )[]
+  #     }))
+  #   )
+  # )
+  # obs <- vm@var_value_space_sample(var_nm = "a", n = 10L)
+  # stopifnot(
+  #   is.integer(obs),
+  #   length(obs) == 10L,
+  #   obs %in% 1:3
+  # )
+  # @codedoc_comment_block function_example(vm@var_value_space_sample)
+
+  # @codedoc_comment_block news("vm@var_value_space_sample", "2025-07-01", "1.11.0")
+  # `vm@var_value_space_sample` gains argument `data`.
+  # @codedoc_comment_block news("vm@var_value_space_sample", "2025-07-01", "1.11.0")
   out <- var_set_value_space_sample(
     vm = vm,
-    id = id,
-    n = n
+    id = NULL,
+    var_nms = var_nm,
+    n = n,
+    data = data,
+    env = env
   )
   if (inherits(out, "data.table")) {
     out <- out[[var_nm]]
