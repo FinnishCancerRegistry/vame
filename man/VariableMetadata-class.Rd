@@ -1507,7 +1507,26 @@ Name of a variable.
 \strong{\code{meta_nm}} \verb{[character]} (no default)
 
 Name of a metadata column in \code{var_set_dt} or \code{var_dt} (depending on context)
-of a \code{VariableMetadata} object.}
+of a \code{VariableMetadata} object.
+
+\emph{\strong{Examples}}
+
+\if{html}{\out{<div class="sourceCode">}}\preformatted{# vm@var_meta_set
+vm <- vame::VariableMetadata(
+  var_dt = data.table::data.table(
+    var_nm = "a",
+    my_meta = 1L
+  ),
+  var_set_dt = data.table::data.table(
+    id = "A",
+    var_nm_set = list("a")
+  )
+)
+stopifnot(identical(
+  vm@var_meta_get(var_nm = "a", meta_nm = "my_meta"),
+  1L
+))
+}\if{html}{\out{</div>}}}
 
 \item{\code{var_meta_set}}{\emph{\strong{Description}}
 
@@ -4341,6 +4360,21 @@ stopifnot(
   identical(vm@var_meta_is_defined(var_nm = "a", meta_nm = "my_list_meta"), FALSE),
   identical(vm@var_meta_is_defined(var_nm = "b", meta_nm = "my_list_meta"), TRUE)
 )
+# vm@var_meta_set
+vm <- vame::VariableMetadata(
+  var_dt = data.table::data.table(
+    var_nm = "a",
+    my_meta = 1L
+  ),
+  var_set_dt = data.table::data.table(
+    id = "A",
+    var_nm_set = list("a")
+  )
+)
+stopifnot(identical(
+  vm@var_meta_get(var_nm = "a", meta_nm = "my_meta"),
+  1L
+))
 # vm@var_meta_set
 vm <- vame::VariableMetadata(
   var_dt = data.table::data.table(

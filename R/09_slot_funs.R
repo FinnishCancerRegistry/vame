@@ -2573,6 +2573,23 @@ var_meta_get <- function(
   # @codedoc_comment_block vm@var_meta_get
   # Get metadata for a variable.
   # @codedoc_comment_block vm@var_meta_get
+  # @codedoc_comment_block function_example(vm@var_meta_get)
+  # # vm@var_meta_set
+  # vm <- vame::VariableMetadata(
+  #   var_dt = data.table::data.table(
+  #     var_nm = "a",
+  #     my_meta = 1L
+  #   ),
+  #   var_set_dt = data.table::data.table(
+  #     id = "A",
+  #     var_nm_set = list("a")
+  #   )
+  # )
+  # stopifnot(identical(
+  #   vm@var_meta_get(var_nm = "a", meta_nm = "my_meta"),
+  #   1L
+  # ))
+  # @codedoc_comment_block function_example(vm@var_meta_get)
   assert_is_var_nm(vm, var_nm)
   assert_is_var_meta_nm(vm, meta_nm)
   vd <- vd_get(vm)
