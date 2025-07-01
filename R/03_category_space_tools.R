@@ -81,7 +81,7 @@ category_space_dt_list__ <- function(
       vm = vm,
       ids_arg_nm = "id",
       var_nms_arg_nm = "var_nms",
-      required_meta_nms = "value_space"
+      required_var_set_meta_nms = "value_space"
     )
     meta_dt <- data.table::data.table(
       id = id

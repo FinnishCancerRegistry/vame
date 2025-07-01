@@ -751,7 +751,7 @@ var_set_make <- function(
   # @codedoc_comment_block vm@var_set_make
   handle_arg_ids_et_var_nms_inplace__(
     vm = vm,
-    required_meta_nms = "maker",
+    required_var_set_meta_nms = "maker",
     ids_arg_nm = "id",
     var_nms_arg_nm = "var_nms"
   )
@@ -1045,7 +1045,7 @@ vame_make <- function(
   # @codedoc_comment_block vm@vame_make
   handle_arg_ids_et_var_nms_inplace__(
     vm = vm,
-    required_meta_nms = "maker"
+    required_var_set_meta_nms = "maker"
   )
   dbc::assert_has_one_of_classes(env, classes = c("NULL", "environment"))
   if (is.null(env)) {
@@ -1926,7 +1926,7 @@ var_set_value_space_sample <- function(
   # one `id` which has either `sampler` or `value_space`.
   # @codedoc_comment_block news("vm@var_set_value_space_sample", "2024-10-14", "1.3.1")
   handle_arg_ids_et_var_nms_inplace__(
-    required_meta_nms = c("sampler", "value_space"),
+    required_var_set_meta_nms = c("sampler", "value_space"),
     require_meta_style = "or",
     ids_arg_nm = "id",
     var_nms_arg_nm = "var_nms",
@@ -4134,7 +4134,7 @@ vame_value_space_sample <- function(
   # @codedoc_comment_block news("vm@vame_value_space_sample", "2024-10-14", "1.3.1")
   handle_arg_ids_et_var_nms_inplace__(
     vm,
-    required_meta_nms = c("sampler", "value_space"),
+    required_var_set_meta_nms = c("sampler", "value_space"),
     require_meta_style = "or"
   )
   dbc::assert_has_one_of_classes(
@@ -4226,7 +4226,7 @@ vame_value_space_sample_default <- function(
   # @codedoc_comment_block news("vm@vame_value_space_sample_default", "2024-10-14", "1.3.1")
   handle_arg_ids_et_var_nms_inplace__(
     vm = vm,
-    required_meta_nms = c("sampler", "value_space"),
+    required_var_set_meta_nms = c("sampler", "value_space"),
     require_meta_style = "or"
   )
   data <- handle_arg_data__(data)

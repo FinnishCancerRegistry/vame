@@ -145,7 +145,7 @@ handle_arg_ids_et_var_nms_inplace__ <- function(
   vm,
   ids_arg_nm = "ids",
   var_nms_arg_nm = "var_nms",
-  required_meta_nms = NULL,
+  required_var_set_meta_nms = NULL,
   require_meta_style = "and",
   n_max_ids = NULL
 ) {
@@ -154,7 +154,7 @@ handle_arg_ids_et_var_nms_inplace__ <- function(
     quote(c(ids_arg_nm, var_nms_arg_nm) %in% ls(envir = calling_env))
   )
   dbc::assert_prod_input_has_one_of_classes(
-    required_meta_nms,
+    required_var_set_meta_nms,
     classes = c("NULL", "character")
   )
   dbc::assert_prod_input_atom_is_in_set(
@@ -198,10 +198,10 @@ handle_arg_ids_et_var_nms_inplace__ <- function(
       logical(1L)
     )
     ids <- all_ids[is_usable_id]
-    if (!is.null(required_meta_nms)) {
+    if (!is.null(required_var_set_meta_nms)) {
       found_meta_nms_by_id <- lapply(ids, function(id) {
-        required_meta_nms[vapply(
-          required_meta_nms,
+        required_var_set_meta_nms[vapply(
+          required_var_set_meta_nms,
           function(rmn) {
             var_set_meta_is_defined(vm = vm, id = id, meta_nm = rmn)
           },
@@ -223,14 +223,16 @@ handle_arg_ids_et_var_nms_inplace__ <- function(
         ), times = n_found_meta_nms_by_id)
       )
       if (require_meta_style %in% c("and", "multi_and")) {
-        good_ids <- ids[n_found_meta_nms_by_id == length(required_meta_nms)]
+        good_ids <- ids[
+          n_found_meta_nms_by_id == length(required_var_set_meta_nms)
+        ]
         dt <- dt[dt[["id"]] %in% good_ids, ]
         if (nrow(dt) == 0) {
           stop(
             "Could not determine `ids` for ",
             "`var_nms = ", deparse1(unname(var_nms)), "`: ",
             "No variable set has all required ",
-            "metadata `", deparse1(required_meta_nms), "`"
+            "metadata `", deparse1(required_var_set_meta_nms), "`"
           )
         }
       }
@@ -247,7 +249,7 @@ handle_arg_ids_et_var_nms_inplace__ <- function(
           j = "meta_preference_order",
           value = data.table::chmatch(
             dt[["meta_nm"]],
-            required_meta_nms
+            required_var_set_meta_nms
           )
         )
         data.table::setkeyv(
@@ -289,11 +291,12 @@ handle_arg_ids_et_var_nms_inplace__ <- function(
         "However, there was no applicable variable set for the ",
         "following `var_nms`: ", deparse1(miss_var_nms), "."
       )
-      if (!is.null(required_meta_nms)) {
+      if (!is.null(required_var_set_meta_nms)) {
         msg <- paste0(
           msg,
           " This problem has likely occurred because not all of the metadata `",
-          deparse1(required_meta_nms), "` was defined for the variable set(s) ",
+          deparse1(required_var_set_meta_nms),
+          "` was defined for the variable set(s) ",
           "which contain the variable names listed above."
         )
       }
