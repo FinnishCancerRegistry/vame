@@ -3124,28 +3124,8 @@ var_description_get <- function(
   descr_nm = NULL,
   describer_env = NULL
 ) {
-  # @codedoc_comment_block feature_funs(describing)
-  # - `vm@var_description_get`
-  # @codedoc_comment_block feature_funs(describing)
-  # @codedoc_comment_block news("vm@var_description_get", "2024-01-22", "0.4.0")
-  # New function `vm@var_description_get`.
-  # @codedoc_comment_block news("vm@var_description_get", "2024-01-22", "0.4.0")
-
-  # @codedoc_comment_block feature(describing)
-  # The describing feature becomes available if
-  # the `var_dt` of a `VariableMetadata` object has a `describer` column value
-  # for a variable. You can include `describer` in `var_dt` when the
-  # `VariableMetadata` object is constructed or use `vm@var_describer_set`
-  # later.
-  #
-  # @codedoc_insert_comment_block specification(var_dt$describer)
-  #
-  # The following functions are related to this feature:
-  # @codedoc_insert_comment_block feature_funs(describing)
-  # @codedoc_comment_block feature(describing)
-  # @codedoc_comment_block feature_example(describing)
-  #
-  # # Example of describing feature
+  # @codedoc_comment_block function_example(vm@var_description_get)
+  # # vm@var_description_get
   # my_vame <- vame::VariableMetadata(
   #   var_dt = data.table::data.table(
   #     var_nm = c("sex", "birth_date"),
@@ -3191,6 +3171,30 @@ var_description_get <- function(
   #     "Syntymapaivamaara."
   #   )
   # )
+  # @codedoc_comment_block function_example(vm@var_description_get)
+  # @codedoc_comment_block feature_funs(describing)
+  # - `vm@var_description_get`
+  # @codedoc_comment_block feature_funs(describing) 
+  # @codedoc_comment_block news("vm@var_description_get", "2024-01-22", "0.4.0")
+  # New function `vm@var_description_get`.
+  # @codedoc_comment_block news("vm@var_description_get", "2024-01-22", "0.4.0")
+
+  # @codedoc_comment_block feature(describing)
+  # The describing feature becomes available if
+  # the `var_dt` of a `VariableMetadata` object has a `describer` column value
+  # for a variable. You can include `describer` in `var_dt` when the
+  # `VariableMetadata` object is constructed or use `vm@var_describer_set`
+  # later.
+  #
+  # @codedoc_insert_comment_block specification(var_dt$describer)
+  #
+  # The following functions are related to this feature:
+  # @codedoc_insert_comment_block feature_funs(describing)
+  # @codedoc_comment_block feature(describing)
+  # @codedoc_comment_block feature_example(describing)
+  #
+  # # Example of describing feature
+  # @codedoc_insert_comment_block function_example(vm@var_description_get)
   # @codedoc_comment_block feature_example(describing)
   assert_is_var_nm(vm, var_nm)
   describer <- var_describer_get(vm, var_nm = var_nm)

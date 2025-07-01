@@ -1909,7 +1909,57 @@ Parent environment of evaluation environment where \code{describer} of class
 \itemize{
 \item \code{NULL}: Use the environment where this function is called.
 \item \code{environment}: Use this environment.
-}}
+}
+
+\emph{\strong{Examples}}
+
+\if{html}{\out{<div class="sourceCode">}}\preformatted{# vm@var_description_get
+my_vame <- vame::VariableMetadata(
+  var_dt = data.table::data.table(
+    var_nm = c("sex", "birth_date"),
+    describer = list(
+      sex = list(
+        en = "Sex assigned at birth.",
+        fi = "Syntymahetken sukupuoli."
+      ),
+      birth_date = quote(switch(
+        descr_nm,
+        en = "Date of birth.",
+        fi = "Syntymapaivamaara."
+      ))
+    )
+  ),
+  var_set_dt = data.table::data.table(
+    id = c("sex", "birth_date"),
+    var_nm_set = list(sex = "sex", birth_date = "birth_date")
+  )
+)
+new_descr <- list(en = c("Sex ", "at ", "birth."), fi = "Sukupuoli.")
+my_vame@var_describer_set(
+  var_nm = "sex",
+  value = new_descr
+)
+stopifnot(
+  identical(
+    my_vame@var_description_get("sex", descr_nm = "en"),
+    new_descr[["en"]]
+  ),
+  inherits(
+    tryCatch(
+      my_vame@var_description_get("birth_date"),
+      error = function(e) e
+    ),
+    "error"
+  ),
+  identical(
+    my_vame@var_description_get(
+      var_nm = "birth_date",
+      descr_nm = "fi"
+    ),
+    "Syntymapaivamaara."
+  )
+)
+}\if{html}{\out{</div>}}}
 
 \item{\code{var_value_space_sample}}{\emph{\strong{Description}}
 
@@ -4605,8 +4655,55 @@ stopifnot(
     c("A", "B")
   )
 )
+# vm@var_description_get
+my_vame <- vame::VariableMetadata(
+  var_dt = data.table::data.table(
+    var_nm = c("sex", "birth_date"),
+    describer = list(
+      sex = list(
+        en = "Sex assigned at birth.",
+        fi = "Syntymahetken sukupuoli."
+      ),
+      birth_date = quote(switch(
+        descr_nm,
+        en = "Date of birth.",
+        fi = "Syntymapaivamaara."
+      ))
+    )
+  ),
+  var_set_dt = data.table::data.table(
+    id = c("sex", "birth_date"),
+    var_nm_set = list(sex = "sex", birth_date = "birth_date")
+  )
+)
+new_descr <- list(en = c("Sex ", "at ", "birth."), fi = "Sukupuoli.")
+my_vame@var_describer_set(
+  var_nm = "sex",
+  value = new_descr
+)
+stopifnot(
+  identical(
+    my_vame@var_description_get("sex", descr_nm = "en"),
+    new_descr[["en"]]
+  ),
+  inherits(
+    tryCatch(
+      my_vame@var_description_get("birth_date"),
+      error = function(e) e
+    ),
+    "error"
+  ),
+  identical(
+    my_vame@var_description_get(
+      var_nm = "birth_date",
+      descr_nm = "fi"
+    ),
+    "Syntymapaivamaara."
+  )
+)
 
 # Example of describing feature
+# vm@var_description_get
 my_vame <- vame::VariableMetadata(
   var_dt = data.table::data.table(
     var_nm = c("sex", "birth_date"),
