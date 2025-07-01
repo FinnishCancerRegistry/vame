@@ -1603,7 +1603,26 @@ Get metadata for all variables.
 \strong{\code{meta_nm}} \verb{[character]} (no default)
 
 Name of a metadata column in \code{var_set_dt} or \code{var_dt} (depending on context)
-of a \code{VariableMetadata} object.}
+of a \code{VariableMetadata} object.
+
+\emph{\strong{Examples}}
+
+\if{html}{\out{<div class="sourceCode">}}\preformatted{# vm@var_meta_get_all
+vm <- vame::VariableMetadata(
+  var_dt = data.table::data.table(
+    var_nm = c("a", "b"),
+    my_meta = 1:2
+  ),
+  var_set_dt = data.table::data.table(
+    id = "ab",
+    var_nm_set = list(c("a", "b"))
+  )
+)
+stopifnot(identical(
+  vm@var_meta_get_all(meta_nm = "my_meta"),
+  c(a = 1L, b = 2L)
+))
+}\if{html}{\out{</div>}}}
 
 \item{\code{var_rename}}{\emph{\strong{Description}}
 
@@ -4407,6 +4426,21 @@ stopifnot(
     a_describer
   )
 )
+# vm@var_meta_get_all
+vm <- vame::VariableMetadata(
+  var_dt = data.table::data.table(
+    var_nm = c("a", "b"),
+    my_meta = 1:2
+  ),
+  var_set_dt = data.table::data.table(
+    id = "ab",
+    var_nm_set = list(c("a", "b"))
+  )
+)
+stopifnot(identical(
+  vm@var_meta_get_all(meta_nm = "my_meta"),
+  c(a = 1L, b = 2L)
+))
 
 # Example of describing feature
 my_vame <- vame::VariableMetadata(

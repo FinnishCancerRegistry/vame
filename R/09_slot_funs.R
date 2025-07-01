@@ -2691,6 +2691,23 @@ var_meta_get_all <- function(
   # @codedoc_comment_block vm@var_meta_get_all
   # Get metadata for all variables.
   # @codedoc_comment_block vm@var_meta_get_all
+  # @codedoc_comment_block function_example(vm@var_meta_get_all)
+  # # vm@var_meta_get_all
+  # vm <- vame::VariableMetadata(
+  #   var_dt = data.table::data.table(
+  #     var_nm = c("a", "b"),
+  #     my_meta = 1:2
+  #   ),
+  #   var_set_dt = data.table::data.table(
+  #     id = "ab",
+  #     var_nm_set = list(c("a", "b"))
+  #   )
+  # )
+  # stopifnot(identical(
+  #   vm@var_meta_get_all(meta_nm = "my_meta"),
+  #   c(a = 1L, b = 2L)
+  # ))
+  # @codedoc_comment_block function_example(vm@var_meta_get_all)
 
   assert_is_var_meta_nm(vm, meta_nm)
   vd <- vd_get(vm)
