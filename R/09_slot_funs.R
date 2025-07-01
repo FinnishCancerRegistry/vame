@@ -2730,6 +2730,28 @@ var_rename <- function(
   # Rename `old` to `old_var_nms` and `new` to `new_var_nms`.
   # @codedoc_comment_block news("vm@var_rename", "2023-12-01", "0.2.0")
 
+  # @codedoc_comment_block function_example(vm@var_rename)
+  # vm <- vame::VariableMetadata(
+  #   var_dt = data.table::data.table(
+  #     var_nm = c("a", "b"),
+  #     my_meta = 1:2
+  #   ),
+  #   var_set_dt = data.table::data.table(
+  #     id = "ab",
+  #     var_nm_set = list(c("a", "b")),
+  #     value_space = list(ab = list(dt = data.table::data.table(
+  #       a = 1:2,
+  #       b = 2:1
+  #     )))
+  #   )
+  # )
+  # vm@var_rename(old_var_nms = "a", new_var_nms = "aaa")
+  # stopifnot(
+  #   "aaa" %in% vm@var_meta_get_all("var_nm"),
+  #   "aaa" %in% names(vm@var_set_value_space_get("ab")[["dt"]])
+  # )
+  # @codedoc_comment_block function_example(vm@var_rename)
+
   # @codedoc_comment_block doc_slot_fun_arg(old_var_nms)
   # **`old_var_nms`** `[character]` (no default)
   #
@@ -2806,6 +2828,29 @@ var_remove <- function(
   # Remove a variable.
   # @codedoc_comment_block vm@var_remove
 
+  # @codedoc_comment_block function_example(vm@var_remove)
+  # vm <- vame::VariableMetadata(
+  #   var_dt = data.table::data.table(
+  #     var_nm = c("a", "b"),
+  #     my_meta = 1:2
+  #   ),
+  #   var_set_dt = data.table::data.table(
+  #     id = "ab",
+  #     var_nm_set = list(c("a", "b")),
+  #     value_space = list(ab = list(dt = data.table::data.table(
+  #       a = 1:2,
+  #       b = 2:1
+  #     )))
+  #   )
+  # )
+  # vm@var_remove(var_nm = "a")
+  # stopifnot(
+  #   !"a" %in% vm@var_meta_get_all("var_nm"),
+  #   identical(vm@var_set_meta_get("ab", meta_nm = "var_nm_set"), "b"),
+  #   identical(names(vm@var_set_value_space_get("ab")[["dt"]]), "b")
+  # )
+  # @codedoc_comment_block function_example(vm@var_remove)
+
   # @codedoc_comment_block news("vm@var_remove", "2023-08-11", "0.1.9")
   # `vm@var_remove` can now remove multiple variables in one go.
   # @codedoc_comment_block news("vm@var_remove", "2023-08-11", "0.1.9")
@@ -2855,6 +2900,46 @@ var_labels_get <- function(
   label_nm = NULL,
   labeler_env = NULL
 ) {
+  # @codedoc_comment_block function_example(vm@var_labels_get)
+  # b_labeler_fun <- function(x, label_nm) {
+  #   dt <- data.table::data.table(
+  #     x = 1:3,
+  #     lowercase = c("a", "b", "c"),
+  #     uppercase = c("A", "B", "C")
+  #   )
+  #   jdt <- data.table::setDT(list(x = x))
+  #   return(dt[i = jdt, on = "x", j = .SD, .SDcols = label_nm][[label_nm]])
+  # }
+  # vm <- vame::VariableMetadata(
+  #   var_dt = data.table::data.table(
+  #     var_nm = c("a", "b"),
+  #     labeler = list(
+  #       a = data.table::data.table(
+  #         x = 1:3,
+  #         my_label = c("a", "b", "c")
+  #       ),
+  #       b = quote({
+  #         b_labeler_fun(x = x, label_nm = label_nm)
+  #       })
+  #     )
+  #   ),
+  #   var_set_dt = data.table::data.table(
+  #     id = "ab",
+  #     var_nm_set = list(c("a", "b"))
+  #   )
+  # )
+  # stopifnot(
+  #   identical(
+  #     vm@var_labels_get(x = 1:2, var_nm = "a", label_nm = "my_label"),
+  #     c("a", "b")
+  #   ),
+  #   identical(
+  #     vm@var_labels_get(x = 1:2, var_nm = "b", label_nm = "uppercase"),
+  #     c("A", "B")
+  #   )
+  # )
+  # @codedoc_comment_block function_example(vm@var_labels_get)
+
   # @codedoc_comment_block feature(labeling)
   # The labeling feature becomes available if
   # the `var_dt` of a `VariableMetadata` object has a `labeler` column value

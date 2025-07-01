@@ -1648,7 +1648,30 @@ Variable names to change.
 
 \strong{\code{new_var_nms}} \verb{[character]} (no default)
 
-Variable names to change to.}
+Variable names to change to.
+
+\emph{\strong{Examples}}
+
+\if{html}{\out{<div class="sourceCode">}}\preformatted{vm <- vame::VariableMetadata(
+  var_dt = data.table::data.table(
+    var_nm = c("a", "b"),
+    my_meta = 1:2
+  ),
+  var_set_dt = data.table::data.table(
+    id = "ab",
+    var_nm_set = list(c("a", "b")),
+    value_space = list(ab = list(dt = data.table::data.table(
+      a = 1:2,
+      b = 2:1
+    )))
+  )
+)
+vm@var_rename(old_var_nms = "a", new_var_nms = "aaa")
+stopifnot(
+  "aaa" \%in\% vm@var_meta_get_all("var_nm"),
+  "aaa" \%in\% names(vm@var_set_value_space_get("ab")[["dt"]])
+)
+}\if{html}{\out{</div>}}}
 
 \item{\code{var_remove}}{\emph{\strong{Description}}
 
@@ -1662,7 +1685,31 @@ Remove a variable.
 
 \strong{\code{var_nm}} \verb{[character]} (no default)
 
-Name of a variable.}
+Name of a variable.
+
+\emph{\strong{Examples}}
+
+\if{html}{\out{<div class="sourceCode">}}\preformatted{vm <- vame::VariableMetadata(
+  var_dt = data.table::data.table(
+    var_nm = c("a", "b"),
+    my_meta = 1:2
+  ),
+  var_set_dt = data.table::data.table(
+    id = "ab",
+    var_nm_set = list(c("a", "b")),
+    value_space = list(ab = list(dt = data.table::data.table(
+      a = 1:2,
+      b = 2:1
+    )))
+  )
+)
+vm@var_remove(var_nm = "a")
+stopifnot(
+  !"a" \%in\% vm@var_meta_get_all("var_nm"),
+  identical(vm@var_set_meta_get("ab", meta_nm = "var_nm_set"), "b"),
+  identical(names(vm@var_set_value_space_get("ab")[["dt"]]), "b")
+)
+}\if{html}{\out{</div>}}}
 
 \item{\code{var_labeler_get}}{\emph{\strong{Description}}
 
@@ -1743,7 +1790,48 @@ Environment where \code{labeler} of class \code{call} is evaluated.
 \itemize{
 \item \code{NULL}: Use the environment where this function is called.
 \item \code{environment}: Use this environment.
-}}
+}
+
+\emph{\strong{Examples}}
+
+\if{html}{\out{<div class="sourceCode">}}\preformatted{b_labeler_fun <- function(x, label_nm) \{
+  dt <- data.table::data.table(
+    x = 1:3,
+    lowercase = c("a", "b", "c"),
+    uppercase = c("A", "B", "C")
+  )
+  jdt <- data.table::setDT(list(x = x))
+  return(dt[i = jdt, on = "x", j = .SD, .SDcols = label_nm][[label_nm]])
+\}
+vm <- vame::VariableMetadata(
+  var_dt = data.table::data.table(
+    var_nm = c("a", "b"),
+    labeler = list(
+      a = data.table::data.table(
+        x = 1:3,
+        my_label = c("a", "b", "c")
+      ),
+      b = quote(\{
+        b_labeler_fun(x = x, label_nm = label_nm)
+      \})
+    )
+  ),
+  var_set_dt = data.table::data.table(
+    id = "ab",
+    var_nm_set = list(c("a", "b"))
+  )
+)
+stopifnot(
+  identical(
+    vm@var_labels_get(x = 1:2, var_nm = "a", label_nm = "my_label"),
+    c("a", "b")
+  ),
+  identical(
+    vm@var_labels_get(x = 1:2, var_nm = "b", label_nm = "uppercase"),
+    c("A", "B")
+  )
+)
+}\if{html}{\out{</div>}}}
 
 \item{\code{var_describer_get}}{\emph{\strong{Description}}
 
@@ -4441,6 +4529,82 @@ stopifnot(identical(
   vm@var_meta_get_all(meta_nm = "my_meta"),
   c(a = 1L, b = 2L)
 ))
+vm <- vame::VariableMetadata(
+  var_dt = data.table::data.table(
+    var_nm = c("a", "b"),
+    my_meta = 1:2
+  ),
+  var_set_dt = data.table::data.table(
+    id = "ab",
+    var_nm_set = list(c("a", "b")),
+    value_space = list(ab = list(dt = data.table::data.table(
+      a = 1:2,
+      b = 2:1
+    )))
+  )
+)
+vm@var_rename(old_var_nms = "a", new_var_nms = "aaa")
+stopifnot(
+  "aaa" \%in\% vm@var_meta_get_all("var_nm"),
+  "aaa" \%in\% names(vm@var_set_value_space_get("ab")[["dt"]])
+)
+vm <- vame::VariableMetadata(
+  var_dt = data.table::data.table(
+    var_nm = c("a", "b"),
+    my_meta = 1:2
+  ),
+  var_set_dt = data.table::data.table(
+    id = "ab",
+    var_nm_set = list(c("a", "b")),
+    value_space = list(ab = list(dt = data.table::data.table(
+      a = 1:2,
+      b = 2:1
+    )))
+  )
+)
+vm@var_remove(var_nm = "a")
+stopifnot(
+  !"a" \%in\% vm@var_meta_get_all("var_nm"),
+  identical(vm@var_set_meta_get("ab", meta_nm = "var_nm_set"), "b"),
+  identical(names(vm@var_set_value_space_get("ab")[["dt"]]), "b")
+)
+b_labeler_fun <- function(x, label_nm) {
+  dt <- data.table::data.table(
+    x = 1:3,
+    lowercase = c("a", "b", "c"),
+    uppercase = c("A", "B", "C")
+  )
+  jdt <- data.table::setDT(list(x = x))
+  return(dt[i = jdt, on = "x", j = .SD, .SDcols = label_nm][[label_nm]])
+}
+vm <- vame::VariableMetadata(
+  var_dt = data.table::data.table(
+    var_nm = c("a", "b"),
+    labeler = list(
+      a = data.table::data.table(
+        x = 1:3,
+        my_label = c("a", "b", "c")
+      ),
+      b = quote({
+        b_labeler_fun(x = x, label_nm = label_nm)
+      })
+    )
+  ),
+  var_set_dt = data.table::data.table(
+    id = "ab",
+    var_nm_set = list(c("a", "b"))
+  )
+)
+stopifnot(
+  identical(
+    vm@var_labels_get(x = 1:2, var_nm = "a", label_nm = "my_label"),
+    c("a", "b")
+  ),
+  identical(
+    vm@var_labels_get(x = 1:2, var_nm = "b", label_nm = "uppercase"),
+    c("A", "B")
+  )
+)
 
 # Example of describing feature
 my_vame <- vame::VariableMetadata(
