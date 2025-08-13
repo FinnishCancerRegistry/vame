@@ -2738,6 +2738,32 @@ stopifnot(
     )
   )
 )
+
+# note that a has different sets of values in the two value_space objects.
+# this works, but maybe for clarity in real life work you should include
+# NA in the joint value_space when there is nothing defined.
+vm <- vame::VariableMetadata(
+  var_dt = data.table::data.table(
+    var_nm = c("a", "b")
+  ),
+  var_set_dt = data.table::data.table(
+    id = c("a", "ab"),
+    var_nm_set = list(a = "a", ab = c("a", "b")),
+    value_space = list(
+      a = list(set = 1:4),
+      ab = list(dt = data.table::data.table(
+        a = rep(1:3, each = 2L),
+        b = 1:6
+      ))
+    )
+  )
+)
+obs <- vm@vame_category_space_dt(var_nms = c("a", "b"))
+exp <- data.table::data.table(
+  a = c(rep(1:3, each = 2L), 4L),
+  b = c(1:6, NA)
+)
+stopifnot(all.equal(obs, exp, check.attributes = FALSE))
 }\if{html}{\out{</div>}}}
 }}
 
@@ -5056,6 +5082,32 @@ stopifnot(
     )
   )
 )
+
+# note that a has different sets of values in the two value_space objects.
+# this works, but maybe for clarity in real life work you should include
+# NA in the joint value_space when there is nothing defined.
+vm <- vame::VariableMetadata(
+  var_dt = data.table::data.table(
+    var_nm = c("a", "b")
+  ),
+  var_set_dt = data.table::data.table(
+    id = c("a", "ab"),
+    var_nm_set = list(a = "a", ab = c("a", "b")),
+    value_space = list(
+      a = list(set = 1:4),
+      ab = list(dt = data.table::data.table(
+        a = rep(1:3, each = 2L),
+        b = 1:6
+      ))
+    )
+  )
+)
+obs <- vm@vame_category_space_dt(var_nms = c("a", "b"))
+exp <- data.table::data.table(
+  a = c(rep(1:3, each = 2L), 4L),
+  b = c(1:6, NA)
+)
+stopifnot(all.equal(obs, exp, check.attributes = FALSE))
 vm <- vame::VariableMetadata(
   var_dt = data.table::data.table(
     var_nm = letters
