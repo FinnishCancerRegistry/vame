@@ -4331,6 +4331,84 @@ vame_category_space_dt_list <- function(
   # @codedoc_comment_block feature_funs(category spaces)
   # - `vm@vame_category_space_dt_list`
   # @codedoc_comment_block feature_funs(category spaces)
+  # @codedoc_comment_block function_example(vm@vame_category_space_dt_list)
+  # vm <- vame::VariableMetadata(
+  #   var_dt = data.table::data.table(
+  #     var_nm = c("a1", "a2", "b")
+  #   ),
+  #   var_set_dt = data.table::data.table(
+  #     id = c("a", "b"),
+  #     var_nm_set = list(c("a1", "a2"), "b"),
+  #     value_space = list(
+  #       a = list(dt = data.table::data.table(
+  #         a1 = c(10L, 10L, 20L, 20L),
+  #         a2 = c(11L, 12L, 21L, 22L)
+  #       )),
+  #       b = list(set = 1:3)
+  #     )
+  #   )
+  # )
+  # stopifnot(
+  #   all.equal(
+  #     vm@vame_category_space_dt_list(var_nms = "a1"),
+  #     list(a = data.table::data.table(a1 = c(10L, 20L)))
+  #   ),
+  #   all.equal(
+  #     vm@vame_category_space_dt_list(var_nms = "a2"),
+  #     list(a = data.table::data.table(a2 = c(11L, 12L, 21L, 22L)))
+  #   ),
+  #   all.equal(
+  #     vm@vame_category_space_dt_list(var_nms = c("a1", "a2")),
+  #     list(a = data.table::data.table(
+  #       a1 = c(10L, 10L, 20L, 20L),
+  #       a2 = c(11L, 12L, 21L, 22L)
+  #     ))
+  #   ),
+  #   all.equal(
+  #     vm@vame_category_space_dt_list(var_nms = c("a1", "b")),
+  #     list(
+  #       a = data.table::data.table(a1 = c(10L, 20L)),
+  #       b = data.table::data.table(b = 1:3)
+  #     )
+  #   ),
+  #   all.equal(
+  #     vm@vame_category_space_dt_list(var_nms = c("a1", "a2", "b")),
+  #     list(
+  #       a = data.table::data.table(
+  #         a1 = c(10L, 10L, 20L, 20L),
+  #         a2 = c(11L, 12L, 21L, 22L)
+  #       ),
+  #       b = data.table::data.table(b = 1:3)
+  #     )
+  #   )
+  # )
+  #
+  # vm <- vame::VariableMetadata(
+  #   var_dt = data.table::data.table(
+  #     var_nm = c("a", "b")
+  #   ),
+  #   var_set_dt = data.table::data.table(
+  #     id = c("a", "ab"),
+  #     var_nm_set = list(a = "a", ab = c("a", "b")),
+  #     value_space = list(
+  #       a = list(set = 1:4),
+  #       ab = list(dt = data.table::data.table(
+  #         a = rep(1:3, each = 2L),
+  #         b = 1:6
+  #       ))
+  #     )
+  #   )
+  # )
+  # obs <- vm@vame_category_space_dt_list(var_nms = c("a", "b"))
+  # exp <- list(
+  #   a = data.table::data.table(a = 1:4),
+  #   ab = data.table::data.table(
+  #     a = rep(1:3, each = 2L),
+  #     b = 1:6
+  #   )
+  # )
+  # stopifnot(all.equal(obs, exp, check.attributes = FALSE))
+  # @codedoc_comment_block function_example(vm@vame_category_space_dt)
 
   dbc::assert_is_one_of(
     env,

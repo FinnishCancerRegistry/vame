@@ -111,7 +111,17 @@ category_space_dt_list__ <- function(
       env = env
     )
   })
+  names(dtl) <- meta_dt[["id"]]
+  # @codedoc_comment_block news("vm@vame_category_space_dt_list", "2025-08-13", "1.12.0")
+  # `vm@vame_category_space_dt_list` now drops duplicated tables in output,
+  # sorts from most complex to least complex (number of columns), and sets names
+  # corresponding to the `var_set_dt$id` values.
+  # @codedoc_comment_block news("vm@vame_category_space_dt_list", "2025-08-13", "1.12.0")
   dtl[vapply(dtl, is.null, logical(1L))] <- NULL
+  lapply(dtl, data.table::setDF)
+  dtl[duplicated(dtl)] <- NULL
+  lapply(dtl, data.table::setDT)
+  dtl <- dtl[order(-vapply(dtl, ncol, integer(1L)))]
   return(dtl)
 }
 
@@ -152,6 +162,15 @@ category_space_dt_list_to_category_space_dt__ <- function(
   } else if (length(dtl) == 1L) {
     return(dtl[[1L]])
   }
+  # @codedoc_comment_block news("vm@vame_category_space_dt", "2025-08-13", "1.12.0")
+  # `vm@vame_category_space_dt` now merges multiple separate `data.table`
+  # objects by starting from the most complex one (most columns).
+  # Formerly order was the order of appearance in the `VariableMetadata` object.
+  # This avoids the error of e.g. first combining two single-variable
+  # `data.table` objects (effectively `data.table::CJ`) and only then their
+  # joint `data.table`.
+  # @codedoc_comment_block news("vm@vame_category_space_dt", "2025-08-13", "1.12.0")
+  dtl <- dtl[order(-vapply(dtl, ncol, integer(1L)))]
   dt <- dtl[[1L]]
   for (i in 2:length(dtl)) {
     join_col_nms <- intersect(names(dt), names(dtl[[i]]))
