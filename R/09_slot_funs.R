@@ -4408,7 +4408,7 @@ vame_category_space_dt_list <- function(
   #   )
   # )
   # stopifnot(all.equal(obs, exp, check.attributes = FALSE))
-  # @codedoc_comment_block function_example(vm@vame_category_space_dt)
+  # @codedoc_comment_block function_example(vm@vame_category_space_dt_list)
 
   dbc::assert_is_one_of(
     env,
