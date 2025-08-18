@@ -4401,11 +4401,11 @@ vame_category_space_dt_list <- function(
   # )
   # obs <- vm@vame_category_space_dt_list(var_nms = c("a", "b"))
   # exp <- list(
-  #   a = data.table::data.table(a = 1:4),
   #   ab = data.table::data.table(
   #     a = rep(1:3, each = 2L),
   #     b = 1:6
-  #   )
+  #   ),
+  #   a = data.table::data.table(a = 1:4)
   # )
   # stopifnot(all.equal(obs, exp, check.attributes = FALSE))
   # @codedoc_comment_block function_example(vm@vame_category_space_dt_list)
