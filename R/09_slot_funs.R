@@ -117,9 +117,9 @@ var_set_meta_get <- function(
   #   identical(vm@var_set_meta_get(id = "set_b", meta_nm = "my_list_meta"), 1:3)
   # )
   # @codedoc_comment_block function_example(vm@var_set_meta_get)
-  assert_is_variablemetadata(vm)
+  assert_is_variablemetadata(x = vm)
 
-  assert_is_var_set_id(vm, id)
+  assert_is_var_set_id(vm = vm, x = id)
 
   # @codedoc_comment_block doc_slot_fun_arg(meta_nm)
   # **`meta_nm`** `[character]` (no default)
@@ -127,7 +127,7 @@ var_set_meta_get <- function(
   # Name of a metadata column in `var_set_dt` or `var_dt` (depending on context)
   # of a `VariableMetadata` object.
   # @codedoc_comment_block doc_slot_fun_arg(meta_nm)
-  assert_is_var_set_meta_nm(vm, meta_nm)
+  assert_is_var_set_meta_nm(vm = vm, x = meta_nm)
   vsd <- vsd_get(vm)
   vsd[[meta_nm]][[var_set_id_to_pos(vm, id)]]
 }
@@ -3408,12 +3408,6 @@ vame_harmonise_dt <- function(
   var_nms = NULL,
   inplace = TRUE
 ) {
-  # @codedoc_comment_block vm@vame_harmonise_dt
-  # Recode (via `maker` calls) and rename columns. Requires
-  # `var_dt$is_harmonised` to be defined. The `maker`s of those variables
-  # which have `is_harmonised == TRUE` determine which variables harmonise
-  # into the harmonised forms. See **Examples**.
-  # @codedoc_comment_block vm@vame_harmonise_dt
   # @codedoc_comment_block feature_funs(make)
   # - `vm@vame_harmonise_dt`
   # @codedoc_comment_block feature_funs(make)
@@ -3576,7 +3570,20 @@ vame_harmonise_dt <- function(
     dt <- data.table::copy(dt)
   }
   meta_dt <- local({
+    # @codedoc_comment_block vm@vame_harmonise_dt
+    # Recode (via `maker` calls) and rename columns. Requires
+    # `var_dt$is_harmonised` to be defined. The `maker`s of those variables
+    # which have `is_harmonised == TRUE` determine which variables harmonise
+    # into the harmonised forms. See **Examples**. Performs the following steps:
+    #
+    # - Infers which columns in `dt` must be harmonised. Makes use of
+    #   arg `var_nms` if supplied.
+    # @codedoc_comment_block vm@vame_harmonise_dt
     if (is.null(var_nms)) {
+      # @codedoc_comment_block vm@vame_harmonise_dt
+      #   + If `is.null(var_nms)`, `vm@vame_harmonise_dt` will attempt to
+      #     guess which columns of `dt` should to be harmonised into what.
+      # @codedoc_comment_block vm@vame_harmonise_dt
       meta_dt <- data.table::data.table(
         var_nm = names(dt),
         var_nm_harmonised = NA_character_
@@ -3584,18 +3591,31 @@ vame_harmonise_dt <- function(
       forced_harmonisation <- FALSE
     } else {
       if (!is.null(names(var_nms))) {
+        # @codedoc_comment_block vm@vame_harmonise_dt
+        #   + Else if `!is.null(names(var_nms))`, `vm@vame_harmonise_dt` knows
+        #     which columns to harmonise and into what.
+        # @codedoc_comment_block vm@vame_harmonise_dt
         meta_dt <- data.table::data.table(
           var_nm = names(var_nms),
           var_nm_harmonised = unname(var_nms)
         )
         forced_harmonisation <- TRUE
       } else {
+        # @codedoc_comment_block vm@vame_harmonise_dt
+        #   + Else if `is.null(names(var_nms))`, `vm@vame_harmonise_dt` knows
+        #     which columns to harmonise but has to guess the harmonised forms.
+        # @codedoc_comment_block vm@vame_harmonise_dt
         meta_dt <- data.table::data.table(
           var_nm = var_nms,
           var_nm_harmonised = NA_character_
         )
       }
     }
+    # @codedoc_comment_block vm@vame_harmonise_dt
+    # - If harmonised forms are not known in advance, `vm@vame_harmonise_dt`
+    #   will inspect every variable that has `var_dt$is_harmonised == TRUE`.
+    #   Else only the pre-specified ones are inspected.
+    # @codedoc_comment_block vm@vame_harmonise_dt
     harmonisation_candidate_set <- local({
       if (forced_harmonisation) {
         harmonisation_candidate_set <- meta_dt[["var_nm_harmonised"]]
@@ -3611,13 +3631,23 @@ vame_harmonise_dt <- function(
     tgt_meta_dt <- data.table::rbindlist(lapply(
       harmonisation_candidate_set,
       function(harmonisation_candidate) {
+        # @codedoc_comment_block vm@vame_harmonise_dt
+        # - Selecting a `maker` for a given harmonised form is performed as
+        #   follows (looping over the candidate set specified above):
+        #   + Collect the `var_set_dt$id`s of variable sets that include the
+        #     current harmonised form.
+        # @codedoc_comment_block vm@vame_harmonise_dt
         id_set <- var_var_set_dt_id_set_get(
           vm = vm,
           var_nm = harmonisation_candidate
         )
+        if (grepl("education", harmonisation_candidate)) browser()
         data.table::rbindlist(lapply(
           id_set,
           function(id) {
+            # @codedoc_comment_block vm@vame_harmonise_dt
+            #   + Exclude `var_set_dt$id` values which do not have a `maker`.
+            # @codedoc_comment_block vm@vame_harmonise_dt
             if (!var_set_meta_is_defined(vm = vm, id = id, meta_nm = "maker")) {
               return(NULL)
             }
@@ -3625,6 +3655,14 @@ vame_harmonise_dt <- function(
               vm = vm,
               id = id
             )
+            # @codedoc_comment_block vm@vame_harmonise_dt
+            #   + Exclude `maker`s with more than one dependent variable.
+            #     By definition harmonising a variable cannot be based on
+            #     multiple variables. However, a `maker` may have multiple
+            #     _sets_ of dependencies. E.g. `list("a", "b")` is allowed,
+            #     `list(c("a1", "a2"))` is not. In `list(c("a1", "a2"), "b")`
+            #     the latter set is detected as usable.
+            # @codedoc_comment_block vm@vame_harmonise_dt
             rm <- vapply(dep_var_nm_sets, length, integer(1L)) != 1L
             dep_var_nm_sets[rm] <- NULL
             var_nms <- unlist(dep_var_nm_sets)
@@ -3637,7 +3675,7 @@ vame_harmonise_dt <- function(
           }
         ))
       }
-    ))
+    ), use.names = TRUE, fill = TRUE)
     if (forced_harmonisation) {
       tgt_meta_dt <- tgt_meta_dt[
         i = meta_dt,
@@ -3655,12 +3693,14 @@ vame_harmonise_dt <- function(
     dup_var_nms <- tgt_meta_dt[["var_nm"]][duplicated(tgt_meta_dt[["var_nm"]])]
     if (length(dup_var_nms) > 0) {
       print(tgt_meta_dt)
-      stop("The following variable(s) have more than possible harmonisation ",
-           "candidate: ", deparse1(dup_var_nms), ". It is best to have only ",
-           "one harmonisation candidate per variable. If you want to have ",
-           "multiple anyway, you must use `vm@vame_harmonise_dt` argument ",
-           "`var_nms` to force a specific harmonisation. See the table ",
-           "above for more information.")
+      stop(
+        "The following variable(s) have more than possible harmonisation ",
+        "candidate: ", deparse1(dup_var_nms), ". It is best to have only ",
+        "one harmonisation candidate per variable. If you want to have ",
+        "multiple anyway, you must use `vm@vame_harmonise_dt` argument ",
+        "`var_nms` to force a specific harmonisation. See the table ",
+        "above for more information."
+      )
     }
     dt_join_assign__(
       dt = meta_dt,
@@ -3675,6 +3715,12 @@ vame_harmonise_dt <- function(
   # At this point, missing `id` implies no harmonisation will be performed
   # on the `var_nm`
   lapply(which(!is.na(meta_dt[["id"]])), function(i) {
+    # @codedoc_comment_block vm@vame_harmonise_dt
+    # - When all the variable names and `maker` objects have been identified,
+    #   the appropriate `maker`s are simply called to produce the intended
+    #   hamonised forms. These harmonised forms replace the unharmonised forms
+    #   in `dt`.
+    # @codedoc_comment_block vm@vame_harmonise_dt
     vn_i <- meta_dt[["var_nm"]][i]
     hc_i <- meta_dt[["var_nm_harmonised"]][i]
     made_dt <- var_set_make(
@@ -3691,6 +3737,23 @@ vame_harmonise_dt <- function(
     )
   })
 
+  # @codedoc_comment_block vm@vame_harmonise_dt
+  # - Lastly for the programmer's convenience we include the attribute
+  #   `vame_harmonise_dt_meta` in the output, a list of metadata containing
+  #   these elements:
+  #   + `dt_col_nms`: The original columns names of `dt`.
+  #     This is identical to calling `names(dt)` before
+  #     `vm@vame_harmonise_dt`.
+  #   + `dt_col_nms_harmonised`: The names of `dt` after harmonisation.
+  #     This is identical to calling `names(dt)` after
+  #     `vm@vame_harmonise_dt`.
+  #   + `var_nms`: Not the argument! This is the set of unharmonised column
+  #     names which were harmonised. This is a subset of `dt_col_nms`
+  #     because maybe not all columns of `dt` were harmonised.
+  #   + `var_nms_harmonised`: The harmonised column names. This is a subset of
+  #     `dt_col_nms_harmonised` because maybe not all columns of `dt` were
+  #     in fact harmonised.
+  # @codedoc_comment_block vm@vame_harmonise_dt
   data.table::setattr(
     dt,
     "vame_harmonise_dt_meta",

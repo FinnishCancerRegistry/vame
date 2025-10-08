@@ -2065,7 +2065,56 @@ Name of a variable.}
 Recode (via \code{maker} calls) and rename columns. Requires
 \code{var_dt$is_harmonised} to be defined. The \code{maker}s of those variables
 which have \code{is_harmonised == TRUE} determine which variables harmonise
-into the harmonised forms. See \strong{Examples}.
+into the harmonised forms. See \strong{Examples}. Performs the following steps:
+\itemize{
+\item Infers which columns in \code{dt} must be harmonised. Makes use of
+arg \code{var_nms} if supplied.
+\itemize{
+\item If \code{is.null(var_nms)}, \code{vm@vame_harmonise_dt} will attempt to
+guess which columns of \code{dt} should to be harmonised into what.
+\item Else if \code{!is.null(names(var_nms))}, \code{vm@vame_harmonise_dt} knows
+which columns to harmonise and into what.
+\item Else if \code{is.null(names(var_nms))}, \code{vm@vame_harmonise_dt} knows
+which columns to harmonise but has to guess the harmonised forms.
+}
+\item If harmonised forms are not known in advance, \code{vm@vame_harmonise_dt}
+will inspect every variable that has \code{var_dt$is_harmonised == TRUE}.
+Else only the pre-specified ones are inspected.
+\item Selecting a \code{maker} for a given harmonised form is performed as
+follows (looping over the candidate set specified above):
+\itemize{
+\item Collect the \code{var_set_dt$id}s of variable sets that include the
+current harmonised form.
+\item Exclude \code{var_set_dt$id} values which do not have a \code{maker}.
+\item Exclude \code{maker}s with more than one dependent variable.
+By definition harmonising a variable cannot be based on
+multiple variables. However, a \code{maker} may have multiple
+\emph{sets} of dependencies. E.g. \code{list("a", "b")} is allowed,
+\code{list(c("a1", "a2"))} is not. In \code{list(c("a1", "a2"), "b")}
+the latter set is detected as usable.
+}
+\item When all the variable names and \code{maker} objects have been identified,
+the appropriate \code{maker}s are simply called to produce the intended
+hamonised forms. These harmonised forms replace the unharmonised forms
+in \code{dt}.
+\item Lastly for the programmer's convenience we include the attribute
+\code{vame_harmonise_dt_meta} in the output, a list of metadata containing
+these elements:
+\itemize{
+\item \code{dt_col_nms}: The original columns names of \code{dt}.
+This is identical to calling \code{names(dt)} before
+\code{vm@vame_harmonise_dt}.
+\item \code{dt_col_nms_harmonised}: The names of \code{dt} after harmonisation.
+This is identical to calling \code{names(dt)} after
+\code{vm@vame_harmonise_dt}.
+\item \code{var_nms}: Not the argument! This is the set of unharmonised column
+names which were harmonised. This is a subset of \code{dt_col_nms}
+because maybe not all columns of \code{dt} were harmonised.
+\item \code{var_nms_harmonised}: The harmonised column names. This is a subset of
+\code{dt_col_nms_harmonised} because maybe not all columns of \code{dt} were
+in fact harmonised.
+}
+}
 
 \emph{\strong{Usage}}
 

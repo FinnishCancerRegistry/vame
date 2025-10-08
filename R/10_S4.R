@@ -517,7 +517,7 @@ VariableMetadata <- function(
   #' column `var_nm`.
   #'
   #' See **Details** and **Features** for more information.
-  assert_is_var_dt(var_dt)
+  assert_is_var_dt(var_dt, var_set_dt = var_set_dt)
   # @codedoc_comment_block recommendation(var_dt)
   # **Recommendations for `var_dt`:**
   #

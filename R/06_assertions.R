@@ -869,7 +869,7 @@ assert_is_var_set_meta_nm <- function(
   assertion_type = NULL
 ) {
   dbc::handle_args_inplace()
-  assert_is_variablemetadata(vm, assertion_type = "prod_input")
+  assert_is_variablemetadata(x = vm, assertion_type = "prod_input")
   dbc::assert_is_character_nonNA_atom(
     x,
     x_nm = x_nm,
@@ -978,6 +978,228 @@ assert_is_arg_optional_steps <- function(
         assertion_type = assertion_type
       )
     }
+  }
+  return(invisible(NULL))
+}
+
+# assert_is_variablemetadata_with_working_feature_* ----------------------------
+var_set_dt_maker_is_harmoniser__ <- function(
+  vm,
+  id,
+  unharmonised_var_nm = NULL
+) {
+  pass <- var_set_meta_is_defined(
+    vm = vm,
+    id = id,
+    meta_nm = "maker"
+  )
+  pass <- pass && var_meta_is_defined(
+    vm = vm,
+    meta_nm = "is_harmonised",
+    var_nm = NULL
+  )
+  pass <- pass && local({
+    var_nm_set <- var_set_meta_get(vm = vm, id = id, meta_nm = "var_nm_set")
+    length(var_nm_set) == 1 &&
+      isTRUE(var_meta_get(
+        vm = vm, var_nm = var_nm_set, meta_nm = "is_harmonised"
+      ))
+  })
+  pass <- pass && local({
+    unharmonised_var_nm <- unname(unharmonised_var_nm)
+    dep_var_nm_sets <- var_set_maker_get_dep_var_nm_sets(vm = vm, id = id)
+    pass <- TRUE
+    if (is.null(unharmonised_var_nm)) {
+      pass <- pass && any(vapply(
+        dep_var_nm_sets,
+        length,
+        integer(1L)
+      ) == 1L)
+    } else {
+      pass <- pass && any(vapply(
+        dep_var_nm_sets,
+        function(dvns) {
+          identical(dvns, unharmonised_var_nm)
+        },
+        logical(1L)
+      ))
+    }
+    pass
+  })
+  return(pass)
+}
+unharmonised_var_nm_to_harmoniser_id_set__ <- function(
+  vm,
+  unharmonised_var_nm,
+  must_have_exactly_one = TRUE
+) {
+  assert_is_var_nm(vm = vm, x = unharmonised_var_nm)
+  id_set <- var_set_meta_get_all(vm = vm, meta_nm = "id")
+  if (!var_set_meta_is_defined(vm = vm, meta_nm = "maker")) {
+    stop("`var_set_dt$maker` does not exist; harmonisation feature ",
+         "requires `maker` objects and you have to add some.")
+  }
+  usable_id_set <- id_set[vapply(id_set, function(id) {
+    var_set_dt_maker_is_harmoniser__(vm = vm, id = id)
+  }, logical(1L))]
+  if (length(usable_id_set) == 0) {
+    stop(
+      "No `var_set_dt$maker` has variable name \"", unharmonised_var_nm, "\"",
+      "as a dependency --- the harmonisation feature makes use of `maker` ",
+      "objects but no `maker` is usable for this variable. You need to add ",
+      "such a `maker`."
+    )
+  } else if (must_have_exactly_one && length(usable_id_set) > 1) {
+    stop(
+      "Variable \"", unharmonised_var_nm, "\" had multiple possible ",
+      "harmonisers (`var_set_dt$maker` objects that produce a harmonised ",
+      "variable) and did not know which one to choose. Either make sure you ",
+      "only have one harmoniser per input variable or force a specific ",
+      "harmonisation. See the documentation about the harmonisation feature. ",
+      "The following `var_set_dt$id` values were found for the harmonisers: ",
+      deparse1(unname(usable_id_set))
+    )
+  }
+  return(usable_id_set)
+}
+# some repetition still. should write one function for both checking and for
+# retrieving.
+harmonised_var_nm_to_harmoniser_id__ <- function(
+  vm,
+  harmonised_var_nm,
+  unharmonised_var_nm = NULL
+) {
+  assert_is_var_nm(harmonised_var_nm, assertion_type = "prod_input")
+  id_set <- var_to_var_set_id(vm = vm, var_nm = harmonised_var_nm)
+  if (length(id_set) == 0) {
+    stop("Variable `\"", harmonised_var_nm, "\"` does not appear in any ",
+         "`var_set_dt$var_nm_set`")
+  }
+  if (!is.null(unharmonised_var_nm)) {
+    assert_is_var_nm(unharmonised_var_nm, assertion_type = "prod_input")
+    id_set <- intersect(
+      id_set,
+      unharmonised_var_nm_to_harmoniser_id_set__(
+        vm = vm,
+        unharmonised_var_nm = unharmonised_var_nm,
+        must_have_exactly_one = FALSE
+      )
+    )
+    if (length(id_set) == 0) {
+      stop("Variable `\"", unharmonised_var_nm, "\"` cannot be harmonised to ",
+           "`\"", harmonised_var_nm, "\"`: there is no ",
+           "`var_set_dt$maker` which accepts the former as input to produce ",
+           "the latter.")
+    }
+  } else {
+    id_set <- id_set[vapply(id_set, function(id) {
+      var_set_meta_is_defined(vm = vm, id = id, meta_nm = "maker") &&
+        any(vapply(
+          var_set_maker_get_dep_var_nm_sets(vm = vm, id = id),
+          function(dep_var_nm_set) {
+            length(dep_var_nm_set) == 1
+          },
+          logical(1L)
+        ))
+    }, logical(1L))]
+    if (length(id_set) == 0) {
+      msg <- sprintf(
+        paste0(
+          "Variable `\"%s\"` has `var_dt$is_harmonised = TRUE` but ",
+          "there is no `var_set_dt$maker` which produces this (and only this) ",
+          "variable such that the `maker accepts exactly one input variable. ",
+          "A `maker` for the purpose of ",
+          "harmonisation can only have one input variable, e.g. ",
+          "variable `x_pretty` should have a `maker` which accepts only ",
+          "one input variable `x_ugly`."
+        ),
+        harmonised_var_nm
+      )
+      stop(msg)
+    }
+  }
+
+  msg_uhvm <- ""
+  if (is.null(unharmonised_var_nm)) {
+    msg_uhvm <- sprintf(" \"%s\"", unharmonised_var_nm)
+  }
+  if (length(id_set) > 1) {
+    msg <- sprintf(paste0(
+      "Harmonised variable `\"%s\"` has more than one possible ",
+      "`var_set_dt$maker`: ",
+      "It can be produced by `maker` objects with corresponding `id %in% ",
+      "%s`, where each `maker` accepts ",
+      "exactly one input variable%s. Only one `maker` can be defined to be ",
+      "used a as harmoniser for a given harmonised variable because we don't ",
+      "know which one to pick. E.g. a single `maker` for `x_pretty`. ",
+      "If you want to allow for multiple different ",
+      "variables as possible input variables, e.g. to harmonise both of ",
+      " `x_ugly_1` and `x_ugly_2`, ",
+      "write a single `maker` which accepts more than one set of dependencies."
+    ), harmonised_var_nm, deparse1(id_set), msg_uhvm)
+  }
+  return(id_set)
+}
+
+assert_is_variablemetadata_with_working_feature_harmonisation <- function(
+  x,
+  x_nm = NULL,
+  call = NULL,
+  assertion_type = NULL
+) {
+  dbc::handle_args_inplace()
+  if (!var_meta_is_defined(vm = x, meta_nm = "is_harmonised")) {
+    stop("Harmonisation feature requires `var_dt$is_harmonised` to be defined")
+  }
+  assert_is_var_dt_column_is_harmonised(
+    x = var_meta_get_all(vm = x, meta_nm = "is_harmonised"),
+    x_nm = sprintf("var_dt$is_harmonised"),
+    call = call,
+    assertion_type = assertion_type
+  )
+  if (!var_set_meta_is_defined(vm = x, meta_nm = "maker")) {
+    stop("Harmonisation feature requires `var_set_dt$maker` to be defined")
+  }
+  harmo_var_nms <- var_meta_get_all(vm = x, meta_nm = "var_nm")[
+    var_meta_get_all(vm = x, meta_nm = "is_harmonised") %in% TRUE
+  ]
+  lapply(harmo_var_nms, function(hvn) {
+    # this function performs the checks also. we dont use its output
+    harmonised_var_nm_to_harmoniser_id__(
+      vm = x,
+      harmonised_var_nm = hvn,
+      unharmonised_var_nm = NULL
+    )
+  })
+  return(invisible(NULL))
+}
+
+assert_is_variablemetadata_proper <- function(
+  x,
+  x_nm = NULL,
+  call = NULL,
+  assertion_type = NULL
+) {
+  dbc::handle_args_inplace()
+  assert_is_variablemetadata(
+    x = x,
+    x_nm = x_nm,
+    call = call,
+    assertion_type = assertion_type
+  )
+  obj_nms <- ls(envir = environment(assert_is_var_dt))
+  assertion_fun_nms <- obj_nms[grepl(
+    "^assert_is_variablemetadata_with_proper_",
+    obj_nms
+  )]
+  arg_list <- list(
+    x = x,
+    x_nm = x_nm,
+    call = call,
+    assertion_type = assertion_type
+  )
+  for (afn in assertion_fun_nms) {
+    do.call(afn, arg_list, quote = TRUE)
   }
   return(invisible(NULL))
 }
