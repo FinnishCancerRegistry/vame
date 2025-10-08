@@ -130,8 +130,9 @@ attempted to be subsetted when variables are removed from that variable set.
 Empty variable sets are removed entirely.
 \item Attempt to auto-assign \code{var_dt[["type"]][i]} to \code{"categorical"} for
 each \code{i}. \code{var_dt[["type"]][i] <- "categorical"} if it is at first \code{NA}
-and the variable has either a \code{labeler} or a guaranteed categorical
-(part of a) \code{value_space} object --- of type \code{set} or \code{dt}.
+and the variable has either a \code{labeler} or if
+\code{vm@var_value_space_eval} produces a \code{value_space} object of type
+\code{dt} or \code{set}.
 \item Return the created \code{VariableMetadata} object.
 }
 }
@@ -2772,21 +2773,23 @@ Environment where a value space will be evaluated, if applicable.
 
 \if{html}{\out{<div class="sourceCode">}}\preformatted{vm <- vame::VariableMetadata(
   var_dt = data.table::data.table(
-    var_nm = c("a1", "a2", "b")
+    var_nm = c("a1", "a2", "b", "c")
   ),
   var_set_dt = data.table::data.table(
-    id = c("a", "b"),
-    var_nm_set = list(c("a1", "a2"), "b"),
+    id = c("a", "b", "c"),
+    var_nm_set = list(c("a1", "a2"), "b", "c"),
     value_space = list(
       a = list(dt = data.table::data.table(
         a1 = c(10L, 10L, 20L, 20L),
         a2 = c(11L, 12L, 21L, 22L)
       )),
-      b = list(set = 1:3)
+      b = list(set = 1:3),
+      c = list(expr = quote(list(set = 1:3)))
     )
   )
 )
 stopifnot(
+  vm@var_meta_get_all(meta_nm = "type") == "categorical",
   all.equal(
     vm@vame_category_space_dt(var_nms = "a1"),
     data.table::data.table(a1 = c(10L, 20L))
@@ -5215,21 +5218,23 @@ exp <- list(
 stopifnot(all.equal(obs, exp, check.attributes = FALSE))
 vm <- vame::VariableMetadata(
   var_dt = data.table::data.table(
-    var_nm = c("a1", "a2", "b")
+    var_nm = c("a1", "a2", "b", "c")
   ),
   var_set_dt = data.table::data.table(
-    id = c("a", "b"),
-    var_nm_set = list(c("a1", "a2"), "b"),
+    id = c("a", "b", "c"),
+    var_nm_set = list(c("a1", "a2"), "b", "c"),
     value_space = list(
       a = list(dt = data.table::data.table(
         a1 = c(10L, 10L, 20L, 20L),
         a2 = c(11L, 12L, 21L, 22L)
       )),
-      b = list(set = 1:3)
+      b = list(set = 1:3),
+      c = list(expr = quote(list(set = 1:3)))
     )
   )
 )
 stopifnot(
+  vm@var_meta_get_all(meta_nm = "type") == "categorical",
   all.equal(
     vm@vame_category_space_dt(var_nms = "a1"),
     data.table::data.table(a1 = c(10L, 20L))

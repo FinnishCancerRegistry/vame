@@ -4446,21 +4446,23 @@ vame_category_space_dt <- function(
   # @codedoc_comment_block function_example(vm@vame_category_space_dt)
   # vm <- vame::VariableMetadata(
   #   var_dt = data.table::data.table(
-  #     var_nm = c("a1", "a2", "b")
+  #     var_nm = c("a1", "a2", "b", "c")
   #   ),
   #   var_set_dt = data.table::data.table(
-  #     id = c("a", "b"),
-  #     var_nm_set = list(c("a1", "a2"), "b"),
+  #     id = c("a", "b", "c"),
+  #     var_nm_set = list(c("a1", "a2"), "b", "c"),
   #     value_space = list(
   #       a = list(dt = data.table::data.table(
   #         a1 = c(10L, 10L, 20L, 20L),
   #         a2 = c(11L, 12L, 21L, 22L)
   #       )),
-  #       b = list(set = 1:3)
+  #       b = list(set = 1:3),
+  #       c = list(expr = quote(list(set = 1:3)))
   #     )
   #   )
   # )
   # stopifnot(
+  #   vm@var_meta_get_all(meta_nm = "type") == "categorical",
   #   all.equal(
   #     vm@vame_category_space_dt(var_nms = "a1"),
   #     data.table::data.table(a1 = c(10L, 20L))

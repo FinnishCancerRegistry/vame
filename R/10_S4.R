@@ -716,8 +716,9 @@ VariableMetadata <- function(
       # @codedoc_comment_block vame::VariableMetadata
       # - Attempt to auto-assign `var_dt[["type"]][i]` to `"categorical"` for
       #   each `i`. `var_dt[["type"]][i] <- "categorical"` if it is at first `NA`
-      #   and the variable has either a `labeler` or a guaranteed categorical
-      #   (part of a) `value_space` object --- of type `set` or `dt`.
+      #   and the variable has either a `labeler` or if
+      #   `vm@var_value_space_eval` produces a `value_space` object of type
+      #   `dt` or `set`.
       # @codedoc_comment_block vame::VariableMetadata
       var_nm <- funs[["data"]][["var_dt"]][["var_nm"]][test_idx]
       is_categorical <- out@var_meta_is_defined(
