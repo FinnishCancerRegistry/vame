@@ -3310,6 +3310,14 @@ The following functions are part of this feature:
 }
 }
 
+\section{News for version 1.13.0}{
+
+
+Fixed automatic assignment \code{type = "categorical"}. There was an issue
+with indexing and the wrong variable could be marked as "categorical"
+(only if \code{type} was \code{NA} of course).
+}
+
 \section{News for version 1.12.0}{
 
 

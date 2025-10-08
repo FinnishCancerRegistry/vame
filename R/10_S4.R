@@ -692,9 +692,9 @@ VariableMetadata <- function(
   } else {
     test_indices <- seq_len(nrow(funs$data$var_dt))
   }
-  categorical_var_indices <- which(vapply(
-    funs$data$var_dt[["var_nm"]][test_indices],
-    function(var_nm) {
+  is_categorical <- vapply(
+    test_indices,
+    function(test_idx) {
       # @codedoc_comment_block news("vame::VariableMetadata", "2024-04-18", "0.5.0")
       # `vame::VariableMetadata` now automatically sets `var_dt$type` to
       # `"categorical"` where the variable's `value_space` is of type
@@ -708,12 +708,18 @@ VariableMetadata <- function(
       # Fixed automatic assignment `type = "categorical"`. It now also works
       # if `type` did not exist at all in the user-supplied `var_dt`.
       # @codedoc_comment_block news("vame::VariableMetadata", "2025-06-30", "1.11.0")
+      # @codedoc_comment_block news("vame::VariableMetadata", "2025-10-08", "1.13.0")
+      # Fixed automatic assignment `type = "categorical"`. There was an issue
+      # with indexing and the wrong variable could be marked as "categorical"
+      # (only if `type` was `NA` of course).
+      # @codedoc_comment_block news("vame::VariableMetadata", "2025-10-08", "1.13.0")
       # @codedoc_comment_block vame::VariableMetadata
       # - Attempt to auto-assign `var_dt[["type"]][i]` to `"categorical"` for
       #   each `i`. `var_dt[["type"]][i] <- "categorical"` if it is at first `NA`
       #   and the variable has either a `labeler` or a guaranteed categorical
       #   (part of a) `value_space` object --- of type `set` or `dt`.
       # @codedoc_comment_block vame::VariableMetadata
+      var_nm <- funs[["data"]][["var_dt"]][["var_nm"]][test_idx]
       is_categorical <- out@var_meta_is_defined(
         var_nm = var_nm, meta_nm = "labeler"
       )
@@ -726,11 +732,11 @@ VariableMetadata <- function(
       return(is_categorical)
     },
     logical(1L)
-  ))
-  if (length(categorical_var_indices) > 0) {
+  )
+  if (any(is_categorical)) {
     data.table::set(
       funs$data$var_dt,
-      i = categorical_var_indices,
+      i = test_indices[is_categorical],
       j = "type",
       value = "categorical"
     )

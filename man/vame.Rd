@@ -340,6 +340,16 @@ stopifnot(
 
 \section{News}{
 
+\subsection{News for version 1.13.0}{
+\subsection{vame::VariableMetadata}{
+
+Fixed automatic assignment \code{type = "categorical"}. There was an issue
+with indexing and the wrong variable could be marked as "categorical"
+(only if \code{type} was \code{NA} of course).
+}
+
+}
+
 \subsection{News for version 1.12.0}{
 \subsection{vm@vame_category_space_dt}{
 
