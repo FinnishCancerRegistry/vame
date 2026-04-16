@@ -340,6 +340,20 @@ stopifnot(
 
 \section{News}{
 
+\subsection{News for version 1.13.1}{
+\subsection{vm@var_set_value_space_eval}{
+
+\code{vm@var_set_value_space_eval} now creates a new \code{data.table} object
+for type \code{dt} instead of returning the original object. This avoids
+unintentionally modifying the underlying \code{data.table} object in the
+\code{VariableMetadata} object using \code{data.table}'s inplace features such as
+\code{data.table::setnames}. The column data are still not copied --- the
+new \code{data.table} object's columns point to the same memory addresses
+as in the original object.
+}
+
+}
+
 \subsection{News for version 1.13.0}{
 \subsection{vame::VariableMetadata}{
 

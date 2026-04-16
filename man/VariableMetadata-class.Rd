@@ -791,6 +791,15 @@ without modification,
 except a \code{value_space} of type \code{data.table} (or if evaluation produced
 a \code{data.table}) is subset into the requested variables only if
 the \code{data.table} contains more than the requested variables.
+\item If \code{value_space} is of type \code{dt}, the \code{data.table} object is created
+anew to avoid problems arising from using \code{data.table}'s inplace
+functionalities such as \code{data.table::setnames}. However, the columns
+in the \code{data.table} object are not copied and still point to the same
+memory addresses as the original \code{data.table}. So making use of e.g.
+\code{dt[i = 1:5, j = "mycol" := value]} will still modify the original
+\code{data.table} object's contents also because the same data is modified.
+The "shallow" copy method used here is a compromise between
+performance (no big copies) and reliability.
 }
 
 \emph{\strong{Usage}}
@@ -3311,6 +3320,18 @@ The following functions are part of this feature:
 \item \code{vm@vame_category_space_dt_list}
 \item \code{vm@vame_category_space_dt}
 }
+}
+
+\section{News for version 1.13.1}{
+
+
+\code{vm@var_set_value_space_eval} now creates a new \code{data.table} object
+for type \code{dt} instead of returning the original object. This avoids
+unintentionally modifying the underlying \code{data.table} object in the
+\code{VariableMetadata} object using \code{data.table}'s inplace features such as
+\code{data.table::setnames}. The column data are still not copied --- the
+new \code{data.table} object's columns point to the same memory addresses
+as in the original object.
 }
 
 \section{News for version 1.13.0}{

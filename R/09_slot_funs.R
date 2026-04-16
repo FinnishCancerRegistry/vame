@@ -1473,14 +1473,37 @@ var_set_value_space_eval <- function(
   #   a `data.table`) is subset into the requested variables only if
   #   the `data.table` contains more than the requested variables.
   # @codedoc_comment_block vm@var_set_value_space_eval
-  if ("dt" %in% names(value_space) &&
-        ncol(value_space[["dt"]]) > length(var_nms)) {
-    #' @importFrom data.table .SD
-    value_space <- list(dt = value_space[["dt"]][
-      i = !duplicated(value_space[["dt"]], by = var_nms),
-      j = .SD,
-      .SDcols = var_nms
-    ])
+  if ("dt" %in% names(value_space)) {
+    if (ncol(value_space[["dt"]]) > length(var_nms)) {
+      #' @importFrom data.table .SD
+      value_space[["dt"]] <- value_space[["dt"]][
+        i = !duplicated(value_space[["dt"]], by = var_nms),
+        j = .SD,
+        .SDcols = var_nms
+      ]
+    } else {
+      # @codedoc_comment_block news("vm@var_set_value_space_eval", "2026-04-16", "1.13.1")
+      # `vm@var_set_value_space_eval` now creates a new `data.table` object
+      # for type `dt` instead of returning the original object. This avoids
+      # unintentionally modifying the underlying `data.table` object in the
+      # `VariableMetadata` object using `data.table`'s inplace features such as
+      # `data.table::setnames`. The column data are still not copied --- the
+      # new `data.table` object's columns point to the same memory addresses
+      # as in the original object.
+      # @codedoc_comment_block news("vm@var_set_value_space_eval", "2026-04-16", "1.13.1")
+      # @codedoc_comment_block vm@var_set_value_space_eval
+      # - If `value_space` is of type `dt`, the `data.table` object is created
+      #   anew to avoid problems arising from using `data.table`'s inplace
+      #   functionalities such as `data.table::setnames`. However, the columns
+      #   in the `data.table` object are not copied and still point to the same
+      #   memory addresses as the original `data.table`. So making use of e.g.
+      #   `dt[i = 1:5, j = "mycol" := value]` will still modify the original
+      #   `data.table` object's contents also because the same data is modified.
+      #   The "shallow" copy method used here is a compromise between
+      #   performance (no big copies) and reliability.
+      # @codedoc_comment_block vm@var_set_value_space_eval
+      value_space[["dt"]] <- data.table::setDT(as.list(value_space[["dt"]]))
+    }
   }
 
   return(value_space)
