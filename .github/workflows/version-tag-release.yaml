@@ -1,0 +1,18 @@
+name: Release-R-Package
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: 'Git tag to build (example: v0.4.0)'
+        required: true
+
+jobs:
+  release:
+    uses: FinnishCancerRegistry/github-actions/.github/workflows/version-tag-release.yaml@master
+    with:
+      tag: ${{ github.event.inputs.tag || github.ref_name }}
