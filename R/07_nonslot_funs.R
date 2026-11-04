@@ -139,31 +139,29 @@ vd_vsd_intersect <- function(
   vm
 ) {
   # @codedoc_comment_block vame:::vd_vsd_intersect
-  # Remove rows in `var_dt` where `var_dt[["var_nm"]]` does not appear in any
-  # `var_set_dt[["var_nm_set"]]`. Remove variables names in
+  # Remove variables names in
   # each `var_set_dt[["var_nm_set"]]` element that do not appear in
-  # `var_dt[["var_nm_set"]]`. `var_set_dt[["value_space"]]` objects are
+  # `var_dt[["var_nm"]]`. `var_set_dt[["value_space"]]` objects are
   # attempted to be subsetted when variables are removed from that variable set.
-  # Empty variable sets are removed entirely.
+  # Empty variable sets are removed entirely. Variables in `var_dt` that do
+  # not appear in any `var_set_dt[["var_nm_set"]]` are kept --- a variable
+  # does not need to belong to any variable set.
   # @codedoc_comment_block vame:::vd_vsd_intersect
+  # @codedoc_comment_block news("vame::VariableMetadata", "2026-11-04", "1.14.0")
+  # `vame::VariableMetadata` no longer requires that every variable in
+  # `var_dt` appears in some `var_set_dt$var_nm_set`. Such variables are now
+  # kept instead of being silently dropped. Similarly `vm@var_set_remove`
+  # and `vm@vame_subset_expr` no longer drop variables from `var_dt` that are
+  # no longer part of any variable set.
+  # @codedoc_comment_block news("vame::VariableMetadata", "2026-11-04", "1.14.0")
   assert_is_variablemetadata(vm, assertion_type = "prod_input")
   vd <- vd_get(vm)
   vdi <- vd_implied_get(vm)
-  rm_var_nms <- union(
-    setdiff(
-      vd[["var_nm"]],
-      vdi[["var_nm"]]
-    ),
-    setdiff(
-      vdi[["var_nm"]],
-      vd[["var_nm"]]
-    )
+  rm_var_nms <- setdiff(
+    vdi[["var_nm"]],
+    vd[["var_nm"]]
   )
   if (length(rm_var_nms) > 0) {
-    vd_subset <- !vd[["var_nm"]] %in% rm_var_nms
-    vd <- vd[vd_subset, ]
-    vd_set(vm, vd)
-
     vsd <- vsd_get(vm)
     #' @importFrom data.table :=
     vsd[

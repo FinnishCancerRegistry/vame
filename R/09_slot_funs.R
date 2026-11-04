@@ -414,7 +414,7 @@ var_set_remove <- function(
   #   ),
   #   identical(
   #     vm@var_meta_get_all(meta_nm = "var_nm"),
-  #     c("b" = "b")
+  #     c("a" = "a", "b" = "b")
   #   )
   # )
   # @codedoc_comment_block function_example(vm@var_set_remove)
@@ -425,7 +425,9 @@ var_set_remove <- function(
   # @codedoc_comment_block vm@var_set_remove
   # Remove a variable set by `id`. Performs the following steps:
   #
-  # - Drop the row in `var_set_dt` with the supplied `id`.
+  # - Drop the row in `var_set_dt` with the supplied `id`. Variables in
+  #   `var_dt` are not removed even if they no longer belong to any
+  #   variable set.
   # @codedoc_comment_block vm@var_set_remove
   vsd <- vsd[vsd_subset, ]
   vsd_set(vm, vsd)
@@ -2334,9 +2336,16 @@ var_value_space_eval <- function(
   })
   value_space <- unique(value_space)
   # @codedoc_comment_block vm@var_value_space_eval
+  # - If no value space is defined for the variable (e.g. because the
+  #   variable does not belong to any variable set), an error is raised.
   # - If we now have only one value space, all is well and that is returned.
   # @codedoc_comment_block vm@var_value_space_eval
-  if (length(value_space) == 1) {
+  if (length(value_space) == 0) {
+    stop(
+      "No value_space defined for var_nm = \"", var_nm, "\": it does not ",
+      "appear in any var_set_dt$var_nm_set with a value_space."
+    )
+  } else if (length(value_space) == 1) {
     value_space <- value_space[[1]]
   } else if (
     identical(unname(var_meta_get(vm, var_nm, "type")), "categorical")
