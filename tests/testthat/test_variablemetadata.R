@@ -28,7 +28,7 @@ testthat::test_that("var_dt variables need not belong to any variable set", {
     c("a", "b", "c")
   )
   testthat::expect_identical(
-    vm@var_var_set_dt_id_set_get("a"),
+    unname(vm@var_var_set_dt_id_set_get("a")),
     "ab"
   )
   testthat::expect_length(vm@var_var_set_dt_id_set_get("c"), 0L)
@@ -43,13 +43,14 @@ testthat::test_that("var_dt variables need not belong to any variable set", {
   )
   vm@var_assert(x = 1:2, var_nm = "a")
 
-  # removing a variable set does not remove variables
+  # removing a variable set removes variables which lose their last set,
+  # but variables which never had a set are kept
   vm@var_set_remove(id = "ab")
   testthat::expect_identical(
     unname(vm@var_meta_get_all("var_nm")),
-    c("a", "b", "c")
+    "c"
   )
-  testthat::expect_length(vm@var_var_set_dt_id_set_get("a"), 0L)
+  testthat::expect_length(vm@var_set_meta_get_all("id"), 0L)
 
   # variables in var_set_dt but not in var_dt are still dropped from sets
   vm <- vame::VariableMetadata(

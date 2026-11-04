@@ -107,6 +107,30 @@ vsd_set <- function(
   data_obj_set(vm, "var_set_dt", dt)
 }
 
+vsd_set_and_drop_orphans <- function(
+  vm,
+  dt
+) {
+  # @codedoc_comment_block vame:::vsd_set_and_drop_orphans
+  # Variables in `var_dt` which belonged to at least one variable set before
+  # `var_set_dt` was replaced with a subset but which no longer belong to any
+  # are removed from `var_dt`. Variables which did not belong to any variable
+  # set to begin with are kept.
+  # @codedoc_comment_block vame:::vsd_set_and_drop_orphans
+  assert_is_variablemetadata(vm, assertion_type = "prod_input")
+  dbc::assert_prod_input_is_data_table(dt)
+  old_var_nms <- unique(unlist(vsd_get(vm)[["var_nm_set"]]))
+  new_var_nms <- unique(unlist(dt[["var_nm_set"]]))
+  orphan_var_nms <- setdiff(old_var_nms, new_var_nms)
+  vsd_set(vm, dt)
+  if (length(orphan_var_nms) > 0) {
+    vd <- vd_get(vm)
+    vd <- vd[!vd[["var_nm"]] %in% orphan_var_nms, ]
+    vd_set(vm, vd)
+  }
+  return(invisible(NULL))
+}
+
 # vd_vsd funs ------------------------------------------------------------
 vd_vsd_linkage_refresh <- function(
   vm
@@ -150,9 +174,9 @@ vd_vsd_intersect <- function(
   # @codedoc_comment_block news("vame::VariableMetadata", "2026-11-04", "1.14.0")
   # `vame::VariableMetadata` no longer requires that every variable in
   # `var_dt` appears in some `var_set_dt$var_nm_set`. Such variables are now
-  # kept instead of being silently dropped. Similarly `vm@var_set_remove`
-  # and `vm@vame_subset_expr` no longer drop variables from `var_dt` that are
-  # no longer part of any variable set.
+  # kept instead of being silently dropped. Variables which lose their
+  # last variable set due to `vm@var_set_remove` or `vm@vame_subset_expr`
+  # are still dropped as before.
   # @codedoc_comment_block news("vame::VariableMetadata", "2026-11-04", "1.14.0")
   assert_is_variablemetadata(vm, assertion_type = "prod_input")
   vd <- vd_get(vm)
@@ -386,6 +410,8 @@ vame_subset_expr <- function(
       #   Raise an error if the result is not a `logical`,
       #   `integer`, or `NULL` object.
       # - Do the same with `var_set_dt_expr` and `eval_env[["var_set_dt"]]`.
+      #   When `var_set_dt` is subsetted:
+      # @codedoc_insert_comment_block vame:::vsd_set_and_drop_orphans
       # @codedoc_comment_block vm@vame_subset_expr
       stop(
         "Evaluation of `", expr_obj_nm, "` did not result in a `logical`, ",
@@ -401,7 +427,7 @@ vame_subset_expr <- function(
       switch(
         dt_nm,
         var_dt = vd_set(vm, eval_env[["var_dt"]]),
-        var_set_dt = vsd_set(vm, eval_env[["var_set_dt"]])
+        var_set_dt = vsd_set_and_drop_orphans(vm, eval_env[["var_set_dt"]])
       )
       vame_subset_expr_env[["need_to_intersect"]] <- TRUE
     }

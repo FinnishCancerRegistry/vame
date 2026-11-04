@@ -414,7 +414,7 @@ var_set_remove <- function(
   #   ),
   #   identical(
   #     vm@var_meta_get_all(meta_nm = "var_nm"),
-  #     c("a" = "a", "b" = "b")
+  #     c("b" = "b")
   #   )
   # )
   # @codedoc_comment_block function_example(vm@var_set_remove)
@@ -425,12 +425,11 @@ var_set_remove <- function(
   # @codedoc_comment_block vm@var_set_remove
   # Remove a variable set by `id`. Performs the following steps:
   #
-  # - Drop the row in `var_set_dt` with the supplied `id`. Variables in
-  #   `var_dt` are not removed even if they no longer belong to any
-  #   variable set.
+  # - Drop the row in `var_set_dt` with the supplied `id`.
+  # @codedoc_insert_comment_block vame:::vsd_set_and_drop_orphans
   # @codedoc_comment_block vm@var_set_remove
   vsd <- vsd[vsd_subset, ]
-  vsd_set(vm, vsd)
+  vsd_set_and_drop_orphans(vm, vsd)
   # @codedoc_comment_block vm@var_set_remove
   # - "Intersect" data in the `VariableMetadata` object:
   # @codedoc_insert_comment_block vame:::vd_vsd_intersect
