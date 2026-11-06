@@ -14,6 +14,13 @@ variable set.
 `var_dt` appears in some `var_set_dt$var_nm_set`. Such variables are now
 kept instead of being silently dropped.
 
+### vame::VariableMetadata
+
+The ***Usage*** part of the documentation of each slot function
+(e.g. `vm@vame_subset`) is now a multiline code block with one argument
+per line, and each argument's default value is shown,
+e.g. `var_dt_expr = NULL`.
+
 ### vm@vame_subset
 
 `vm@vame_subset` no longer removes variables from `var_dt` which lose

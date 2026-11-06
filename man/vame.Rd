@@ -417,6 +417,14 @@ variable set.
 kept instead of being silently dropped.
 }
 
+\subsection{vame::VariableMetadata}{
+
+The \emph{\strong{Usage}} part of the documentation of each slot function
+(e.g. \code{vm@vame_subset}) is now a multiline code block with one argument
+per line, and each argument's default value is shown,
+e.g. \code{var_dt_expr = NULL}.
+}
+
 \subsection{vm@vame_subset}{
 
 \code{vm@vame_subset} no longer removes variables from \code{var_dt} which lose

@@ -74,12 +74,12 @@ doc_slot_fun__ <- function(df = NULL, fun_nm) {
   description <- unlist(df[["comment_block"]][df[["key"]] == key])
   fun_arg_nms <- names(formals(match.fun(fun_nm)))
   slot_fun_arg_nms <- setdiff(fun_arg_nms, "vm")
-  # @codedoc_comment_block news("vame::VariableMetadata", "2026-11-06", "1.13.1.9000")
+  # @codedoc_comment_block news("vame::VariableMetadata", "2026-11-06", "1.14.0")
   # The ***Usage*** part of the documentation of each slot function
   # (e.g. `vm@vame_subset`) is now a multiline code block with one argument
   # per line, and each argument's default value is shown,
   # e.g. `var_dt_expr = NULL`.
-  # @codedoc_comment_block news("vame::VariableMetadata", "2026-11-06", "1.13.1.9000")
+  # @codedoc_comment_block news("vame::VariableMetadata", "2026-11-06", "1.14.0")
   lines <- c(
     paste0("@slot ", fun_nm),
     "",
