@@ -33,6 +33,16 @@ variable has no `value_space`, e.g. because it does not belong to any
 variable set.
 
 
+## News for version 1.13.1.9000
+
+### vame::VariableMetadata
+
+The ***Usage*** part of the documentation of each slot function
+(e.g. `vm@vame_subset`) is now a multiline code block with one argument
+per line, and each argument's default value is shown,
+e.g. `var_dt_expr = NULL`.
+
+
 ## News for version 1.13.1
 
 ### vm@var_set_value_space_eval

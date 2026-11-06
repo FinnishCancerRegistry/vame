@@ -440,6 +440,17 @@ variable set.
 
 }
 
+\subsection{News for version 1.13.1.9000}{
+\subsection{vame::VariableMetadata}{
+
+The \emph{\strong{Usage}} part of the documentation of each slot function
+(e.g. \code{vm@vame_subset}) is now a multiline code block with one argument
+per line, and each argument's default value is shown,
+e.g. \code{var_dt_expr = NULL}.
+}
+
+}
+
 \subsection{News for version 1.13.1}{
 \subsection{vm@var_set_value_space_eval}{
 

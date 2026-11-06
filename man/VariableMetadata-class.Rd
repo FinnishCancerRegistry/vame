@@ -149,7 +149,10 @@ Print \code{var_set_dt}.
 
 \emph{\strong{Usage}}
 
-\code{vm@var_set_dt_print(...)}
+\if{html}{\out{<div class="sourceCode">}}\preformatted{vm@var_set_dt_print(
+  ...
+)
+}\if{html}{\out{</div>}}
 
 \emph{\strong{Arguments}}
 
@@ -163,7 +166,8 @@ Returns a deep copy of \code{var_set_dt}.
 
 \emph{\strong{Usage}}
 
-\code{vm@var_set_dt_copy()}}
+\if{html}{\out{<div class="sourceCode">}}\preformatted{vm@var_set_dt_copy()
+}\if{html}{\out{</div>}}}
 
 \item{\code{var_set_meta_is_defined}}{\emph{\strong{Description}}
 
@@ -179,7 +183,11 @@ a missing (\code{?is.na}) value results in \code{FALSE}. Otherwise you get \code
 
 \emph{\strong{Usage}}
 
-\code{vm@var_set_meta_is_defined(id, meta_nm)}
+\if{html}{\out{<div class="sourceCode">}}\preformatted{vm@var_set_meta_is_defined(
+  id,
+  meta_nm
+)
+}\if{html}{\out{</div>}}
 
 \emph{\strong{Arguments}}
 
@@ -222,7 +230,11 @@ Get metadata for a specific variable set.
 
 \emph{\strong{Usage}}
 
-\code{vm@var_set_meta_get(id, meta_nm)}
+\if{html}{\out{<div class="sourceCode">}}\preformatted{vm@var_set_meta_get(
+  id,
+  meta_nm
+)
+}\if{html}{\out{</div>}}
 
 \emph{\strong{Arguments}}
 
@@ -264,7 +276,12 @@ correct assignment into a \code{list}-valued column.
 
 \emph{\strong{Usage}}
 
-\code{vm@var_set_meta_set(id, meta_nm, value)}
+\if{html}{\out{<div class="sourceCode">}}\preformatted{vm@var_set_meta_set(
+  id,
+  meta_nm,
+  value
+)
+}\if{html}{\out{</div>}}
 
 \emph{\strong{Arguments}}
 
@@ -334,7 +351,10 @@ Get specific metadata for every variable set.
 
 \emph{\strong{Usage}}
 
-\code{vm@var_set_meta_get_all(meta_nm)}
+\if{html}{\out{<div class="sourceCode">}}\preformatted{vm@var_set_meta_get_all(
+  meta_nm
+)
+}\if{html}{\out{</div>}}
 
 \emph{\strong{Arguments}}
 
@@ -378,7 +398,8 @@ Get every variable name set.
 
 \emph{\strong{Usage}}
 
-\code{vm@var_set_var_nm_set_get_all()}}
+\if{html}{\out{<div class="sourceCode">}}\preformatted{vm@var_set_var_nm_set_get_all()
+}\if{html}{\out{</div>}}}
 
 \item{\code{var_set_var_nm_set_get}}{\emph{\strong{Description}}
 
@@ -386,7 +407,10 @@ Get a specific variable name set.
 
 \emph{\strong{Usage}}
 
-\code{vm@var_set_var_nm_set_get(id)}
+\if{html}{\out{<div class="sourceCode">}}\preformatted{vm@var_set_var_nm_set_get(
+  id
+)
+}\if{html}{\out{</div>}}
 
 \emph{\strong{Arguments}}
 
@@ -401,7 +425,11 @@ Set a new value for a specific variable name set.
 
 \emph{\strong{Usage}}
 
-\code{vm@var_set_var_nm_set_set(id, value)}
+\if{html}{\out{<div class="sourceCode">}}\preformatted{vm@var_set_var_nm_set_set(
+  id,
+  value
+)
+}\if{html}{\out{</div>}}
 
 \emph{\strong{Arguments}}
 
@@ -420,7 +448,11 @@ Rename variable sets --- change \code{var_set_dt$id} values.
 
 \emph{\strong{Usage}}
 
-\code{vm@var_set_rename(old_ids, new_ids)}
+\if{html}{\out{<div class="sourceCode">}}\preformatted{vm@var_set_rename(
+  old_ids,
+  new_ids
+)
+}\if{html}{\out{</div>}}
 
 \emph{\strong{Arguments}}
 
@@ -474,7 +506,11 @@ any variable set to begin with are kept.
 
 \emph{\strong{Usage}}
 
-\code{vm@var_set_remove(id, drop_orphaned_vars)}
+\if{html}{\out{<div class="sourceCode">}}\preformatted{vm@var_set_remove(
+  id,
+  drop_orphaned_vars = FALSE
+)
+}\if{html}{\out{</div>}}
 
 \emph{\strong{Arguments}}
 
@@ -548,7 +584,10 @@ Get specific \code{var_set_dt$maker}.
 
 \emph{\strong{Usage}}
 
-\code{vm@var_set_maker_get(id)}
+\if{html}{\out{<div class="sourceCode">}}\preformatted{vm@var_set_maker_get(
+  id
+)
+}\if{html}{\out{</div>}}
 
 \emph{\strong{Arguments}}
 
@@ -563,7 +602,11 @@ Assign specific \code{var_set_dt$maker}.
 
 \emph{\strong{Usage}}
 
-\code{vm@var_set_maker_set(id, value)}
+\if{html}{\out{<div class="sourceCode">}}\preformatted{vm@var_set_maker_set(
+  id,
+  value
+)
+}\if{html}{\out{</div>}}
 
 \emph{\strong{Arguments}}
 
@@ -614,7 +657,13 @@ elements \code{id}, \code{var_nms}, and \code{dep_var_nm_set}.
 
 \emph{\strong{Usage}}
 
-\code{vm@var_set_make(data, id, var_nms, env)}
+\if{html}{\out{<div class="sourceCode">}}\preformatted{vm@var_set_make(
+  data,
+  id = NULL,
+  var_nms = NULL,
+  env = NULL
+)
+}\if{html}{\out{</div>}}
 
 \emph{\strong{Arguments}}
 
@@ -665,7 +714,10 @@ Get list of dependency variable sets of a \code{maker}. Always returns a list of
 
 \emph{\strong{Usage}}
 
-\code{vm@var_set_maker_get_dep_var_nm_sets(id)}
+\if{html}{\out{<div class="sourceCode">}}\preformatted{vm@var_set_maker_get_dep_var_nm_sets(
+  id
+)
+}\if{html}{\out{</div>}}
 
 \emph{\strong{Arguments}}
 
@@ -763,7 +815,14 @@ columns \code{id}, \code{var_nms}, and \code{dep_var_nm_set} in the order of exe
 
 \emph{\strong{Usage}}
 
-\code{vm@vame_make(data, ids, var_nms, env, optional_steps)}
+\if{html}{\out{<div class="sourceCode">}}\preformatted{vm@vame_make(
+  data,
+  ids = NULL,
+  var_nms = NULL,
+  env = NULL,
+  optional_steps = NULL
+)
+}\if{html}{\out{</div>}}
 
 \emph{\strong{Arguments}}
 
@@ -853,7 +912,12 @@ performance (no big copies) and reliability.
 
 \emph{\strong{Usage}}
 
-\code{vm@var_set_value_space_eval(id, var_nms, env)}
+\if{html}{\out{<div class="sourceCode">}}\preformatted{vm@var_set_value_space_eval(
+  id,
+  var_nms = NULL,
+  env = NULL
+)
+}\if{html}{\out{</div>}}
 
 \emph{\strong{Arguments}}
 
@@ -929,7 +993,10 @@ Get the \code{value_space} of a specific variable set without evaluting it.
 
 \emph{\strong{Usage}}
 
-\code{vm@var_set_value_space_get(id)}
+\if{html}{\out{<div class="sourceCode">}}\preformatted{vm@var_set_value_space_get(
+  id
+)
+}\if{html}{\out{</div>}}
 
 \emph{\strong{Arguments}}
 
@@ -944,7 +1011,11 @@ Set the \code{value_space} of a variable set.
 
 \emph{\strong{Usage}}
 
-\code{vm@var_set_value_space_set(id, value_space)}
+\if{html}{\out{<div class="sourceCode">}}\preformatted{vm@var_set_value_space_set(
+  id,
+  value_space
+)
+}\if{html}{\out{</div>}}
 
 \emph{\strong{Arguments}}
 
@@ -975,7 +1046,12 @@ up to 10 times until result is not \code{name} or \code{call} object.
 
 \emph{\strong{Usage}}
 
-\code{vm@var_set_value_space_dt_subset(id, expr, enclos)}
+\if{html}{\out{<div class="sourceCode">}}\preformatted{vm@var_set_value_space_dt_subset(
+  id,
+  expr,
+  enclos = NULL
+)
+}\if{html}{\out{</div>}}
 
 \emph{\strong{Arguments}}
 
@@ -1043,7 +1119,10 @@ Retrieve value space sampler for given \code{id} from \code{var_set_dt$sampler}.
 
 \emph{\strong{Usage}}
 
-\code{vm@var_set_value_space_sampler_get(id)}
+\if{html}{\out{<div class="sourceCode">}}\preformatted{vm@var_set_value_space_sampler_get(
+  id
+)
+}\if{html}{\out{</div>}}
 
 \emph{\strong{Arguments}}
 
@@ -1077,7 +1156,11 @@ the \code{sampler} object is used.
 
 \emph{\strong{Usage}}
 
-\code{vm@var_set_value_space_sampler_set(id, value)}
+\if{html}{\out{<div class="sourceCode">}}\preformatted{vm@var_set_value_space_sampler_set(
+  id,
+  value
+)
+}\if{html}{\out{</div>}}
 
 \emph{\strong{Arguments}}
 
@@ -1137,7 +1220,14 @@ list.
 
 \emph{\strong{Usage}}
 
-\code{vm@var_set_value_space_sample(id, var_nms, n, data, env)}
+\if{html}{\out{<div class="sourceCode">}}\preformatted{vm@var_set_value_space_sample(
+  id = NULL,
+  var_nms = NULL,
+  n = 1L,
+  data = NULL,
+  env = NULL
+)
+}\if{html}{\out{</div>}}
 
 \emph{\strong{Arguments}}
 
@@ -1273,7 +1363,11 @@ Returns \code{TRUE} if \code{from_var_nm} can be aggregated into \code{to_var_nm
 
 \emph{\strong{Usage}}
 
-\code{vm@var_is_aggregateable_to(from_var_nm, to_var_nm)}
+\if{html}{\out{<div class="sourceCode">}}\preformatted{vm@var_is_aggregateable_to(
+  from_var_nm,
+  to_var_nm
+)
+}\if{html}{\out{</div>}}
 
 \emph{\strong{Arguments}}
 
@@ -1334,7 +1428,12 @@ exact \code{class}. Raise an informative error if that is not the case.
 
 \emph{\strong{Usage}}
 
-\code{vm@var_aggregate(x, from_var_nm, to_var_nm)}
+\if{html}{\out{<div class="sourceCode">}}\preformatted{vm@var_aggregate(
+  x,
+  from_var_nm,
+  to_var_nm
+)
+}\if{html}{\out{</div>}}
 
 \emph{\strong{Arguments}}
 
@@ -1371,7 +1470,11 @@ any way to decide which value space to use.
 
 \emph{\strong{Usage}}
 
-\code{vm@var_value_space_eval(var_nm, env)}
+\if{html}{\out{<div class="sourceCode">}}\preformatted{vm@var_value_space_eval(
+  var_nm,
+  env = NULL
+)
+}\if{html}{\out{</div>}}
 
 \emph{\strong{Arguments}}
 
@@ -1416,7 +1519,15 @@ Assert that values in \code{x} are proper values of \code{var_nm}.
 
 \emph{\strong{Usage}}
 
-\code{vm@var_assert(x, var_nm, x_nm, call, assertion_type, env)}
+\if{html}{\out{<div class="sourceCode">}}\preformatted{vm@var_assert(
+  x,
+  var_nm,
+  x_nm = NULL,
+  call = NULL,
+  assertion_type = NULL,
+  env = NULL
+)
+}\if{html}{\out{</div>}}
 
 \emph{\strong{Arguments}}
 
@@ -1430,15 +1541,15 @@ Name of a variable.
 
 \strong{\code{x_nm}} \verb{[NULL, character]} (default \code{NULL})
 
-See \link[dbc:handle_arg_x_nm]{dbc::handle_arg_x_nm}.
+See \link[dbc:argument_handlers]{dbc::handle_arg_x_nm}.
 
 \strong{\code{call}} \verb{[NULL, language]} (default \code{NULL})
 
-See \link[dbc:handle_arg_call]{dbc::handle_arg_call}.
+See \link[dbc:argument_handlers]{dbc::handle_arg_call}.
 
 \strong{\code{assertion_type}} \verb{[NULL, character]} (default \code{NULL})
 
-See \link[dbc:handle_arg_assertion_type]{dbc::handle_arg_assertion_type}.
+See \link[dbc:assertion_types]{dbc::handle_arg_assertion_type}.
 
 \strong{\code{env}} \verb{[NULL, environment]} (default \code{NULL})
 
@@ -1485,7 +1596,10 @@ Print \code{var_dt}.
 
 \emph{\strong{Usage}}
 
-\code{vm@var_dt_print(...)}
+\if{html}{\out{<div class="sourceCode">}}\preformatted{vm@var_dt_print(
+  ...
+)
+}\if{html}{\out{</div>}}
 
 \emph{\strong{Arguments}}
 
@@ -1499,7 +1613,8 @@ Returns a deep copy of \code{var_dt}.
 
 \emph{\strong{Usage}}
 
-\code{vm@var_dt_copy()}}
+\if{html}{\out{<div class="sourceCode">}}\preformatted{vm@var_dt_copy()
+}\if{html}{\out{</div>}}}
 
 \item{\code{var_meta_is_defined}}{\emph{\strong{Description}}
 
@@ -1515,7 +1630,11 @@ element is \code{NA} or not.
 
 \emph{\strong{Usage}}
 
-\code{vm@var_meta_is_defined(var_nm, meta_nm)}
+\if{html}{\out{<div class="sourceCode">}}\preformatted{vm@var_meta_is_defined(
+  var_nm,
+  meta_nm
+)
+}\if{html}{\out{</div>}}
 
 \emph{\strong{Arguments}}
 
@@ -1557,7 +1676,11 @@ Get metadata for a variable.
 
 \emph{\strong{Usage}}
 
-\code{vm@var_meta_get(var_nm, meta_nm)}
+\if{html}{\out{<div class="sourceCode">}}\preformatted{vm@var_meta_get(
+  var_nm,
+  meta_nm
+)
+}\if{html}{\out{</div>}}
 
 \emph{\strong{Arguments}}
 
@@ -1598,7 +1721,12 @@ correct assignment into a \code{list}-valued column.
 
 \emph{\strong{Usage}}
 
-\code{vm@var_meta_set(var_nm, meta_nm, value)}
+\if{html}{\out{<div class="sourceCode">}}\preformatted{vm@var_meta_set(
+  var_nm,
+  meta_nm,
+  value
+)
+}\if{html}{\out{</div>}}
 
 \emph{\strong{Arguments}}
 
@@ -1657,7 +1785,10 @@ Get metadata for all variables.
 
 \emph{\strong{Usage}}
 
-\code{vm@var_meta_get_all(meta_nm)}
+\if{html}{\out{<div class="sourceCode">}}\preformatted{vm@var_meta_get_all(
+  meta_nm
+)
+}\if{html}{\out{</div>}}
 
 \emph{\strong{Arguments}}
 
@@ -1699,7 +1830,11 @@ functions --- you will have to do that youself.
 
 \emph{\strong{Usage}}
 
-\code{vm@var_rename(old_var_nms, new_var_nms)}
+\if{html}{\out{<div class="sourceCode">}}\preformatted{vm@var_rename(
+  old_var_nms,
+  new_var_nms
+)
+}\if{html}{\out{</div>}}
 
 \emph{\strong{Arguments}}
 
@@ -1740,7 +1875,10 @@ Remove a variable.
 
 \emph{\strong{Usage}}
 
-\code{vm@var_remove(var_nm)}
+\if{html}{\out{<div class="sourceCode">}}\preformatted{vm@var_remove(
+  var_nm
+)
+}\if{html}{\out{</div>}}
 
 \emph{\strong{Arguments}}
 
@@ -1779,7 +1917,10 @@ Set the labeler for a variable.
 
 \emph{\strong{Usage}}
 
-\code{vm@var_labeler_get(var_nm)}
+\if{html}{\out{<div class="sourceCode">}}\preformatted{vm@var_labeler_get(
+  var_nm
+)
+}\if{html}{\out{</div>}}
 
 \emph{\strong{Arguments}}
 
@@ -1791,7 +1932,11 @@ Name of a variable.}
 
 \emph{\strong{Usage}}
 
-\code{vm@var_labeler_set(var_nm, value)}
+\if{html}{\out{<div class="sourceCode">}}\preformatted{vm@var_labeler_set(
+  var_nm,
+  value
+)
+}\if{html}{\out{</div>}}
 
 \emph{\strong{Arguments}}
 
@@ -1823,7 +1968,13 @@ left join on the \code{data.table}.
 
 \emph{\strong{Usage}}
 
-\code{vm@var_labels_get(x, var_nm, label_nm, labeler_env)}
+\if{html}{\out{<div class="sourceCode">}}\preformatted{vm@var_labels_get(
+  x,
+  var_nm,
+  label_nm = NULL,
+  labeler_env = NULL
+)
+}\if{html}{\out{</div>}}
 
 \emph{\strong{Arguments}}
 
@@ -1901,7 +2052,10 @@ Set the describer for a variable.
 
 \emph{\strong{Usage}}
 
-\code{vm@var_describer_get(var_nm)}
+\if{html}{\out{<div class="sourceCode">}}\preformatted{vm@var_describer_get(
+  var_nm
+)
+}\if{html}{\out{</div>}}
 
 \emph{\strong{Arguments}}
 
@@ -1913,7 +2067,11 @@ Name of a variable.}
 
 \emph{\strong{Usage}}
 
-\code{vm@var_describer_set(var_nm, value)}
+\if{html}{\out{<div class="sourceCode">}}\preformatted{vm@var_describer_set(
+  var_nm,
+  value
+)
+}\if{html}{\out{</div>}}
 
 \emph{\strong{Arguments}}
 
@@ -1945,7 +2103,12 @@ the list.
 
 \emph{\strong{Usage}}
 
-\code{vm@var_description_get(var_nm, descr_nm, describer_env)}
+\if{html}{\out{<div class="sourceCode">}}\preformatted{vm@var_description_get(
+  var_nm,
+  descr_nm = NULL,
+  describer_env = NULL
+)
+}\if{html}{\out{</div>}}
 
 \emph{\strong{Arguments}}
 
@@ -2029,7 +2192,13 @@ sample for only one variable.
 
 \emph{\strong{Usage}}
 
-\code{vm@var_value_space_sample(var_nm, n, data, env)}
+\if{html}{\out{<div class="sourceCode">}}\preformatted{vm@var_value_space_sample(
+  var_nm,
+  n = 1L,
+  data = NULL,
+  env = NULL
+)
+}\if{html}{\out{</div>}}
 
 \emph{\strong{Arguments}}
 
@@ -2097,7 +2266,10 @@ Retrieve positions (indices) of where \code{var_nm} is part of
 
 \emph{\strong{Usage}}
 
-\code{vm@var_var_set_dt_pos_set_get(var_nm)}
+\if{html}{\out{<div class="sourceCode">}}\preformatted{vm@var_var_set_dt_pos_set_get(
+  var_nm
+)
+}\if{html}{\out{</div>}}
 
 \emph{\strong{Arguments}}
 
@@ -2112,7 +2284,10 @@ Retrieve \code{var_set_dt$id} values of where \code{var_nm} is part of
 
 \emph{\strong{Usage}}
 
-\code{vm@var_var_set_dt_id_set_get(var_nm)}
+\if{html}{\out{<div class="sourceCode">}}\preformatted{vm@var_var_set_dt_id_set_get(
+  var_nm
+)
+}\if{html}{\out{</div>}}
 
 \emph{\strong{Arguments}}
 
@@ -2129,7 +2304,12 @@ into the harmonised forms. See \strong{Examples}.
 
 \emph{\strong{Usage}}
 
-\code{vm@vame_harmonise_dt(dt, var_nms, inplace)}
+\if{html}{\out{<div class="sourceCode">}}\preformatted{vm@vame_harmonise_dt(
+  dt,
+  var_nms = NULL,
+  inplace = TRUE
+)
+}\if{html}{\out{</div>}}
 
 \emph{\strong{Arguments}}
 
@@ -2275,7 +2455,8 @@ Take a deep copy of a VariableMetadata object. See \code{?data.table::copy}.
 
 \emph{\strong{Usage}}
 
-\code{vm@vame_copy()}
+\if{html}{\out{<div class="sourceCode">}}\preformatted{vm@vame_copy()
+}\if{html}{\out{</div>}}
 
 \emph{\strong{Examples}}
 
@@ -2338,7 +2519,13 @@ any variable set to begin with are kept.
 
 \emph{\strong{Usage}}
 
-\code{vm@vame_subset(var_dt_expr, var_set_dt_expr, enclos, drop_orphaned_vars)}
+\if{html}{\out{<div class="sourceCode">}}\preformatted{vm@vame_subset(
+  var_dt_expr = NULL,
+  var_set_dt_expr = NULL,
+  enclos = NULL,
+  drop_orphaned_vars = FALSE
+)
+}\if{html}{\out{</div>}}
 
 \emph{\strong{Arguments}}
 
@@ -2456,7 +2643,10 @@ made into \code{vm} in-place.
 
 \emph{\strong{Usage}}
 
-\code{vm@vame_union_append(vm_2)}
+\if{html}{\out{<div class="sourceCode">}}\preformatted{vm@vame_union_append(
+  vm_2
+)
+}\if{html}{\out{</div>}}
 
 \emph{\strong{Arguments}}
 
@@ -2500,7 +2690,10 @@ Returns \code{TRUE} if \code{vame_list} has non-\code{NULL} element named \code{
 
 \emph{\strong{Usage}}
 
-\code{vm@vame_meta_is_defined(meta_nm)}
+\if{html}{\out{<div class="sourceCode">}}\preformatted{vm@vame_meta_is_defined(
+  meta_nm
+)
+}\if{html}{\out{</div>}}
 
 \emph{\strong{Arguments}}
 
@@ -2515,7 +2708,10 @@ Retrieve an element of \code{vame_list}.
 
 \emph{\strong{Usage}}
 
-\code{vm@vame_meta_get(meta_nm)}
+\if{html}{\out{<div class="sourceCode">}}\preformatted{vm@vame_meta_get(
+  meta_nm
+)
+}\if{html}{\out{</div>}}
 
 \emph{\strong{Arguments}}
 
@@ -2530,7 +2726,11 @@ Assign an element of \code{vame_meta_set}.
 
 \emph{\strong{Usage}}
 
-\code{vm@vame_meta_set(meta_nm, value)}
+\if{html}{\out{<div class="sourceCode">}}\preformatted{vm@vame_meta_set(
+  meta_nm,
+  value
+)
+}\if{html}{\out{</div>}}
 
 \emph{\strong{Arguments}}
 
@@ -2549,7 +2749,8 @@ Retrieve \code{meta_list$sampler}.
 
 \emph{\strong{Usage}}
 
-\code{vm@vame_value_space_sampler_get()}}
+\if{html}{\out{<div class="sourceCode">}}\preformatted{vm@vame_value_space_sampler_get()
+}\if{html}{\out{</div>}}}
 
 \item{\code{vame_value_space_sampler_set}}{\emph{\strong{Description}}
 
@@ -2576,7 +2777,10 @@ the \code{sampler} object is used.
 
 \emph{\strong{Usage}}
 
-\code{vm@vame_value_space_sampler_set(value)}
+\if{html}{\out{<div class="sourceCode">}}\preformatted{vm@vame_value_space_sampler_set(
+  value
+)
+}\if{html}{\out{</div>}}
 
 \emph{\strong{Arguments}}
 
@@ -2605,7 +2809,14 @@ Else all columns for each variable set identified by \code{ids} are present.
 
 \emph{\strong{Usage}}
 
-\code{vm@vame_value_space_sample(ids, n, data, var_nms, env)}
+\if{html}{\out{<div class="sourceCode">}}\preformatted{vm@vame_value_space_sample(
+  ids = NULL,
+  n = 1L,
+  data = NULL,
+  var_nms = NULL,
+  env = NULL
+)
+}\if{html}{\out{</div>}}
 
 \emph{\strong{Arguments}}
 
@@ -2663,7 +2874,14 @@ rows.
 
 \emph{\strong{Usage}}
 
-\code{vm@vame_value_space_sample_default(ids, env, var_nms, data, n)}
+\if{html}{\out{<div class="sourceCode">}}\preformatted{vm@vame_value_space_sample_default(
+  ids = NULL,
+  env = NULL,
+  var_nms = NULL,
+  data = NULL,
+  n = 1L
+)
+}\if{html}{\out{</div>}}
 
 \emph{\strong{Arguments}}
 
@@ -2717,7 +2935,8 @@ Run \code{print(summary(meta_list))}.
 
 \emph{\strong{Usage}}
 
-\code{vm@vame_list_print()}}
+\if{html}{\out{<div class="sourceCode">}}\preformatted{vm@vame_list_print()
+}\if{html}{\out{</div>}}}
 
 \item{\code{vame_list_copy}}{\emph{\strong{Description}}
 
@@ -2725,7 +2944,8 @@ Get a deep copy of \code{meta_list}.
 
 \emph{\strong{Usage}}
 
-\code{vm@vame_list_copy()}}
+\if{html}{\out{<div class="sourceCode">}}\preformatted{vm@vame_list_copy()
+}\if{html}{\out{</div>}}}
 
 \item{\code{vame_category_space_dt_list}}{\emph{\strong{Description}}
 
@@ -2733,7 +2953,11 @@ Get list of category space \code{data.table} objects.
 
 \emph{\strong{Usage}}
 
-\code{vm@vame_category_space_dt_list(var_nms, env)}
+\if{html}{\out{<div class="sourceCode">}}\preformatted{vm@vame_category_space_dt_list(
+  var_nms,
+  env = NULL
+)
+}\if{html}{\out{</div>}}
 
 \emph{\strong{Arguments}}
 
@@ -2838,7 +3062,11 @@ Get a category space \code{data.table}.
 
 \emph{\strong{Usage}}
 
-\code{vm@vame_category_space_dt(var_nms, env)}
+\if{html}{\out{<div class="sourceCode">}}\preformatted{vm@vame_category_space_dt(
+  var_nms,
+  env = NULL
+)
+}\if{html}{\out{</div>}}
 
 \emph{\strong{Arguments}}
 
@@ -3423,6 +3651,15 @@ to do that.
 \code{vm@var_value_space_eval} now raises an informative error when the
 variable has no \code{value_space}, e.g. because it does not belong to any
 variable set.
+}
+
+\section{News for version 1.13.1.9000}{
+
+
+The \emph{\strong{Usage}} part of the documentation of each slot function
+(e.g. \code{vm@vame_subset}) is now a multiline code block with one argument
+per line, and each argument's default value is shown,
+e.g. \code{var_dt_expr = NULL}.
 }
 
 \section{News for version 1.13.1}{
