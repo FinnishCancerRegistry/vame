@@ -166,12 +166,14 @@ value_space_type_funs__ <- list(
         dbc::report_has_length(
           x,
           expected_length = 1L,
-          x_nm = x_nm, call = call
+          x_nm = x_nm,
+          call = call
         ),
         dbc::report_has_names(
           x,
           required_names = "class_set",
-          x_nm = x_nm, call = call
+          x_nm = x_nm,
+          call = call
         ),
         dbc::report_is_character_nonNA_vector(
           x[["class_set"]],
@@ -216,8 +218,10 @@ value_space_type_funs__ <- list(
       # @codedoc_comment_block defaults(var_set_dt$sampler)
 
       if (!identical(vs[["unrestricted"]][["class_set"]], "character")) {
-        stop("No default sampler defined for value_space_type ",
-             "\"unrestricted\" unless class_set = \"character\"")
+        stop(
+          "No default sampler defined for value_space_type ",
+          "\"unrestricted\" unless class_set = \"character\""
+        )
       }
       pool <- c(letters, LETTERS, 0:9)
       out <- vapply(
@@ -246,7 +250,8 @@ value_space_type_funs__ <- list(
       call <- dbc::handle_arg_call(call)
       dbc::report_is_character_nonNA_atom(
         x,
-        x_nm = x_nm, call = call
+        x_nm = x_nm,
+        call = call
       )
     },
     var_value_assertion = function(
@@ -296,17 +301,20 @@ value_space_type_funs__ <- list(
       rbind(
         dbc::report_is_list(
           x,
-          x_nm = x_nm, call = call
+          x_nm = x_nm,
+          call = call
         ),
         dbc::report_has_length(
           x,
           expected_length = 4L,
-          x_nm = x_nm, call = call
+          x_nm = x_nm,
+          call = call
         ),
         dbc::report_has_names(
           x,
           required_names = c("lo", "hi", "lo_inclusive", "hi_inclusive"),
-          x_nm = x_nm, call = call
+          x_nm = x_nm,
+          call = call
         ),
         dbc::report_is_logical_nonNA_atom(
           x[["lo_inclusive"]],

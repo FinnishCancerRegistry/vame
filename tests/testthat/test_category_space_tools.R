@@ -8,7 +8,7 @@ testthat::test_that("category_space_dt_list_to_category_space_dt__ works", {
   exp <- data.table::copy(dtl[[2]])
   exp[i = dtl[[1]], on = "a", j = "b" := i.b]
   exp <- exp[rep(seq_len(.N), each = 2L), ]
-  exp[j = "d" := rep(5:6, .N/2)]
+  exp[j = "d" := rep(5:6, .N / 2)]
   data.table::setcolorder(exp, names(obs))
   data.table::setkeyv(obs, names(obs))
   data.table::setkeyv(exp, names(exp))

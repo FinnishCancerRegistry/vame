@@ -47,18 +47,27 @@ create_call__ <- function(
 ) {
   arg_list_expr <- substitute(arg_list)
   if (is.name(arg_list_expr)) {
-    arg_list_expr <- eval(substitute(
-      substitute(EXPR, environment()),
-      list(EXPR = arg_list_expr)
-    ), envir = parent.frame(1L))
+    arg_list_expr <- eval(
+      substitute(
+        substitute(EXPR, environment()),
+        list(EXPR = arg_list_expr)
+      ),
+      envir = parent.frame(1L)
+    )
   }
   if (is.null(arg_list_expr)) {
     fun <- eval(parse(text = fun_nm)[[1]], envir = fun_search_env)
     def_arg_nms <- intersect(names(formals(fun)), ls(arg_search_env))
     if (length(def_arg_nms) > 0) {
-      arg_list_expr <- parse(text = paste0(
-        "list(", def_arg_nms, " = ", def_arg_nms, ")"
-      ))[[1]]
+      arg_list_expr <- parse(
+        text = paste0(
+          "list(",
+          def_arg_nms,
+          " = ",
+          def_arg_nms,
+          ")"
+        )
+      )[[1]]
     } else {
       arg_list_expr <- quote(list())
     }

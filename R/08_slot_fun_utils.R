@@ -62,7 +62,8 @@ handle_arg_data__ <- function(
             message = paste0(
               "Arg `data` was of class `list`, and had element `data$df`, but ",
               "`data$df` was not a `data.frame`/`data.table` object. Instead ",
-              "it had class vector ", deparse1(class(data[["df"]]))
+              "it had class vector ",
+              deparse1(class(data[["df"]]))
             ),
             call = parent_call
           ))
@@ -216,11 +217,14 @@ handle_arg_ids_et_var_nms_inplace__ <- function(
       dt <- data.table::data.table(
         id = rep(ids, times = n_found_meta_nms_by_id),
         meta_nm = unlist(found_meta_nms_by_id),
-        var_nm_set_length = rep(vapply(
-          all_var_nm_sets[is_usable_id],
-          length,
-          integer(1L)
-        ), times = n_found_meta_nms_by_id)
+        var_nm_set_length = rep(
+          vapply(
+            all_var_nm_sets[is_usable_id],
+            length,
+            integer(1L)
+          ),
+          times = n_found_meta_nms_by_id
+        )
       )
       if (require_meta_style %in% c("and", "multi_and")) {
         good_ids <- ids[
@@ -230,9 +234,13 @@ handle_arg_ids_et_var_nms_inplace__ <- function(
         if (nrow(dt) == 0) {
           stop(
             "Could not determine `ids` for ",
-            "`var_nms = ", deparse1(unname(var_nms)), "`: ",
+            "`var_nms = ",
+            deparse1(unname(var_nms)),
+            "`: ",
             "No variable set has all required ",
-            "metadata `", deparse1(required_var_set_meta_nms), "`"
+            "metadata `",
+            deparse1(required_var_set_meta_nms),
+            "`"
           )
         }
       }
@@ -289,7 +297,9 @@ handle_arg_ids_et_var_nms_inplace__ <- function(
       msg <- paste0(
         "`ids` was `NULL` and `var_nms` was used to infer the `ids`. ",
         "However, there was no applicable variable set for the ",
-        "following `var_nms`: ", deparse1(miss_var_nms), "."
+        "following `var_nms`: ",
+        deparse1(miss_var_nms),
+        "."
       )
       if (!is.null(required_var_set_meta_nms)) {
         msg <- paste0(
@@ -311,9 +321,12 @@ handle_arg_ids_et_var_nms_inplace__ <- function(
     inferred_var_nms <- unlist(all_var_nm_sets[match(ids, all_ids)])
     idless_var_nms <- setdiff(var_nms, inferred_var_nms)
     if (length(idless_var_nms) > 0) {
-      stop("Arguments `ids` and `var_nms` are incongruent: `var_nms` contains ",
-           "these variable names not found in any of the variable name sets ",
-           "for the supplied `ids`: ", deparse1(idless_var_nms))
+      stop(
+        "Arguments `ids` and `var_nms` are incongruent: `var_nms` contains ",
+        "these variable names not found in any of the variable name sets ",
+        "for the supplied `ids`: ",
+        deparse1(idless_var_nms)
+      )
     }
   }
   calling_env[[ids_arg_nm]] <- ids
@@ -335,8 +348,10 @@ var_set_maker_req_obj_nm_sets__ <- function(vm, id = NULL, maker = NULL) {
   } else if (is.function(maker)) {
     out <- list(names(formals(maker)))
   } else {
-    stop("Internal error: could not determine required object names for a ",
-         "`maker` --- it was neither a list nor a function.")
+    stop(
+      "Internal error: could not determine required object names for a ",
+      "`maker` --- it was neither a list nor a function."
+    )
   }
   return(out)
 }
