@@ -226,7 +226,9 @@ var_set_meta_set <- function(
   # @codedoc_comment_block vm@var_set_meta_set
   vsd <- vsd_get(vm)
   if (
-    meta_nm %in% names(vsd) && is.list(vsd[[meta_nm]]) ||
+    meta_nm %in%
+      names(vsd) &&
+      is.list(vsd[[meta_nm]]) ||
       meta_nm %in% c("value_space", "maker")
   ) {
     value <- list(value)
@@ -445,11 +447,11 @@ var_set_remove <- function(
   # )
   # @codedoc_comment_block function_example(vm@var_set_remove)
 
-  # @codedoc_comment_block news("vm@var_set_remove", "2026-11-06", "1.13.1.9000")
+  # @codedoc_comment_block news("vm@var_set_remove", "2026-11-06", "1.14.0")
   # `vm@var_set_remove` no longer removes variables from `var_dt` which lose
   # their last variable set by default. Gained argument `drop_orphaned_vars`
   # to do that.
-  # @codedoc_comment_block news("vm@var_set_remove", "2026-11-06", "1.13.1.9000")
+  # @codedoc_comment_block news("vm@var_set_remove", "2026-11-06", "1.14.0")
   assert_is_var_set_id(vm, id)
   # @codedoc_comment_block doc_slot_fun_arg(drop_orphaned_vars)
   # **`drop_orphaned_vars`** `[logical]` (default `FALSE`)
@@ -814,8 +816,11 @@ var_set_make <- function(
     var_nms_arg_nm = "var_nms"
   )
   if (length(id) != 1L) {
-    stop("`id` must be of length one but inferred `id` was `",
-         deparse1(id), "`. Consider passing `id` explicitly.")
+    stop(
+      "`id` must be of length one but inferred `id` was `",
+      deparse1(id),
+      "`. Consider passing `id` explicitly."
+    )
   }
   # @codedoc_comment_block vame::var_set_make::data
   # @codedoc_insert_comment_block specs(vame:::handle_arg_data__("arg_list"))
@@ -860,7 +865,9 @@ var_set_make <- function(
         msg <- c(
           msg,
           paste0(
-            "These were missing: `", deparse1(miss_req_obj_nm_sets[[1]]), "`."
+            "These were missing: `",
+            deparse1(miss_req_obj_nm_sets[[1]]),
+            "`."
           )
         )
       } else {
@@ -868,9 +875,13 @@ var_set_make <- function(
           msg,
           "Make sure `data` contains all of the objects of at least one ",
           "of these sets: ",
-          vapply(req_obj_nm_sets, function(set) {
-            sprintf("\n- `%s`", deparse1(set))
-          }, character(1L))
+          vapply(
+            req_obj_nm_sets,
+            function(set) {
+              sprintf("\n- `%s`", deparse1(set))
+            },
+            character(1L)
+          )
         )
       }
       stop(msg)
@@ -933,8 +944,10 @@ var_set_make <- function(
     } else if (is.call(maker[["maker"]])) {
       maker_call <- maker[["maker"]]
     } else {
-      stop("No logic defined for situation where element `maker` is not ",
-           "a `function`, a `call` object, nor \"var_aggregate\".")
+      stop(
+        "No logic defined for situation where element `maker` is not ",
+        "a `function`, a `call` object, nor \"var_aggregate\"."
+      )
     }
     dt <- eval(maker_call, envir = make_env)
   } else {
@@ -1164,7 +1177,8 @@ vame_make <- function(
           "or fix one or more of the `maker`s. See the printed table above ",
           "for more information. Argument `data` contains objects with names ",
           "(first five)`",
-          deparse1(utils::head(unname(data_obj_nm_set), 5L)), "`"
+          deparse1(utils::head(unname(data_obj_nm_set), 5L)),
+          "`"
         )
       }
       order_of_ids[i] <- match(makeable_ids, ids)[1L]
@@ -1353,7 +1367,6 @@ var_set_value_space_eval <- function(
   # ))
   # @codedoc_comment_block function_example(vm@var_set_value_space_eval)
 
-
   # @codedoc_comment_block news("vm@var_set_value_space_eval", "2023-07-03", "0.1.1")
   # New slot `vm@var_set_value_space_eval`.
   # @codedoc_comment_block news("vm@var_set_value_space_eval", "2023-07-03", "0.1.1")
@@ -1403,8 +1416,7 @@ var_set_value_space_eval <- function(
   # @codedoc_comment_block doc_slot_fun_arg(env)
   dbc::assert_is_one_of(
     env,
-    funs = list(dbc::report_is_NULL,
-                dbc::report_is_environment)
+    funs = list(dbc::report_is_NULL, dbc::report_is_environment)
   )
   if (is.null(env)) {
     env <- parent.frame(1L)
@@ -1443,7 +1455,7 @@ var_set_value_space_eval <- function(
     ) {
       dt <- var_labeler_get(vm = vm, var_nm = var_nms)
       #' @importFrom data.table .SD
-      dt <- dt[j  = .SD, .SDcols = "x"]
+      dt <- dt[j = .SD, .SDcols = "x"]
       data.table::setnames(dt, var_nms)
       value_space <- list(dt = dt)
       assert_is_value_space(
@@ -1514,14 +1526,18 @@ var_set_value_space_eval <- function(
     } else if (is.list(tmp) && "lo" %in% names(tmp)) {
       names(value_space) <- "bounds"
     } else {
-      stop("value space for var_set with id = ", deparse1(id),
-           " was of type expr or fun, but did not evaluate into ",
-           "a proper value_space object nor the contents of value_space types ",
-           "dt, set, nor bounds (data.table, vector, and named list, ",
-           "respectively). Output had class(es) ",
-           deparse1(class(tmp)), ". It is recommended that a value_space ",
-           "of type expr or fun evaluates into a proper value_space object, ",
-           "e.g. into list(set = 1:3).")
+      stop(
+        "value space for var_set with id = ",
+        deparse1(id),
+        " was of type expr or fun, but did not evaluate into ",
+        "a proper value_space object nor the contents of value_space types ",
+        "dt, set, nor bounds (data.table, vector, and named list, ",
+        "respectively). Output had class(es) ",
+        deparse1(class(tmp)),
+        ". It is recommended that a value_space ",
+        "of type expr or fun evaluates into a proper value_space object, ",
+        "e.g. into list(set = 1:3)."
+      )
     }
   }
   # @codedoc_comment_block vm@var_set_value_space_eval
@@ -1675,8 +1691,7 @@ var_set_value_space_dt_subset <- function(
   # @codedoc_comment_block news("vm@var_set_value_space_dt_subset", "2025-06-30", "1.11.0")
   dbc::assert_is_one_of(
     enclos,
-    funs = list(dbc::report_is_NULL,
-                dbc::report_is_environment)
+    funs = list(dbc::report_is_NULL, dbc::report_is_environment)
   )
   if (is.null(enclos)) {
     enclos <- parent.frame(2L)
@@ -1721,8 +1736,11 @@ var_set_value_space_dt_subset <- function(
   # - Raise an error if result of `expr` is not `logical` or `integer`.
   # @codedoc_comment_block vm@var_set_value_space_dt_subset
   if (!inherits(dt_subset, c("logical", "integer"))) {
-    stop("Result of `expr` was not `logical` nor `integer` vector after ",
-         n, " evaluations.")
+    stop(
+      "Result of `expr` was not `logical` nor `integer` vector after ",
+      n,
+      " evaluations."
+    )
   }
   # @codedoc_comment_block vm@var_set_value_space_dt_subset
   # - Use result to subset `eval_env[["dt"]]`.
@@ -2055,8 +2073,11 @@ var_set_value_space_sample <- function(
     sampler <- var_set_value_space_sampler_get(vm, id = id)
     assert_is_value_space_sampler(sampler, assertion_type = "general")
   } else if (is.null(vs)) {
-    stop("No `sampler` nor `value_space` defined for `id = ", deparse1(id),
-         "`. At least one of them must be defined for sampling.")
+    stop(
+      "No `sampler` nor `value_space` defined for `id = ",
+      deparse1(id),
+      "`. At least one of them must be defined for sampling."
+    )
   } else {
     sampler <- get_value_space_type_fun__(
       value_space_type = names(vs),
@@ -2091,10 +2112,12 @@ var_set_value_space_sample <- function(
   if (inherits(sampler, "list")) {
     miss_dep_var_nm_set <- setdiff(sampler[["dep_var_nm_set"]], names(data))
     if (length(miss_dep_var_nm_set) > 0) {
-      stop("`sampler` requires variables ",
-           deparse1(sampler[["dep_var_nm_set"]]),
-           " but these were not included via `data`: ",
-           deparse1(miss_dep_var_nm_set))
+      stop(
+        "`sampler` requires variables ",
+        deparse1(sampler[["dep_var_nm_set"]]),
+        " but these were not included via `data`: ",
+        deparse1(miss_dep_var_nm_set)
+      )
     }
     # @codedoc_comment_block feature_process(random sampling)
     #   * `dep_var_nm_set`: only added if `sampler` is a `list` object and has
@@ -2121,11 +2144,14 @@ var_set_value_space_sample <- function(
     parent.env(call_eval_env) <- env
     sample <- eval(sampler, envir = call_eval_env)
   } else {
-    stop("Internal error: no handling defined for sampler with class vector ",
-         deparse1(class(sampler)), "; if your sampler object can be set with ",
-         "vm@var_set_value_space_sampler_set, this function is broken ",
-         "and you should contact the maintainer ",
-         as.character(utils::maintainer(pkg = "vame")))
+    stop(
+      "Internal error: no handling defined for sampler with class vector ",
+      deparse1(class(sampler)),
+      "; if your sampler object can be set with ",
+      "vm@var_set_value_space_sampler_set, this function is broken ",
+      "and you should contact the maintainer ",
+      as.character(utils::maintainer(pkg = "vame"))
+    )
   }
 
   # @codedoc_comment_block feature_process(random sampling)
@@ -2248,11 +2274,18 @@ var_aggregate <- function(
   )
   if (!is_aggregateable) {
     stop(
-      "cannot aggregate ", from_var_nm, " to ", to_var_nm, "; ",
+      "cannot aggregate ",
+      from_var_nm,
+      " to ",
+      to_var_nm,
+      "; ",
       "aggregation only possible when there is exactly one ",
       "level of the target variable for each level of the starting ",
-      "variable. if e.g. ", from_var_nm, " = 1 can be either ",
-      to_var_nm, " = 1 or 2, cannot aggregate."
+      "variable. if e.g. ",
+      from_var_nm,
+      " = 1 can be either ",
+      to_var_nm,
+      " = 1 or 2, cannot aggregate."
     )
   }
   # @codedoc_comment_block vm@var_aggregate
@@ -2268,10 +2301,16 @@ var_aggregate <- function(
     # error if that is not the case.
     # @codedoc_comment_block news("vm@var_aggregate", "2025-04-24", "1.9.4")
     stop(
-      "`x` and `value_space` for `from_var_nm = \"", from_var_nm, "\"` ",
+      "`x` and `value_space` for `from_var_nm = \"",
+      from_var_nm,
+      "\"` ",
       "do not match. Join between `x` and its `value_space` not possible. ",
-      "`class(x) = ", deparse1(class(x)), "` vs. ",
-      "`class(vs_of_from_var_nm) = ", deparse1(dt[[from_var_nm]]), "`."
+      "`class(x) = ",
+      deparse1(class(x)),
+      "` vs. ",
+      "`class(vs_of_from_var_nm) = ",
+      deparse1(dt[[from_var_nm]]),
+      "`."
     )
   }
   # @codedoc_comment_block vm@var_aggregate
@@ -2340,8 +2379,7 @@ var_value_space_eval <- function(
   # @codedoc_comment_block vame::var_value_space_eval::env
   dbc::assert_is_one_of(
     env,
-    funs = list(dbc::report_is_NULL,
-                dbc::report_is_environment)
+    funs = list(dbc::report_is_NULL, dbc::report_is_environment)
   )
   if (is.null(env)) {
     env <- parent.frame(2L)
@@ -2362,13 +2400,19 @@ var_value_space_eval <- function(
     pos_set <- var_meta_get(vm, var_nm = var_nm, meta_nm = "var_set_dt_pos_set")
     id_set <- vsd[["id"]][pos_set]
     has_vs <- vapply(
-      id_set, var_set_meta_is_defined, logical(1L),
+      id_set,
+      var_set_meta_is_defined,
+      logical(1L),
       meta = "value_space",
       vm = vm
     )
-    is_singular_vs <- has_vs & vapply(
-      vsd[["var_nm_set"]][pos_set], length, integer(1L)
-    ) == 1
+    is_singular_vs <- has_vs &
+      vapply(
+        vsd[["var_nm_set"]][pos_set],
+        length,
+        integer(1L)
+      ) ==
+        1
     if (sum(is_singular_vs) == 1) {
       id_set <- id_set[is_singular_vs]
     } else {
@@ -2397,13 +2441,15 @@ var_value_space_eval <- function(
   # - If we now have only one value space, all is well and that is returned.
   # @codedoc_comment_block vm@var_value_space_eval
   if (length(value_space) == 0) {
-    # @codedoc_comment_block news("vm@var_value_space_eval", "2026-11-06", "1.13.1.9000")
+    # @codedoc_comment_block news("vm@var_value_space_eval", "2026-11-06", "1.14.0")
     # `vm@var_value_space_eval` now raises an informative error when the
     # variable has no `value_space`, e.g. because it does not belong to any
     # variable set.
-    # @codedoc_comment_block news("vm@var_value_space_eval", "2026-11-06", "1.13.1.9000")
+    # @codedoc_comment_block news("vm@var_value_space_eval", "2026-11-06", "1.14.0")
     stop(
-      "No value_space defined for var_nm = \"", var_nm, "\": it does not ",
+      "No value_space defined for var_nm = \"",
+      var_nm,
+      "\": it does not ",
       "appear in any var_set_dt$var_nm_set with a value_space."
     )
   } else if (length(value_space) == 1) {
@@ -2433,7 +2479,9 @@ var_value_space_eval <- function(
     #   any way to decide which value space to use.
     # @codedoc_comment_block vm@var_value_space_eval
     stop(
-      "Internal error: var_nm = \"", var_nm, "\" appears in more than ",
+      "Internal error: var_nm = \"",
+      var_nm,
+      "\" appears in more than ",
       "one variable set value space, and its value spaces are different ",
       "in the different sets --- don't know which one to take."
     )
@@ -2536,8 +2584,7 @@ var_assert <- function(
   # @codedoc_comment_block news("vm@var_assert", "2023-07-11", "0.1.3")
   dbc::assert_is_one_of(
     env,
-    funs = list(dbc::report_is_NULL,
-                dbc::report_is_environment)
+    funs = list(dbc::report_is_NULL, dbc::report_is_environment)
   )
   if (is.null(env)) {
     env <- parent.frame(1L)
@@ -2758,7 +2805,9 @@ var_meta_set <- function(
   # @codedoc_comment_block vm@var_meta_set
   vd <- vd_get(vm)
   if (
-    meta_nm %in% names(vd) && is.list(vd[[meta_nm]]) ||
+    meta_nm %in%
+      names(vd) &&
+      is.list(vd[[meta_nm]]) ||
       meta_nm %in% c("describer", "labeler")
   ) {
     value <- list(value)
@@ -2891,8 +2940,11 @@ var_rename <- function(
         } else if (any(c("expr", "fun") %in% names(vs))) {
           warning(
             "vm@var_rename cannot handle value_space object of type ",
-            names(vs)[1], "; you must alter the value_space object for ",
-            "id = ", id, " yourself"
+            names(vs)[1],
+            "; you must alter the value_space object for ",
+            "id = ",
+            id,
+            " yourself"
           )
         }
         var_set_value_space_set(vm, id = id, value_space = vs)
@@ -3065,8 +3117,7 @@ var_labels_get <- function(
   # @codedoc_comment_block news("vm@var_labels_get", "2024-01-24", "0.4.0")
   dbc::assert_is_one_of(
     label_nm,
-    funs = list(dbc::report_is_NULL,
-                dbc::report_is_character_nonNA_atom)
+    funs = list(dbc::report_is_NULL, dbc::report_is_character_nonNA_atom)
   )
 
   # @codedoc_comment_block doc_slot_fun_arg(labeler_env)
@@ -3079,8 +3130,7 @@ var_labels_get <- function(
   # @codedoc_comment_block doc_slot_fun_arg(labeler_env)
   dbc::assert_is_one_of(
     labeler_env,
-    funs = list(dbc::report_is_NULL,
-                dbc::report_is_environment)
+    funs = list(dbc::report_is_NULL, dbc::report_is_environment)
   )
   if (is.null(labeler_env)) {
     labeler_env <- parent.frame(1L)
@@ -3103,8 +3153,10 @@ var_labels_get <- function(
     # `vm@var_labels_get` now can handle `labeler`s of type `function`.
     # @codedoc_comment_block news("vm@var_labels_get", "2023-12-01", "0.2.0")
     if (is.null(label_nm)) {
-      stop("label_nm = NULL, but labeler is a function so cannot ",
-           "determine label_nm automatically.")
+      stop(
+        "label_nm = NULL, but labeler is a function so cannot ",
+        "determine label_nm automatically."
+      )
     }
     # @codedoc_comment_block vm@var_labels_get
     # - A `labeler` of type `function` is called with a subset of the
@@ -3132,15 +3184,21 @@ var_labels_get <- function(
       eval(labeler, envir = labeler_env),
       error = function(e) {
         stop(
-          "Labeler for var_nm = \"", var_nm, "\" was of class 'call', but ",
-          "evaluation failed. Error message: \"", e[["message"]], "\""
+          "Labeler for var_nm = \"",
+          var_nm,
+          "\" was of class 'call', but ",
+          "evaluation failed. Error message: \"",
+          e[["message"]],
+          "\""
         )
       }
     )
     if (!is.character(out)) {
       utils::str(out)
       stop(
-        "Labeler for var_nm = \"", var_nm, "\" was of class 'call', but ",
+        "Labeler for var_nm = \"",
+        var_nm,
+        "\" was of class 'call', but ",
         "evaluation did not produce a character string vector. See what ",
         "`str(result)` printed above this error message."
       )
@@ -3150,8 +3208,13 @@ var_labels_get <- function(
     if (is.null(label_nm)) {
       label_nm <- label_nm_set[1]
     } else if (!label_nm %in% label_nm_set) {
-      stop("label_nm = \"", label_nm, "\" not one of the defined ",
-           "label names: ", deparse1(label_nm_set))
+      stop(
+        "label_nm = \"",
+        label_nm,
+        "\" not one of the defined ",
+        "label names: ",
+        deparse1(label_nm_set)
+      )
     }
     dbc::assert_has_class(x = x, required_class = class(labeler[["x"]]))
     jdt <- data.table::setDT(list(x = x))
@@ -3167,8 +3230,10 @@ var_labels_get <- function(
       .SDcols = label_nm
     ]
   } else {
-    stop("no handling defined for labeler of class(es) ",
-         deparse1(class(labeler)))
+    stop(
+      "no handling defined for labeler of class(es) ",
+      deparse1(class(labeler))
+    )
   }
   return(out)
 }
@@ -3267,7 +3332,7 @@ var_description_get <- function(
   # @codedoc_comment_block function_example(vm@var_description_get)
   # @codedoc_comment_block feature_funs(describing)
   # - `vm@var_description_get`
-  # @codedoc_comment_block feature_funs(describing) 
+  # @codedoc_comment_block feature_funs(describing)
   # @codedoc_comment_block news("vm@var_description_get", "2024-01-22", "0.4.0")
   # New function `vm@var_description_get`.
   # @codedoc_comment_block news("vm@var_description_get", "2024-01-22", "0.4.0")
@@ -3307,8 +3372,7 @@ var_description_get <- function(
   # @codedoc_comment_block news("vm@var_description_get", "2024-01-24", "0.4.0")
   dbc::assert_is_one_of(
     descr_nm,
-    funs = list(dbc::report_is_NULL,
-                dbc::report_is_character_nonNA_atom)
+    funs = list(dbc::report_is_NULL, dbc::report_is_character_nonNA_atom)
   )
 
   # @codedoc_comment_block doc_slot_fun_arg(describer_env)
@@ -3322,8 +3386,7 @@ var_description_get <- function(
   # @codedoc_comment_block doc_slot_fun_arg(describer_env)
   dbc::assert_is_one_of(
     describer_env,
-    funs = list(dbc::report_is_NULL,
-                dbc::report_is_environment)
+    funs = list(dbc::report_is_NULL, dbc::report_is_environment)
   )
   if (is.null(describer_env)) {
     describer_env <- parent.frame(1L)
@@ -3344,8 +3407,10 @@ var_description_get <- function(
 
   if (is.function(describer)) {
     if (is.null(descr_nm)) {
-      stop("descr_nm = NULL, but describer is a function so cannot ",
-           "determine descr_nm automatically.")
+      stop(
+        "descr_nm = NULL, but describer is a function so cannot ",
+        "determine descr_nm automatically."
+      )
     }
     # @codedoc_comment_block vm@var_description_get
     # - A `describer` of type `function` is called with a subset of the
@@ -3359,8 +3424,10 @@ var_description_get <- function(
     )
   } else if (is.call(describer)) {
     if (is.null(descr_nm)) {
-      stop("descr_nm = NULL, but describer is a call so cannot ",
-           "determine descr_nm automatically.")
+      stop(
+        "descr_nm = NULL, but describer is a call so cannot ",
+        "determine descr_nm automatically."
+      )
     }
     eval_env <- as.environment(arg_list)
     parent.env(eval_env) <- describer_env
@@ -3373,8 +3440,12 @@ var_description_get <- function(
       eval(describer, envir = eval_env),
       error = function(e) {
         stop(
-          "describer for var_nm = \"", var_nm, "\" was of class 'call', but ",
-          "evaluation failed. Error message: \"", e[["message"]], "\""
+          "describer for var_nm = \"",
+          var_nm,
+          "\" was of class 'call', but ",
+          "evaluation failed. Error message: \"",
+          e[["message"]],
+          "\""
         )
       }
     )
@@ -3383,9 +3454,13 @@ var_description_get <- function(
     if (is.null(descr_nm)) {
       descr_nm <- descr_nm_set[1]
     } else if (!descr_nm %in% descr_nm_set) {
-      stop("descr_nm = \"", descr_nm,
-           "\" not one of the defined ",
-           "elements: ", deparse1(descr_nm_set))
+      stop(
+        "descr_nm = \"",
+        descr_nm,
+        "\" not one of the defined ",
+        "elements: ",
+        deparse1(descr_nm_set)
+      )
     }
     # @codedoc_comment_block vm@var_description_get
     # - If `describer` is a `list`, we simply take the appropriate element from
@@ -3393,8 +3468,10 @@ var_description_get <- function(
     # @codedoc_comment_block vm@var_description_get
     out <- describer[[descr_nm]]
   } else {
-    stop("no handling defined for describer of class(es) ",
-         deparse1(class(describer)))
+    stop(
+      "no handling defined for describer of class(es) ",
+      deparse1(class(describer))
+    )
   }
   assert_is_description(out, assertion_type = "prod_output")
   return(out)
@@ -3654,9 +3731,11 @@ vame_harmonise_dt <- function(
     allow_null = TRUE
   )
   if (!var_meta_is_defined(vm = vm, var_nm = NULL, meta_nm = "is_harmonised")) {
-    stop("Your `vame::VariableMetadata` object does not have ",
-         "`var_dt$is_harmonised` defined. This boolean column is needed to ",
-         "identify what input data are harmonised to.")
+    stop(
+      "Your `vame::VariableMetadata` object does not have ",
+      "`var_dt$is_harmonised` defined. This boolean column is needed to ",
+      "identify what input data are harmonised to."
+    )
   }
   original_dt_col_nms <- data.table::copy(names(dt))
   # @codedoc_comment_block vame::vame_harmonise_dt::inplace
@@ -3695,7 +3774,8 @@ vame_harmonise_dt <- function(
       } else {
         all_var_nms <- var_meta_get_all(vm = vm, meta_nm = "var_nm")
         is_harmonised_idx <- which(var_meta_get_all(
-          vm = vm, meta_nm = "is_harmonised"
+          vm = vm,
+          meta_nm = "is_harmonised"
         ))
         harmonisation_candidate_set <- all_var_nms[is_harmonised_idx]
       }
@@ -3739,21 +3819,28 @@ vame_harmonise_dt <- function(
       ]
       miss_var_nms <- setdiff(tgt_meta_dt[["var_nm"]], meta_dt[["var_nm"]])
       if (length(miss_var_nms) > 0) {
-        stop("The harmonised forms of the following variable(s) had no ",
-             "`var_set_dt$maker`: ",
-             deparse1(miss_var_nms), ". Define ",
-             "`var_set_dt$maker` for variables you want to harmonise to.")
+        stop(
+          "The harmonised forms of the following variable(s) had no ",
+          "`var_set_dt$maker`: ",
+          deparse1(miss_var_nms),
+          ". Define ",
+          "`var_set_dt$maker` for variables you want to harmonise to."
+        )
       }
     }
     dup_var_nms <- tgt_meta_dt[["var_nm"]][duplicated(tgt_meta_dt[["var_nm"]])]
     if (length(dup_var_nms) > 0) {
       print(tgt_meta_dt)
-      stop("The following variable(s) have more than possible harmonisation ",
-           "candidate: ", deparse1(dup_var_nms), ". It is best to have only ",
-           "one harmonisation candidate per variable. If you want to have ",
-           "multiple anyway, you must use `vm@vame_harmonise_dt` argument ",
-           "`var_nms` to force a specific harmonisation. See the table ",
-           "above for more information.")
+      stop(
+        "The following variable(s) have more than possible harmonisation ",
+        "candidate: ",
+        deparse1(dup_var_nms),
+        ". It is best to have only ",
+        "one harmonisation candidate per variable. If you want to have ",
+        "multiple anyway, you must use `vm@vame_harmonise_dt` argument ",
+        "`var_nms` to force a specific harmonisation. See the table ",
+        "above for more information."
+      )
     }
     dt_join_assign__(
       dt = meta_dt,
@@ -3773,7 +3860,7 @@ vame_harmonise_dt <- function(
     made_dt <- var_set_make(
       vm = vm,
       data = dt,
-      id =  meta_dt[["id"]][i],
+      id = meta_dt[["id"]][i],
       var_nms = hc_i
     )
     data.table::setnames(dt, vn_i, hc_i)
@@ -3952,15 +4039,14 @@ vame_subset <- function(
   # @codedoc_comment_block news("vm@vame_subset", "2025-06-24", "1.10.0")
   # `vm@vame_subset` gained argument `enclos`.
   # @codedoc_comment_block news("vm@vame_subset", "2025-06-24", "1.10.0")
-  # @codedoc_comment_block news("vm@vame_subset", "2026-11-06", "1.13.1.9000")
+  # @codedoc_comment_block news("vm@vame_subset", "2026-11-06", "1.14.0")
   # `vm@vame_subset` no longer removes variables from `var_dt` which lose
   # their last variable set by default. Gained argument `drop_orphaned_vars`
   # to do that.
-  # @codedoc_comment_block news("vm@vame_subset", "2026-11-06", "1.13.1.9000")
+  # @codedoc_comment_block news("vm@vame_subset", "2026-11-06", "1.14.0")
   dbc::assert_is_one_of(
     enclos,
-    funs = list(dbc::report_is_NULL,
-                dbc::report_is_environment)
+    funs = list(dbc::report_is_NULL, dbc::report_is_environment)
   )
   if (is.null(enclos)) {
     # @codedoc_comment_block vm@vame_subset
@@ -4086,10 +4172,12 @@ vame_union_append <- function(
     for (vd_2_meta_nm in setdiff(names(vd_2), "var_nm")) {
       if (
         vm_2@var_meta_is_defined(
-          var_nm = vd_2_var_nm, meta_nm = vd_2_meta_nm
+          var_nm = vd_2_var_nm,
+          meta_nm = vd_2_meta_nm
         ) &&
           !vm@var_meta_is_defined(
-            var_nm = vd_2_var_nm, meta_nm = vd_2_meta_nm
+            var_nm = vd_2_var_nm,
+            meta_nm = vd_2_meta_nm
           )
       ) {
         vm@var_meta_set(
@@ -4522,8 +4610,7 @@ vame_category_space_dt_list <- function(
 
   dbc::assert_is_one_of(
     env,
-    funs = list(dbc::report_is_NULL,
-                dbc::report_is_environment)
+    funs = list(dbc::report_is_NULL, dbc::report_is_environment)
   )
   if (is.null(env)) {
     env <- parent.frame(1L)

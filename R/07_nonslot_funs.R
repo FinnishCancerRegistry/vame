@@ -164,11 +164,11 @@ vd_vsd_linkage_refresh <- function(
   if ("var_set_dt_pos_set" %in% names(vd)) {
     data.table::set(vd, j = "var_set_dt_pos_set", value = NULL)
   }
-  # @codedoc_comment_block news("vame::VariableMetadata", "2026-11-06", "1.13.1.9000")
+  # @codedoc_comment_block news("vame::VariableMetadata", "2026-11-06", "1.14.0")
   # Fixed `var_dt$var_set_dt_pos_set` sometimes becoming an `integer` column
   # instead of a `list` column when only one variable belonged to any
   # variable set.
-  # @codedoc_comment_block news("vame::VariableMetadata", "2026-11-06", "1.13.1.9000")
+  # @codedoc_comment_block news("vame::VariableMetadata", "2026-11-06", "1.14.0")
   pos_set_list <- vdi[["var_set_dt_pos_set"]][
     data.table::chmatch(vd[["var_nm"]], vdi[["var_nm"]])
   ]
@@ -189,11 +189,11 @@ vd_vsd_intersect <- function(
   # not appear in any `var_set_dt[["var_nm_set"]]` are kept --- a variable
   # does not need to belong to any variable set.
   # @codedoc_comment_block vame:::vd_vsd_intersect
-  # @codedoc_comment_block news("vame::VariableMetadata", "2026-11-06", "1.13.1.9000")
+  # @codedoc_comment_block news("vame::VariableMetadata", "2026-11-06", "1.14.0")
   # `vame::VariableMetadata` no longer requires that every variable in
   # `var_dt` appears in some `var_set_dt$var_nm_set`. Such variables are now
   # kept instead of being silently dropped.
-  # @codedoc_comment_block news("vame::VariableMetadata", "2026-11-06", "1.13.1.9000")
+  # @codedoc_comment_block news("vame::VariableMetadata", "2026-11-06", "1.14.0")
   assert_is_variablemetadata(vm, assertion_type = "prod_input")
   vd <- vd_get(vm)
   vdi <- vd_implied_get(vm)
@@ -264,7 +264,7 @@ var_to_var_set_pos <- function(
   var_nm,
   style = c("all", "smallest_set")[1]
 ) {
-  stopifnot(style %in%  c("all", "smallest_set"))
+  stopifnot(style %in% c("all", "smallest_set"))
   assert_is_variablemetadata(vm, assertion_type = "prod_input")
   pos <- var_meta_get(vm, var_nm = var_nm, meta_nm = "var_set_dt_pos_set")
   if (style == "smallest_set" && length(pos) > 1) {
@@ -371,18 +371,15 @@ vame_subset_expr <- function(
   dbc::assert_is_logical_nonNA_atom(drop_orphaned_vars)
   dbc::assert_is_one_of(
     var_dt_expr,
-    funs = list(dbc::report_is_NULL,
-                dbc::report_is_language_object)
+    funs = list(dbc::report_is_NULL, dbc::report_is_language_object)
   )
   dbc::assert_is_one_of(
     var_set_dt_expr,
-    funs = list(dbc::report_is_NULL,
-                dbc::report_is_language_object)
+    funs = list(dbc::report_is_NULL, dbc::report_is_language_object)
   )
   dbc::assert_is_one_of(
     enclos,
-    funs = list(dbc::report_is_NULL,
-                dbc::report_is_environment)
+    funs = list(dbc::report_is_NULL, dbc::report_is_environment)
   )
   if (is.null(enclos)) {
     enclos <- parent.frame(1L)
@@ -392,7 +389,7 @@ vame_subset_expr <- function(
   #   parent. Populate it with `var_dt` and `var_set_dt`.
   # @codedoc_comment_block vm@vame_subset_expr
   eval_env <- new.env(parent = enclos)
-  eval_env[["var_dt"]] <-  vd_get(vm)
+  eval_env[["var_dt"]] <- vd_get(vm)
   eval_env[["var_set_dt"]] <- vsd_get(vm)
   old_var_nms_with_var_set <- vd_var_nms_with_var_set_get(vm)
   need_to_intersect <- FALSE
@@ -431,9 +428,14 @@ vame_subset_expr <- function(
       # - Do the same with `var_set_dt_expr` and `eval_env[["var_set_dt"]]`.
       # @codedoc_comment_block vm@vame_subset_expr
       stop(
-        "Evaluation of `", expr_obj_nm, "` did not result in a `logical`, ",
-        "`integer`, nor `NULL` object after ", n_tries, " tries. Instead ",
-        "result had class(es) ", deparse1(class(obj_subset))
+        "Evaluation of `",
+        expr_obj_nm,
+        "` did not result in a `logical`, ",
+        "`integer`, nor `NULL` object after ",
+        n_tries,
+        " tries. Instead ",
+        "result had class(es) ",
+        deparse1(class(obj_subset))
       )
     }
     if (is.logical(obj_subset)) {
@@ -524,8 +526,10 @@ self <- function() {
     }
   }
   if (is.null(out)) {
-    stop("vame::self failed --- complain to the package maintainer if ",
-         "you see this")
+    stop(
+      "vame::self failed --- complain to the package maintainer if ",
+      "you see this"
+    )
   }
   return(out)
 }
