@@ -441,7 +441,9 @@ vame_subset_expr <- function(
     if (is.logical(obj_subset)) {
       obj_subset[is.na(obj_subset)] <- FALSE
     }
-    if ((is.logical(obj_subset) && any(!obj_subset)) | is.integer(obj_subset)) {
+    if (
+      (is.logical(obj_subset) && any(!obj_subset)) || is.integer(obj_subset)
+    ) {
       eval_env[[dt_nm]] <- eval_env[[dt_nm]][obj_subset, ]
       switch(
         dt_nm,
