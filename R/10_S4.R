@@ -45,7 +45,11 @@ doc_slot_fun__ <- function(df = NULL, fun_nm) {
   fun_arg_nms <- names(formals(match.fun(fun_nm)))
   slot_fun_arg_nms <- setdiff(fun_arg_nms, "vm")
   slot_call_string <- paste0(
-    "vm@", fun_nm, "(", paste0(slot_fun_arg_nms, collapse = ", "), ")"
+    "vm@",
+    fun_nm,
+    "(",
+    paste0(slot_fun_arg_nms, collapse = ", "),
+    ")"
   )
   lines <- c(
     paste0("@slot ", fun_nm),
@@ -65,8 +69,10 @@ doc_slot_fun__ <- function(df = NULL, fun_nm) {
       "***Arguments***",
       "",
       unlist(lapply(
-        slot_fun_arg_nms, doc_slot_fun_arg__,
-        fun_nm = fun_nm, df = df
+        slot_fun_arg_nms,
+        doc_slot_fun_arg__,
+        fun_nm = fun_nm,
+        df = df
       ))
     )
   }
@@ -136,8 +142,7 @@ doc_variablemetadata_section__ <- function(
   re <- switch(
     section_name,
     details = "(^vame::VariableMetadata$)|(^recommendation[(])",
-    examples =
-      "(^feature_example[(])|(^general_example$)|(^function_example[(])"
+    examples = "(^feature_example[(])|(^general_example$)|(^function_example[(])"
   )
   use <- grepl(re, df[["key"]])
   lines <- unlist(df[["comment_block"]][use])
@@ -696,7 +701,9 @@ VariableMetadata <- function(
     alias_fun <- eval(parse(text = alias_fun_nm))
     args <- formals(alias_fun)
     arg_lines <- paste0(
-      names(args), " = ", vapply(args, deparse1, character(1L))
+      names(args),
+      " = ",
+      vapply(args, deparse1, character(1L))
     )
     arg_lines <- sub(" = $", "", arg_lines)
     arg_lines <- setdiff(arg_lines, "vm")
@@ -740,8 +747,10 @@ VariableMetadata <- function(
   # @codedoc_comment_block vame::VariableMetadata
   vd_vsd_intersect(out)
   if (nrow(vd_get(out)) == 0) {
-    stop("vame::VariableMetadata call resulted in no variables being defined. ",
-         "Is var_dt empty?")
+    stop(
+      "vame::VariableMetadata call resulted in no variables being defined. ",
+      "Is var_dt empty?"
+    )
   }
 
   funs <- environment(out@var_meta_get)
@@ -787,14 +796,17 @@ VariableMetadata <- function(
       # @codedoc_comment_block vame::VariableMetadata
       var_nm <- funs[["data"]][["var_dt"]][["var_nm"]][test_idx]
       is_categorical <- out@var_meta_is_defined(
-        var_nm = var_nm, meta_nm = "labeler"
+        var_nm = var_nm,
+        meta_nm = "labeler"
       )
-      is_categorical <- is_categorical || any(
-        c("set", "dt") %in% names(tryCatch(
-          out@var_value_space_eval(var_nm),
-          error = function(e) list()
-        ))
-      )
+      is_categorical <- is_categorical ||
+        any(
+          c("set", "dt") %in%
+            names(tryCatch(
+              out@var_value_space_eval(var_nm),
+              error = function(e) list()
+            ))
+        )
       return(is_categorical)
     },
     logical(1L)
@@ -815,7 +827,7 @@ VariableMetadata <- function(
 }
 
 print_VariableMetadata <- function(x, ...) {
-  # @codedoc_comment_block function_example(vame::print_VariableMetadata)    
+  # @codedoc_comment_block function_example(vame::print_VariableMetadata)
   # vm <- vame::VariableMetadata(
   #   var_dt = data.table::data.table(
   #     var_nm = letters

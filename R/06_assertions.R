@@ -84,10 +84,20 @@ assert_is_labeler <- function(
         quote("label_nm" %in% all.vars(x))
       ),
       fail_messages = c(
-        paste0("R expression `", deparse1(x), "` from object/expression `",
-               x_nm, "` must contain variable `x`"),
-        paste0("R expression `", deparse1(x), "` from object/expression `",
-               x_nm, "` must contain variable `label_nm`")
+        paste0(
+          "R expression `",
+          deparse1(x),
+          "` from object/expression `",
+          x_nm,
+          "` must contain variable `x`"
+        ),
+        paste0(
+          "R expression `",
+          deparse1(x),
+          "` from object/expression `",
+          x_nm,
+          "` must contain variable `label_nm`"
+        )
       ),
       call = call,
       env = environment()
@@ -414,8 +424,13 @@ assert_is_sampler <- assert_is_value_space_sampler <- function(
       quote("n" %in% all.vars(x))
     ),
     fail_messages = c(
-      paste0("R expression `", deparse1(x), "` from object/expression `",
-             x_nm, "` must contain variable `n`")
+      paste0(
+        "R expression `",
+        deparse1(x),
+        "` from object/expression `",
+        x_nm,
+        "` must contain variable `n`"
+      )
     ),
     call = call,
     env = environment()
@@ -439,8 +454,7 @@ assert_is_vame_list <- function(
     x_nm = x_nm,
     call = call,
     assertion_type = assertion_type,
-    funs = list(dbc::report_is_NULL,
-                dbc::report_is_list)
+    funs = list(dbc::report_is_NULL, dbc::report_is_list)
   )
 }
 
@@ -521,8 +535,7 @@ assert_is_maker <- function(
     x_nm = sprintf("%s$maker", x_nm),
     call = call,
     assertion_type = assertion_type,
-    funs = list(dbc::report_is_call,
-                report_is_maker_var_aggregate)
+    funs = list(dbc::report_is_call, report_is_maker_var_aggregate)
   )
   if ("dep_var_nm_set" %in% names(x)) {
     dbc::assert_is_character_nonNA_vector(
@@ -558,9 +571,15 @@ assert_is_maker <- function(
     }
   } else {
     x_nm <- paste0(x_nm, "$dep_var_nm_sets")
-    stop("`", x_nm, "` must have either ",
-         sprintf("`%s$%s`", x_nm, "dep_var_nm_set"), " or ",
-         sprintf("`%s$%s`", x_nm, "dep_var_nm_sets"), ".")
+    stop(
+      "`",
+      x_nm,
+      "` must have either ",
+      sprintf("`%s$%s`", x_nm, "dep_var_nm_set"),
+      " or ",
+      sprintf("`%s$%s`", x_nm, "dep_var_nm_sets"),
+      "."
+    )
   }
   return(invisible(NULL))
 }
@@ -660,8 +679,13 @@ assert_is_describer <- function(
       quote("descr_nm" %in% all.vars(x))
     ),
     fail_messages = c(
-      paste0("R expression `", deparse1(x), "` from object/expression `",
-             x_nm, "` must contain variable `descr_nm`")
+      paste0(
+        "R expression `",
+        deparse1(x),
+        "` from object/expression `",
+        x_nm,
+        "` must contain variable `descr_nm`"
+      )
     ),
     call = call,
     env = environment()
@@ -726,8 +750,7 @@ assert_is_arg_var_nms <- function(
       x_nm = x_nm,
       call = call,
       assertion_type = assertion_type,
-      funs = list(dbc::report_is_NULL,
-                  dbc::report_is_character_nonNA_vector)
+      funs = list(dbc::report_is_NULL, dbc::report_is_character_nonNA_vector)
     )
   } else {
     dbc::assert_is_character_nonNA_vector(
@@ -907,8 +930,7 @@ assert_is_arg_ids <- function(
     x_nm = x_nm,
     call = call,
     assertion_type = assertion_type,
-    funs = list(dbc::report_is_NULL,
-                dbc::report_is_vector)
+    funs = list(dbc::report_is_NULL, dbc::report_is_vector)
   )
   lapply(seq_along(x), function(i) {
     assert_is_var_set_id(

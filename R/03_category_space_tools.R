@@ -47,9 +47,13 @@ value_space_to_subset_dt__ <- function(
     data.table::setnames(dt, "x", var_nms)
     data.table::setkeyv(dt, var_nms)
   } else {
-    stop("A value_space did not have a \"dt\", \"expr\", \"set\", or ",
-         "\"bounds\" element. Could not evaluate category space for ",
-         "variable name(s) ", deparse1(var_nms), ".")
+    stop(
+      "A value_space did not have a \"dt\", \"expr\", \"set\", or ",
+      "\"bounds\" element. Could not evaluate category space for ",
+      "variable name(s) ",
+      deparse1(var_nms),
+      "."
+    )
   }
   data.table::setcolorder(dt, var_nms)
   dbc::assert_prod_output_is_data_table_with_required_names(
