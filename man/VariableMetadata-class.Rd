@@ -1541,15 +1541,15 @@ Name of a variable.
 
 \strong{\code{x_nm}} \verb{[NULL, character]} (default \code{NULL})
 
-See \link[dbc:argument_handlers]{dbc::handle_arg_x_nm}.
+See \link[dbc:handle_arg_x_nm]{dbc::handle_arg_x_nm}.
 
 \strong{\code{call}} \verb{[NULL, language]} (default \code{NULL})
 
-See \link[dbc:argument_handlers]{dbc::handle_arg_call}.
+See \link[dbc:handle_arg_call]{dbc::handle_arg_call}.
 
 \strong{\code{assertion_type}} \verb{[NULL, character]} (default \code{NULL})
 
-See \link[dbc:assertion_types]{dbc::handle_arg_assertion_type}.
+See \link[dbc:handle_arg_assertion_type]{dbc::handle_arg_assertion_type}.
 
 \strong{\code{env}} \verb{[NULL, environment]} (default \code{NULL})
 
