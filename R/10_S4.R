@@ -36,6 +36,36 @@ doc_slot_fun_arg__ <- function(df = NULL, fun_nm, arg_nm) {
   return(lines)
 }
 
+doc_slot_fun_usage__ <- function(fun_nm) {
+  arg_list <- formals(match.fun(fun_nm))
+  arg_list <- arg_list[setdiff(names(arg_list), "vm")]
+  call_start <- paste0("vm@", fun_nm, "(")
+  if (length(arg_list) == 0) {
+    return(paste0(call_start, ")"))
+  }
+  arg_strings <- vapply(
+    names(arg_list),
+    function(arg_nm) {
+      # arguments without a default have the empty symbol as their "default"
+      if (identical(arg_list[[arg_nm]], quote(expr = ))) {
+        return(arg_nm)
+      }
+      default_string <- paste0(
+        deparse(arg_list[[arg_nm]], width.cutoff = 500L),
+        collapse = " "
+      )
+      paste0(arg_nm, " = ", default_string)
+    },
+    character(1L)
+  )
+  arg_strings <- paste0(
+    "  ",
+    arg_strings,
+    c(rep(",", length(arg_strings) - 1L), "")
+  )
+  c(call_start, arg_strings, ")")
+}
+
 doc_slot_fun__ <- function(df = NULL, fun_nm) {
   if (is.null(df)) {
     df <- codedoc_df__()
@@ -44,13 +74,12 @@ doc_slot_fun__ <- function(df = NULL, fun_nm) {
   description <- unlist(df[["comment_block"]][df[["key"]] == key])
   fun_arg_nms <- names(formals(match.fun(fun_nm)))
   slot_fun_arg_nms <- setdiff(fun_arg_nms, "vm")
-  slot_call_string <- paste0(
-    "vm@",
-    fun_nm,
-    "(",
-    paste0(slot_fun_arg_nms, collapse = ", "),
-    ")"
-  )
+  # @codedoc_comment_block news("vame::VariableMetadata", "2026-11-06", "1.14.0")
+  # The ***Usage*** part of the documentation of each slot function
+  # (e.g. `vm@vame_subset`) is now a multiline code block with one argument
+  # per line, and each argument's default value is shown,
+  # e.g. `var_dt_expr = NULL`.
+  # @codedoc_comment_block news("vame::VariableMetadata", "2026-11-06", "1.14.0")
   lines <- c(
     paste0("@slot ", fun_nm),
     "",
@@ -60,7 +89,9 @@ doc_slot_fun__ <- function(df = NULL, fun_nm) {
     "",
     "***Usage***",
     "",
-    paste0("`", slot_call_string, "`"),
+    "```",
+    doc_slot_fun_usage__(fun_nm = fun_nm),
+    "```",
     ""
   )
   if (length(slot_fun_arg_nms) > 0) {
