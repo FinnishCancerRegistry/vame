@@ -396,45 +396,102 @@ var_set_rename <- function(
 
 var_set_remove <- function(
   vm,
-  id
+  id,
+  drop_orphaned_vars = FALSE
 ) {
   # @codedoc_comment_block function_example(vm@var_set_remove)
-  # vm <- vame::VariableMetadata(
-  #   var_dt = data.table::data.table(var_nm = c("a", "b")),
-  #   var_set_dt = data.table::data.table(
-  #     id = c("set_a", "set_b"),
-  #     var_nm_set = list("a", "b")
+  # # vm@var_set_remove
+  # make_vm <- function() {
+  #   vame::VariableMetadata(
+  #     var_dt = data.table::data.table(var_nm = c("a", "b", "c", "d")),
+  #     var_set_dt = data.table::data.table(
+  #       id = c("set_a", "set_ab", "set_c"),
+  #       var_nm_set = list("a", c("a", "b"), "c")
+  #     )
   #   )
-  # )
-  # vm@var_set_remove(id = "set_a")
+  # }
+  #
+  # # by default variables are not removed when their variable set is
+  # # removed.
+  # vm_1 <- make_vm()
+  # vm_1@var_set_remove(id = "set_c")
   # stopifnot(
   #   identical(
-  #     vm@var_set_meta_get_all(meta_nm = "id"),
-  #     c("set_b" = "set_b")
+  #     vm_1@var_set_meta_get_all(meta_nm = "id"),
+  #     c("set_a" = "set_a", "set_ab" = "set_ab")
   #   ),
   #   identical(
-  #     vm@var_meta_get_all(meta_nm = "var_nm"),
-  #     c("b" = "b")
+  #     unname(vm_1@var_meta_get_all(meta_nm = "var_nm")),
+  #     c("a", "b", "c", "d")
+  #   ),
+  #   length(vm_1@var_var_set_dt_id_set_get("c")) == 0L
+  # )
+  #
+  # # with drop_orphaned_vars = TRUE, variables which lost their last variable
+  # # set are removed. "d" never had a variable set so it is kept. "a" still
+  # # belongs to "set_a" so it is kept.
+  # vm_2 <- make_vm()
+  # vm_2@var_set_remove(id = "set_ab", drop_orphaned_vars = TRUE)
+  # vm_2@var_set_remove(id = "set_c", drop_orphaned_vars = TRUE)
+  # stopifnot(
+  #   identical(
+  #     vm_2@var_set_meta_get_all(meta_nm = "id"),
+  #     c("set_a" = "set_a")
+  #   ),
+  #   identical(
+  #     unname(vm_2@var_meta_get_all(meta_nm = "var_nm")),
+  #     c("a", "d")
   #   )
   # )
   # @codedoc_comment_block function_example(vm@var_set_remove)
+
+  # @codedoc_comment_block news("vm@var_set_remove", "2026-11-06", "1.13.1.9000")
+  # `vm@var_set_remove` no longer removes variables from `var_dt` which lose
+  # their last variable set by default. Gained argument `drop_orphaned_vars`
+  # to do that.
+  # @codedoc_comment_block news("vm@var_set_remove", "2026-11-06", "1.13.1.9000")
   assert_is_var_set_id(vm, id)
+  # @codedoc_comment_block doc_slot_fun_arg(drop_orphaned_vars)
+  # **`drop_orphaned_vars`** `[logical]` (default `FALSE`)
+  #
+  # Whether to remove variables from `var_dt` which belonged to at least one
+  # variable set before the action but no longer belong to any after it.
+  #
+  # - `FALSE`: Keep all variables in `var_dt`, even if they no longer belong
+  #   to any variable set.
+  # - `TRUE`: Drop variables whose last variable set was removed.
+  #   Variables which did not belong to any variable set to begin with are
+  #   kept regardless.
+  # @codedoc_comment_block doc_slot_fun_arg(drop_orphaned_vars)
+  dbc::assert_is_logical_nonNA_atom(drop_orphaned_vars)
+  old_var_nms_with_var_set <- vd_var_nms_with_var_set_get(vm)
   pos <- var_set_id_to_pos(vm, id)
   vsd <- vsd_get(vm)
   vsd_subset <- setdiff(seq_len(nrow(vsd)), pos)
   # @codedoc_comment_block vm@var_set_remove
   # Remove a variable set by `id`. Performs the following steps:
   #
-  # - Drop the row in `var_set_dt` with the supplied `id`.
-  # @codedoc_insert_comment_block vame:::vsd_set_and_drop_orphans
+  # - Drop the row in `var_set_dt` with the supplied `id`. By default
+  #   variables in `var_dt` are kept even if they no longer belong to any
+  #   variable set.
   # @codedoc_comment_block vm@var_set_remove
   vsd <- vsd[vsd_subset, ]
-  vsd_set_and_drop_orphans(vm, vsd)
+  vsd_set(vm, vsd)
   # @codedoc_comment_block vm@var_set_remove
   # - "Intersect" data in the `VariableMetadata` object:
   # @codedoc_insert_comment_block vame:::vd_vsd_intersect
   # @codedoc_comment_block vm@var_set_remove
   vd_vsd_intersect(vm)
+  if (drop_orphaned_vars) {
+    # @codedoc_comment_block vm@var_set_remove
+    # - If `drop_orphaned_vars = TRUE`:
+    # @codedoc_insert_comment_block vame:::vd_orphaned_vars_drop
+    # @codedoc_comment_block vm@var_set_remove
+    vd_orphaned_vars_drop(
+      vm = vm,
+      old_var_nms_with_var_set = old_var_nms_with_var_set
+    )
+  }
   return(invisible(NULL))
 }
 
@@ -2340,6 +2397,11 @@ var_value_space_eval <- function(
   # - If we now have only one value space, all is well and that is returned.
   # @codedoc_comment_block vm@var_value_space_eval
   if (length(value_space) == 0) {
+    # @codedoc_comment_block news("vm@var_value_space_eval", "2026-11-06", "1.13.1.9000")
+    # `vm@var_value_space_eval` now raises an informative error when the
+    # variable has no `value_space`, e.g. because it does not belong to any
+    # variable set.
+    # @codedoc_comment_block news("vm@var_value_space_eval", "2026-11-06", "1.13.1.9000")
     stop(
       "No value_space defined for var_nm = \"", var_nm, "\": it does not ",
       "appear in any var_set_dt$var_nm_set with a value_space."
@@ -3781,7 +3843,8 @@ vame_subset <- function(
   vm,
   var_dt_expr = NULL,
   var_set_dt_expr = NULL,
-  enclos = NULL
+  enclos = NULL,
+  drop_orphaned_vars = FALSE
 ) {
   # @codedoc_comment_block function_example(vm@vame_subset)
   # # vm@vame_subset
@@ -3810,17 +3873,25 @@ vame_subset <- function(
   #   identical(names(vm_1@var_set_value_space_eval("set_01")[["dt"]]), "a")
   # )
   #
+  # # variables whose last variable set is dropped are kept by default.
   # allowed_id_set <- "set_02"
   # vm_2 <- vm@vame_copy()
   # vm_2@vame_subset(var_set_dt_expr = var_set_dt[["id"]] %in% allowed_id_set)
   # stopifnot(
-  #   identical(unname(vm_2@var_meta_get_all(meta_nm = "var_nm")), "c"),
+  #   identical(
+  #     unname(vm_2@var_meta_get_all(meta_nm = "var_nm")),
+  #     c("a", "b", "c")
+  #   ),
   #   identical(unname(vm_2@var_set_meta_get_all(meta_nm = "id")), "set_02")
   # )
   #
+  # # use drop_orphaned_vars = TRUE to drop them.
   # allowed_id_set <- "set_02"
   # vm_3 <- vm@vame_copy()
-  # vm_3@vame_subset(var_set_dt_expr = quote(id %in% allowed_id_set))
+  # vm_3@vame_subset(
+  #   var_set_dt_expr = quote(id %in% allowed_id_set),
+  #   drop_orphaned_vars = TRUE
+  # )
   # stopifnot(
   #   identical(unname(vm_3@var_meta_get_all(meta_nm = "var_nm")), "c"),
   #   identical(unname(vm_3@var_set_meta_get_all(meta_nm = "id")), "set_02")
@@ -3835,8 +3906,10 @@ vame_subset <- function(
   # Subset whole `VariableMetadata` object in-place. This means that your
   # `VariableMetadata` object is modified and no copy is taken.
   # Subset either `var_dt` or
-  # `var_set_dt` (or both) and keep only metadata for variables that appear in
-  # both `var_dt` and `var_set_dt`. Performs the following steps:
+  # `var_set_dt` (or both). Variables removed from `var_dt` are also removed
+  # from `var_set_dt`. Variables which no longer belong to any variable set
+  # are kept in `var_dt` unless `drop_orphaned_vars = TRUE`.
+  # Performs the following steps:
   #
   # - Collect `var_dt_expr` and `var_set_dt_expr` using `substitute`.
   # @codedoc_comment_block vm@vame_subset
@@ -3879,6 +3952,11 @@ vame_subset <- function(
   # @codedoc_comment_block news("vm@vame_subset", "2025-06-24", "1.10.0")
   # `vm@vame_subset` gained argument `enclos`.
   # @codedoc_comment_block news("vm@vame_subset", "2025-06-24", "1.10.0")
+  # @codedoc_comment_block news("vm@vame_subset", "2026-11-06", "1.13.1.9000")
+  # `vm@vame_subset` no longer removes variables from `var_dt` which lose
+  # their last variable set by default. Gained argument `drop_orphaned_vars`
+  # to do that.
+  # @codedoc_comment_block news("vm@vame_subset", "2026-11-06", "1.13.1.9000")
   dbc::assert_is_one_of(
     enclos,
     funs = list(dbc::report_is_NULL,
@@ -3902,7 +3980,8 @@ vame_subset <- function(
     vm = vm,
     var_dt_expr = var_dt_expr,
     var_set_dt_expr = var_set_dt_expr,
-    enclos = enclos
+    enclos = enclos,
+    drop_orphaned_vars = drop_orphaned_vars
   )
   return(invisible(NULL))
 }

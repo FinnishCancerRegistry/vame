@@ -506,6 +506,68 @@ VariableMetadata <- function(
   #   "dd" %in% vm_2@var_meta_get_all("var_nm")
   # )
   #
+  # # a variable in var_dt does not need to belong to any variable set.
+  # # here "c" has no variable set and therefore no value_space.
+  # vm_4 <- vame::VariableMetadata(
+  #   var_dt = data.table::data.table(
+  #     var_nm = c("a", "b", "c"),
+  #     type = c(
+  #       "categorical",
+  #       "categorical",
+  #       "categorical"
+  #     )
+  #   ),
+  #   var_set_dt = data.table::data.table(
+  #     id = c("ab"),
+  #     var_nm_set = list(
+  #       ab = c("a", "b")
+  #     ),
+  #     value_space = list(
+  #       ab = list(
+  #         dt = data.table::data.table(
+  #           a = c(1L, 2L, 2L),
+  #           b = c(11L, 21L, 22L)
+  #         )
+  #       )
+  #     )
+  #   )
+  # )
+  # stopifnot(
+  #   identical(
+  #     unname(vm_4@var_meta_get_all("var_nm")),
+  #     c("a", "b", "c")
+  #   ),
+  #   identical(unname(vm_4@var_var_set_dt_id_set_get("a")), "ab"),
+  #   length(vm_4@var_var_set_dt_id_set_get("c")) == 0L,
+  #   identical(vm_4@var_value_space_eval("a")[["dt"]][["a"]], 1:2),
+  #   inherits(
+  #     tryCatch(vm_4@var_value_space_eval("c"), error = function(e) e),
+  #     "error"
+  #   )
+  # )
+  # # removing a variable removes it from all variable sets as well.
+  # vm_4@var_remove("a")
+  # stopifnot(
+  #   identical(unname(vm_4@var_meta_get_all("var_nm")), c("b", "c")),
+  #   identical(vm_4@var_set_meta_get("ab", "var_nm_set"), "b"),
+  #   identical(names(vm_4@var_set_value_space_get("ab")[["dt"]]), "b")
+  # )
+  # # variable names in var_set_dt that do not appear in var_dt are
+  # # removed from the variable sets. variable sets which become empty are
+  # # removed entirely.
+  # vm_5 <- vame::VariableMetadata(
+  #   var_dt = data.table::data.table(var_nm = c("a", "c")),
+  #   var_set_dt = data.table::data.table(
+  #     id = c("ab", "d"),
+  #     var_nm_set = list(c("a", "b"), "d")
+  #   )
+  # )
+  # stopifnot(
+  #   identical(unname(vm_5@var_meta_get_all("var_nm")), c("a", "c")),
+  #   identical(unname(vm_5@var_set_meta_get_all("id")), "ab"),
+  #   identical(vm_5@var_set_meta_get("ab", "var_nm_set"), "a")
+  # )
+  #
   # @codedoc_comment_block general_example(vame::VariableMetadata)
 
   # @codedoc_comment_block news("vame::VariableMetadata", "2023-06-30", "0.1.0")
@@ -514,7 +576,8 @@ VariableMetadata <- function(
   #' @param var_dt `[data.table]`
   #'
   #' Contains information for individual variables. Must contain at a minimum
-  #' column `var_nm`.
+  #' column `var_nm`. A variable in `var_dt` does not need to appear in any
+  #' `var_set_dt$var_nm_set`.
   #'
   #' See **Details** and **Features** for more information.
   assert_is_var_dt(var_dt)
@@ -534,7 +597,9 @@ VariableMetadata <- function(
   #' - `id` `[integer, character]`: Identifies each set of variable names. E.g.
   #'   `c("my_set_01", "my_set_02")` or `1:2`.
   #' - `var_nm_set` `[list]`: Each list element contains a character string
-  #'   vector of variable names. e.g. `list(c("a", "b"))`.
+  #'   vector of variable names. e.g. `list(c("a", "b"))`. Variable names
+  #'   which do not appear in `var_dt$var_nm` are removed from the variable
+  #'   sets, and variable sets which become empty are removed entirely.
   #'
   #' See **Details** and **Features** for more information.
   # @codedoc_comment_block news("vame::VariableMetadata", "2024-03-07", "0.4.0")
@@ -676,7 +741,7 @@ VariableMetadata <- function(
   vd_vsd_intersect(out)
   if (nrow(vd_get(out)) == 0) {
     stop("vame::VariableMetadata call resulted in no variables being defined. ",
-         "do var_dt and var_set_dt use the same variable names?")
+         "Is var_dt empty?")
   }
 
   funs <- environment(out@var_meta_get)
