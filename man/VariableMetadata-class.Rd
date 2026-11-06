@@ -12,7 +12,8 @@ VariableMetadata(var_dt, var_set_dt, vame_list = NULL)
 \item{var_dt}{\verb{[data.table]}
 
 Contains information for individual variables. Must contain at a minimum
-column \code{var_nm}.
+column \code{var_nm}. A variable in \code{var_dt} does not need to appear in any
+\code{var_set_dt$var_nm_set}.
 
 See \strong{Details} and \strong{Features} for more information.}
 
@@ -24,7 +25,9 @@ Must contain at a minimum columns
 \item \code{id} \verb{[integer, character]}: Identifies each set of variable names. E.g.
 \code{c("my_set_01", "my_set_02")} or \code{1:2}.
 \item \code{var_nm_set} \verb{[list]}: Each list element contains a character string
-vector of variable names. e.g. \code{list(c("a", "b"))}.
+vector of variable names. e.g. \code{list(c("a", "b"))}. Variable names
+which do not appear in \code{var_dt$var_nm} are removed from the variable
+sets, and variable sets which become empty are removed entirely.
 }
 
 See \strong{Details} and \strong{Features} for more information.}
@@ -122,12 +125,13 @@ The \code{show} method simply runs \code{print(object)}, so the \code{print} met
 \item Call \verb{[methods::new]} with \code{Class = "VariableMetada"} with collected data
 and slot functions.
 \item "Intersect" data in the \code{VariableMetadata} object:
-Remove rows in \code{var_dt} where \code{var_dt[["var_nm"]]} does not appear in any
-\code{var_set_dt[["var_nm_set"]]}. Remove variables names in
+Remove variables names in
 each \code{var_set_dt[["var_nm_set"]]} element that do not appear in
-\code{var_dt[["var_nm_set"]]}. \code{var_set_dt[["value_space"]]} objects are
+\code{var_dt[["var_nm"]]}. \code{var_set_dt[["value_space"]]} objects are
 attempted to be subsetted when variables are removed from that variable set.
-Empty variable sets are removed entirely.
+Empty variable sets are removed entirely. Variables in \code{var_dt} that do
+not appear in any \code{var_set_dt[["var_nm_set"]]} are kept --- a variable
+does not need to belong to any variable set.
 \item Attempt to auto-assign \code{var_dt[["type"]][i]} to \code{"categorical"} for
 each \code{i}. \code{var_dt[["type"]][i] <- "categorical"} if it is at first \code{NA}
 and the variable has either a \code{labeler} or if
@@ -450,19 +454,27 @@ stopifnot(
 
 Remove a variable set by \code{id}. Performs the following steps:
 \itemize{
-\item Drop the row in \code{var_set_dt} with the supplied \code{id}.
+\item Drop the row in \code{var_set_dt} with the supplied \code{id}. By default
+variables in \code{var_dt} are kept even if they no longer belong to any
+variable set.
 \item "Intersect" data in the \code{VariableMetadata} object:
-Remove rows in \code{var_dt} where \code{var_dt[["var_nm"]]} does not appear in any
-\code{var_set_dt[["var_nm_set"]]}. Remove variables names in
+Remove variables names in
 each \code{var_set_dt[["var_nm_set"]]} element that do not appear in
-\code{var_dt[["var_nm_set"]]}. \code{var_set_dt[["value_space"]]} objects are
+\code{var_dt[["var_nm"]]}. \code{var_set_dt[["value_space"]]} objects are
 attempted to be subsetted when variables are removed from that variable set.
-Empty variable sets are removed entirely.
+Empty variable sets are removed entirely. Variables in \code{var_dt} that do
+not appear in any \code{var_set_dt[["var_nm_set"]]} are kept --- a variable
+does not need to belong to any variable set.
+\item If \code{drop_orphaned_vars = TRUE}:
+Variables in \code{var_dt} which belonged to at least one variable set before
+the action (according to \code{var_dt$var_set_dt_pos_set}) but which no longer
+belong to any are removed from \code{var_dt}. Variables which did not belong to
+any variable set to begin with are kept.
 }
 
 \emph{\strong{Usage}}
 
-\code{vm@var_set_remove(id)}
+\code{vm@var_set_remove(id, drop_orphaned_vars)}
 
 \emph{\strong{Arguments}}
 
@@ -471,24 +483,61 @@ Empty variable sets are removed entirely.
 ID, or "name", of a variable set. The class of \code{id} is defined when you
 create the \code{VariableMetadata} object and it can be pretty much anything.
 
+\strong{\code{drop_orphaned_vars}} \verb{[logical]} (default \code{FALSE})
+
+Whether to remove variables from \code{var_dt} which belonged to at least one
+variable set before the action but no longer belong to any after it.
+\itemize{
+\item \code{FALSE}: Keep all variables in \code{var_dt}, even if they no longer belong
+to any variable set.
+\item \code{TRUE}: Drop variables whose last variable set was removed.
+Variables which did not belong to any variable set to begin with are
+kept regardless.
+}
+
 \emph{\strong{Examples}}
 
-\if{html}{\out{<div class="sourceCode">}}\preformatted{vm <- vame::VariableMetadata(
-  var_dt = data.table::data.table(var_nm = c("a", "b")),
-  var_set_dt = data.table::data.table(
-    id = c("set_a", "set_b"),
-    var_nm_set = list("a", "b")
+\if{html}{\out{<div class="sourceCode">}}\preformatted{# vm@var_set_remove
+make_vm <- function() \{
+  vame::VariableMetadata(
+    var_dt = data.table::data.table(var_nm = c("a", "b", "c", "d")),
+    var_set_dt = data.table::data.table(
+      id = c("set_a", "set_ab", "set_c"),
+      var_nm_set = list("a", c("a", "b"), "c")
+    )
   )
-)
-vm@var_set_remove(id = "set_a")
+\}
+
+# by default variables are not removed when their variable set is
+# removed.
+vm_1 <- make_vm()
+vm_1@var_set_remove(id = "set_c")
 stopifnot(
   identical(
-    vm@var_set_meta_get_all(meta_nm = "id"),
-    c("set_b" = "set_b")
+    vm_1@var_set_meta_get_all(meta_nm = "id"),
+    c("set_a" = "set_a", "set_ab" = "set_ab")
   ),
   identical(
-    vm@var_meta_get_all(meta_nm = "var_nm"),
-    c("b" = "b")
+    unname(vm_1@var_meta_get_all(meta_nm = "var_nm")),
+    c("a", "b", "c", "d")
+  ),
+  length(vm_1@var_var_set_dt_id_set_get("c")) == 0L
+)
+
+# with drop_orphaned_vars = TRUE, variables which lost their last variable
+# set are removed. "d" never had a variable set so it is kept. "a" still
+# belongs to "set_a" so it is kept.
+vm_2 <- make_vm()
+vm_2@var_set_remove(id = "set_ab", drop_orphaned_vars = TRUE)
+vm_2@var_set_remove(id = "set_c", drop_orphaned_vars = TRUE)
+stopifnot(
+  identical(
+    vm_2@var_set_meta_get_all(meta_nm = "id"),
+    c("set_a" = "set_a")
+  ),
+  identical(
+    unname(vm_2@var_meta_get_all(meta_nm = "var_nm")),
+    c("a", "d")
   )
 )
 }\if{html}{\out{</div>}}}
@@ -1311,6 +1360,8 @@ for only the variable of interest, that is used. Otherwise:
 \item Every value space for the variable is evaluated via
 \code{vm@var_set_value_space_eval}. If the exact same value space has been
 produced multiple times, duplicates are removed.
+\item If no value space is defined for the variable (e.g. because the
+variable does not belong to any variable set), an error is raised.
 \item If we now have only one value space, all is well and that is returned.
 \item If the \code{var_dt$type == "categorical"} for this variable, the union of
 all separate value spaces is formed and that will be returned.
@@ -1379,15 +1430,15 @@ Name of a variable.
 
 \strong{\code{x_nm}} \verb{[NULL, character]} (default \code{NULL})
 
-See \link[dbc:argument_handlers]{dbc::handle_arg_x_nm}.
+See \link[dbc:handle_arg_x_nm]{dbc::handle_arg_x_nm}.
 
 \strong{\code{call}} \verb{[NULL, language]} (default \code{NULL})
 
-See \link[dbc:argument_handlers]{dbc::handle_arg_call}.
+See \link[dbc:handle_arg_call]{dbc::handle_arg_call}.
 
 \strong{\code{assertion_type}} \verb{[NULL, character]} (default \code{NULL})
 
-See \link[dbc:assertion_types]{dbc::handle_arg_assertion_type}.
+See \link[dbc:handle_arg_assertion_type]{dbc::handle_arg_assertion_type}.
 
 \strong{\code{env}} \verb{[NULL, environment]} (default \code{NULL})
 
@@ -2252,8 +2303,10 @@ stopifnot(
 Subset whole \code{VariableMetadata} object in-place. This means that your
 \code{VariableMetadata} object is modified and no copy is taken.
 Subset either \code{var_dt} or
-\code{var_set_dt} (or both) and keep only metadata for variables that appear in
-both \code{var_dt} and \code{var_set_dt}. Performs the following steps:
+\code{var_set_dt} (or both). Variables removed from \code{var_dt} are also removed
+from \code{var_set_dt}. Variables which no longer belong to any variable set
+are kept in \code{var_dt} unless \code{drop_orphaned_vars = TRUE}.
+Performs the following steps:
 \itemize{
 \item Collect \code{var_dt_expr} and \code{var_set_dt_expr} using \code{substitute}.
 \item If \code{is.null(enclos)}, use the environment where \code{vm@vame_subset}
@@ -2269,17 +2322,23 @@ Raise an error if the result is not a \code{logical},
 \code{integer}, or \code{NULL} object.
 \item Do the same with \code{var_set_dt_expr} and \code{eval_env[["var_set_dt"]]}.
 \item "Intersect" data in the \code{VariableMetadata} object:
-Remove rows in \code{var_dt} where \code{var_dt[["var_nm"]]} does not appear in any
-\code{var_set_dt[["var_nm_set"]]}. Remove variables names in
+Remove variables names in
 each \code{var_set_dt[["var_nm_set"]]} element that do not appear in
-\code{var_dt[["var_nm_set"]]}. \code{var_set_dt[["value_space"]]} objects are
+\code{var_dt[["var_nm"]]}. \code{var_set_dt[["value_space"]]} objects are
 attempted to be subsetted when variables are removed from that variable set.
-Empty variable sets are removed entirely.
+Empty variable sets are removed entirely. Variables in \code{var_dt} that do
+not appear in any \code{var_set_dt[["var_nm_set"]]} are kept --- a variable
+does not need to belong to any variable set.
+\item If \code{drop_orphaned_vars = TRUE}:
+Variables in \code{var_dt} which belonged to at least one variable set before
+the action (according to \code{var_dt$var_set_dt_pos_set}) but which no longer
+belong to any are removed from \code{var_dt}. Variables which did not belong to
+any variable set to begin with are kept.
 }
 
 \emph{\strong{Usage}}
 
-\code{vm@vame_subset(var_dt_expr, var_set_dt_expr, enclos)}
+\code{vm@vame_subset(var_dt_expr, var_set_dt_expr, enclos, drop_orphaned_vars)}
 
 \emph{\strong{Arguments}}
 
@@ -2312,6 +2371,18 @@ Effectively we do e.g. \code{eval(var_dt_expr, envir = var_dt, enclos = enclos)}
 \item \code{environment}: Use this environment.
 }
 
+\strong{\code{drop_orphaned_vars}} \verb{[logical]} (default \code{FALSE})
+
+Whether to remove variables from \code{var_dt} which belonged to at least one
+variable set before the action but no longer belong to any after it.
+\itemize{
+\item \code{FALSE}: Keep all variables in \code{var_dt}, even if they no longer belong
+to any variable set.
+\item \code{TRUE}: Drop variables whose last variable set was removed.
+Variables which did not belong to any variable set to begin with are
+kept regardless.
+}
+
 \emph{\strong{Examples}}
 
 \if{html}{\out{<div class="sourceCode">}}\preformatted{# vm@vame_subset
@@ -2340,17 +2411,25 @@ stopifnot(
   identical(names(vm_1@var_set_value_space_eval("set_01")[["dt"]]), "a")
 )
 
+# variables whose last variable set is dropped are kept by default.
 allowed_id_set <- "set_02"
 vm_2 <- vm@vame_copy()
 vm_2@vame_subset(var_set_dt_expr = var_set_dt[["id"]] \%in\% allowed_id_set)
 stopifnot(
-  identical(unname(vm_2@var_meta_get_all(meta_nm = "var_nm")), "c"),
+  identical(
+    unname(vm_2@var_meta_get_all(meta_nm = "var_nm")),
+    c("a", "b", "c")
+  ),
   identical(unname(vm_2@var_set_meta_get_all(meta_nm = "id")), "set_02")
 )
 
+# use drop_orphaned_vars = TRUE to drop them.
 allowed_id_set <- "set_02"
 vm_3 <- vm@vame_copy()
-vm_3@vame_subset(var_set_dt_expr = quote(id \%in\% allowed_id_set))
+vm_3@vame_subset(
+  var_set_dt_expr = quote(id \%in\% allowed_id_set),
+  drop_orphaned_vars = TRUE
+)
 stopifnot(
   identical(unname(vm_3@var_meta_get_all(meta_nm = "var_nm")), "c"),
   identical(unname(vm_3@var_set_meta_get_all(meta_nm = "id")), "set_02")
@@ -3322,6 +3401,30 @@ The following functions are part of this feature:
 }
 }
 
+\section{News for version 1.14.0}{
+
+
+Fixed \code{var_dt$var_set_dt_pos_set} sometimes becoming an \code{integer} column
+instead of a \code{list} column when only one variable belonged to any
+variable set.
+
+\code{vame::VariableMetadata} no longer requires that every variable in
+\code{var_dt} appears in some \code{var_set_dt$var_nm_set}. Such variables are now
+kept instead of being silently dropped.
+
+\code{vm@vame_subset} no longer removes variables from \code{var_dt} which lose
+their last variable set by default. Gained argument \code{drop_orphaned_vars}
+to do that.
+
+\code{vm@var_set_remove} no longer removes variables from \code{var_dt} which lose
+their last variable set by default. Gained argument \code{drop_orphaned_vars}
+to do that.
+
+\code{vm@var_value_space_eval} now raises an informative error when the
+variable has no \code{value_space}, e.g. because it does not belong to any
+variable set.
+}
+
 \section{News for version 1.13.1}{
 
 
@@ -4017,22 +4120,47 @@ stopifnot(
     c("set_A" = "set_A", "set_b" = "set_b")
   )
 )
-vm <- vame::VariableMetadata(
-  var_dt = data.table::data.table(var_nm = c("a", "b")),
-  var_set_dt = data.table::data.table(
-    id = c("set_a", "set_b"),
-    var_nm_set = list("a", "b")
+# vm@var_set_remove
+make_vm <- function() {
+  vame::VariableMetadata(
+    var_dt = data.table::data.table(var_nm = c("a", "b", "c", "d")),
+    var_set_dt = data.table::data.table(
+      id = c("set_a", "set_ab", "set_c"),
+      var_nm_set = list("a", c("a", "b"), "c")
+    )
   )
-)
-vm@var_set_remove(id = "set_a")
+}
+
+# by default variables are not removed when their variable set is
+# removed.
+vm_1 <- make_vm()
+vm_1@var_set_remove(id = "set_c")
 stopifnot(
   identical(
-    vm@var_set_meta_get_all(meta_nm = "id"),
-    c("set_b" = "set_b")
+    vm_1@var_set_meta_get_all(meta_nm = "id"),
+    c("set_a" = "set_a", "set_ab" = "set_ab")
   ),
   identical(
-    vm@var_meta_get_all(meta_nm = "var_nm"),
-    c("b" = "b")
+    unname(vm_1@var_meta_get_all(meta_nm = "var_nm")),
+    c("a", "b", "c", "d")
+  ),
+  length(vm_1@var_var_set_dt_id_set_get("c")) == 0L
+)
+
+# with drop_orphaned_vars = TRUE, variables which lost their last variable
+# set are removed. "d" never had a variable set so it is kept. "a" still
+# belongs to "set_a" so it is kept.
+vm_2 <- make_vm()
+vm_2@var_set_remove(id = "set_ab", drop_orphaned_vars = TRUE)
+vm_2@var_set_remove(id = "set_c", drop_orphaned_vars = TRUE)
+stopifnot(
+  identical(
+    vm_2@var_set_meta_get_all(meta_nm = "id"),
+    c("set_a" = "set_a")
+  ),
+  identical(
+    unname(vm_2@var_meta_get_all(meta_nm = "var_nm")),
+    c("a", "d")
   )
 )
 # Example of make feature
@@ -5121,17 +5249,25 @@ stopifnot(
   identical(names(vm_1@var_set_value_space_eval("set_01")[["dt"]]), "a")
 )
 
+# variables whose last variable set is dropped are kept by default.
 allowed_id_set <- "set_02"
 vm_2 <- vm@vame_copy()
 vm_2@vame_subset(var_set_dt_expr = var_set_dt[["id"]] \%in\% allowed_id_set)
 stopifnot(
-  identical(unname(vm_2@var_meta_get_all(meta_nm = "var_nm")), "c"),
+  identical(
+    unname(vm_2@var_meta_get_all(meta_nm = "var_nm")),
+    c("a", "b", "c")
+  ),
   identical(unname(vm_2@var_set_meta_get_all(meta_nm = "id")), "set_02")
 )
 
+# use drop_orphaned_vars = TRUE to drop them.
 allowed_id_set <- "set_02"
 vm_3 <- vm@vame_copy()
-vm_3@vame_subset(var_set_dt_expr = quote(id \%in\% allowed_id_set))
+vm_3@vame_subset(
+  var_set_dt_expr = quote(id \%in\% allowed_id_set),
+  drop_orphaned_vars = TRUE
+)
 stopifnot(
   identical(unname(vm_3@var_meta_get_all(meta_nm = "var_nm")), "c"),
   identical(unname(vm_3@var_set_meta_get_all(meta_nm = "id")), "set_02")
