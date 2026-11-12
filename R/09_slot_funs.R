@@ -2455,7 +2455,7 @@ var_value_space_eval <- function(
   } else if (length(value_space) == 1) {
     value_space <- value_space[[1]]
   } else if (
-    identical(unname(var_meta_get(vm, var_nm, "type")), "categorical")
+    var_is_categorical__(vm, var_nm)
   ) {
     # @codedoc_comment_block vm@var_value_space_eval
     # - If the `var_dt$type == "categorical"` for this variable, the union of
@@ -4615,12 +4615,10 @@ vame_category_space_dt_list <- function(
   if (is.null(env)) {
     env <- parent.frame(1L)
   }
-  vd <- vd_get(vm, c("var_nm", "type"))
-  is_categorical <- vd[["type"]] == "categorical"
-  is_categorical[is.na(is_categorical)] <- FALSE
+  vd <- vd_get(vm, "var_nm")
   dbc::assert_vector_elems_are_in_set(
     var_nms,
-    set = vd[["var_nm"]][is_categorical]
+    set = vd[["var_nm"]][var_is_categorical__(vm)]
   )
   dtl <- category_space_dt_list__(
     vm = vm,

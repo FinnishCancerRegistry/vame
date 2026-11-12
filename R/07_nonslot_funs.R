@@ -300,6 +300,35 @@ var_set_value_space_is_defined <- function(
 }
 
 # var funs ---------------------------------------------------------------------
+var_is_categorical__ <- function(
+  vm,
+  var_nms = NULL
+) {
+  # Returns a logical vector with one element per `var_nms` (or per variable in
+  # `var_dt` if `var_nms` is `NULL`). An element is `TRUE` only if
+  # `var_dt$type` exists and is `"categorical"` for that variable; `NA` type,
+  # a missing `type` column, or any other type all result in `FALSE`.
+  assert_is_variablemetadata(vm, assertion_type = "prod_input")
+  vd <- vd_get(vm)
+  if (is.null(var_nms)) {
+    var_nms <- vd[["var_nm"]]
+  }
+  dbc::assert_prod_input_is_character_nonNA_vector(var_nms)
+  pos <- data.table::chmatch(var_nms, vd[["var_nm"]])
+  if (anyNA(pos)) {
+    stop(
+      "Internal error: no such variable(s) in var_dt$var_nm: ",
+      deparse1(var_nms[is.na(pos)])
+    )
+  }
+  if (!"type" %in% names(vd)) {
+    return(rep(FALSE, length(var_nms)))
+  }
+  out <- vd[["type"]][pos] == "categorical"
+  out[is.na(out)] <- FALSE
+  return(out)
+}
+
 var_is_aggregateable_to__ <- function(
   vm,
   from_var_nm,
@@ -327,8 +356,6 @@ var_is_aggregateable_to__ <- function(
   if (from_var_nm == to_var_nm || data.table::uniqueN(dt[[to_var_nm]]) == 1L) {
     return(TRUE)
   }
-  from_type <- var_meta_get(vm, from_var_nm, "type")
-  to_type <- var_meta_get(vm, to_var_nm, "type")
   # @codedoc_comment_block var_is_aggregateable_to__
   #   + Both `from_var_nm` and `to_var_nm` have `var_dt$type` set to
   #     `"categorical"`,
@@ -336,7 +363,7 @@ var_is_aggregateable_to__ <- function(
   #     AND `from_var_nm` has no duplicates in a table that contains the
   #     complete joint `value_space` of `from_var_nm` and `to_var_nm`.
   # @codedoc_comment_block var_is_aggregateable_to__
-  if (from_type != "categorical" || to_type != "categorical") {
+  if (!all(var_is_categorical__(vm, c(from_var_nm, to_var_nm)))) {
     return(FALSE)
   }
   from_pos_set <- var_meta_get(vm, from_var_nm, "var_set_dt_pos_set")
