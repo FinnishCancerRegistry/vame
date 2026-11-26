@@ -21,6 +21,17 @@ The ***Usage*** part of the documentation of each slot function
 per line, and each argument's default value is shown,
 e.g. `var_dt_expr = NULL`.
 
+### vm@vame_maker_dag_get
+
+New function `vm@vame_maker_dag_get`. It returns the directed acyclic
+graph (DAG) of `maker`s as a `data.table` of edges.
+
+### vm@vame_maker_dag_print
+
+New function `vm@vame_maker_dag_print`. It prints the directed acyclic
+graph (DAG) of `maker`s, e.g. `x -> y -> z` if `x` is used to make `y`
+and `y` is used to make `z`.
+
 ### vm@vame_subset
 
 `vm@vame_subset` no longer removes variables from `var_dt` which lose
@@ -38,20 +49,6 @@ to do that.
 `vm@var_value_space_eval` now raises an informative error when the
 variable has no `value_space`, e.g. because it does not belong to any
 variable set.
-
-
-## News for version 1.13.2
-
-### vm@vame_maker_dag_get
-
-New function `vm@vame_maker_dag_get`. It returns the directed acyclic
-graph (DAG) of `maker`s as a `data.table` of edges.
-
-### vm@vame_maker_dag_print
-
-New function `vm@vame_maker_dag_print`. It prints the directed acyclic
-graph (DAG) of `maker`s, e.g. `x -> y -> z` if `x` is used to make `y`
-and `y` is used to make `z`.
 
 
 ## News for version 1.13.1

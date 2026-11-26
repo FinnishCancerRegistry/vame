@@ -1319,10 +1319,10 @@ vame_maker_dag_get <- function(
   # @codedoc_comment_block feature_funs(make)
   # - `vm@vame_maker_dag_get`
   # @codedoc_comment_block feature_funs(make)
-  # @codedoc_comment_block news("vm@vame_maker_dag_get", "2026-11-26", "1.13.2")
+  # @codedoc_comment_block news("vm@vame_maker_dag_get", "2026-11-26", "1.14.0")
   # New function `vm@vame_maker_dag_get`. It returns the directed acyclic
   # graph (DAG) of `maker`s as a `data.table` of edges.
-  # @codedoc_comment_block news("vm@vame_maker_dag_get", "2026-11-26", "1.13.2")
+  # @codedoc_comment_block news("vm@vame_maker_dag_get", "2026-11-26", "1.14.0")
   # @codedoc_comment_block vm@vame_maker_dag_get
   # Get the directed acyclic graph (DAG) of `var_set_dt$maker`s, i.e. which
   # variables are used to make which variables. E.g. if `x` is used to make
@@ -1435,11 +1435,11 @@ vame_maker_dag_print <- function(
   # @codedoc_comment_block feature_funs(make)
   # - `vm@vame_maker_dag_print`
   # @codedoc_comment_block feature_funs(make)
-  # @codedoc_comment_block news("vm@vame_maker_dag_print", "2026-11-26", "1.13.2")
+  # @codedoc_comment_block news("vm@vame_maker_dag_print", "2026-11-26", "1.14.0")
   # New function `vm@vame_maker_dag_print`. It prints the directed acyclic
   # graph (DAG) of `maker`s, e.g. `x -> y -> z` if `x` is used to make `y`
   # and `y` is used to make `z`.
-  # @codedoc_comment_block news("vm@vame_maker_dag_print", "2026-11-26", "1.13.2")
+  # @codedoc_comment_block news("vm@vame_maker_dag_print", "2026-11-26", "1.14.0")
   # @codedoc_comment_block vm@vame_maker_dag_print
   # Print the directed acyclic graph (DAG) of `var_set_dt$maker`s.
   # E.g. if `x` is used to make `y` and `y` is used to make `z`, prints

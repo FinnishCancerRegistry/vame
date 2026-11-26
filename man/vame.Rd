@@ -425,6 +425,19 @@ per line, and each argument's default value is shown,
 e.g. \code{var_dt_expr = NULL}.
 }
 
+\subsection{vm@vame_maker_dag_get}{
+
+New function \code{vm@vame_maker_dag_get}. It returns the directed acyclic
+graph (DAG) of \code{maker}s as a \code{data.table} of edges.
+}
+
+\subsection{vm@vame_maker_dag_print}{
+
+New function \code{vm@vame_maker_dag_print}. It prints the directed acyclic
+graph (DAG) of \code{maker}s, e.g. \code{x -> y -> z} if \code{x} is used to make \code{y}
+and \code{y} is used to make \code{z}.
+}
+
 \subsection{vm@vame_subset}{
 
 \code{vm@vame_subset} no longer removes variables from \code{var_dt} which lose
@@ -444,22 +457,6 @@ to do that.
 \code{vm@var_value_space_eval} now raises an informative error when the
 variable has no \code{value_space}, e.g. because it does not belong to any
 variable set.
-}
-
-}
-
-\subsection{News for version 1.13.2}{
-\subsection{vm@vame_maker_dag_get}{
-
-New function \code{vm@vame_maker_dag_get}. It returns the directed acyclic
-graph (DAG) of \code{maker}s as a \code{data.table} of edges.
-}
-
-\subsection{vm@vame_maker_dag_print}{
-
-New function \code{vm@vame_maker_dag_print}. It prints the directed acyclic
-graph (DAG) of \code{maker}s, e.g. \code{x -> y -> z} if \code{x} is used to make \code{y}
-and \code{y} is used to make \code{z}.
 }
 
 }
