@@ -448,6 +448,22 @@ variable set.
 
 }
 
+\subsection{News for version 1.13.2}{
+\subsection{vm@vame_maker_dag_get}{
+
+New function \code{vm@vame_maker_dag_get}. It returns the directed acyclic
+graph (DAG) of \code{maker}s as a \code{data.table} of edges.
+}
+
+\subsection{vm@vame_maker_dag_print}{
+
+New function \code{vm@vame_maker_dag_print}. It prints the directed acyclic
+graph (DAG) of \code{maker}s, e.g. \code{x -> y -> z} if \code{x} is used to make \code{y}
+and \code{y} is used to make \code{z}.
+}
+
+}
+
 \subsection{News for version 1.13.1}{
 \subsection{vm@var_set_value_space_eval}{
 

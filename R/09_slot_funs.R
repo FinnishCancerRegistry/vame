@@ -1311,6 +1311,215 @@ vame_make <- function(
   return(data[["df"]][])
 }
 
+vame_maker_dag_get <- function(
+  vm,
+  ids = NULL,
+  var_nms = NULL
+) {
+  # @codedoc_comment_block feature_funs(make)
+  # - `vm@vame_maker_dag_get`
+  # @codedoc_comment_block feature_funs(make)
+  # @codedoc_comment_block news("vm@vame_maker_dag_get", "2026-11-26", "1.13.2")
+  # New function `vm@vame_maker_dag_get`. It returns the directed acyclic
+  # graph (DAG) of `maker`s as a `data.table` of edges.
+  # @codedoc_comment_block news("vm@vame_maker_dag_get", "2026-11-26", "1.13.2")
+  # @codedoc_comment_block vm@vame_maker_dag_get
+  # Get the directed acyclic graph (DAG) of `var_set_dt$maker`s, i.e. which
+  # variables are used to make which variables. E.g. if `x` is used to make
+  # `y` and `y` is used to make `z`, the DAG is `x -> y -> z`.
+  # Performs these steps:
+  #
+  # - If both `ids` and `var_nms` are `NULL`, all variable sets with a
+  #   `maker` are used. Otherwise infers `ids` to use if user gave `var_nms`
+  #   but not `ids` and vice versa, and only those `ids` which have a `maker`
+  #   are used.
+  # @codedoc_insert_comment_block vame:::maker_dag_edge_dt__
+  # - If `ids` or `var_nms` was supplied, keep only the part of the DAG that
+  #   leads to the variables of interest:
+  # @codedoc_insert_comment_block vame:::maker_dag_ancestor_edge_dt__
+  # - Returns a `data.table` with one row per edge of the DAG, with columns
+  #   `id` (the variable set whose `maker` uses the dependency),
+  #   `dep_var_nm_set_no` (which of the alternative dependency sets of the
+  #   `maker` the edge is from), `from_var_nm` (the dependency variable name),
+  #   and `to_var_nm` (the variable name made).
+  # @codedoc_comment_block vm@vame_maker_dag_get
+
+  # @codedoc_comment_block vame::vame_maker_dag_get::ids
+  # **`ids`** `[NULL, vector]` (default `NULL`)
+  #
+  # - `NULL`: If also `var_nms` is `NULL`, all variable sets with a `maker`
+  #   are used. Else `var_nms` is used to infer `ids`.
+  # - `vector`: One or more values that can be found in `var_set_dt$id`.
+  #   The DAG is limited to what is needed to make these variable sets.
+  # @codedoc_comment_block vame::vame_maker_dag_get::ids
+  # @codedoc_comment_block vame::vame_maker_dag_get::var_nms
+  # **`var_nms`** `[NULL, character]` (default `NULL`)
+  #
+  # - `NULL`: If also `ids` is `NULL`, all variable sets with a `maker`
+  #   are used. Else all variable names in `ids` are used.
+  # - `character`: The DAG is limited to what is needed to make these
+  #   variables.
+  # @codedoc_comment_block vame::vame_maker_dag_get::var_nms
+
+  # @codedoc_comment_block function_example(vm@vame_maker_dag_get)
+  # vm <- vame::VariableMetadata(
+  #   var_dt = data.table::data.table(
+  #     var_nm = c("x", "y", "z", "w")
+  #   ),
+  #   var_set_dt = data.table::data.table(
+  #     id = c("x", "y", "z", "w"),
+  #     var_nm_set = list(x = "x", y = "y", z = "z", w = "w"),
+  #     maker = list(
+  #       x = NULL,
+  #       y = list(
+  #         maker = quote(data.table::data.table(y = x + 1L)),
+  #         dep_var_nm_set = "x"
+  #       ),
+  #       z = list(
+  #         maker = quote(data.table::data.table(z = y + 1L)),
+  #         dep_var_nm_set = "y"
+  #       ),
+  #       w = list(
+  #         maker = quote(data.table::data.table(w = x - 1L)),
+  #         dep_var_nm_set = "x"
+  #       )
+  #     )
+  #   )
+  # )
+  # dag <- vm@vame_maker_dag_get()
+  # stopifnot(
+  #   identical(dag[["from_var_nm"]], c("x", "y", "x")),
+  #   identical(dag[["to_var_nm"]], c("y", "z", "w"))
+  # )
+  # dag <- vm@vame_maker_dag_get(var_nms = "z")
+  # stopifnot(
+  #   identical(dag[["from_var_nm"]], c("x", "y")),
+  #   identical(dag[["to_var_nm"]], c("y", "z"))
+  # )
+  # @codedoc_comment_block function_example(vm@vame_maker_dag_get)
+  assert_is_variablemetadata(vm)
+  all_ids <- var_set_meta_get_all(vm = vm, meta_nm = "id")
+  if (var_set_meta_is_defined(vm = vm, id = NULL, meta_nm = "maker")) {
+    maker_ids <- all_ids[vapply(
+      all_ids,
+      function(id) {
+        var_set_meta_is_defined(vm = vm, id = id, meta_nm = "maker")
+      },
+      logical(1L)
+    )]
+  } else {
+    maker_ids <- all_ids[0L]
+  }
+  is_subset <- !(is.null(ids) && is.null(var_nms))
+  if (is_subset) {
+    handle_arg_ids_et_var_nms_inplace__(
+      vm = vm,
+      required_var_set_meta_nms = "maker"
+    )
+  }
+  edge_dt <- maker_dag_edge_dt__(vm = vm, ids = maker_ids)
+  if (is_subset) {
+    edge_dt <- maker_dag_ancestor_edge_dt__(
+      edge_dt = edge_dt,
+      var_nms = var_nms
+    )
+  }
+  return(edge_dt[])
+}
+
+vame_maker_dag_print <- function(
+  vm,
+  ids = NULL,
+  var_nms = NULL
+) {
+  # @codedoc_comment_block feature_funs(make)
+  # - `vm@vame_maker_dag_print`
+  # @codedoc_comment_block feature_funs(make)
+  # @codedoc_comment_block news("vm@vame_maker_dag_print", "2026-11-26", "1.13.2")
+  # New function `vm@vame_maker_dag_print`. It prints the directed acyclic
+  # graph (DAG) of `maker`s, e.g. `x -> y -> z` if `x` is used to make `y`
+  # and `y` is used to make `z`.
+  # @codedoc_comment_block news("vm@vame_maker_dag_print", "2026-11-26", "1.13.2")
+  # @codedoc_comment_block vm@vame_maker_dag_print
+  # Print the directed acyclic graph (DAG) of `var_set_dt$maker`s.
+  # E.g. if `x` is used to make `y` and `y` is used to make `z`, prints
+  #
+  # ```
+  # x -> y -> z
+  # ```
+  #
+  # Performs these steps:
+  #
+  # - Calls `vm@vame_maker_dag_get` with `ids` and `var_nms`.
+  # - Forms every path through the DAG.
+  # @codedoc_insert_comment_block vame:::maker_dag_paths__
+  # - Prints each path on its own line, e.g. `x -> y -> z`, and returns the
+  #   printed lines invisibly as a `character` vector. If there are no
+  #   `maker`s with dependencies, prints a message saying so and returns
+  #   `character(0L)` invisibly.
+  # @codedoc_comment_block vm@vame_maker_dag_print
+
+  # @codedoc_comment_block vame::vame_maker_dag_print::ids
+  # @codedoc_insert_comment_block vame::vame_maker_dag_get::ids
+  # @codedoc_comment_block vame::vame_maker_dag_print::ids
+  # @codedoc_comment_block vame::vame_maker_dag_print::var_nms
+  # @codedoc_insert_comment_block vame::vame_maker_dag_get::var_nms
+  # @codedoc_comment_block vame::vame_maker_dag_print::var_nms
+
+  # @codedoc_comment_block function_example(vm@vame_maker_dag_print)
+  # vm <- vame::VariableMetadata(
+  #   var_dt = data.table::data.table(
+  #     var_nm = c("x", "y", "z", "w")
+  #   ),
+  #   var_set_dt = data.table::data.table(
+  #     id = c("x", "y", "z", "w"),
+  #     var_nm_set = list(x = "x", y = "y", z = "z", w = "w"),
+  #     maker = list(
+  #       x = NULL,
+  #       y = list(
+  #         maker = quote(data.table::data.table(y = x + 1L)),
+  #         dep_var_nm_set = "x"
+  #       ),
+  #       z = list(
+  #         maker = quote(data.table::data.table(z = y + 1L)),
+  #         dep_var_nm_set = "y"
+  #       ),
+  #       w = list(
+  #         maker = quote(data.table::data.table(w = x - 1L)),
+  #         dep_var_nm_set = "x"
+  #       )
+  #     )
+  #   )
+  # )
+  # lines <- vm@vame_maker_dag_print()
+  # stopifnot(identical(lines, c("x -> y -> z", "x -> w")))
+  # lines <- vm@vame_maker_dag_print(var_nms = "z")
+  # stopifnot(identical(lines, "x -> y -> z"))
+  # @codedoc_comment_block function_example(vm@vame_maker_dag_print)
+  edge_dt <- vame_maker_dag_get(vm = vm, ids = ids, var_nms = var_nms)
+  if (nrow(edge_dt) == 0L) {
+    message("No `maker`s with dependencies to print.")
+    return(invisible(character(0L)))
+  }
+  paths <- maker_dag_paths__(
+    from_var_nms = edge_dt[["from_var_nm"]],
+    to_var_nms = edge_dt[["to_var_nm"]]
+  )
+  lines <- vapply(
+    paths,
+    function(path) {
+      line <- paste0(path, collapse = " -> ")
+      if (isTRUE(attr(path, "is_cycle"))) {
+        line <- paste0(line, " (cycle)")
+      }
+      line
+    },
+    character(1L)
+  )
+  cat(lines, sep = "\n")
+  return(invisible(lines))
+}
+
 # var_set_value_space funs -----------------------------------------------------
 var_set_value_space_eval <- function(
   vm,

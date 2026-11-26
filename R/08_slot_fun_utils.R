@@ -355,3 +355,123 @@ var_set_maker_req_obj_nm_sets__ <- function(vm, id = NULL, maker = NULL) {
   }
   return(out)
 }
+
+maker_dag_edge_dt__ <- function(vm, ids) {
+  # @codedoc_comment_block vame:::maker_dag_edge_dt__
+  # - For each variable set `id` that has a `maker`, collect the dependency
+  #   variable names of the `maker` (see
+  #   `vm@var_set_maker_get_dep_var_nm_sets`). For a `maker` of type
+  #   `function`, the argument names `vm`, `var_nms`, and `dep_var_nm_set`
+  #   are not considered dependencies because they are supplied by
+  #   `vm@var_set_make` itself. Each dependency variable name is then
+  #   considered to be used to make each variable in the `var_nm_set` of
+  #   the variable set. If a `maker` has multiple alternative dependency
+  #   sets (`dep_var_nm_sets`), all of them are included.
+  # @codedoc_comment_block vame:::maker_dag_edge_dt__
+  edge_dt_list <- lapply(ids, function(id) {
+    maker <- var_set_maker_get(vm = vm, id = id)
+    dep_var_nm_sets <- var_set_maker_req_obj_nm_sets__(
+      vm = vm,
+      id = id,
+      maker = maker
+    )
+    if (is.function(maker)) {
+      dep_var_nm_sets <- lapply(dep_var_nm_sets, function(dep_var_nm_set) {
+        setdiff(dep_var_nm_set, c("vm", "var_nms", "dep_var_nm_set"))
+      })
+    }
+    var_nm_set <- var_set_var_nm_set_get(vm = vm, id = id)
+    dt_list <- lapply(seq_along(dep_var_nm_sets), function(i) {
+      dep_var_nm_set <- as.character(dep_var_nm_sets[[i]])
+      if (length(dep_var_nm_set) == 0L || length(var_nm_set) == 0L) {
+        return(NULL)
+      }
+      data.table::CJ(
+        id = id,
+        dep_var_nm_set_no = i,
+        from_var_nm = dep_var_nm_set,
+        to_var_nm = var_nm_set,
+        sorted = FALSE,
+        unique = TRUE
+      )
+    })
+    data.table::rbindlist(dt_list)
+  })
+  edge_dt <- data.table::rbindlist(edge_dt_list)
+  if (nrow(edge_dt) == 0L) {
+    edge_dt <- data.table::data.table(
+      id = ids[0L],
+      dep_var_nm_set_no = integer(0L),
+      from_var_nm = character(0L),
+      to_var_nm = character(0L)
+    )
+  }
+  return(edge_dt[])
+}
+
+maker_dag_ancestor_edge_dt__ <- function(edge_dt, var_nms) {
+  # @codedoc_comment_block vame:::maker_dag_ancestor_edge_dt__
+  # - Keep only those edges which lead to `var_nms`, directly or via other
+  #   variables made by other `maker`s.
+  # @codedoc_comment_block vame:::maker_dag_ancestor_edge_dt__
+  keep <- edge_dt[["to_var_nm"]] %in% var_nms
+  repeat {
+    keep_next <- keep |
+      edge_dt[["to_var_nm"]] %in% edge_dt[["from_var_nm"]][keep]
+    if (identical(keep_next, keep)) {
+      break
+    }
+    keep <- keep_next
+  }
+  return(edge_dt[keep, ])
+}
+
+maker_dag_paths__ <- function(from_var_nms, to_var_nms) {
+  # @codedoc_comment_block vame:::maker_dag_paths__
+  # - Each path starts from a variable name that is not made by any `maker`
+  #   (a root) and continues until a variable name which is not used by any
+  #   `maker` (a leaf) is reached. If a variable name is encountered twice
+  #   in the same path, i.e. there is a cycle, the path ends there and
+  #   is marked with `(cycle)`. Variables that are only part of cycles
+  #   and have no root are also handled.
+  # @codedoc_comment_block vame:::maker_dag_paths__
+  dbc::assert_prod_input_is_character_nonNA_vector(from_var_nms)
+  dbc::assert_prod_input_is_character_nonNA_vector(to_var_nms)
+  is_dup <- duplicated(data.frame(from_var_nms, to_var_nms))
+  from_var_nms <- from_var_nms[!is_dup]
+  to_var_nms <- to_var_nms[!is_dup]
+  node_var_nms <- unique(c(from_var_nms, to_var_nms))
+  child_var_nm_list <- lapply(node_var_nms, function(var_nm) {
+    to_var_nms[from_var_nms == var_nm]
+  })
+  names(child_var_nm_list) <- node_var_nms
+  paths <- list()
+  visited <- character(0L)
+  walk <- function(path) {
+    var_nm <- path[length(path)]
+    visited <<- union(visited, var_nm)
+    child_var_nms <- child_var_nm_list[[var_nm]]
+    if (length(child_var_nms) == 0L) {
+      paths[[length(paths) + 1L]] <<- path
+      return(invisible(NULL))
+    }
+    for (child_var_nm in child_var_nms) {
+      if (child_var_nm %in% path) {
+        cycle_path <- c(path, child_var_nm)
+        attr(cycle_path, "is_cycle") <- TRUE
+        paths[[length(paths) + 1L]] <<- cycle_path
+      } else {
+        walk(c(path, child_var_nm))
+      }
+    }
+    return(invisible(NULL))
+  }
+  root_var_nms <- setdiff(node_var_nms, to_var_nms)
+  for (root_var_nm in root_var_nms) {
+    walk(root_var_nm)
+  }
+  while (length(unvisited_var_nms <- setdiff(node_var_nms, visited)) > 0L) {
+    walk(unvisited_var_nms[1L])
+  }
+  return(paths)
+}

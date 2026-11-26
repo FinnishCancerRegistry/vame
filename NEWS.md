@@ -40,6 +40,20 @@ variable has no `value_space`, e.g. because it does not belong to any
 variable set.
 
 
+## News for version 1.13.2
+
+### vm@vame_maker_dag_get
+
+New function `vm@vame_maker_dag_get`. It returns the directed acyclic
+graph (DAG) of `maker`s as a `data.table` of edges.
+
+### vm@vame_maker_dag_print
+
+New function `vm@vame_maker_dag_print`. It prints the directed acyclic
+graph (DAG) of `maker`s, e.g. `x -> y -> z` if `x` is used to make `y`
+and `y` is used to make `z`.
+
+
 ## News for version 1.13.1
 
 ### vm@var_set_value_space_eval
