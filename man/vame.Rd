@@ -435,7 +435,10 @@ graph (DAG) of \code{maker}s as a \code{data.table} of edges.
 
 New function \code{vm@vame_maker_dag_print}. It prints the directed acyclic
 graph (DAG) of \code{maker}s, e.g. \code{x -> y -> z} if \code{x} is used to make \code{y}
-and \code{y} is used to make \code{z}.
+and \code{y} is used to make \code{z}. Variables used together are grouped and
+alternative dependency sets are separated by \code{|},
+e.g. \verb{(x1, x2) | x3 -> y -> z}. Argument \code{style} selects between
+one line per path (\code{"chain"}) and one line per \code{maker} (\code{"maker"}).
 }
 
 \subsection{vm@vame_subset}{

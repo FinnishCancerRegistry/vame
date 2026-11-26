@@ -30,7 +30,10 @@ graph (DAG) of `maker`s as a `data.table` of edges.
 
 New function `vm@vame_maker_dag_print`. It prints the directed acyclic
 graph (DAG) of `maker`s, e.g. `x -> y -> z` if `x` is used to make `y`
-and `y` is used to make `z`.
+and `y` is used to make `z`. Variables used together are grouped and
+alternative dependency sets are separated by `|`,
+e.g. `(x1, x2) | x3 -> y -> z`. Argument `style` selects between
+one line per path (`"chain"`) and one line per `maker` (`"maker"`).
 
 ### vm@vame_subset
 

@@ -67,8 +67,58 @@ testthat::test_that("vm@vame_maker_dag_print handles no makers and cycles", {
   )
   testthat::expect_output(
     lines <- vm@vame_maker_dag_print(),
-    "q -> a -> b -> a (cycle)",
+    "b | q -> a -> b | q -> a (cycle)",
     fixed = TRUE
   )
-  testthat::expect_identical(lines, "q -> a -> b -> a (cycle)")
+  testthat::expect_identical(lines, "b | q -> a -> b | q -> a (cycle)")
+})
+
+testthat::test_that("vm@vame_maker_dag_print groups and separates dep sets", {
+  vm <- vame::VariableMetadata(
+    var_dt = data.table::data.table(
+      var_nm = c("x1", "x2", "x3", "y", "z", "a", "b")
+    ),
+    var_set_dt = data.table::data.table(
+      id = c("y", "z", "ab"),
+      var_nm_set = list(y = "y", z = "z", ab = c("a", "b")),
+      maker = list(
+        y = list(
+          maker = quote(f(x1, x2, x3)),
+          dep_var_nm_sets = list(c("x1", "x2"), "x3")
+        ),
+        z = list(
+          maker = quote(f(y, x3)),
+          dep_var_nm_set = c("y", "x3")
+        ),
+        ab = list(
+          maker = quote(f(z)),
+          dep_var_nm_set = "z"
+        )
+      )
+    )
+  )
+  testthat::expect_output(
+    lines <- vm@vame_maker_dag_print(),
+    "(x1, x2) | x3 -> (y, x3) -> z -> a",
+    fixed = TRUE
+  )
+  testthat::expect_identical(
+    lines,
+    c(
+      "(x1, x2) | x3 -> (y, x3) -> z -> a",
+      "(x1, x2) | x3 -> (y, x3) -> z -> b",
+      "(y, x3) -> z -> a",
+      "(y, x3) -> z -> b"
+    )
+  )
+  testthat::expect_output(
+    lines <- vm@vame_maker_dag_print(style = "maker"),
+    "y <- (x1, x2) | x3",
+    fixed = TRUE
+  )
+  testthat::expect_identical(
+    lines,
+    c("y <- (x1, x2) | x3", "z <- (y, x3)", "(a, b) <- z")
+  )
+  testthat::expect_error(vm@vame_maker_dag_print(style = "tree"))
 })

@@ -475,3 +475,92 @@ maker_dag_paths__ <- function(from_var_nms, to_var_nms) {
   }
   return(paths)
 }
+
+maker_dag_dep_expr__ <- function(dep_var_nm_sets) {
+  # @codedoc_comment_block vame:::maker_dag_dep_expr__
+  # The dependencies of a `maker` are written as follows: variables which are
+  # used together are grouped in parentheses, e.g. `(x1, x2)`, and alternative
+  # dependency sets are separated by `|`, e.g. `(x1, x2) | x3` means that
+  # either both `x1` and `x2` or only `x3` are needed. A dependency set of
+  # only one variable is written without parentheses.
+  # @codedoc_comment_block vame:::maker_dag_dep_expr__
+  dep_var_nm_sets <- unique(lapply(dep_var_nm_sets, unique))
+  set_strings <- vapply(
+    dep_var_nm_sets,
+    function(dep_var_nm_set) {
+      out <- paste0(dep_var_nm_set, collapse = ", ")
+      if (length(dep_var_nm_set) > 1L) {
+        out <- paste0("(", out, ")")
+      }
+      out
+    },
+    character(1L)
+  )
+  return(paste0(set_strings, collapse = " | "))
+}
+
+maker_dag_dep_var_nm_sets__ <- function(edge_dt, is_selected) {
+  # Collect the dependency sets of the rows of `edge_dt` where `is_selected`,
+  # one set per `id` & `dep_var_nm_set_no` combination, in order of
+  # appearance.
+  sub_dt <- edge_dt[is_selected, ]
+  set_keys <- paste0(sub_dt[["id"]], "\r", sub_dt[["dep_var_nm_set_no"]])
+  dep_var_nm_sets <- split(
+    sub_dt[["from_var_nm"]],
+    factor(set_keys, levels = unique(set_keys))
+  )
+  return(unname(dep_var_nm_sets))
+}
+
+maker_dag_chain_lines__ <- function(edge_dt) {
+  to_var_nms <- unique(edge_dt[["to_var_nm"]])
+  dep_exprs <- vapply(
+    to_var_nms,
+    function(to_var_nm) {
+      maker_dag_dep_expr__(maker_dag_dep_var_nm_sets__(
+        edge_dt = edge_dt,
+        is_selected = edge_dt[["to_var_nm"]] == to_var_nm
+      ))
+    },
+    character(1L)
+  )
+  paths <- maker_dag_paths__(
+    from_var_nms = edge_dt[["from_var_nm"]],
+    to_var_nms = edge_dt[["to_var_nm"]]
+  )
+  lines <- vapply(
+    paths,
+    function(path) {
+      n <- length(path)
+      tokens <- c(unname(dep_exprs[path[-1L]]), path[n])
+      line <- paste0(tokens, collapse = " -> ")
+      if (isTRUE(attr(path, "is_cycle"))) {
+        line <- paste0(line, " (cycle)")
+      }
+      line
+    },
+    character(1L)
+  )
+  return(unique(lines))
+}
+
+maker_dag_maker_lines__ <- function(edge_dt) {
+  ids <- unique(edge_dt[["id"]])
+  lines <- vapply(
+    ids,
+    function(id) {
+      is_selected <- edge_dt[["id"]] == id
+      made_var_nms <- unique(edge_dt[["to_var_nm"]][is_selected])
+      paste0(
+        maker_dag_dep_expr__(list(made_var_nms)),
+        " <- ",
+        maker_dag_dep_expr__(maker_dag_dep_var_nm_sets__(
+          edge_dt = edge_dt,
+          is_selected = is_selected
+        ))
+      )
+    },
+    character(1L)
+  )
+  return(unname(lines))
+}

@@ -960,88 +960,6 @@ stopifnot(
 )
 }\if{html}{\out{</div>}}}
 
-\item{\code{vame_maker_dag_print}}{\emph{\strong{Description}}
-
-Print the directed acyclic graph (DAG) of \code{var_set_dt$maker}s.
-E.g. if \code{x} is used to make \code{y} and \code{y} is used to make \code{z}, prints
-
-\if{html}{\out{<div class="sourceCode">}}\preformatted{x -> y -> z
-}\if{html}{\out{</div>}}
-
-Performs these steps:
-\itemize{
-\item Calls \code{vm@vame_maker_dag_get} with \code{ids} and \code{var_nms}.
-\item Forms every path through the DAG.
-\item Each path starts from a variable name that is not made by any \code{maker}
-(a root) and continues until a variable name which is not used by any
-\code{maker} (a leaf) is reached. If a variable name is encountered twice
-in the same path, i.e. there is a cycle, the path ends there and
-is marked with \code{(cycle)}. Variables that are only part of cycles
-and have no root are also handled.
-\item Prints each path on its own line, e.g. \code{x -> y -> z}, and returns the
-printed lines invisibly as a \code{character} vector. If there are no
-\code{maker}s with dependencies, prints a message saying so and returns
-\code{character(0L)} invisibly.
-}
-
-\emph{\strong{Usage}}
-
-\if{html}{\out{<div class="sourceCode">}}\preformatted{vm@vame_maker_dag_print(
-  ids = NULL,
-  var_nms = NULL
-)
-}\if{html}{\out{</div>}}
-
-\emph{\strong{Arguments}}
-
-\strong{\code{ids}} \verb{[NULL, vector]} (default \code{NULL})
-\itemize{
-\item \code{NULL}: If also \code{var_nms} is \code{NULL}, all variable sets with a \code{maker}
-are used. Else \code{var_nms} is used to infer \code{ids}.
-\item \code{vector}: One or more values that can be found in \code{var_set_dt$id}.
-The DAG is limited to what is needed to make these variable sets.
-}
-
-\strong{\code{var_nms}} \verb{[NULL, character]} (default \code{NULL})
-\itemize{
-\item \code{NULL}: If also \code{ids} is \code{NULL}, all variable sets with a \code{maker}
-are used. Else all variable names in \code{ids} are used.
-\item \code{character}: The DAG is limited to what is needed to make these
-variables.
-}
-
-\emph{\strong{Examples}}
-
-\if{html}{\out{<div class="sourceCode">}}\preformatted{vm <- vame::VariableMetadata(
-  var_dt = data.table::data.table(
-    var_nm = c("x", "y", "z", "w")
-  ),
-  var_set_dt = data.table::data.table(
-    id = c("x", "y", "z", "w"),
-    var_nm_set = list(x = "x", y = "y", z = "z", w = "w"),
-    maker = list(
-      x = NULL,
-      y = list(
-        maker = quote(data.table::data.table(y = x + 1L)),
-        dep_var_nm_set = "x"
-      ),
-      z = list(
-        maker = quote(data.table::data.table(z = y + 1L)),
-        dep_var_nm_set = "y"
-      ),
-      w = list(
-        maker = quote(data.table::data.table(w = x - 1L)),
-        dep_var_nm_set = "x"
-      )
-    )
-  )
-)
-lines <- vm@vame_maker_dag_print()
-stopifnot(identical(lines, c("x -> y -> z", "x -> w")))
-lines <- vm@vame_maker_dag_print(var_nms = "z")
-stopifnot(identical(lines, "x -> y -> z"))
-}\if{html}{\out{</div>}}}
-
 \item{\code{var_set_value_space_eval}}{\emph{\strong{Description}}
 
 Retrieve and evaluate value space for a variable set given its \code{id}.
@@ -3829,7 +3747,10 @@ graph (DAG) of \code{maker}s as a \code{data.table} of edges.
 
 New function \code{vm@vame_maker_dag_print}. It prints the directed acyclic
 graph (DAG) of \code{maker}s, e.g. \code{x -> y -> z} if \code{x} is used to make \code{y}
-and \code{y} is used to make \code{z}.
+and \code{y} is used to make \code{z}. Variables used together are grouped and
+alternative dependency sets are separated by \code{|},
+e.g. \verb{(x1, x2) | x3 -> y -> z}. Argument \code{style} selects between
+one line per path (\code{"chain"}) and one line per \code{maker} (\code{"maker"}).
 
 \code{vm@vame_subset} no longer removes variables from \code{var_dt} which lose
 their last variable set by default. Gained argument \code{drop_orphaned_vars}
@@ -4873,32 +4794,46 @@ stopifnot(
 )
 vm <- vame::VariableMetadata(
   var_dt = data.table::data.table(
-    var_nm = c("x", "y", "z", "w")
+    var_nm = c("x1", "x2", "x3", "y", "z", "w")
   ),
   var_set_dt = data.table::data.table(
-    id = c("x", "y", "z", "w"),
-    var_nm_set = list(x = "x", y = "y", z = "z", w = "w"),
+    id = c("y", "z", "w"),
+    var_nm_set = list(y = "y", z = "z", w = "w"),
     maker = list(
-      x = NULL,
       y = list(
-        maker = quote(data.table::data.table(y = x + 1L)),
-        dep_var_nm_set = "x"
+        maker = quote({
+          if ("x3" \%in\% ls()) {
+            out <- get("x3") + 1L
+          } else {
+            out <- get("x1") + get("x2") + 1L
+          }
+          data.table::data.table(y = out)
+        }),
+        dep_var_nm_sets = list(c("x1", "x2"), "x3")
       ),
       z = list(
         maker = quote(data.table::data.table(z = y + 1L)),
         dep_var_nm_set = "y"
       ),
       w = list(
-        maker = quote(data.table::data.table(w = x - 1L)),
-        dep_var_nm_set = "x"
+        maker = quote(data.table::data.table(w = x3 - 1L)),
+        dep_var_nm_set = "x3"
       )
     )
   )
 )
 lines <- vm@vame_maker_dag_print()
-stopifnot(identical(lines, c("x -> y -> z", "x -> w")))
+stopifnot(identical(
+  lines,
+  c("(x1, x2) | x3 -> y -> z", "x3 -> w")
+))
 lines <- vm@vame_maker_dag_print(var_nms = "z")
-stopifnot(identical(lines, "x -> y -> z"))
+stopifnot(identical(lines, "(x1, x2) | x3 -> y -> z"))
+lines <- vm@vame_maker_dag_print(style = "maker")
+stopifnot(identical(
+  lines,
+  c("y <- (x1, x2) | x3", "z <- y", "w <- x3")
+))
 # vm@var_set_value_space_eval
 vm <- vame::VariableMetadata(
   var_dt = data.table::data.table(

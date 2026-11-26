@@ -1430,7 +1430,8 @@ vame_maker_dag_get <- function(
 vame_maker_dag_print <- function(
   vm,
   ids = NULL,
-  var_nms = NULL
+  var_nms = NULL,
+  style = "chain"
 ) {
   # @codedoc_comment_block feature_funs(make)
   # - `vm@vame_maker_dag_print`
@@ -1438,7 +1439,10 @@ vame_maker_dag_print <- function(
   # @codedoc_comment_block news("vm@vame_maker_dag_print", "2026-11-26", "1.14.0")
   # New function `vm@vame_maker_dag_print`. It prints the directed acyclic
   # graph (DAG) of `maker`s, e.g. `x -> y -> z` if `x` is used to make `y`
-  # and `y` is used to make `z`.
+  # and `y` is used to make `z`. Variables used together are grouped and
+  # alternative dependency sets are separated by `|`,
+  # e.g. `(x1, x2) | x3 -> y -> z`. Argument `style` selects between
+  # one line per path (`"chain"`) and one line per `maker` (`"maker"`).
   # @codedoc_comment_block news("vm@vame_maker_dag_print", "2026-11-26", "1.14.0")
   # @codedoc_comment_block vm@vame_maker_dag_print
   # Print the directed acyclic graph (DAG) of `var_set_dt$maker`s.
@@ -1448,15 +1452,23 @@ vame_maker_dag_print <- function(
   # x -> y -> z
   # ```
   #
+  # @codedoc_insert_comment_block vame:::maker_dag_dep_expr__
+  #
   # Performs these steps:
   #
   # - Calls `vm@vame_maker_dag_get` with `ids` and `var_nms`.
-  # - Forms every path through the DAG.
+  # - If `style = "chain"`, forms every path through the DAG.
   # @codedoc_insert_comment_block vame:::maker_dag_paths__
-  # - Prints each path on its own line, e.g. `x -> y -> z`, and returns the
-  #   printed lines invisibly as a `character` vector. If there are no
-  #   `maker`s with dependencies, prints a message saying so and returns
-  #   `character(0L)` invisibly.
+  #   Each path is printed on its own line. Where a variable in the path is
+  #   used to make the next one, the dependency expression of the next
+  #   variable is shown in its place, e.g. `(x1, x2) | x3 -> y -> z`.
+  #   Paths which would be printed identically are printed only once.
+  # - If `style = "maker"`, prints one line per `maker`, e.g.
+  #   `y <- (x1, x2) | x3`. Multiple variables made by the same `maker`
+  #   are grouped, e.g. `(a, b) <- c`.
+  # - Returns the printed lines invisibly as a `character` vector.
+  #   If there are no `maker`s with dependencies, prints a message saying so
+  #   and returns `character(0L)` invisibly.
   # @codedoc_comment_block vm@vame_maker_dag_print
 
   # @codedoc_comment_block vame::vame_maker_dag_print::ids
@@ -1465,57 +1477,69 @@ vame_maker_dag_print <- function(
   # @codedoc_comment_block vame::vame_maker_dag_print::var_nms
   # @codedoc_insert_comment_block vame::vame_maker_dag_get::var_nms
   # @codedoc_comment_block vame::vame_maker_dag_print::var_nms
+  # @codedoc_comment_block vame::vame_maker_dag_print::style
+  # **`style`** `[character]` (default `"chain"`)
+  #
+  # - `"chain"`: One path through the DAG per line,
+  #   e.g. `(x1, x2) | x3 -> y -> z`.
+  # - `"maker"`: One `maker` per line, e.g. `y <- (x1, x2) | x3`.
+  # @codedoc_comment_block vame::vame_maker_dag_print::style
 
   # @codedoc_comment_block function_example(vm@vame_maker_dag_print)
   # vm <- vame::VariableMetadata(
   #   var_dt = data.table::data.table(
-  #     var_nm = c("x", "y", "z", "w")
+  #     var_nm = c("x1", "x2", "x3", "y", "z", "w")
   #   ),
   #   var_set_dt = data.table::data.table(
-  #     id = c("x", "y", "z", "w"),
-  #     var_nm_set = list(x = "x", y = "y", z = "z", w = "w"),
+  #     id = c("y", "z", "w"),
+  #     var_nm_set = list(y = "y", z = "z", w = "w"),
   #     maker = list(
-  #       x = NULL,
   #       y = list(
-  #         maker = quote(data.table::data.table(y = x + 1L)),
-  #         dep_var_nm_set = "x"
+  #         maker = quote({
+  #           if ("x3" %in% ls()) {
+  #             out <- get("x3") + 1L
+  #           } else {
+  #             out <- get("x1") + get("x2") + 1L
+  #           }
+  #           data.table::data.table(y = out)
+  #         }),
+  #         dep_var_nm_sets = list(c("x1", "x2"), "x3")
   #       ),
   #       z = list(
   #         maker = quote(data.table::data.table(z = y + 1L)),
   #         dep_var_nm_set = "y"
   #       ),
   #       w = list(
-  #         maker = quote(data.table::data.table(w = x - 1L)),
-  #         dep_var_nm_set = "x"
+  #         maker = quote(data.table::data.table(w = x3 - 1L)),
+  #         dep_var_nm_set = "x3"
   #       )
   #     )
   #   )
   # )
   # lines <- vm@vame_maker_dag_print()
-  # stopifnot(identical(lines, c("x -> y -> z", "x -> w")))
+  # stopifnot(identical(
+  #   lines,
+  #   c("(x1, x2) | x3 -> y -> z", "x3 -> w")
+  # ))
   # lines <- vm@vame_maker_dag_print(var_nms = "z")
-  # stopifnot(identical(lines, "x -> y -> z"))
+  # stopifnot(identical(lines, "(x1, x2) | x3 -> y -> z"))
+  # lines <- vm@vame_maker_dag_print(style = "maker")
+  # stopifnot(identical(
+  #   lines,
+  #   c("y <- (x1, x2) | x3", "z <- y", "w <- x3")
+  # ))
   # @codedoc_comment_block function_example(vm@vame_maker_dag_print)
+  dbc::assert_user_input_atom_is_in_set(style, set = c("chain", "maker"))
   edge_dt <- vame_maker_dag_get(vm = vm, ids = ids, var_nms = var_nms)
   if (nrow(edge_dt) == 0L) {
     message("No `maker`s with dependencies to print.")
     return(invisible(character(0L)))
   }
-  paths <- maker_dag_paths__(
-    from_var_nms = edge_dt[["from_var_nm"]],
-    to_var_nms = edge_dt[["to_var_nm"]]
-  )
-  lines <- vapply(
-    paths,
-    function(path) {
-      line <- paste0(path, collapse = " -> ")
-      if (isTRUE(attr(path, "is_cycle"))) {
-        line <- paste0(line, " (cycle)")
-      }
-      line
-    },
-    character(1L)
-  )
+  if (style == "chain") {
+    lines <- maker_dag_chain_lines__(edge_dt)
+  } else {
+    lines <- maker_dag_maker_lines__(edge_dt)
+  }
   cat(lines, sep = "\n")
   return(invisible(lines))
 }
