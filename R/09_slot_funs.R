@@ -1396,6 +1396,31 @@ vame_maker_dag_get <- function(
   #   identical(dag[["from_var_nm"]], c("x", "y")),
   #   identical(dag[["to_var_nm"]], c("y", "z"))
   # )
+  # dag <- vm@vame_maker_dag_get(ids = "z")
+  # stopifnot(identical(dag[["id"]], c("y", "z")))
+  #
+  # # Arguments `vm`, `var_nms`, and `dep_var_nm_set` of a `maker` of type
+  # # `function` are not dependencies because `vm@var_set_make` supplies them.
+  # vm <- vame::VariableMetadata(
+  #   var_dt = data.table::data.table(var_nm = "w"),
+  #   var_set_dt = data.table::data.table(
+  #     id = "w",
+  #     var_nm_set = list(w = "w"),
+  #     maker = list(w = function(x, vm) data.table::data.table(w = x - 1L))
+  #   )
+  # )
+  # dag <- vm@vame_maker_dag_get()
+  # stopifnot(
+  #   identical(dag[["from_var_nm"]], "x"),
+  #   identical(dag[["to_var_nm"]], "w")
+  # )
+  #
+  # # Without any `maker`s the DAG has no edges.
+  # vm <- vame::VariableMetadata(
+  #   var_dt = data.table::data.table(var_nm = "a"),
+  #   var_set_dt = data.table::data.table(id = "a", var_nm_set = list("a"))
+  # )
+  # stopifnot(nrow(vm@vame_maker_dag_get()) == 0L)
   # @codedoc_comment_block function_example(vm@vame_maker_dag_get)
   assert_is_variablemetadata(vm)
   all_ids <- var_set_meta_get_all(vm = vm, meta_nm = "id")
@@ -1528,6 +1553,76 @@ vame_maker_dag_print <- function(
   #   lines,
   #   c("y <- (x1, x2) | x3", "z <- y", "w <- x3")
   # ))
+  # # Only styles "chain" and "maker" exist.
+  # res <- tryCatch(
+  #   vm@vame_maker_dag_print(style = "tree"),
+  #   error = function(e) "ok"
+  # )
+  # stopifnot(identical(res, "ok"))
+  #
+  # # A group of dependencies partway along a path and a `maker` which makes
+  # # multiple variables.
+  # vm <- vame::VariableMetadata(
+  #   var_dt = data.table::data.table(
+  #     var_nm = c("x1", "x2", "x3", "y", "z", "a", "b")
+  #   ),
+  #   var_set_dt = data.table::data.table(
+  #     id = c("y", "z", "ab"),
+  #     var_nm_set = list(y = "y", z = "z", ab = c("a", "b")),
+  #     maker = list(
+  #       y = list(
+  #         maker = quote(f(x1, x2, x3)),
+  #         dep_var_nm_sets = list(c("x1", "x2"), "x3")
+  #       ),
+  #       z = list(
+  #         maker = quote(f(y, x3)),
+  #         dep_var_nm_set = c("y", "x3")
+  #       ),
+  #       ab = list(
+  #         maker = quote(f(z)),
+  #         dep_var_nm_set = "z"
+  #       )
+  #     )
+  #   )
+  # )
+  # lines <- vm@vame_maker_dag_print()
+  # stopifnot(identical(
+  #   lines,
+  #   c(
+  #     "(x1, x2) | x3 -> (y, x3) -> z -> a",
+  #     "(x1, x2) | x3 -> (y, x3) -> z -> b",
+  #     "(y, x3) -> z -> a",
+  #     "(y, x3) -> z -> b"
+  #   )
+  # ))
+  # lines <- vm@vame_maker_dag_print(style = "maker")
+  # stopifnot(identical(
+  #   lines,
+  #   c("y <- (x1, x2) | x3", "z <- (y, x3)", "(a, b) <- z")
+  # ))
+  #
+  # # A cycle is marked.
+  # vm <- vame::VariableMetadata(
+  #   var_dt = data.table::data.table(var_nm = c("a", "b")),
+  #   var_set_dt = data.table::data.table(
+  #     id = c("a", "b"),
+  #     var_nm_set = list("a", "b"),
+  #     maker = list(
+  #       a = list(dep_var_nm_sets = list("b", "q"), maker = quote(f(b))),
+  #       b = list(dep_var_nm_set = "a", maker = quote(f(a)))
+  #     )
+  #   )
+  # )
+  # lines <- vm@vame_maker_dag_print()
+  # stopifnot(identical(lines, "b | q -> a -> b | q -> a (cycle)"))
+  #
+  # # Without any `maker`s nothing is printed.
+  # vm <- vame::VariableMetadata(
+  #   var_dt = data.table::data.table(var_nm = "a"),
+  #   var_set_dt = data.table::data.table(id = "a", var_nm_set = list("a"))
+  # )
+  # lines <- vm@vame_maker_dag_print()
+  # stopifnot(identical(lines, character(0L)))
   # @codedoc_comment_block function_example(vm@vame_maker_dag_print)
   dbc::assert_user_input_atom_is_in_set(style, set = c("chain", "maker"))
   edge_dt <- vame_maker_dag_get(vm = vm, ids = ids, var_nms = var_nms)
